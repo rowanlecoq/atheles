@@ -3,20 +3,61 @@
 @plugin "@tailwindcss/container-queries";
 @plugin "@tailwindcss/typography";
 
+@theme {
+  --color-brand-dark: #1A1A1A;
+  --color-brand-dark-gold: #7F6F4C;
+  --color-brand-gold: #CCB173;
+  --color-brand-pale-gold: #B09E73;
+  --color-brand-light-gold: #E5C685;
+  --color-brand-medium-grey: #484848;
+  --color-brand-gold-wash: #C1AA89;
+  --color-brand-grey: #737373;
+
+  --font-family-body: 'Courier New', Courier, monospace;
+  --font-family-heading: var(--font-playfair), Georgia, 'Times New Roman', serif;
+}
+
+:root {
+  --mobile-baseline-width: 375;
+  --mobile-content-gutter: clamp(1rem, 4vw, 1.5rem);
+  --touch-target-size: 44px;
+}
+
 @layer base {
   *,
   ::after,
   ::before,
   ::backdrop,
   ::file-selector-button {
-    border-color: var(--color-gray-200, currentColor);
+    border-color: var(--color-brand-medium-grey);
   }
 }
 
-@media (prefers-color-scheme: dark) {
-  html {
-    color-scheme: dark;
-  }
+html {
+  color-scheme: dark;
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+  width: 100%;
+  overflow-x: hidden;
+  /* scrollbar-color prevents a gray flash on non-overlay scrollbar systems */
+  scrollbar-color: var(--color-brand-medium-grey) var(--color-brand-dark);
+}
+
+body {
+  font-family: var(--font-family-body);
+  background-color: var(--color-brand-dark);
+  background-image:
+    radial-gradient(circle at 50% 0%, rgba(204, 177, 115, 0.1) 0%, rgba(26, 26, 26, 0) 62%),
+    linear-gradient(135deg, rgba(204, 177, 115, 0.03) 0%, rgba(204, 177, 115, 0) 45%, rgba(204, 177, 115, 0.03) 100%),
+    url('/greek-pattern.svg');
+  background-repeat: no-repeat, no-repeat, repeat;
+  background-size: 100% 100%, 100% 100%, 1800px 1800px;
+  background-position: center top, center top, center top;
+  background-attachment: fixed, fixed, scroll;
+  color: #ffffff;
+  min-width: 320px;
+  width: 100%;
+  overflow-x: hidden;
 }
 
 @supports (font: -apple-system-body) and (-webkit-appearance: none) {
@@ -28,5 +69,169 @@
 a,
 input,
 button {
-  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-neutral-400 focus-visible:ring-offset-2 focus-visible:ring-offset-neutral-50 dark:focus-visible:ring-neutral-600 dark:focus-visible:ring-offset-neutral-900;
+  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark;
+}
+
+@layer utilities {
+  .tap-target {
+    min-height: var(--touch-target-size);
+    min-width: var(--touch-target-size);
+  }
+
+  .mobile-page-shell {
+    padding-left: var(--mobile-content-gutter);
+    padding-right: var(--mobile-content-gutter);
+  }
+}
+
+/* Scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: var(--color-brand-dark);
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--color-brand-medium-grey);
+  border-radius: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-brand-dark-gold);
+}
+
+/* Selection styling */
+::selection {
+  background-color: rgba(204, 177, 115, 0.3);
+  color: #ffffff;
+}
+
+@keyframes carousel-scroll {
+  0% {
+    transform: translate3d(0, 0, 0);
+  }
+  100% {
+    transform: translate3d(-33.333%, 0, 0);
+  }
+}
+
+.animate-carousel {
+  animation: carousel-scroll 42s linear infinite;
+  will-change: transform;
+}
+
+.animate-carousel:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-carousel {
+    animation: none;
+  }
+}
+
+@keyframes nav-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-12px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-nav-enter {
+  animation: nav-enter 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+@keyframes footer-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-footer-enter {
+  animation: footer-enter 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+}
+
+@media (max-width: 767px) {
+  body {
+    background-size: 100% 100%, 100% 100%, 1500px 1500px;
+    background-attachment: scroll, scroll, scroll;
+  }
+}
+
+/* Custom cursor: hide native cursor only when component is mounted */
+@media (pointer: fine) {
+  html[data-custom-cursor] {
+    cursor: none;
+  }
+  html[data-custom-cursor] a,
+  html[data-custom-cursor] button,
+  html[data-custom-cursor] [role="button"],
+  html[data-custom-cursor] input,
+  html[data-custom-cursor] textarea,
+  html[data-custom-cursor] select,
+  html[data-custom-cursor] label {
+    cursor: none;
+  }
+}
+
+/* Thunder shake easter egg */
+@keyframes thunder-shake {
+  0%, 100% { transform: translate(0, 0); }
+  10% { transform: translate(-3px, 1px); }
+  20% { transform: translate(3px, -1px); }
+  30% { transform: translate(-2px, 2px); }
+  40% { transform: translate(2px, -2px); }
+  50% { transform: translate(-1px, 1px); }
+  60% { transform: translate(1px, -1px); }
+  70% { transform: translate(-2px, 0); }
+  80% { transform: translate(2px, 1px); }
+  90% { transform: translate(-1px, -1px); }
+}
+
+html.thunder-shake {
+  animation: thunder-shake 0.3s ease-in-out;
+}
+
+/* Laurel wreath path-trace draw-in */
+@keyframes draw-path {
+  from {
+    stroke-dashoffset: var(--path-length, 200);
+    opacity: 0;
+  }
+  10% {
+    opacity: 1;
+  }
+  to {
+    stroke-dashoffset: 0;
+    opacity: 1;
+  }
+}
+
+.laurel-stem {
+  stroke-dasharray: 200;
+  stroke-dashoffset: 200;
+  opacity: 0;
+  animation: draw-path 2s cubic-bezier(0.25, 0.1, 0.25, 1) 0.5s forwards;
+  color: rgba(204, 177, 115, 0.3);
+  --path-length: 200;
+}
+
+.laurel-leaf {
+  stroke-dasharray: 80;
+  stroke-dashoffset: 80;
+  opacity: 0;
+  animation: draw-path 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
+  color: rgba(204, 177, 115, 0.25);
+  --path-length: 80;
 }

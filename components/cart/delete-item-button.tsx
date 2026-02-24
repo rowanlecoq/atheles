@@ -10,7 +10,7 @@ export function DeleteItemButton({
   optimisticUpdate,
 }: {
   item: CartItem;
-  optimisticUpdate: any;
+  optimisticUpdate: (merchandiseId: string, updateType: "delete") => void;
 }) {
   const [message, formAction] = useActionState(removeItem, null);
   const merchandiseId = item.merchandise.id;
@@ -26,13 +26,13 @@ export function DeleteItemButton({
       <button
         type="submit"
         aria-label="Remove cart item"
-        className="flex h-[24px] w-[24px] items-center justify-center rounded-full bg-neutral-500"
+        className="tap-target flex h-11 w-11 items-center justify-center rounded-full bg-brand-medium-grey transition-colors hover:bg-brand-dark-gold"
       >
-        <XMarkIcon className="mx-[1px] h-4 w-4 text-white dark:text-black" />
+        <XMarkIcon className="mx-[1px] h-5 w-5 text-white" />
       </button>
-      <p aria-live="polite" className="sr-only" role="status">
+      <output aria-live="polite" className="sr-only">
         {message}
-      </p>
+      </output>
     </form>
   );
 }

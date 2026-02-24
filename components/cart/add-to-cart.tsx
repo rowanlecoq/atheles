@@ -3,7 +3,7 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { addItem } from "components/cart/actions";
-import { Product, ProductVariant } from "lib/shopify/types";
+import type { Product, ProductVariant } from "lib/shopify/types";
 import { useSearchParams } from "next/navigation";
 import { useActionState } from "react";
 import { useCart } from "./cart-context";
@@ -16,7 +16,7 @@ function SubmitButton({
   selectedVariantId: string | undefined;
 }) {
   const buttonClasses =
-    "relative flex w-full items-center justify-center rounded-full bg-blue-600 p-4 tracking-wide text-white";
+    "relative flex w-full items-center justify-center rounded-full bg-brand-gold p-4 font-heading text-sm uppercase tracking-wider text-brand-dark";
   const disabledClasses = "cursor-not-allowed opacity-60 hover:opacity-60";
 
   if (!availableForSale) {
@@ -45,9 +45,7 @@ function SubmitButton({
   return (
     <button
       aria-label="Add to cart"
-      className={clsx(buttonClasses, {
-        "hover:opacity-90": true,
-      })}
+      className={clsx(buttonClasses, "hover:opacity-90 transition-opacity")}
     >
       <div className="absolute left-0 ml-4">
         <PlusIcon className="h-5" />
@@ -73,12 +71,14 @@ export function AddToCart({ product }: { product: Product }) {
   const addItemAction = formAction.bind(null, selectedVariantId);
   const finalVariant = variants.find(
     (variant) => variant.id === selectedVariantId,
-  )!;
+  );
 
   return (
     <form
       action={async () => {
-        addCartItem(finalVariant, product);
+        if (finalVariant) {
+          addCartItem(finalVariant, product);
+        }
         addItemAction();
       }}
     >

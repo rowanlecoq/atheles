@@ -2,6 +2,10 @@ import { GridTileImage } from "components/grid/tile";
 import Footer from "components/layout/footer";
 import { Gallery } from "components/product/gallery";
 import { ProductDescription } from "components/product/product-description";
+import {
+  RecentlyViewedProducts,
+  RecentlyViewedTracker,
+} from "components/product/recently-viewed";
 import { HIDDEN_PRODUCT_TAG } from "lib/constants";
 import { getProduct, getProductRecommendations } from "lib/shopify";
 import type { Image } from "lib/shopify/types";
@@ -61,6 +65,10 @@ export default async function ProductPage(props: {
     name: product.title,
     description: product.description,
     image: product.featuredImage.url,
+    brand: {
+      "@type": "Brand",
+      name: "ATHELES",
+    },
     offers: {
       "@type": "AggregateOffer",
       availability: product.availableForSale
@@ -80,12 +88,21 @@ export default async function ProductPage(props: {
           __html: JSON.stringify(productJsonLd),
         }}
       />
+      <RecentlyViewedTracker
+        product={{
+          handle: product.handle,
+          title: product.title,
+          featuredImageUrl: product.featuredImage?.url,
+          price: product.priceRange.maxVariantPrice.amount,
+          currencyCode: product.priceRange.maxVariantPrice.currencyCode,
+        }}
+      />
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4">
-        <div className="flex flex-col rounded-lg border border-neutral-200 bg-white p-8 md:p-12 lg:flex-row lg:gap-8 dark:border-neutral-800 dark:bg-black">
+        <div className="flex flex-col rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 sm:p-6 md:p-10 lg:flex-row lg:gap-8 lg:p-12">
           <div className="h-full w-full basis-full lg:basis-4/6">
             <Suspense
               fallback={
-                <div className="relative aspect-square h-full max-h-[550px] w-full overflow-hidden" />
+                <div className="relative aspect-square h-full max-h-[460px] w-full overflow-hidden sm:max-h-[550px]" />
               }
             >
               <Gallery
@@ -97,13 +114,16 @@ export default async function ProductPage(props: {
             </Suspense>
           </div>
 
-          <div className="basis-full lg:basis-2/6">
+          <div className="mt-8 basis-full lg:mt-0 lg:basis-2/6">
             <Suspense fallback={null}>
               <ProductDescription product={product} />
             </Suspense>
           </div>
         </div>
         <RelatedProducts id={product.id} />
+        <Suspense fallback={null}>
+          <RecentlyViewedProducts currentHandle={product.handle} />
+        </Suspense>
       </div>
       <Footer />
     </>
@@ -117,12 +137,14 @@ async function RelatedProducts({ id }: { id: string }) {
 
   return (
     <div className="py-8">
-      <h2 className="mb-4 text-2xl font-bold">Related Products</h2>
+      <h2 className="mb-4 font-heading text-xl font-bold text-brand-gold sm:text-2xl">
+        Related Products
+      </h2>
       <ul className="flex w-full gap-4 overflow-x-auto pt-1">
         {relatedProducts.map((product) => (
           <li
             key={product.handle}
-            className="aspect-square w-full flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
+            className="aspect-square w-[72%] min-w-[220px] flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
           >
             <Link
               className="relative h-full w-full"

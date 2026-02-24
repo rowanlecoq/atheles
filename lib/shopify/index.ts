@@ -217,7 +217,21 @@ const reshapeProducts = (products: ShopifyProduct[]) => {
   return reshapedProducts;
 };
 
+const EMPTY_CART: Cart = {
+  id: undefined,
+  checkoutUrl: "",
+  totalQuantity: 0,
+  lines: [],
+  cost: {
+    subtotalAmount: { amount: "0", currencyCode: "USD" },
+    totalAmount: { amount: "0", currencyCode: "USD" },
+    totalTaxAmount: { amount: "0", currencyCode: "USD" },
+  },
+};
+
 export async function createCart(): Promise<Cart> {
+  if (!endpoint) return { ...EMPTY_CART };
+
   const res = await shopifyFetch<ShopifyCreateCartOperation>({
     query: createCartMutation,
   });
@@ -228,6 +242,8 @@ export async function createCart(): Promise<Cart> {
 export async function addToCart(
   lines: { merchandiseId: string; quantity: number }[]
 ): Promise<Cart> {
+  if (!endpoint) return { ...EMPTY_CART };
+
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyAddToCartOperation>({
     query: addToCartMutation,
@@ -240,6 +256,8 @@ export async function addToCart(
 }
 
 export async function removeFromCart(lineIds: string[]): Promise<Cart> {
+  if (!endpoint) return { ...EMPTY_CART };
+
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyRemoveFromCartOperation>({
     query: removeFromCartMutation,
@@ -255,6 +273,8 @@ export async function removeFromCart(lineIds: string[]): Promise<Cart> {
 export async function updateCart(
   lines: { id: string; merchandiseId: string; quantity: number }[]
 ): Promise<Cart> {
+  if (!endpoint) return { ...EMPTY_CART };
+
   const cartId = (await cookies()).get("cartId")?.value!;
   const res = await shopifyFetch<ShopifyUpdateCartOperation>({
     query: editCartItemsMutation,
@@ -272,6 +292,8 @@ export async function getCart(): Promise<Cart | undefined> {
   cacheTag(TAGS.cart);
   cacheLife("seconds");
 
+  if (!endpoint) return undefined;
+
   const cartId = (await cookies()).get("cartId")?.value;
 
   if (!cartId) {
@@ -283,7 +305,6 @@ export async function getCart(): Promise<Cart | undefined> {
     variables: { cartId },
   });
 
-  // Old carts becomes `null` when you checkout.
   if (!res.body.data.cart) {
     return undefined;
   }
@@ -297,6 +318,8 @@ export async function getCollection(
   "use cache";
   cacheTag(TAGS.collections);
   cacheLife("days");
+
+  if (!endpoint) return undefined;
 
   const res = await shopifyFetch<ShopifyCollectionOperation>({
     query: getCollectionQuery,
@@ -423,7 +446,9 @@ export async function getMenu(handle: string): Promise<Menu[]> {
   );
 }
 
-export async function getPage(handle: string): Promise<Page> {
+export async function getPage(handle: string): Promise<Page | null> {
+  if (!endpoint) return null;
+
   const res = await shopifyFetch<ShopifyPageOperation>({
     query: getPageQuery,
     variables: { handle },
@@ -433,6 +458,8 @@ export async function getPage(handle: string): Promise<Page> {
 }
 
 export async function getPages(): Promise<Page[]> {
+  if (!endpoint) return [];
+
   const res = await shopifyFetch<ShopifyPagesOperation>({
     query: getPagesQuery,
   });
@@ -467,6 +494,8 @@ export async function getProductRecommendations(
   cacheTag(TAGS.products);
   cacheLife("days");
 
+  if (!endpoint) return [];
+
   const res = await shopifyFetch<ShopifyProductRecommendationsOperation>({
     query: getProductRecommendationsQuery,
     variables: {
@@ -489,6 +518,8 @@ export async function getProducts({
   "use cache";
   cacheTag(TAGS.products);
   cacheLife("days");
+
+  if (!endpoint) return [];
 
   const res = await shopifyFetch<ShopifyProductsOperation>({
     query: getProductsQuery,

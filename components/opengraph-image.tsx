@@ -1,5 +1,4 @@
 import { ImageResponse } from "next/og";
-import LogoIcon from "./icons/logo";
 import { join } from "path";
 import { readFile } from "fs/promises";
 
@@ -12,7 +11,7 @@ export default async function OpengraphImage(
 ): Promise<ImageResponse> {
   const { title } = {
     ...{
-      title: process.env.SITE_NAME,
+      title: process.env.SITE_NAME || "ATHELES",
     },
     ...props,
   };
@@ -22,11 +21,43 @@ export default async function OpengraphImage(
 
   return new ImageResponse(
     (
-      <div tw="flex h-full w-full flex-col items-center justify-center bg-black">
-        <div tw="flex flex-none items-center justify-center border border-neutral-700 h-[160px] w-[160px] rounded-3xl">
-          <LogoIcon width="64" height="58" fill="white" />
+      <div
+        tw="flex h-full w-full flex-col items-center justify-center"
+        style={{ backgroundColor: "#1A1A1A" }}
+      >
+        {/* Decorative border */}
+        <div
+          tw="absolute inset-4 border-2 rounded-lg"
+          style={{ borderColor: "#7F6F4C40" }}
+        />
+
+        {/* Brand name */}
+        <p
+          tw="text-7xl font-bold tracking-widest"
+          style={{ color: "#CCB173", letterSpacing: "0.2em" }}
+        >
+          ATHELES
+        </p>
+
+        {/* Decorative divider */}
+        <div tw="flex items-center mt-4 mb-6">
+          <div tw="w-16 h-px" style={{ backgroundColor: "#7F6F4C" }} />
+          <p tw="mx-4 text-lg" style={{ color: "#7F6F4C" }}>
+            ◆
+          </p>
+          <div tw="w-16 h-px" style={{ backgroundColor: "#7F6F4C" }} />
         </div>
-        <p tw="mt-12 text-6xl font-bold text-white">{title}</p>
+
+        {/* Page title or tagline */}
+        <p
+          tw="text-2xl"
+          style={{
+            color: "#B09E73",
+            letterSpacing: "0.15em",
+          }}
+        >
+          {title === "ATHELES" ? "AUTHENTIC SUPERIORITY" : title}
+        </p>
       </div>
     ),
     {

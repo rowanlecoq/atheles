@@ -1,0 +1,15 @@
+{
+  "permissions": {
+    "allow": [
+      "WebFetch(domain:atheles.co)",
+      "Bash(wc:*)",
+      "Bash(pnpm remove:*)",
+      "Bash(pnpm build:*)",
+      "WebFetch(domain:www.reactbits.dev)",
+      "WebFetch(domain:github.com)",
+      "WebFetch(domain:raw.githubusercontent.com)",
+      "WebFetch(domain:api.github.com)",
+      "Bash(pnpm add:*)"
+    ]
+  }
+}

@@ -48,17 +48,17 @@ export function VariantSelector({
   return options.map((option) => (
     <form key={option.id}>
       <dl className="mb-8">
-        <dt className="mb-4 text-sm uppercase tracking-wide">{option.name}</dt>
+        <dt className="mb-4 text-sm uppercase tracking-wide text-brand-pale-gold">
+          {option.name}
+        </dt>
         <dd className="flex flex-wrap gap-3">
           {option.values.map((value) => {
             const optionNameLowerCase = option.name.toLowerCase();
 
-            // Base option params on current searchParams so we can preserve any other param state.
             const optionParams: Record<string, string> = {};
             searchParams.forEach((v, k) => (optionParams[k] = v));
             optionParams[optionNameLowerCase] = value;
 
-            // Filter out invalid options and check if the option combination is available for sale.
             const filtered = Object.entries(optionParams).filter(
               ([key, value]) =>
                 options.find(
@@ -74,7 +74,6 @@ export function VariantSelector({
               ),
             );
 
-            // The option is active if it's in the selected options.
             const isActive = searchParams.get(optionNameLowerCase) === value;
 
             return (
@@ -85,12 +84,12 @@ export function VariantSelector({
                 disabled={!isAvailableForSale}
                 title={`${option.name} ${value}${!isAvailableForSale ? " (Out of Stock)" : ""}`}
                 className={clsx(
-                  "flex min-w-[48px] items-center justify-center rounded-full border bg-neutral-100 px-2 py-1 text-sm dark:border-neutral-800 dark:bg-neutral-900",
+                  "flex min-w-[48px] items-center justify-center rounded-full border bg-brand-medium-grey/30 px-2 py-1 text-sm text-white",
                   {
-                    "cursor-default ring-2 ring-blue-600": isActive,
-                    "ring-1 ring-transparent transition duration-300 ease-in-out hover:ring-blue-600":
+                    "cursor-default ring-2 ring-brand-gold": isActive,
+                    "ring-1 ring-transparent transition duration-300 ease-in-out hover:ring-brand-gold":
                       !isActive && isAvailableForSale,
-                    "relative z-10 cursor-not-allowed overflow-hidden bg-neutral-100 text-neutral-500 ring-1 ring-neutral-300 before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-neutral-300 before:transition-transform dark:bg-neutral-900 dark:text-neutral-400 dark:ring-neutral-700 dark:before:bg-neutral-700":
+                    "relative z-10 cursor-not-allowed overflow-hidden bg-brand-medium-grey/20 text-brand-grey ring-1 ring-brand-medium-grey/50 before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-brand-medium-grey before:transition-transform":
                       !isAvailableForSale,
                   },
                 )}

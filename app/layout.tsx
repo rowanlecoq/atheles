@@ -1,21 +1,31 @@
 import { CartProvider } from "components/cart/cart-context";
+import { CustomCursor } from "components/custom-cursor";
+import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
-import { WelcomeToast } from "components/welcome-toast";
-import { GeistSans } from "geist/font/sans";
+import { PageTransition } from "components/page-transition";
+import { ScrollProgress } from "components/scroll-progress";
+import { SmoothScrollProvider } from "components/smooth-scroll-provider";
 import { getCart } from "lib/shopify";
-import { ReactNode } from "react";
+import { Playfair_Display } from "next/font/google";
+import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { baseUrl } from "lib/utils";
 
-const { SITE_NAME } = process.env;
+const playfair = Playfair_Display({
+  subsets: ["latin"],
+  variable: "--font-playfair",
+  display: "swap",
+});
 
 export const metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: SITE_NAME!,
-    template: `%s | ${SITE_NAME}`,
+    default: "ATHELES - Authentic Superiority",
+    template: `%s | ATHELES`,
   },
+  description:
+    "Greek god inspired athletic wear. Premium fitness and lifestyle clothing crafted for authentic superiority.",
   robots: {
     follow: true,
     index: true,
@@ -27,20 +37,25 @@ export default async function RootLayout({
 }: {
   children: ReactNode;
 }) {
-  // Don't await the fetch, pass the Promise to the context provider
   const cart = getCart();
 
   return (
-    <html lang="en" className={GeistSans.variable}>
-      <body className="bg-neutral-50 text-black selection:bg-teal-300 dark:bg-neutral-900 dark:text-white dark:selection:bg-pink-500 dark:selection:text-white">
-        <CartProvider cartPromise={cart}>
-          <Navbar />
-          <main>
-            {children}
-            <Toaster closeButton />
-            <WelcomeToast />
-          </main>
-        </CartProvider>
+    <html lang="en" className={`dark ${playfair.variable}`} style={{ colorScheme: "dark" }}>
+      <body className="bg-brand-dark text-white">
+        <SmoothScrollProvider>
+          <CartProvider cartPromise={cart}>
+            <CustomCursor />
+            <ScrollProgress />
+            <KonamiLightning />
+            <Navbar />
+            <main className="w-full overflow-x-hidden">
+              <PageTransition>
+                {children}
+              </PageTransition>
+              <Toaster closeButton />
+            </main>
+          </CartProvider>
+        </SmoothScrollProvider>
       </body>
     </html>
   );

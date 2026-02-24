@@ -12,7 +12,17 @@ export const dynamic = "force-dynamic";
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   validateEnvironmentVariables();
 
-  const routesMap = [""].map((route) => ({
+  const staticPages = [
+    "",
+    "/about",
+    "/contact",
+    "/faq",
+    "/size-guide",
+    "/shipping",
+    "/returns",
+  ];
+
+  const routesMap = staticPages.map((route) => ({
     url: `${baseUrl}${route}`,
     lastModified: new Date().toISOString(),
   }));

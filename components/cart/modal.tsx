@@ -45,11 +45,16 @@ export default function CartModal() {
       }
       quantityRef.current = cart?.totalQuantity;
     }
-  }, [isOpen, cart?.totalQuantity, quantityRef]);
+  }, [isOpen, cart?.totalQuantity]);
 
   return (
     <>
-      <button aria-label="Open cart" onClick={openCart}>
+      <button
+        type="button"
+        aria-label="Open cart"
+        onClick={openCart}
+        className="tap-target rounded-md"
+      >
         <OpenCart quantity={cart?.totalQuantity} />
       </button>
       <Transition show={isOpen}>
@@ -63,7 +68,7 @@ export default function CartModal() {
             leaveFrom="opacity-100 backdrop-blur-[.5px]"
             leaveTo="opacity-0 backdrop-blur-none"
           >
-            <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
+            <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
           </Transition.Child>
           <Transition.Child
             as={Fragment}
@@ -74,18 +79,20 @@ export default function CartModal() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col border-l border-neutral-200 bg-white/80 p-6 text-black backdrop-blur-xl md:w-[390px] dark:border-neutral-700 dark:bg-black/80 dark:text-white">
+            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col border-l border-brand-dark-gold/30 bg-brand-dark/95 p-4 text-white backdrop-blur-xl sm:p-6 md:w-[390px]">
               <div className="flex items-center justify-between">
-                <p className="text-lg font-semibold">My Cart</p>
-                <button aria-label="Close cart" onClick={closeCart}>
+                <p className="font-heading text-lg font-semibold text-brand-gold">
+                  My Cart
+                </p>
+                <button type="button" aria-label="Close cart" onClick={closeCart}>
                   <CloseCart />
                 </button>
               </div>
 
               {!cart || cart.lines.length === 0 ? (
                 <div className="mt-20 flex w-full flex-col items-center justify-center overflow-hidden">
-                  <ShoppingCartIcon className="h-16" />
-                  <p className="mt-6 text-center text-2xl font-bold">
+                  <ShoppingCartIcon className="h-16 text-brand-grey" />
+                  <p className="mt-6 text-center text-2xl font-bold text-brand-grey">
                     Your cart is empty.
                   </p>
                 </div>
@@ -98,7 +105,7 @@ export default function CartModal() {
                           b.merchandise.product.title,
                         ),
                       )
-                      .map((item, i) => {
+                      .map((item) => {
                         const merchandiseSearchParams =
                           {} as MerchandiseSearchParams;
 
@@ -118,18 +125,18 @@ export default function CartModal() {
 
                         return (
                           <li
-                            key={i}
-                            className="flex w-full flex-col border-b border-neutral-300 dark:border-neutral-700"
+                            key={item.id ?? item.merchandise.id}
+                            className="flex w-full flex-col border-b border-brand-dark-gold/20"
                           >
-                            <div className="relative flex w-full flex-row justify-between px-1 py-4">
-                              <div className="absolute z-40 -ml-1 -mt-2">
+                            <div className="relative flex w-full flex-row justify-between gap-3 py-4 pl-11 pr-1">
+                              <div className="absolute left-0 top-3 z-40">
                                 <DeleteItemButton
                                   item={item}
                                   optimisticUpdate={updateCartItem}
                                 />
                               </div>
-                              <div className="flex flex-row">
-                                <div className="relative h-16 w-16 overflow-hidden rounded-md border border-neutral-300 bg-neutral-300 dark:border-neutral-700 dark:bg-neutral-900 dark:hover:bg-neutral-800">
+                              <div className="flex min-w-0 flex-row">
+                                <div className="relative h-16 w-16 overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-medium-grey/30">
                                   <Image
                                     className="h-full w-full object-cover"
                                     width={64}
@@ -147,15 +154,15 @@ export default function CartModal() {
                                 <Link
                                   href={merchandiseUrl}
                                   onClick={closeCart}
-                                  className="z-30 ml-2 flex flex-row space-x-4"
+                                  className="z-30 ml-3 flex min-w-0 flex-row"
                                 >
-                                  <div className="flex flex-1 flex-col text-base">
-                                    <span className="leading-tight">
+                                  <div className="flex min-w-0 flex-1 flex-col text-base">
+                                    <span className="line-clamp-2 leading-tight">
                                       {item.merchandise.product.title}
                                     </span>
                                     {item.merchandise.title !==
                                     DEFAULT_OPTION ? (
-                                      <p className="text-sm text-neutral-500 dark:text-neutral-400">
+                                      <p className="line-clamp-1 text-sm text-brand-grey">
                                         {item.merchandise.title}
                                       </p>
                                     ) : null}
@@ -170,13 +177,13 @@ export default function CartModal() {
                                     item.cost.totalAmount.currencyCode
                                   }
                                 />
-                                <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-neutral-200 dark:border-neutral-700">
+                                <div className="ml-auto flex h-11 flex-row items-center rounded-full border border-brand-dark-gold/30">
                                   <EditItemQuantityButton
                                     item={item}
                                     type="minus"
                                     optimisticUpdate={updateCartItem}
                                   />
-                                  <p className="w-6 text-center">
+                                  <p className="w-7 text-center">
                                     <span className="w-full text-sm">
                                       {item.quantity}
                                     </span>
@@ -193,23 +200,23 @@ export default function CartModal() {
                         );
                       })}
                   </ul>
-                  <div className="py-4 text-sm text-neutral-500 dark:text-neutral-400">
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 dark:border-neutral-700">
+                  <div className="py-4 text-sm text-brand-grey">
+                    <div className="mb-3 flex items-center justify-between border-b border-brand-dark-gold/20 pb-1">
                       <p>Taxes</p>
                       <Price
-                        className="text-right text-base text-black dark:text-white"
+                        className="text-right text-base text-white"
                         amount={cart.cost.totalTaxAmount.amount}
                         currencyCode={cart.cost.totalTaxAmount.currencyCode}
                       />
                     </div>
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
+                    <div className="mb-3 flex items-center justify-between border-b border-brand-dark-gold/20 pb-1 pt-1">
                       <p>Shipping</p>
                       <p className="text-right">Calculated at checkout</p>
                     </div>
-                    <div className="mb-3 flex items-center justify-between border-b border-neutral-200 pb-1 pt-1 dark:border-neutral-700">
+                    <div className="mb-3 flex items-center justify-between border-b border-brand-dark-gold/20 pb-1 pt-1">
                       <p>Total</p>
                       <Price
-                        className="text-right text-base text-black dark:text-white"
+                        className="text-right text-base text-brand-gold"
                         amount={cart.cost.totalAmount.amount}
                         currencyCode={cart.cost.totalAmount.currencyCode}
                       />
@@ -230,7 +237,7 @@ export default function CartModal() {
 
 function CloseCart({ className }: { className?: string }) {
   return (
-    <div className="relative flex h-11 w-11 items-center justify-center rounded-md border border-neutral-200 text-black transition-colors dark:border-neutral-700 dark:text-white">
+    <div className="relative flex h-11 w-11 items-center justify-center rounded-md border border-brand-dark-gold/30 text-brand-grey transition-colors hover:text-brand-gold">
       <XMarkIcon
         className={clsx(
           "h-6 transition-all ease-in-out hover:scale-110",
@@ -246,11 +253,15 @@ function CheckoutButton() {
 
   return (
     <button
-      className="block w-full rounded-full bg-blue-600 p-3 text-center text-sm font-medium text-white opacity-90 hover:opacity-100"
+      className="tap-target block min-h-[44px] w-full rounded-full bg-brand-gold p-3 text-center font-heading text-sm font-medium uppercase tracking-wider text-brand-dark opacity-90 transition-opacity hover:opacity-100"
       type="submit"
       disabled={pending}
     >
-      {pending ? <LoadingDots className="bg-white" /> : "Proceed to Checkout"}
+      {pending ? (
+        <LoadingDots className="bg-brand-dark" />
+      ) : (
+        "Proceed to Checkout"
+      )}
     </button>
   );
 }
