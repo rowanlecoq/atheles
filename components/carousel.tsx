@@ -1,9 +1,10 @@
 import { CarouselControls } from "components/carousel-controls";
 import { ProductCard } from "components/product-card";
 import { getCollectionProducts, getProducts } from "lib/shopify";
+import type { Product } from "lib/shopify/types";
 
 export async function Carousel() {
-  let products;
+  let products: Product[];
   try {
     products = await getCollectionProducts({
       collection: "hidden-homepage-carousel",
