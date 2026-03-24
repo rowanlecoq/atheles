@@ -300,16 +300,21 @@ export async function getCart(): Promise<Cart | undefined> {
     return undefined;
   }
 
-  const res = await shopifyFetch<ShopifyCartOperation>({
-    query: getCartQuery,
-    variables: { cartId },
-  });
+  try {
+    const res = await shopifyFetch<ShopifyCartOperation>({
+      query: getCartQuery,
+      variables: { cartId },
+    });
 
-  if (!res.body.data.cart) {
+    if (!res.body.data.cart) {
+      return undefined;
+    }
+
+    return reshapeCart(res.body.data.cart);
+  } catch (error) {
+    console.error("getCart: Shopify request failed", error);
     return undefined;
   }
-
-  return reshapeCart(res.body.data.cart);
 }
 
 export async function getCollection(

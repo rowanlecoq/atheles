@@ -1,18 +1,31 @@
 import clsx from "clsx";
 import Image from "next/image";
+import tan1Logo from "../tan1.png";
+import tan2Logo from "../tan2.png";
 
 export default function LogoSquare({ size }: { size?: "sm" | undefined }) {
   return (
-    <Image
-      src="/logo-atheles.webp"
-      alt="ATHELES"
-      width={size === "sm" ? 80 : 120}
-      height={size === "sm" ? 28 : 40}
-      className={clsx("h-auto object-contain", {
-        "w-[120px]": !size,
-        "w-[80px]": size === "sm",
+    <div
+      className={clsx("relative", {
+        "w-[88px]": !size,
+        "w-[60px]": size === "sm",
       })}
-      priority
-    />
+      style={{ aspectRatio: `${tan2Logo.width} / ${tan2Logo.height}` }}
+    >
+      <Image
+        src={tan2Logo}
+        alt="ATHELES"
+        fill
+        className="object-contain transition-opacity duration-300 group-hover:opacity-0"
+        priority
+      />
+      <Image
+        src={tan1Logo}
+        alt="ATHELES"
+        fill
+        className="object-contain opacity-0 transition-opacity duration-300 group-hover:opacity-100"
+        priority
+      />
+    </div>
   );
 }

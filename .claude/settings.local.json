@@ -9,7 +9,15 @@
       "WebFetch(domain:github.com)",
       "WebFetch(domain:raw.githubusercontent.com)",
       "WebFetch(domain:api.github.com)",
-      "Bash(pnpm add:*)"
+      "Bash(pnpm add:*)",
+      "WebFetch(domain:www.youngla.com)",
+      "Bash(ls:*)",
+      "mcp__Claude_Preview__preview_start",
+      "Bash(lsof:*)",
+      "Bash(kill:*)",
+      "Bash(npx tsc:*)",
+      "Bash(sips:*)",
+      "Bash(md5:*)"
     ]
   }
 }

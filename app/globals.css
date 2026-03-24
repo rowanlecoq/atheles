@@ -48,16 +48,16 @@ body {
   background-color: var(--color-brand-dark);
   background-image:
     radial-gradient(circle at 50% 0%, rgba(204, 177, 115, 0.1) 0%, rgba(26, 26, 26, 0) 62%),
-    linear-gradient(135deg, rgba(204, 177, 115, 0.03) 0%, rgba(204, 177, 115, 0) 45%, rgba(204, 177, 115, 0.03) 100%),
-    url('/greek-pattern.svg');
-  background-repeat: no-repeat, no-repeat, repeat;
-  background-size: 100% 100%, 100% 100%, 1800px 1800px;
-  background-position: center top, center top, center top;
-  background-attachment: fixed, fixed, scroll;
+    linear-gradient(135deg, rgba(204, 177, 115, 0.03) 0%, rgba(204, 177, 115, 0) 45%, rgba(204, 177, 115, 0.03) 100%);
+  background-repeat: no-repeat, no-repeat;
+  background-size: 100% 100%, 100% 100%;
+  background-position: center top, center top;
+  background-attachment: fixed, fixed;
   color: #ffffff;
   min-width: 320px;
   width: 100%;
   overflow-x: hidden;
+  text-transform: lowercase;
 }
 
 @supports (font: -apple-system-body) and (-webkit-appearance: none) {
@@ -147,6 +147,21 @@ button {
   animation: nav-enter 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) both;
 }
 
+@keyframes category-nav-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-category-nav-enter {
+  animation: category-nav-enter 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) 0.3s both;
+}
+
 @keyframes footer-enter {
   0% {
     opacity: 0;
@@ -169,22 +184,6 @@ button {
   }
 }
 
-/* Custom cursor: hide native cursor only when component is mounted */
-@media (pointer: fine) {
-  html[data-custom-cursor] {
-    cursor: none;
-  }
-  html[data-custom-cursor] a,
-  html[data-custom-cursor] button,
-  html[data-custom-cursor] [role="button"],
-  html[data-custom-cursor] input,
-  html[data-custom-cursor] textarea,
-  html[data-custom-cursor] select,
-  html[data-custom-cursor] label {
-    cursor: none;
-  }
-}
-
 /* Thunder shake easter egg */
 @keyframes thunder-shake {
   0%, 100% { transform: translate(0, 0); }
@@ -203,35 +202,42 @@ html.thunder-shake {
   animation: thunder-shake 0.3s ease-in-out;
 }
 
-/* Laurel wreath path-trace draw-in */
-@keyframes draw-path {
-  from {
-    stroke-dashoffset: var(--path-length, 200);
-    opacity: 0;
-  }
-  10% {
-    opacity: 1;
-  }
-  to {
-    stroke-dashoffset: 0;
-    opacity: 1;
-  }
+/* Laurel wreath animations */
+@keyframes laurel-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 
+@keyframes laurel-draw {
+  to { stroke-dashoffset: 0; }
+}
+
+/* Wrapper fades in after "atheles" text finishes (~1.45s) */
+.laurel-wrapper {
+  opacity: 0;
+  animation: laurel-enter 0.9s cubic-bezier(0.25, 0.1, 0.25, 1) 1.45s forwards;
+}
+
+/* Stem draws starting at 1.75s */
 .laurel-stem {
-  stroke-dasharray: 200;
-  stroke-dashoffset: 200;
-  opacity: 0;
-  animation: draw-path 2s cubic-bezier(0.25, 0.1, 0.25, 1) 0.5s forwards;
-  color: rgba(204, 177, 115, 0.3);
-  --path-length: 200;
+  stroke-dasharray: 300;
+  stroke-dashoffset: 300;
+  animation: laurel-draw 1.0s ease-in-out 1.75s forwards;
 }
 
+/* Leaves: delay is set per-element via inline style */
 .laurel-leaf {
-  stroke-dasharray: 80;
-  stroke-dashoffset: 80;
-  opacity: 0;
-  animation: draw-path 1.2s cubic-bezier(0.25, 0.1, 0.25, 1) forwards;
-  color: rgba(204, 177, 115, 0.25);
-  --path-length: 80;
+  stroke-dasharray: 100;
+  stroke-dashoffset: 100;
+  animation: laurel-draw 0.5s ease-in-out forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .laurel-wrapper,
+  .laurel-stem,
+  .laurel-leaf {
+    animation: none;
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
 }

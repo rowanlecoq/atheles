@@ -43,8 +43,7 @@ export default async function Footer() {
               Authentic Superiority
             </p>
             <p className="text-xs leading-relaxed text-brand-grey">
-              Greek god inspired athletic wear. Where ancient artistry meets
-              modern performance.
+              where ancient artistry meets modern performance.
             </p>
           </div>
 

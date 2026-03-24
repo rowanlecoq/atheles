@@ -22,9 +22,6 @@ export default function SearchLayout({
             text="Shop"
             className="mb-2 font-heading text-3xl tracking-[0.08em] text-brand-gold sm:text-4xl md:text-5xl"
           />
-          <p className="text-xs text-brand-grey sm:text-sm">
-            Greek god inspired athletic wear
-          </p>
         </div>
       </div>
 

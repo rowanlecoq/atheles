@@ -1,5 +1,4 @@
 import { CartProvider } from "components/cart/cart-context";
-import { CustomCursor } from "components/custom-cursor";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
@@ -21,11 +20,11 @@ const playfair = Playfair_Display({
 export const metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "ATHELES - Authentic Superiority",
-    template: `%s | ATHELES`,
+    default: "atheles - authentic superiority",
+    template: `%s | atheles`,
   },
   description:
-    "Greek god inspired athletic wear. Premium fitness and lifestyle clothing crafted for authentic superiority.",
+    "premium fitness and lifestyle clothing crafted for authentic superiority.",
   robots: {
     follow: true,
     index: true,
@@ -44,7 +43,6 @@ export default async function RootLayout({
       <body className="bg-brand-dark text-white">
         <SmoothScrollProvider>
           <CartProvider cartPromise={cart}>
-            <CustomCursor />
             <ScrollProgress />
             <KonamiLightning />
             <Navbar />

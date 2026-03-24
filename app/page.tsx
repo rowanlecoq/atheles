@@ -1,4 +1,3 @@
-import { BrandStory } from "components/brand-story";
 import { Carousel } from "components/carousel";
 import { GreekQuote } from "components/greek-quote";
 import { ThreeItemGrid } from "components/grid/three-items";
@@ -9,7 +8,7 @@ import { StatueInterstitial } from "components/statue-interstitial";
 
 export const metadata = {
   description:
-    "Greek god inspired athletic wear. Premium fitness and lifestyle clothing crafted for authentic superiority. Opening 5.6.26.",
+    "premium fitness and lifestyle clothing crafted for authentic superiority.",
   openGraph: {
     type: "website",
   },
@@ -19,10 +18,9 @@ export default function HomePage() {
   return (
     <>
       <Hero />
+      <Carousel />
       <ThreeItemGrid />
       <StatueInterstitial />
-      <BrandStory />
-      <Carousel />
       <NewsletterSignup />
       <GreekQuote />
       <Footer />

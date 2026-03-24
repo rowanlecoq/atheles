@@ -16,7 +16,7 @@ export function LogoLink() {
         href="/"
         prefetch={true}
         onClick={handleClick}
-        className="mr-2 flex items-center justify-center md:w-auto lg:mr-6"
+        className="group flex items-center justify-center"
       >
         <LogoSquare />
       </Link>

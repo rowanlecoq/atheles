@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "About",
   description:
-    "Discover the story behind ATHELES. Greek god inspired athletic wear designed for those who demand authentic superiority.",
+    "discover the story behind atheles, designed for those who demand authentic superiority.",
 };
 
 export default function AboutPage() {

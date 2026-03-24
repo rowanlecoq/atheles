@@ -5,10 +5,108 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Fragment, Suspense, useEffect, useState } from "react";
 
-import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
+import {
+  Bars3Icon,
+  ChevronDownIcon,
+  HeartIcon,
+  UserIcon,
+  XMarkIcon,
+} from "@heroicons/react/24/outline";
 import LogoSquare from "components/logo-square";
 import type { Menu } from "lib/shopify/types";
 import Search, { SearchSkeleton } from "./search";
+
+type CategoryLink = {
+  title: string;
+  path: string;
+  comingSoon?: boolean;
+  subcategories?: { title: string; path: string }[];
+};
+
+const categoryLinks: CategoryLink[] = [
+  {
+    title: "Mens",
+    path: "/search/mens",
+    subcategories: [
+      { title: "Compressions", path: "/search/compressions" },
+      { title: "Tees", path: "/search/t-shirts" },
+      { title: "Sweatpants", path: "/search/sweatpants" },
+    ],
+  },
+  {
+    title: "Womens",
+    path: "/search/womens",
+    comingSoon: true,
+  },
+  {
+    title: "Accessories",
+    path: "/search/accessories",
+    comingSoon: true,
+  },
+];
+
+function CategoryItem({
+  item,
+  onNavigate,
+}: {
+  item: CategoryLink;
+  onNavigate: () => void;
+}) {
+  const [expanded, setExpanded] = useState(false);
+  const hasSubs = item.subcategories && item.subcategories.length > 0;
+
+  return (
+    <li className="border-b border-brand-dark-gold/10">
+      <div className="flex items-center">
+        <Link
+          href={item.path}
+          onClick={onNavigate}
+          className="tap-target flex min-h-[44px] flex-1 items-center py-3 text-lg uppercase tracking-[0.12em] text-brand-grey transition-colors hover:text-brand-gold sm:text-xl sm:tracking-wider"
+        >
+          {item.title}
+          {item.comingSoon && (
+            <span className="ml-2 text-[10px] italic tracking-wide text-brand-dark-gold">
+              Soon
+            </span>
+          )}
+        </Link>
+        {hasSubs && (
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="flex h-11 w-11 items-center justify-center text-brand-dark-gold transition-colors hover:text-brand-gold"
+            aria-label={expanded ? "Collapse subcategories" : "Expand subcategories"}
+          >
+            <ChevronDownIcon
+              className={`h-4 w-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
+            />
+          </button>
+        )}
+      </div>
+      {hasSubs && (
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-out ${
+            expanded ? "max-h-[500px] opacity-100" : "max-h-0 opacity-0"
+          }`}
+        >
+          <ul className="pb-2 pl-4">
+            {item.subcategories!.map((sub) => (
+              <li key={sub.title}>
+                <Link
+                  href={sub.path}
+                  onClick={onNavigate}
+                  className="tap-target flex min-h-[40px] items-center py-2 text-sm uppercase tracking-[0.12em] text-brand-dark-gold transition-colors hover:text-brand-gold"
+                >
+                  {sub.title}
+                </Link>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </li>
+  );
+}
 
 export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const pathname = usePathname();
@@ -40,7 +138,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
         type="button"
         onClick={openMobileMenu}
         aria-label="Open mobile menu"
-        className="flex h-11 w-11 items-center justify-center rounded-md border border-brand-dark-gold/30 text-brand-grey transition-colors hover:text-brand-gold md:hidden"
+        className="flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold md:hidden"
       >
         <Bars3Icon className="h-5" />
       </button>
@@ -66,13 +164,13 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-[-100%]"
           >
-            <Dialog.Panel className="fixed bottom-0 left-0 right-0 top-0 flex h-full w-full flex-col bg-brand-dark pb-6">
+            <Dialog.Panel className="fixed bottom-0 left-0 right-0 top-0 flex h-full w-full flex-col overflow-y-auto bg-brand-dark pb-6">
               <div className="p-4">
                 <div className="mb-6 flex items-center justify-between">
                   <LogoSquare size="sm" />
                   <button
                     type="button"
-                    className="flex h-11 w-11 items-center justify-center rounded-md border border-brand-dark-gold/30 text-brand-grey transition-colors hover:text-brand-gold"
+                    className="flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold"
                     onClick={closeMobileMenu}
                     aria-label="Close mobile menu"
                   >
@@ -85,6 +183,8 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     <Search />
                   </Suspense>
                 </div>
+
+                {/* Main nav links */}
                 {menu.length ? (
                   <ul className="flex w-full flex-col">
                     {menu.map((item: Menu) => (
@@ -101,16 +201,48 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     ))}
                   </ul>
                 ) : null}
+
+                {/* Category links with expandable subcategories */}
+                <div className="mt-4">
+                  <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-brand-dark-gold">
+                    Categories
+                  </p>
+                  <ul className="flex w-full flex-col">
+                    {categoryLinks.map((item) => (
+                      <CategoryItem
+                        key={item.title}
+                        item={item}
+                        onNavigate={closeMobileMenu}
+                      />
+                    ))}
+                  </ul>
+                </div>
               </div>
 
-              {/* Social links at bottom */}
+              {/* Account & Favorites + Social at bottom */}
               <div className="mt-auto px-4 pb-4">
-                <div className="flex items-center gap-4 border-t border-brand-dark-gold/20 pt-4">
+                <div className="flex flex-col gap-0 border-t border-brand-dark-gold/20 pt-3">
+                  <Link
+                    href="/favorites"
+                    onClick={closeMobileMenu}
+                    className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm uppercase tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
+                  >
+                    <HeartIcon className="h-5 w-5" />
+                    Favorites
+                  </Link>
+                  <Link
+                    href="/login"
+                    onClick={closeMobileMenu}
+                    className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm uppercase tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
+                  >
+                    <UserIcon className="h-5 w-5" />
+                    Account
+                  </Link>
                   <a
                     href="https://www.instagram.com/atheles.co/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="tap-target inline-flex min-h-[44px] items-center text-sm uppercase tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
+                    className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm uppercase tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
                   >
                     Instagram
                   </a>
