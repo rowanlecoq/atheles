@@ -16,8 +16,9 @@ const quickLinks = [
 
 const helpLinks = [
   { title: "Contact Us", path: "/contact" },
-  { title: "Shipping", path: "/shipping" },
+  { title: "Orders", path: "/account/orders" },
   { title: "Returns", path: "/returns" },
+  { title: "FAQ", path: "/faq" },
 ];
 
 export default async function Footer() {
@@ -33,43 +34,33 @@ export default async function Footer() {
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Column 1: Logo + Tagline */}
           <div className="space-y-4">
-            <Link className="flex items-center gap-3" href="/">
+            <Link className="flex items-center" href="/">
               <LogoSquare size="sm" />
-              <span className="font-heading text-lg uppercase tracking-[0.22em] text-brand-gold sm:tracking-widest">
-                {SITE_NAME || "ATHELES"}
-              </span>
             </Link>
             <p className="text-xs uppercase tracking-[0.14em] text-brand-pale-gold sm:tracking-[0.2em]">
               Authentic Superiority
             </p>
-            <p className="text-xs leading-relaxed text-brand-grey">
-              where ancient artistry meets modern performance.
-            </p>
           </div>
 
-          {/* Column 2: Quick Links */}
+          {/* Column 2: Join the Team */}
           <div>
             <h3 className="mb-4 font-heading text-sm uppercase tracking-wider text-brand-gold">
-              Quick Links
+              Want to join the team?
             </h3>
-            <ul className="space-y-2">
-              {quickLinks.map((link) => (
-                <li key={link.path}>
-                  <Link
-                    href={link.path}
-                    className="text-sm text-brand-grey hover:text-brand-gold hover:underline underline-offset-4 transition-colors"
-                  >
-                    {link.title}
-                  </Link>
-                </li>
-              ))}
-            </ul>
+            <a
+              href="https://forms.gle/h9KqFyp67jmGL3KM6"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-sm text-brand-grey underline-offset-4 transition-colors hover:text-brand-gold hover:underline"
+            >
+              apply here
+            </a>
           </div>
 
           {/* Column 3: Help / Shopify Menu */}
           <div>
             <h3 className="mb-4 font-heading text-sm uppercase tracking-wider text-brand-gold">
-              Help
+              Need Help?
             </h3>
             <ul className="space-y-2">
               {helpLinks.map((link) => (
@@ -103,7 +94,7 @@ export default async function Footer() {
           {/* Column 4: Newsletter + Social */}
           <div>
             <h3 className="mb-4 font-heading text-sm uppercase tracking-wider text-brand-gold">
-              Connect
+              Follow Our Socials
             </h3>
             <p className="mb-4 text-xs text-brand-grey">Follow the brand journey.</p>
             <div className="flex gap-4">
