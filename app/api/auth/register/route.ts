@@ -41,7 +41,8 @@ export async function POST(request: Request) {
     return NextResponse.json({
       success: true,
       user: null,
-      message: "account created. please sign in.",
+      verificationRequired: true,
+      message: "account created. please check your email to activate your account.",
     });
   } catch {
     return NextResponse.json({ success: false, error: "something went wrong" }, { status: 500 });

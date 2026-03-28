@@ -7,6 +7,10 @@ export function middleware(request: NextRequest) {
   const token = request.cookies.get("atheles-auth-token")?.value;
   const { pathname } = request.nextUrl;
 
+  if (pathname.startsWith("/account/activate")) {
+    return NextResponse.next();
+  }
+
   const isProtected = protectedPaths.some((p) => pathname.startsWith(p));
   const isAuthPage = authPaths.some((p) => pathname.startsWith(p));
 

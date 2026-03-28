@@ -22,8 +22,14 @@ export async function GET() {
       user: {
         id: customer.id,
         email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
         name: customer.displayName || customer.firstName || "athlete",
+        phone: customer.phone,
+        acceptsMarketing: customer.acceptsMarketing,
         createdAt: customer.createdAt,
+        numberOfOrders: customer.numberOfOrders,
+        totalSpent: customer.totalSpent,
       },
     });
   } catch {
