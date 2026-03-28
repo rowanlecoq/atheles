@@ -187,8 +187,8 @@ export default function ProfileContent() {
         setLastName(data.user.lastName || "");
         setPhone(data.user.phone ? formatPhoneDisplay(data.user.phone) : "");
         setEditing(false);
-        setSaveMessage("profile updated.");
-        setTimeout(() => setSaveMessage(""), 3000);
+        setSaveMessage(data.warning || "profile updated.");
+        setTimeout(() => setSaveMessage(""), 5000);
       } else {
         setSaveMessage(data.error || "failed to save.");
       }
@@ -469,7 +469,7 @@ export default function ProfileContent() {
 
         {saveMessage && (
           <p
-            className={`mb-3 text-xs ${saveMessage.includes("updated") ? "text-green-400" : "text-red-400"}`}
+            className={`mb-3 text-xs ${saveMessage.includes("updated") ? (saveMessage.includes("can't") ? "text-yellow-400" : "text-green-400") : "text-red-400"}`}
           >
             {saveMessage}
           </p>

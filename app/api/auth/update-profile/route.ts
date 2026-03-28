@@ -26,12 +26,16 @@ export async function POST(request: Request) {
       acceptsMarketing?: boolean;
     } = {};
 
-    if (firstName !== undefined) input.firstName = firstName;
-    if (lastName !== undefined) input.lastName = lastName;
-    // Shopify rejects empty/blank phone - only include if it has a real value
-    if (phone) input.phone = phone;
+    if (firstName !== undefined && firstName !== "") input.firstName = firstName;
+    if (lastName !== undefined && lastName !== "") input.lastName = lastName;
+    if (phone !== undefined && phone !== null && phone !== "") input.phone = phone;
     if (acceptsMarketing !== undefined)
       input.acceptsMarketing = acceptsMarketing;
+
+    // Track which fields the user tried to clear but Shopify won't allow
+    const skippedClears: string[] = [];
+    if (lastName !== undefined && lastName === "") skippedClears.push("last name");
+    if ((phone === "" || phone === null) && phone !== undefined) skippedClears.push("phone number");
 
     const result = await updateCustomer(token, input);
 
@@ -44,8 +48,13 @@ export async function POST(request: Request) {
 
     const customer = await getCustomerByToken(token);
 
+    const warning = skippedClears.length > 0
+      ? `profile updated, but ${skippedClears.join(" and ")} can't be removed once set.`
+      : null;
+
     return NextResponse.json({
       success: true,
+      warning,
       user: customer
         ? {
             id: customer.id,
