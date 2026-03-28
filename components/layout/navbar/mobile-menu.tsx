@@ -330,9 +330,14 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     href="https://www.instagram.com/atheles.co/"
                     target="_blank"
                     rel="noopener noreferrer"
-                    className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm uppercase tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
+                    className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
                   >
-                    Instagram
+                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                      <rect x="2" y="2" width="20" height="20" rx="5" />
+                      <circle cx="12" cy="12" r="5" />
+                      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                    </svg>
+                    @ATHELES.CO
                   </a>
                 </div>
               </div>
