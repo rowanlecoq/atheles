@@ -1,5 +1,6 @@
-import { CartProvider } from "components/cart/cart-context";
 import { AnnouncementBar } from "components/announcement-bar";
+import { AuthProvider } from "components/auth-context";
+import { CartProvider } from "components/cart/cart-context";
 import { CurrencyProvider } from "components/currency-context";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
@@ -46,6 +47,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`dark ${playfair.variable}`} style={{ colorScheme: "dark" }}>
       <body className="bg-brand-dark text-white">
+        <AuthProvider>
         <CurrencyProvider>
           <CartProvider cartPromise={cart}>
             <AnnouncementBar />
@@ -60,6 +62,7 @@ export default async function RootLayout({
             </main>
           </CartProvider>
         </CurrencyProvider>
+        </AuthProvider>
       </body>
     </html>
   );
