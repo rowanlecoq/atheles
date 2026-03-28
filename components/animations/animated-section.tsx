@@ -1,5 +1,3 @@
-"use client";
-
 import { FadeIn, GradualBlur, ScrollFloat, StaggerChildren } from "components/animations";
 import type { ReactNode } from "react";
 

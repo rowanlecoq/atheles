@@ -1,5 +1,3 @@
-"use client";
-
 import { FadeIn } from "components/animations";
 import Image from "next/image";
 

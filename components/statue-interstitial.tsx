@@ -1,5 +1,3 @@
-"use client";
-
 import { SplitText } from "components/animations";
 import Image from "next/image";
 
