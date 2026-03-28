@@ -1,5 +1,5 @@
+import { setAuthCookie } from "lib/auth/set-auth-cookie";
 import { createCustomerAccount, authenticateCustomer, getCustomerByToken } from "lib/auth/shopify-customer";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -23,18 +23,10 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: false, error: result.error }, { status: 400 });
     }
 
-    // Auto sign in after registration
     const tokenResult = await authenticateCustomer(email, password);
     if (tokenResult) {
       const customer = await getCustomerByToken(tokenResult.accessToken);
-      const cookieStore = await cookies();
-      cookieStore.set("atheles-auth-token", tokenResult.accessToken, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 60 * 60 * 24 * 30, // 30 days
-        path: "/",
-      });
+      await setAuthCookie(tokenResult.accessToken, tokenResult.expiresAt);
       return NextResponse.json({
         success: true,
         user: customer ? {
@@ -46,7 +38,11 @@ export async function POST(request: Request) {
       });
     }
 
-    return NextResponse.json({ success: true, user: null });
+    return NextResponse.json({
+      success: true,
+      user: null,
+      message: "account created. please sign in.",
+    });
   } catch {
     return NextResponse.json({ success: false, error: "something went wrong" }, { status: 500 });
   }

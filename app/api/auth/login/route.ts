@@ -1,5 +1,5 @@
+import { setAuthCookie } from "lib/auth/set-auth-cookie";
 import { authenticateCustomer, getCustomerByToken } from "lib/auth/shopify-customer";
-import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -18,15 +18,7 @@ export async function POST(request: Request) {
     }
 
     const customer = await getCustomerByToken(tokenResult.accessToken);
-
-    const cookieStore = await cookies();
-    cookieStore.set("atheles-auth-token", tokenResult.accessToken, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "lax",
-      maxAge: 60 * 60 * 24 * 30,
-      path: "/",
-    });
+    await setAuthCookie(tokenResult.accessToken, tokenResult.expiresAt);
 
     return NextResponse.json({
       success: true,

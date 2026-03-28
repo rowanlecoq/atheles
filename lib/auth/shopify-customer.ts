@@ -1,5 +1,4 @@
-// Isolated Shopify customer auth helper.
-// Uses ONLY raw fetch() — never imports from lib/shopify/index.ts.
+import { SHOPIFY_GRAPHQL_API_ENDPOINT } from "lib/constants";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
   ? process.env.SHOPIFY_STORE_DOMAIN.startsWith("https://")
@@ -7,7 +6,7 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
     : `https://${process.env.SHOPIFY_STORE_DOMAIN}`
   : "";
 
-const endpoint = domain ? `${domain}/api/2023-01/graphql.json` : "";
+const endpoint = domain ? `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}` : "";
 const token = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
 
 async function shopifyCustomerFetch<T>(
@@ -22,7 +21,21 @@ async function shopifyCustomerFetch<T>(
     },
     body: JSON.stringify({ query, variables }),
   });
+
+  if (!res.ok) {
+    throw new Error(`Shopify request failed: ${res.status} ${res.statusText}`);
+  }
+
   const json = await res.json();
+
+  if (json.errors) {
+    throw new Error(json.errors[0]?.message || "Shopify GraphQL error");
+  }
+
+  if (!json.data) {
+    throw new Error("No data returned from Shopify");
+  }
+
   return json.data;
 }
 
