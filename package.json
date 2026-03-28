@@ -15,7 +15,6 @@
     "lenis": "^1.3.17",
     "motion": "^12.34.3",
     "next": "15.6.0-canary.60",
-    "next-auth": "5.0.0-beta.30",
     "react": "19.0.0",
     "react-dom": "19.0.0",
     "sonner": "^2.0.1"

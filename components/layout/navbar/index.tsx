@@ -1,8 +1,9 @@
+import { UserIcon } from "@heroicons/react/24/outline";
 import CartModal from "components/cart/modal";
 import { getMenu } from "lib/shopify";
 import type { Menu } from "lib/shopify/types";
+import Link from "next/link";
 import { Suspense } from "react";
-import { AccountIcon } from "./account-icon";
 import { CountrySelector } from "./country-selector";
 import { FavoritesIcon } from "./favorites-icon";
 import { LogoLink } from "./logo-link";
@@ -42,7 +43,13 @@ export async function Navbar() {
         {/* Right: Search + Account + Cart */}
         <div className="flex w-1/3 items-center justify-end gap-3">
           <SearchToggle />
-          <AccountIcon />
+          <Link
+            href="/login"
+            className="hidden h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold md:flex"
+            aria-label="Account"
+          >
+            <UserIcon className="h-5 w-5" />
+          </Link>
           <CartModal />
         </div>
       </div>
