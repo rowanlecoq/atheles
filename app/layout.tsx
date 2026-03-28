@@ -3,7 +3,7 @@ import { CartProvider } from "components/cart/cart-context";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
-import { Providers } from "components/providers";
+import { CurrencyProvider } from "components/currency-context";
 import { ScrollProgress } from "components/scroll-progress";
 import { getCart } from "lib/shopify";
 import { Playfair_Display } from "next/font/google";
@@ -46,7 +46,7 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`dark ${playfair.variable}`} style={{ colorScheme: "dark" }}>
       <body className="bg-brand-dark text-white">
-        <Providers>
+        <CurrencyProvider>
           <CartProvider cartPromise={cart}>
             <AnnouncementBar />
             <ScrollProgress />
@@ -59,7 +59,7 @@ export default async function RootLayout({
               <Toaster closeButton />
             </main>
           </CartProvider>
-        </Providers>
+        </CurrencyProvider>
       </body>
     </html>
   );

@@ -1,5 +1,4 @@
 export default {
-  serverExternalPackages: ["firebase"],
   experimental: {
     ppr: true,
     inlineCss: true,
