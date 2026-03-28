@@ -174,9 +174,9 @@ export default function ProfileContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName: firstName || undefined,
-          lastName: lastName || undefined,
-          phone: phone ? phoneToE164(phone) : "",
+          firstName: firstName.trim(),
+          lastName: lastName.trim(),
+          phone: phone ? phoneToE164(phone) : null,
           acceptsMarketing: newsletter,
         }),
       });

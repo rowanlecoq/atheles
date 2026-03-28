@@ -28,7 +28,8 @@ export async function POST(request: Request) {
 
     if (firstName !== undefined) input.firstName = firstName;
     if (lastName !== undefined) input.lastName = lastName;
-    if (phone !== undefined) input.phone = phone || "";
+    // Shopify rejects empty/blank phone - only include if it has a real value
+    if (phone) input.phone = phone;
     if (acceptsMarketing !== undefined)
       input.acceptsMarketing = acceptsMarketing;
 
