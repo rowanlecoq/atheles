@@ -20,22 +20,18 @@ export async function POST(request: Request) {
       await request.json();
 
     const input: {
-      firstName?: string;
-      lastName?: string;
-      phone?: string;
+      firstName?: string | null;
+      lastName?: string | null;
+      phone?: string | null;
       acceptsMarketing?: boolean;
     } = {};
 
-    if (firstName !== undefined && firstName !== "") input.firstName = firstName;
-    if (lastName !== undefined && lastName !== "") input.lastName = lastName;
-    if (phone !== undefined && phone !== null && phone !== "") input.phone = phone;
+    // Send actual values or null to clear - let Shopify handle it
+    if (firstName !== undefined) input.firstName = firstName || null;
+    if (lastName !== undefined) input.lastName = lastName || null;
+    if (phone !== undefined) input.phone = phone || null;
     if (acceptsMarketing !== undefined)
       input.acceptsMarketing = acceptsMarketing;
-
-    // Track which fields the user tried to clear but Shopify won't allow
-    const skippedClears: string[] = [];
-    if (lastName !== undefined && lastName === "") skippedClears.push("last name");
-    if ((phone === "" || phone === null) && phone !== undefined) skippedClears.push("phone number");
 
     const result = await updateCustomer(token, input);
 
@@ -48,13 +44,8 @@ export async function POST(request: Request) {
 
     const customer = await getCustomerByToken(token);
 
-    const warning = skippedClears.length > 0
-      ? `profile updated, but ${skippedClears.join(" and ")} can't be removed once set.`
-      : null;
-
     return NextResponse.json({
       success: true,
-      warning,
       user: customer
         ? {
             id: customer.id,

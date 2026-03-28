@@ -147,9 +147,9 @@ export async function activateCustomerByUrl(
 export async function updateCustomer(
   accessToken: string,
   input: {
-    firstName?: string;
-    lastName?: string;
-    phone?: string;
+    firstName?: string | null;
+    lastName?: string | null;
+    phone?: string | null;
     acceptsMarketing?: boolean;
   }
 ): Promise<{ success: boolean; error?: string }> {
