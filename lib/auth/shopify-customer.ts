@@ -254,7 +254,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     .reduce((sum, edge) => sum + parseFloat(edge.node.totalPrice.amount || "0"), 0)
     .toFixed(2);
 
-  const dobTag = data.customer.tags.find((t) => t.startsWith("dob:"));
+  const dobTag = (data.customer.tags || []).find((t) => t.startsWith("dob:"));
   const dob = dobTag ? dobTag.replace("dob:", "") : null;
 
   return {
