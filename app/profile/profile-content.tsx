@@ -94,6 +94,9 @@ export default function ProfileContent() {
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
   const [newsletter, setNewsletter] = useState(false);
+  const [dobDay, setDobDay] = useState("");
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobYear, setDobYear] = useState("");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -107,6 +110,12 @@ export default function ProfileContent() {
           setLastName(data.user.lastName || "");
           setPhone(data.user.phone ? formatPhoneDisplay(data.user.phone) : "");
           setNewsletter(data.user.acceptsMarketing || false);
+          if (data.user.dob) {
+            const [y, m, d] = data.user.dob.split("-");
+            setDobYear(y || "");
+            setDobMonth(m ? String(parseInt(m)) : "");
+            setDobDay(d ? String(parseInt(d)) : "");
+          }
           const stored = localStorage.getItem(`avatar-${data.user.id}`);
           if (stored) setAvatar(stored);
         } else {
@@ -183,6 +192,9 @@ export default function ProfileContent() {
           lastName: lastName.trim() || "",
           phone: phone ? phoneToE164(phone) : "",
           acceptsMarketing: newsletter,
+          dob: dobDay && dobMonth && dobYear
+            ? `${dobYear}-${dobMonth.padStart(2, "0")}-${dobDay.padStart(2, "0")}`
+            : undefined,
         }),
       });
       const data = await res.json();
@@ -209,6 +221,16 @@ export default function ProfileContent() {
     setLastName(user.lastName || "");
     setPhone(user.phone ? formatPhoneDisplay(user.phone) : "");
     setNewsletter(user.acceptsMarketing);
+    if (user.dob) {
+      const [y, m, d] = user.dob.split("-");
+      setDobYear(y || "");
+      setDobMonth(m ? String(parseInt(m)) : "");
+      setDobDay(d ? String(parseInt(d)) : "");
+    } else {
+      setDobDay("");
+      setDobMonth("");
+      setDobYear("");
+    }
     setEditing(false);
     setSaveMessage("");
   };
@@ -590,20 +612,49 @@ export default function ProfileContent() {
             <p className="px-3 py-2 text-sm text-brand-grey">{user.email}</p>
           </div>
 
-          {/* Date of Birth (read-only) */}
+          {/* Date of Birth */}
           <div>
             <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">
               date of birth
             </label>
-            <p className="px-3 py-2 text-sm text-brand-grey">
-              {user.dob
-                ? new Date(user.dob + "T00:00:00").toLocaleDateString("en-US", {
-                    day: "numeric",
-                    month: "long",
-                    year: "numeric",
-                  })
-                : <span className="text-brand-grey/50">not set</span>}
-            </p>
+            {editing ? (
+              <div className="grid grid-cols-3 gap-2">
+                <select value={dobDay} onChange={(e) => setDobDay(e.target.value)}
+                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
+                  aria-label="Day">
+                  <option value="">day</option>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                    <option key={d} value={String(d)}>{d}</option>
+                  ))}
+                </select>
+                <select value={dobMonth} onChange={(e) => setDobMonth(e.target.value)}
+                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
+                  aria-label="Month">
+                  <option value="">month</option>
+                  {["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].map((m, i) => (
+                    <option key={m} value={String(i + 1)}>{m}</option>
+                  ))}
+                </select>
+                <select value={dobYear} onChange={(e) => setDobYear(e.target.value)}
+                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
+                  aria-label="Year">
+                  <option value="">year</option>
+                  {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => (
+                    <option key={y} value={String(y)}>{y}</option>
+                  ))}
+                </select>
+              </div>
+            ) : (
+              <p className="px-3 py-2 text-sm text-white">
+                {user.dob
+                  ? new Date(user.dob + "T00:00:00").toLocaleDateString("en-US", {
+                      day: "numeric",
+                      month: "long",
+                      year: "numeric",
+                    })
+                  : <span className="text-brand-grey/50">not set</span>}
+              </p>
+            )}
           </div>
 
           {/* Phone */}

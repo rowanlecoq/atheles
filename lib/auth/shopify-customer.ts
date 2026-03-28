@@ -8,6 +8,8 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
 
 const endpoint = domain ? `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}` : "";
 const token = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
+const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
+const adminEndpoint = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
 
 async function shopifyCustomerFetch<T>(
   query: string,
@@ -37,6 +39,70 @@ async function shopifyCustomerFetch<T>(
   }
 
   return json.data;
+}
+
+async function shopifyAdminFetch<T>(
+  query: string,
+  variables: Record<string, unknown>
+): Promise<T> {
+  const res = await fetch(adminEndpoint, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "X-Shopify-Access-Token": adminToken,
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  if (!res.ok) {
+    throw new Error(`Shopify Admin request failed: ${res.status}`);
+  }
+
+  const json = await res.json();
+  if (json.errors) {
+    throw new Error(json.errors[0]?.message || "Shopify Admin GraphQL error");
+  }
+  return json.data;
+}
+
+export async function updateCustomerDob(
+  customerId: string,
+  dob: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!adminEndpoint || !adminToken) {
+    return { success: false, error: "admin API not configured" };
+  }
+
+  // Fetch current tags first
+  const customerData = await shopifyAdminFetch<{
+    customer: { tags: string[] } | null;
+  }>(
+    `query customer($id: ID!) {
+      customer(id: $id) { tags }
+    }`,
+    { id: customerId }
+  );
+
+  const existingTags = customerData.customer?.tags || [];
+  const filteredTags = existingTags.filter((t) => !t.startsWith("dob:"));
+  const newTags = [...filteredTags, `dob:${dob}`];
+
+  await shopifyAdminFetch<{
+    customerUpdate: {
+      customer: { id: string } | null;
+      userErrors: { message: string }[];
+    };
+  }>(
+    `mutation customerUpdate($input: CustomerInput!) {
+      customerUpdate(input: $input) {
+        customer { id }
+        userErrors { message }
+      }
+    }`,
+    { input: { id: customerId, tags: newTags } }
+  );
+
+  return { success: true };
 }
 
 export async function createCustomerAccount(

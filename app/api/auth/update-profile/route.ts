@@ -1,4 +1,4 @@
-import { updateCustomer, getCustomerByToken } from "lib/auth/shopify-customer";
+import { updateCustomer, updateCustomerDob, getCustomerByToken } from "lib/auth/shopify-customer";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -16,7 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { firstName, lastName, phone, acceptsMarketing } =
+    const { firstName, lastName, phone, acceptsMarketing, dob } =
       await request.json();
 
     const input: {
@@ -34,6 +34,16 @@ export async function POST(request: Request) {
       input.acceptsMarketing = acceptsMarketing;
 
     const result = await updateCustomer(token, input);
+
+    // Update DOB via Admin API if provided
+    if (dob) {
+      const customer = await getCustomerByToken(token);
+      if (customer) {
+        await updateCustomerDob(customer.id, dob).catch(() => {
+          // DOB update is best-effort — don't fail the whole save
+        });
+      }
+    }
 
     if (!result.success) {
       return NextResponse.json(
