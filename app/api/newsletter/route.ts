@@ -1,8 +1,15 @@
-import { shopifyFetch } from "lib/shopify";
 import { customerCreateMutation } from "lib/shopify/mutations/customer";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+const domain = process.env.SHOPIFY_STORE_DOMAIN
+  ? process.env.SHOPIFY_STORE_DOMAIN.startsWith("https://")
+    ? process.env.SHOPIFY_STORE_DOMAIN
+    : `https://${process.env.SHOPIFY_STORE_DOMAIN}`
+  : "";
+const endpoint = domain ? `${domain}/api/2023-01/graphql.json` : "";
+const token = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
 
 export async function POST(request: Request) {
   try {
@@ -15,33 +22,39 @@ export async function POST(request: Request) {
       );
     }
 
-    // Generate a random password (required by Shopify but not used for login)
+    if (!endpoint) {
+      return NextResponse.json(
+        { success: false, error: "store not configured" },
+        { status: 500 }
+      );
+    }
+
     const randomPassword = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
-    const res = await shopifyFetch<{
-      data: {
-        customerCreate: {
-          customer: { id: string; email: string } | null;
-          customerUserErrors: { code: string; message: string }[];
-        };
-      };
-    }>({
-      query: customerCreateMutation,
-      variables: {
-        input: {
-          email,
-          acceptsMarketing: true,
-          password: randomPassword,
-        },
+    const res = await fetch(endpoint, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        "X-Shopify-Storefront-Access-Token": token,
       },
+      body: JSON.stringify({
+        query: customerCreateMutation,
+        variables: {
+          input: {
+            email,
+            acceptsMarketing: true,
+            password: randomPassword,
+          },
+        },
+      }),
     });
 
-    const errors = res.body.data.customerCreate.customerUserErrors;
+    const json = await res.json();
+    const errors = json.data?.customerCreate?.customerUserErrors || [];
 
-    // If customer already exists, that's fine — they're already subscribed
     if (errors.length > 0) {
       const alreadyExists = errors.some(
-        (e) => e.code === "TAKEN" || e.code === "CUSTOMER_DISABLED"
+        (e: { code: string }) => e.code === "TAKEN" || e.code === "CUSTOMER_DISABLED"
       );
       if (alreadyExists) {
         return NextResponse.json({ success: true });
