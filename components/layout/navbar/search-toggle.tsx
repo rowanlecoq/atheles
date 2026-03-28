@@ -1,6 +1,7 @@
 "use client";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
+import { useCurrency } from "components/currency-context";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,11 +10,54 @@ import { useCallback, useEffect, useRef, useState } from "react";
 type SearchResult = {
   handle: string;
   title: string;
-  featuredImage?: { url: string };
+  featuredImage?: { url: string } | null;
   priceRange: {
     maxVariantPrice: { amount: string; currencyCode: string };
   };
 };
+
+function ResultItem({
+  product,
+  onClose,
+}: {
+  product: SearchResult;
+  onClose: () => void;
+}) {
+  const { currency, convert } = useCurrency();
+  const price = new Intl.NumberFormat(undefined, {
+    style: "currency",
+    currency,
+    currencyDisplay: "narrowSymbol",
+  }).format(parseFloat(convert(product.priceRange.maxVariantPrice.amount)));
+
+  return (
+    <Link
+      href={`/product/${product.handle}`}
+      onClick={onClose}
+      className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-brand-dark-gold/10"
+    >
+      {product.featuredImage?.url ? (
+        <div className="relative h-10 w-10 flex-none overflow-hidden rounded bg-[#222]">
+          <Image
+            src={product.featuredImage.url}
+            alt={product.title}
+            fill
+            className="object-cover"
+            sizes="40px"
+          />
+        </div>
+      ) : (
+        <div className="flex h-10 w-10 flex-none items-center justify-center rounded bg-[#222]">
+          <span className="text-[8px] text-brand-grey">ATHELES</span>
+        </div>
+      )}
+      <div className="min-w-0 flex-1">
+        <p className="truncate text-sm text-white">{product.title}</p>
+        <p className="text-xs text-brand-grey">{price}</p>
+      </div>
+    </Link>
+  );
+}
 
 export function SearchToggle() {
   const [open, setOpen] = useState(false);
@@ -104,85 +148,52 @@ export function SearchToggle() {
     }
   };
 
-  const showResults = query.trim().length >= 2 && (results.length > 0 || loading);
-
-  const resultsDropdown = (
-    <div className="border-t border-brand-dark-gold/20 bg-brand-dark">
-      {loading && results.length === 0 ? (
-        <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
-      ) : (
-        <>
-          {results.slice(0, 5).map((product) => (
-            <Link
-              key={product.handle}
-              href={`/product/${product.handle}`}
-              onClick={close}
-              className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-brand-dark-gold/10"
-            >
-              {product.featuredImage?.url ? (
-                <div className="relative h-10 w-10 flex-none overflow-hidden rounded bg-[#222]">
-                  <Image
-                    src={product.featuredImage.url}
-                    alt={product.title}
-                    fill
-                    className="object-cover"
-                    sizes="40px"
-                  />
-                </div>
-              ) : (
-                <div className="flex h-10 w-10 flex-none items-center justify-center rounded bg-[#222]">
-                  <span className="text-[8px] text-brand-grey">ATHELES</span>
-                </div>
-              )}
-              <div className="min-w-0 flex-1">
-                <p className="truncate text-sm text-white">{product.title}</p>
-                <p className="text-xs text-brand-grey">
-                  ${parseFloat(product.priceRange.maxVariantPrice.amount).toFixed(2)}
-                </p>
-              </div>
-            </Link>
-          ))}
-          {results.length > 0 && (
-            <button
-              type="button"
-              onClick={() => {
-                router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-                close();
-              }}
-              className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
-            >
-              view all results
-            </button>
-          )}
-        </>
-      )}
-    </div>
-  );
+  const showDropdown = open && query.trim().length >= 2 && (results.length > 0 || loading);
 
   return (
     <div ref={containerRef} className="relative flex items-center">
-      {/* Desktop: inline expanding search */}
-      <div
-        className={`absolute right-0 hidden overflow-hidden transition-all duration-300 ease-out md:block ${
-          open ? "w-[320px] opacity-100" : "w-0 opacity-0"
-        }`}
-      >
-        <form onSubmit={handleSubmit} className="flex w-full items-center">
-          <input
-            ref={inputRef}
-            type="text"
-            value={query}
-            onChange={(e) => setQuery(e.target.value)}
-            placeholder="search..."
-            className="h-9 w-full border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none transition-colors duration-200 focus:border-brand-gold"
-          />
-        </form>
-        {/* Desktop results dropdown */}
-        {showResults && (
-          <div className="absolute left-0 right-0 top-full z-50 mt-1 overflow-hidden rounded-md border border-brand-dark-gold/20 shadow-lg shadow-black/30">
-            {resultsDropdown}
-          </div>
-        )}
+      {/* Desktop: inline expanding search with dropdown */}
+      <div className="hidden md:block">
+        <div
+          className={`absolute right-0 top-1/2 -translate-y-1/2 overflow-visible transition-all duration-300 ease-out ${
+            open ? "w-[320px] opacity-100" : "w-0 opacity-0"
+          }`}
+        >
+          <form onSubmit={handleSubmit}>
+            <input
+              ref={inputRef}
+              type="text"
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="search..."
+              className="h-9 w-full border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none transition-colors duration-200 focus:border-brand-gold"
+            />
+          </form>
+          {/* Desktop dropdown */}
+          {showDropdown && (
+            <div className="absolute left-0 right-0 top-full z-[70] mt-1 overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-xl shadow-black/40">
+              {loading && results.length === 0 ? (
+                <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
+              ) : (
+                <>
+                  {results.slice(0, 5).map((product) => (
+                    <ResultItem key={product.handle} product={product} onClose={close} />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                      close();
+                    }}
+                    className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
+                  >
+                    view all results
+                  </button>
+                </>
+              )}
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Mobile: full-width overlay bar */}
@@ -210,7 +221,29 @@ export function SearchToggle() {
             </button>
           </div>
           {/* Mobile results */}
-          {showResults && resultsDropdown}
+          {showDropdown && (
+            <div className="border-t border-brand-dark-gold/20">
+              {loading && results.length === 0 ? (
+                <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
+              ) : (
+                <>
+                  {results.slice(0, 5).map((product) => (
+                    <ResultItem key={product.handle} product={product} onClose={close} />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                      close();
+                    }}
+                    className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
+                  >
+                    view all results
+                  </button>
+                </>
+              )}
+            </div>
+          )}
         </div>
       )}
 
