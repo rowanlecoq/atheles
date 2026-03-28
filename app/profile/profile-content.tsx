@@ -84,6 +84,7 @@ function phoneToE164(raw: string): string {
 export default function ProfileContent() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
+  const [redirecting, setRedirecting] = useState(false);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
@@ -109,11 +110,13 @@ export default function ProfileContent() {
           const stored = localStorage.getItem(`avatar-${data.user.id}`);
           if (stored) setAvatar(stored);
         } else {
+          setRedirecting(true);
           router.push("/login");
         }
         setLoading(false);
       })
       .catch(() => {
+        setRedirecting(true);
         router.push("/login");
         setLoading(false);
       });
@@ -213,7 +216,9 @@ export default function ProfileContent() {
   if (loading || !user) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-brand-grey">loading...</p>
+        <p className="text-sm text-brand-grey">
+          {redirecting ? "redirecting to sign in..." : "loading..."}
+        </p>
       </div>
     );
   }
