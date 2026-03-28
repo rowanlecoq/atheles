@@ -230,7 +230,6 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       phone: string | null;
       acceptsMarketing: boolean;
       createdAt: string;
-      tags: string[];
       orders: {
         edges: { node: { totalPrice: { amount: string } } }[];
       };
@@ -238,7 +237,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   }>(
     `query customer($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {
-        id email firstName lastName displayName phone acceptsMarketing createdAt tags
+        id email firstName lastName displayName phone acceptsMarketing createdAt
         orders(first: 100) {
           edges { node { totalPrice { amount } } }
         }
@@ -254,8 +253,22 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     .reduce((sum, edge) => sum + parseFloat(edge.node.totalPrice.amount || "0"), 0)
     .toFixed(2);
 
-  const dobTag = (data.customer.tags || []).find((t) => t.startsWith("dob:"));
-  const dob = dobTag ? dobTag.replace("dob:", "") : null;
+  // Try to fetch customer tags separately for DOB (may not be available on all Storefront API configs)
+  let dob: string | null = null;
+  try {
+    const tagsData = await shopifyCustomerFetch<{
+      customer: { tags: string[] } | null;
+    }>(
+      `query customer($customerAccessToken: String!) {
+        customer(customerAccessToken: $customerAccessToken) { tags }
+      }`,
+      { customerAccessToken: accessToken }
+    );
+    const dobTag = (tagsData.customer?.tags || []).find((t) => t.startsWith("dob:"));
+    dob = dobTag ? dobTag.replace("dob:", "") : null;
+  } catch {
+    // Tags not available — DOB will show as "not set"
+  }
 
   return {
     id: data.customer.id,
