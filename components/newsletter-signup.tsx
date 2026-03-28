@@ -6,13 +6,36 @@ import { useState } from "react";
 export function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (email) {
-      setSubmitted(true);
-      setEmail("");
+    if (!email) return;
+
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch("/api/newsletter", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSubmitted(true);
+        setEmail("");
+      } else {
+        setError(data.error || "failed to subscribe. please try again.");
+      }
+    } catch {
+      setError("something went wrong. please try again.");
     }
+
+    setLoading(false);
   };
 
   return (
@@ -59,11 +82,15 @@ export function NewsletterSignup() {
               />
               <button
                 type="submit"
-                className="border border-brand-gold bg-transparent px-8 py-3 text-sm uppercase tracking-[0.2em] text-brand-gold transition-all duration-300 hover:bg-brand-gold hover:text-brand-dark"
+                disabled={loading}
+                className="border border-brand-gold bg-transparent px-8 py-3 text-sm uppercase tracking-[0.2em] text-brand-gold transition-all duration-300 hover:bg-brand-gold hover:text-brand-dark disabled:opacity-50"
               >
-                Subscribe
+                {loading ? "..." : "Subscribe"}
               </button>
             </form>
+          )}
+          {error && (
+            <p className="mt-3 text-xs text-red-400">{error}</p>
           )}
         </div>
       </div>

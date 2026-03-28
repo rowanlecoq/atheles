@@ -1,9 +1,10 @@
 import { AnnouncementBar } from "components/announcement-bar";
+import { AuthSessionProvider } from "components/auth/session-provider";
 import { CartProvider } from "components/cart/cart-context";
+import { CurrencyProvider } from "components/currency-context";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
-import { CurrencyProvider } from "components/currency-context";
 import { ScrollProgress } from "components/scroll-progress";
 import { getCart } from "lib/shopify";
 import { Playfair_Display } from "next/font/google";
@@ -46,20 +47,22 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`dark ${playfair.variable}`} style={{ colorScheme: "dark" }}>
       <body className="bg-brand-dark text-white">
-        <CurrencyProvider>
-          <CartProvider cartPromise={cart}>
-            <AnnouncementBar />
-            <ScrollProgress />
-            <KonamiLightning />
-            <Navbar />
-            <main className="w-full overflow-x-hidden">
-              <PageTransition>
-                {children}
-              </PageTransition>
-              <Toaster closeButton />
-            </main>
-          </CartProvider>
-        </CurrencyProvider>
+        <AuthSessionProvider>
+          <CurrencyProvider>
+            <CartProvider cartPromise={cart}>
+              <AnnouncementBar />
+              <ScrollProgress />
+              <KonamiLightning />
+              <Navbar />
+              <main className="w-full overflow-x-hidden">
+                <PageTransition>
+                  {children}
+                </PageTransition>
+                <Toaster closeButton />
+              </main>
+            </CartProvider>
+          </CurrencyProvider>
+        </AuthSessionProvider>
       </body>
     </html>
   );

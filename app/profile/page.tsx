@@ -1,0 +1,106 @@
+"use client";
+
+import Footer from "components/layout/footer";
+import { signOut, useSession } from "next-auth/react";
+import { useRouter } from "next/navigation";
+import { useEffect } from "react";
+
+export default function ProfilePage() {
+  const { data: session, status } = useSession();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === "unauthenticated") router.push("/login");
+  }, [status, router]);
+
+  if (status === "loading" || !session?.user) {
+    return (
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-brand-grey">loading...</p>
+      </div>
+    );
+  }
+
+  const user = session.user;
+  const initials = (user.name || user.email || "A")
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+
+  return (
+    <>
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+        {/* Profile header */}
+        <div className="mb-10 flex flex-col items-center text-center">
+          <div className="mb-4 flex h-24 w-24 items-center justify-center rounded-full border-2 border-brand-gold bg-brand-dark-gold/20">
+            <span className="font-heading text-2xl text-brand-gold">
+              {initials}
+            </span>
+          </div>
+
+          <h1 className="font-heading text-2xl text-brand-gold sm:text-3xl">
+            {user.name || "athlete"}
+          </h1>
+          <p className="mt-1 text-sm text-brand-grey">{user.email}</p>
+        </div>
+
+        {/* Stats placeholders */}
+        <div className="mb-8 grid grid-cols-3 gap-3">
+          <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 text-center">
+            <p className="font-heading text-2xl text-brand-gold">0</p>
+            <p className="mt-1 text-[10px] uppercase tracking-wider text-brand-grey">
+              points
+            </p>
+          </div>
+          <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 text-center">
+            <p className="font-heading text-2xl text-brand-gold">0</p>
+            <p className="mt-1 text-[10px] uppercase tracking-wider text-brand-grey">
+              orders
+            </p>
+          </div>
+          <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 text-center">
+            <p className="font-heading text-2xl text-brand-gold">bronze</p>
+            <p className="mt-1 text-[10px] uppercase tracking-wider text-brand-grey">
+              tier
+            </p>
+          </div>
+        </div>
+
+        {/* Links */}
+        <div className="space-y-3">
+          <h2 className="mb-4 font-heading text-lg text-brand-pale-gold">
+            account
+          </h2>
+
+          <a
+            href="/favorites"
+            className="flex items-center justify-between rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 transition-colors hover:border-brand-gold/30"
+          >
+            <span className="text-sm text-white">favorites</span>
+            <span className="text-xs text-brand-grey">&rarr;</span>
+          </a>
+
+          <a
+            href="/search"
+            className="flex items-center justify-between rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 transition-colors hover:border-brand-gold/30"
+          >
+            <span className="text-sm text-white">shop</span>
+            <span className="text-xs text-brand-grey">&rarr;</span>
+          </a>
+
+          <button
+            type="button"
+            onClick={() => signOut({ callbackUrl: "/" })}
+            className="flex w-full items-center justify-between rounded-lg border border-red-900/30 bg-brand-dark px-4 py-3 transition-colors hover:border-red-700/50"
+          >
+            <span className="text-sm text-red-400">sign out</span>
+            <span className="text-xs text-red-400/50">&rarr;</span>
+          </button>
+        </div>
+      </div>
+      <Footer />
+    </>
+  );
+}
