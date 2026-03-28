@@ -19,10 +19,11 @@ type User = {
 };
 
 const TIERS = [
-  { name: "bronze", min: 0, max: 25000, color: "text-amber-600", gradient: "from-amber-900 to-amber-600" },
-  { name: "silver", min: 25000, max: 75000, color: "text-gray-300", gradient: "from-gray-500 to-gray-300" },
-  { name: "gold", min: 75000, max: 150000, color: "text-yellow-400", gradient: "from-yellow-700 via-yellow-400 to-amber-300" },
-  { name: "platinum", min: 150000, max: Infinity, color: "text-cyan-200", gradient: "from-cyan-600 via-cyan-300 to-white" },
+  { name: "BRONZE", min: 0, max: 1000, color: "text-amber-600", gradient: "from-amber-900 to-amber-600" },
+  { name: "SILVER", min: 1000, max: 3000, color: "text-gray-300", gradient: "from-gray-500 to-gray-300" },
+  { name: "GOLD", min: 3000, max: 5000, color: "text-yellow-400", gradient: "from-yellow-700 via-yellow-400 to-amber-300" },
+  { name: "PLATINUM", min: 5000, max: 10000, color: "text-cyan-200", gradient: "from-cyan-600 via-cyan-300 to-white" },
+  { name: "CHAMPION", min: 10000, max: Infinity, color: "text-fuchsia-300", gradient: "from-fuchsia-700 via-fuchsia-400 to-amber-300" },
 ];
 
 function getTier(points: number) {
@@ -325,7 +326,7 @@ export default function ProfileContent() {
             <p className="mb-1 text-[10px] uppercase tracking-[0.25em] text-brand-grey">
               loyalty rewards
             </p>
-            <p className={`font-heading text-3xl capitalize ${tier.color}`}>
+            <p className={`font-heading text-3xl tracking-wider ${tier.color}`}>
               {tier.name}
             </p>
           </div>
@@ -347,8 +348,8 @@ export default function ProfileContent() {
           </div>
 
           {/* Tier progress bar */}
-          <div className="mb-2">
-            <div className="relative h-3 w-full overflow-hidden rounded-full bg-brand-dark-gold/15">
+          <div className="mb-1">
+            <div className="relative h-5 w-full overflow-hidden rounded-full bg-brand-dark-gold/15">
               {/* Filled bar with tier gradient */}
               <div
                 className={`relative h-full rounded-full bg-gradient-to-r ${tier.gradient} transition-all duration-1000 ease-out`}
@@ -363,40 +364,43 @@ export default function ProfileContent() {
                   }}
                 />
                 {/* Sparkle particles along the bar */}
-                <span className="absolute right-1 top-0 animate-ping text-[6px] text-white/60" style={{ animationDuration: "1.5s" }}>&#10022;</span>
-                <span className="absolute right-3 top-0.5 animate-ping text-[5px] text-white/40" style={{ animationDuration: "2s", animationDelay: "0.5s" }}>&#10022;</span>
-                <span className="absolute right-6 -top-0.5 animate-ping text-[4px] text-white/30" style={{ animationDuration: "2.5s", animationDelay: "1s" }}>&#10022;</span>
+                <span className="absolute right-1 top-0.5 animate-ping text-[7px] text-white/60" style={{ animationDuration: "1.5s" }}>&#10022;</span>
+                <span className="absolute right-4 top-1 animate-ping text-[6px] text-white/40" style={{ animationDuration: "2s", animationDelay: "0.5s" }}>&#10022;</span>
+                <span className="absolute right-7 top-0 animate-ping text-[5px] text-white/30" style={{ animationDuration: "2.5s", animationDelay: "1s" }}>&#10022;</span>
+                <span className="absolute right-10 top-1.5 animate-ping text-[5px] text-white/20" style={{ animationDuration: "3s", animationDelay: "1.5s" }}>&#10022;</span>
               </div>
-
-              {/* Tier markers */}
-              {TIERS.slice(1).map((t) =>
-                t.max !== Infinity && tier.max !== Infinity ? (
-                  <div
-                    key={t.name}
-                    className="absolute top-0 h-full w-px bg-brand-grey/20"
-                    style={{
-                      left: `${((t.min - tier.min) / (tier.max - tier.min)) * 100}%`,
-                    }}
-                  />
-                ) : null
-              )}
             </div>
           </div>
 
-          {/* Tier labels under bar */}
-          <div className="mb-5 flex items-center justify-between">
-            <span className={`text-[10px] font-medium uppercase tracking-wider ${tier.color}`}>
-              {tier.name}
-            </span>
+          {/* Tier milestone markers */}
+          <div className="relative mb-5 flex justify-between px-0.5">
+            {TIERS.map((t, i) => {
+              const reached = points >= t.min;
+              return (
+                <div key={t.name} className="flex flex-col items-center" style={{ width: i === 0 || i === TIERS.length - 1 ? "auto" : undefined }}>
+                  <div className={`mb-0.5 h-1.5 w-1.5 rounded-full ${reached ? "bg-brand-gold" : "bg-brand-dark-gold/30"}`} />
+                  <span className={`text-[8px] font-medium tracking-wider ${reached ? t.color : "text-brand-grey/40"}`}>
+                    {t.name}
+                  </span>
+                  <span className={`text-[7px] ${reached ? "text-brand-grey" : "text-brand-grey/30"}`}>
+                    {t.min === 0 ? "0" : `${(t.min / 1000).toFixed(0)}K`}
+                  </span>
+                </div>
+              );
+            })}
+          </div>
+
+          {/* Progress text */}
+          <div className="mb-5 text-center">
             {nextTier ? (
-              <span className="text-[10px] tracking-wider text-brand-grey">
-                <span className="text-brand-pale-gold">{(nextTier.min - points).toLocaleString()}</span> pts to{" "}
-                <span className={`font-medium uppercase ${nextTier.color}`}>{nextTier.name}</span>
-              </span>
+              <p className="text-xs text-brand-grey">
+                <span className="text-brand-pale-gold">{(nextTier.min - points).toLocaleString()}</span> points to{" "}
+                <span className={`font-medium ${nextTier.color}`}>{nextTier.name}</span>
+              </p>
             ) : (
-              <span className="text-[10px] uppercase tracking-wider text-brand-pale-gold">
+              <p className="text-xs text-brand-pale-gold">
                 &#10022; max tier achieved &#10022;
-              </span>
+              </p>
             )}
           </div>
 
