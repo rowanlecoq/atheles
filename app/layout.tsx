@@ -3,7 +3,6 @@ import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ScrollProgress } from "components/scroll-progress";
-import { SmoothScrollProvider } from "components/smooth-scroll-provider";
 import { getCart } from "lib/shopify";
 import { Playfair_Display } from "next/font/google";
 import type { ReactNode } from "react";
@@ -41,19 +40,17 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`dark ${playfair.variable}`} style={{ colorScheme: "dark" }}>
       <body className="bg-brand-dark text-white">
-        <SmoothScrollProvider>
-          <CartProvider cartPromise={cart}>
-            <ScrollProgress />
-            <KonamiLightning />
-            <Navbar />
-            <main className="w-full overflow-x-hidden">
-              <PageTransition>
-                {children}
-              </PageTransition>
-              <Toaster closeButton />
-            </main>
-          </CartProvider>
-        </SmoothScrollProvider>
+        <CartProvider cartPromise={cart}>
+          <ScrollProgress />
+          <KonamiLightning />
+          <Navbar />
+          <main className="w-full overflow-x-hidden">
+            <PageTransition>
+              {children}
+            </PageTransition>
+            <Toaster closeButton />
+          </main>
+        </CartProvider>
       </body>
     </html>
   );
