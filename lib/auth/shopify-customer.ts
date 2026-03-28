@@ -107,6 +107,43 @@ export async function authenticateCustomer(
   return data.customerAccessTokenCreate.customerAccessToken;
 }
 
+export async function activateCustomerByUrl(
+  activationUrl: string,
+  password: string
+): Promise<{ accessToken: string; expiresAt: string } | { error: string }> {
+  if (!endpoint) return { error: "store not configured" };
+
+  const data = await shopifyCustomerFetch<{
+    customerActivateByUrl: {
+      customerAccessToken: {
+        accessToken: string;
+        expiresAt: string;
+      } | null;
+      customerUserErrors: { code: string; message: string }[];
+    };
+  }>(
+    `mutation customerActivateByUrl($activationUrl: URL!, $password: String!) {
+      customerActivateByUrl(activationUrl: $activationUrl, password: $password) {
+        customerAccessToken { accessToken expiresAt }
+        customerUserErrors { code message }
+      }
+    }`,
+    { activationUrl, password }
+  );
+
+  const errors = data.customerActivateByUrl.customerUserErrors;
+  if (errors.length > 0) {
+    return { error: errors[0]?.message || "failed to activate account" };
+  }
+
+  const tokenData = data.customerActivateByUrl.customerAccessToken;
+  if (!tokenData) {
+    return { error: "failed to activate account" };
+  }
+
+  return { accessToken: tokenData.accessToken, expiresAt: tokenData.expiresAt };
+}
+
 export async function getCustomerByToken(accessToken: string): Promise<{
   id: string;
   email: string;

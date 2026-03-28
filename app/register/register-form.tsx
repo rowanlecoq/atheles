@@ -11,6 +11,7 @@ export default function RegisterForm() {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
+  const [verificationSent, setVerificationSent] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -30,7 +31,7 @@ export default function RegisterForm() {
         router.push("/profile");
         router.refresh();
       } else if (data.success && !data.user) {
-        router.push("/login");
+        setVerificationSent(true);
       } else {
         setError(data.error || "failed to create account.");
       }
@@ -48,6 +49,27 @@ export default function RegisterForm() {
           <p className="text-sm text-brand-grey">join the atheles club.</p>
         </div>
         <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8">
+          {verificationSent ? (
+            <div className="space-y-4 text-center">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-brand-dark-gold/30">
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-6 w-6 text-brand-gold">
+                  <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z" />
+                  <polyline points="22,6 12,13 2,6" />
+                </svg>
+              </div>
+              <p className="text-sm text-brand-pale-gold">
+                we&apos;ve sent a verification email to <span className="text-brand-gold">{email}</span>.
+              </p>
+              <p className="text-xs text-brand-grey">
+                click the link in the email to activate your account and sign in.
+              </p>
+              <div className="pt-2">
+                <Link href="/login" className="text-xs text-brand-gold underline underline-offset-4 hover:text-brand-light-gold">
+                  go to sign in
+                </Link>
+              </div>
+            </div>
+          ) : (
           <form onSubmit={handleSubmit} className="space-y-4">
             <div>
               <label htmlFor="name" className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold">display name</label>
@@ -91,6 +113,7 @@ export default function RegisterForm() {
               {loading ? "creating account..." : "create account"}
             </button>
           </form>
+          )}
           <div className="mt-6 text-center">
             <p className="text-xs text-brand-grey">
               already have an account?{" "}
