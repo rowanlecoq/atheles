@@ -1,5 +1,6 @@
 "use client";
 
+import { FadeIn } from "components/animations";
 import { useEffect, useState } from "react";
 
 const quotes = [
@@ -25,7 +26,7 @@ export function GreekQuote() {
   const quote = quotes[index] ?? { text: "Know thyself.", author: "Inscription at the Temple of Apollo, Delphi" };
 
   return (
-    <div className="border-t border-brand-dark-gold/20 py-12 sm:py-16">
+    <FadeIn direction="up" className="border-t border-brand-dark-gold/20 py-12 sm:py-16">
       <div className="mx-auto max-w-2xl px-4 text-center">
         <p className="mb-3 font-heading text-sm italic leading-relaxed text-brand-pale-gold sm:text-base">
           &ldquo;{quote.text}&rdquo;
@@ -34,6 +35,6 @@ export function GreekQuote() {
           &mdash; {quote.author}
         </p>
       </div>
-    </div>
+    </FadeIn>
   );
 }

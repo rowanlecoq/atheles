@@ -1,5 +1,6 @@
 "use client";
 
+import { FadeIn, GradualBlur, SplitText } from "components/animations";
 import { useState } from "react";
 
 export function NewsletterSignup() {
@@ -18,17 +19,21 @@ export function NewsletterSignup() {
     <section className="border-y border-brand-dark-gold/20 py-20">
       <div className="mx-auto max-w-2xl px-4 text-center">
         {/* Heading */}
-        <h2 className="mb-4 font-heading text-2xl font-bold tracking-[0.06em] text-brand-gold sm:text-3xl sm:tracking-wider md:text-4xl">
-          join the club for free
-        </h2>
+        <SplitText
+          as="h2"
+          text="join the club for free"
+          className="mb-4 font-heading text-2xl font-bold tracking-[0.06em] text-brand-gold sm:text-3xl sm:tracking-wider md:text-4xl"
+        />
         <div className="mx-auto mb-6 h-px w-24 bg-brand-dark-gold/40" />
-        <p className="mb-8 text-sm text-brand-grey">
-          Be the first to know about new drops, exclusive offers, and the
-          Atheles journey.
-        </p>
+        <FadeIn direction="up" delay={0.2}>
+          <p className="mb-8 text-sm text-brand-grey">
+            Be the first to know about new drops, exclusive offers, and the
+            Atheles journey.
+          </p>
+        </FadeIn>
 
         {/* Form */}
-        <div>
+        <GradualBlur delay={0.3}>
           {submitted ? (
             <div className="border border-brand-dark-gold/40 bg-brand-dark/40 px-8 py-4 backdrop-blur-sm">
               <p className="text-sm uppercase tracking-wider text-brand-pale-gold">
@@ -56,7 +61,7 @@ export function NewsletterSignup() {
               </button>
             </form>
           )}
-        </div>
+        </GradualBlur>
       </div>
     </section>
   );

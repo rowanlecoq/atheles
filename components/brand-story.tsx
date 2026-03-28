@@ -1,3 +1,5 @@
+"use client";
+
 import { FadeIn, GradualBlur, ScrollFloat, SplitText } from "components/animations";
 import Image from "next/image";
 

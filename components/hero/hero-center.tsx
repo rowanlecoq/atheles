@@ -1,3 +1,5 @@
+"use client";
+
 import { FadeIn, MagneticHover } from "components/animations";
 import Link from "next/link";
 
