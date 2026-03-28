@@ -5,11 +5,41 @@ import { useCurrency, type RegionCode } from "components/currency-context";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const regions = [
-  { code: "US" as RegionCode, flag: "🇺🇸", label: "US", language: "EN", currency: "USD" },
-  { code: "CA" as RegionCode, flag: "🇨🇦", label: "CA", language: "EN", currency: "CAD" },
-  { code: "GB" as RegionCode, flag: "🇬🇧", label: "UK", language: "EN", currency: "GBP" },
-  { code: "AU" as RegionCode, flag: "🇦🇺", label: "AU", language: "EN", currency: "AUD" },
-  { code: "EU" as RegionCode, flag: "🇪🇺", label: "EU", language: "EN", currency: "EUR" },
+  {
+    code: "US" as RegionCode,
+    flag: "🇺🇸",
+    label: "US",
+    language: "EN",
+    currency: "USD",
+  },
+  {
+    code: "CA" as RegionCode,
+    flag: "🇨🇦",
+    label: "CA",
+    language: "EN",
+    currency: "CAD",
+  },
+  {
+    code: "GB" as RegionCode,
+    flag: "🇬🇧",
+    label: "UK",
+    language: "EN",
+    currency: "GBP",
+  },
+  {
+    code: "AU" as RegionCode,
+    flag: "🇦🇺",
+    label: "AU",
+    language: "EN",
+    currency: "AUD",
+  },
+  {
+    code: "EU" as RegionCode,
+    flag: "🇪🇺",
+    label: "EU",
+    language: "EN",
+    currency: "EUR",
+  },
 ];
 
 export function CountrySelector() {
@@ -39,10 +69,13 @@ export function CountrySelector() {
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  const handleSelect = useCallback((code: RegionCode) => {
-    setRegion(code);
-    setOpen(false);
-  }, [setRegion]);
+  const handleSelect = useCallback(
+    (code: RegionCode) => {
+      setRegion(code);
+      setOpen(false);
+    },
+    [setRegion],
+  );
 
   const current = regions.find((r) => r.code === region) || regions[0]!;
 

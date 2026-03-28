@@ -6,22 +6,29 @@
 @theme {
   --animate-fade-in: fade-in 0.6s ease both;
 
-  --color-brand-dark: #1A1A1A;
-  --color-brand-dark-gold: #7F6F4C;
-  --color-brand-gold: #CCB173;
-  --color-brand-pale-gold: #B09E73;
-  --color-brand-light-gold: #E5C685;
+  --color-brand-dark: #1a1a1a;
+  --color-brand-dark-gold: #7f6f4c;
+  --color-brand-gold: #ccb173;
+  --color-brand-pale-gold: #b09e73;
+  --color-brand-light-gold: #e5c685;
   --color-brand-medium-grey: #484848;
-  --color-brand-gold-wash: #C1AA89;
+  --color-brand-gold-wash: #c1aa89;
   --color-brand-grey: #737373;
 
-  --font-family-body: 'Courier New', Courier, monospace;
-  --font-family-heading: var(--font-playfair), Georgia, 'Times New Roman', serif;
+  --font-family-body: "Courier New", Courier, monospace;
+  --font-family-heading:
+    var(--font-playfair), Georgia, "Times New Roman", serif;
 }
 
 @keyframes fade-in {
-  from { opacity: 0; transform: translateY(10px); }
-  to { opacity: 1; transform: translateY(0); }
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 :root {
@@ -183,23 +190,47 @@ textarea {
 
 @media (max-width: 767px) {
   body {
-    background-size: 100% 100%, 100% 100%, 1500px 1500px;
+    background-size:
+      100% 100%,
+      100% 100%,
+      1500px 1500px;
     background-attachment: scroll, scroll, scroll;
   }
 }
 
 /* Thunder shake easter egg */
 @keyframes thunder-shake {
-  0%, 100% { transform: translate(0, 0); }
-  10% { transform: translate(-3px, 1px); }
-  20% { transform: translate(3px, -1px); }
-  30% { transform: translate(-2px, 2px); }
-  40% { transform: translate(2px, -2px); }
-  50% { transform: translate(-1px, 1px); }
-  60% { transform: translate(1px, -1px); }
-  70% { transform: translate(-2px, 0); }
-  80% { transform: translate(2px, 1px); }
-  90% { transform: translate(-1px, -1px); }
+  0%,
+  100% {
+    transform: translate(0, 0);
+  }
+  10% {
+    transform: translate(-3px, 1px);
+  }
+  20% {
+    transform: translate(3px, -1px);
+  }
+  30% {
+    transform: translate(-2px, 2px);
+  }
+  40% {
+    transform: translate(2px, -2px);
+  }
+  50% {
+    transform: translate(-1px, 1px);
+  }
+  60% {
+    transform: translate(1px, -1px);
+  }
+  70% {
+    transform: translate(-2px, 0);
+  }
+  80% {
+    transform: translate(2px, 1px);
+  }
+  90% {
+    transform: translate(-1px, -1px);
+  }
 }
 
 html.thunder-shake {
@@ -208,12 +239,18 @@ html.thunder-shake {
 
 /* Laurel wreath animations */
 @keyframes laurel-enter {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
 }
 
 @keyframes laurel-draw {
-  to { stroke-dashoffset: 0; }
+  to {
+    stroke-dashoffset: 0;
+  }
 }
 
 /* Wrapper fades in after "atheles" text finishes (~1.45s) */
@@ -226,7 +263,7 @@ html.thunder-shake {
 .laurel-stem {
   stroke-dasharray: 300;
   stroke-dashoffset: 300;
-  animation: laurel-draw 1.0s ease-in-out 1.75s forwards;
+  animation: laurel-draw 1s ease-in-out 1.75s forwards;
 }
 
 /* Leaves: delay is set per-element via inline style */

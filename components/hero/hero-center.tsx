@@ -12,7 +12,6 @@ export function HeroCenter() {
         </p>
       </FadeIn>
 
-
       <FadeIn delay={0.45} direction="none">
         <div className="mx-auto my-5 h-px w-28 bg-brand-dark-gold/40" />
       </FadeIn>

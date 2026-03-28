@@ -18,14 +18,14 @@ export async function POST(request: Request) {
     if (!email || typeof email !== "string") {
       return NextResponse.json(
         { success: false, error: "email is required" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
     if (!endpoint) {
       return NextResponse.json(
         { success: false, error: "store not configured" },
-        { status: 500 }
+        { status: 500 },
       );
     }
 
@@ -54,14 +54,15 @@ export async function POST(request: Request) {
 
     if (errors.length > 0) {
       const alreadyExists = errors.some(
-        (e: { code: string }) => e.code === "TAKEN" || e.code === "CUSTOMER_DISABLED"
+        (e: { code: string }) =>
+          e.code === "TAKEN" || e.code === "CUSTOMER_DISABLED",
       );
       if (alreadyExists) {
         return NextResponse.json({ success: true });
       }
       return NextResponse.json(
         { success: false, error: errors[0]?.message || "failed to subscribe" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -69,7 +70,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json(
       { success: false, error: "something went wrong" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

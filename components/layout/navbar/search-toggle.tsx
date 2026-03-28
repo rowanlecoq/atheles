@@ -90,7 +90,7 @@ export function SearchToggle() {
     debounceRef.current = setTimeout(async () => {
       try {
         const res = await fetch(
-          `/api/search?q=${encodeURIComponent(query.trim())}`
+          `/api/search?q=${encodeURIComponent(query.trim())}`,
         );
         if (res.ok) {
           const data = await res.json();
@@ -121,7 +121,10 @@ export function SearchToggle() {
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
+      if (
+        containerRef.current &&
+        !containerRef.current.contains(e.target as Node)
+      ) {
         close();
       }
     };
@@ -148,7 +151,8 @@ export function SearchToggle() {
     }
   };
 
-  const showDropdown = open && query.trim().length >= 2 && (results.length > 0 || loading);
+  const showDropdown =
+    open && query.trim().length >= 2 && (results.length > 0 || loading);
 
   return (
     <div ref={containerRef} className="relative flex items-center">
@@ -173,16 +177,24 @@ export function SearchToggle() {
           {showDropdown && (
             <div className="absolute left-0 right-0 top-full z-[70] mt-1 overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-xl shadow-black/40">
               {loading && results.length === 0 ? (
-                <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
+                <div className="px-4 py-3 text-xs text-brand-grey">
+                  searching...
+                </div>
               ) : (
                 <>
                   {results.slice(0, 5).map((product) => (
-                    <ResultItem key={product.handle} product={product} onClose={close} />
+                    <ResultItem
+                      key={product.handle}
+                      product={product}
+                      onClose={close}
+                    />
                   ))}
                   <button
                     type="button"
                     onClick={() => {
-                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                      router.push(
+                        `/search?q=${encodeURIComponent(query.trim())}`,
+                      );
                       close();
                     }}
                     className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
@@ -224,16 +236,24 @@ export function SearchToggle() {
           {showDropdown && (
             <div className="border-t border-brand-dark-gold/20">
               {loading && results.length === 0 ? (
-                <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
+                <div className="px-4 py-3 text-xs text-brand-grey">
+                  searching...
+                </div>
               ) : (
                 <>
                   {results.slice(0, 5).map((product) => (
-                    <ResultItem key={product.handle} product={product} onClose={close} />
+                    <ResultItem
+                      key={product.handle}
+                      product={product}
+                      onClose={close}
+                    />
                   ))}
                   <button
                     type="button"
                     onClick={() => {
-                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                      router.push(
+                        `/search?q=${encodeURIComponent(query.trim())}`,
+                      );
                       close();
                     }}
                     className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
@@ -266,12 +286,16 @@ export function SearchToggle() {
         <div className="relative h-5 w-5">
           <MagnifyingGlassIcon
             className={`absolute inset-0 h-5 w-5 transition-all duration-300 ${
-              open ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
+              open
+                ? "rotate-90 scale-0 opacity-0"
+                : "rotate-0 scale-100 opacity-100"
             }`}
           />
           <XMarkIcon
             className={`absolute inset-0 hidden h-5 w-5 transition-all duration-300 md:block ${
-              open ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
+              open
+                ? "rotate-0 scale-100 opacity-100"
+                : "-rotate-90 scale-0 opacity-0"
             }`}
           />
         </div>

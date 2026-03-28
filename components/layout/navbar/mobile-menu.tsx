@@ -75,7 +75,9 @@ function CategoryItem({
             type="button"
             onClick={() => setExpanded((v) => !v)}
             className="flex h-11 w-11 items-center justify-center text-brand-dark-gold transition-colors hover:text-brand-gold"
-            aria-label={expanded ? "Collapse subcategories" : "Expand subcategories"}
+            aria-label={
+              expanded ? "Collapse subcategories" : "Expand subcategories"
+            }
           >
             <ChevronDownIcon
               className={`h-4 w-4 transition-transform duration-200 ${expanded ? "rotate-180" : ""}`}
@@ -159,7 +161,8 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
       }
     };
     window.addEventListener("avatar-changed", handleAvatarChange);
-    return () => window.removeEventListener("avatar-changed", handleAvatarChange);
+    return () =>
+      window.removeEventListener("avatar-changed", handleAvatarChange);
   }, [userId]);
 
   useEffect(() => {
@@ -261,13 +264,21 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     <div>
                       {loggedIn ? (
                         <>
-                          <p className="text-sm font-medium text-white">{userName}</p>
-                          <p className="text-[10px] uppercase tracking-wider text-brand-dark-gold">view profile</p>
+                          <p className="text-sm font-medium text-white">
+                            {userName}
+                          </p>
+                          <p className="text-[10px] uppercase tracking-wider text-brand-dark-gold">
+                            view profile
+                          </p>
                         </>
                       ) : (
                         <>
-                          <p className="text-sm font-medium text-brand-pale-gold">sign in</p>
-                          <p className="text-[10px] uppercase tracking-wider text-brand-dark-gold">or create account</p>
+                          <p className="text-sm font-medium text-brand-pale-gold">
+                            sign in
+                          </p>
+                          <p className="text-[10px] uppercase tracking-wider text-brand-dark-gold">
+                            or create account
+                          </p>
                         </>
                       )}
                     </div>
@@ -292,7 +303,10 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                 {menu.length ? (
                   <ul className="flex w-full flex-col">
                     {menu.map((item: Menu) => (
-                      <li className="border-b border-brand-dark-gold/10" key={item.title}>
+                      <li
+                        className="border-b border-brand-dark-gold/10"
+                        key={item.title}
+                      >
                         <Link
                           href={item.path}
                           prefetch={true}
@@ -332,10 +346,24 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     rel="noopener noreferrer"
                     className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
                   >
-                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
+                    <svg
+                      viewBox="0 0 24 24"
+                      fill="none"
+                      className="h-5 w-5"
+                      stroke="currentColor"
+                      strokeWidth={1.5}
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                    >
                       <rect x="2" y="2" width="20" height="20" rx="5" />
                       <circle cx="12" cy="12" r="5" />
-                      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                      <circle
+                        cx="17.5"
+                        cy="6.5"
+                        r="1"
+                        fill="currentColor"
+                        stroke="none"
+                      />
                     </svg>
                     @ATHELES.CO
                   </a>

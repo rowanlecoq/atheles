@@ -64,7 +64,7 @@ export function CarouselScroller({ children }: { children: React.ReactNode }) {
       const dx = e.clientX - dragStartX.current;
       containerRef.current.scrollLeft = scrollStartX.current - dx;
     },
-    [isDragging]
+    [isDragging],
   );
 
   const handleMouseUp = useCallback(() => {
@@ -86,7 +86,7 @@ export function CarouselScroller({ children }: { children: React.ReactNode }) {
       const dx = e.touches[0]!.clientX - dragStartX.current;
       containerRef.current.scrollLeft = scrollStartX.current - dx;
     },
-    [isDragging]
+    [isDragging],
   );
 
   const handleTouchEnd = useCallback(() => {
@@ -103,7 +103,9 @@ export function CarouselScroller({ children }: { children: React.ReactNode }) {
     <div
       ref={containerRef}
       className="overflow-x-auto scrollbar-hide"
-      style={{ cursor: isDragging ? "grabbing" : isHovered ? "grab" : "default" }}
+      style={{
+        cursor: isDragging ? "grabbing" : isHovered ? "grab" : "default",
+      }}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
       onMouseDown={handleMouseDown}
@@ -113,7 +115,11 @@ export function CarouselScroller({ children }: { children: React.ReactNode }) {
       onTouchMove={handleTouchMove}
       onTouchEnd={handleTouchEnd}
     >
-      <ul ref={innerRef} className="flex w-max gap-3 px-4 sm:gap-4" style={{ userSelect: "none" }}>
+      <ul
+        ref={innerRef}
+        className="flex w-max gap-3 px-4 sm:gap-4"
+        style={{ userSelect: "none" }}
+      >
         {children}
       </ul>
     </div>

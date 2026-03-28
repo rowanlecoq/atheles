@@ -65,7 +65,11 @@ export function FadeIn({
           ? { opacity: 1, x: 0, y: 0 }
           : { opacity: 0, x: hiddenX, y: hiddenY }
       }
-      transition={{ duration: transitionDuration, delay, ease: animationEasing }}
+      transition={{
+        duration: transitionDuration,
+        delay,
+        ease: animationEasing,
+      }}
       className={className}
     >
       {children}

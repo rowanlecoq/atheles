@@ -1,6 +1,11 @@
 "use client";
 
-import { FadeIn, GradualBlur, ScrollFloat, SplitText } from "components/animations";
+import {
+  FadeIn,
+  GradualBlur,
+  ScrollFloat,
+  SplitText,
+} from "components/animations";
 import Image from "next/image";
 
 export function BrandStory() {
@@ -18,9 +23,9 @@ export function BrandStory() {
             />
           </ScrollFloat>
           <p className="mb-6 text-sm leading-relaxed text-brand-grey">
-            Atheles draws from the timeless power of Greek mythology &mdash; where
-            gods and athletes were one. Every garment is crafted to embody the
-            strength, discipline, and beauty of the classical ideal.
+            Atheles draws from the timeless power of Greek mythology &mdash;
+            where gods and athletes were one. Every garment is crafted to embody
+            the strength, discipline, and beauty of the classical ideal.
           </p>
           <p className="mb-6 text-sm leading-relaxed text-brand-grey">
             From heavyweight 460 GSM cotton fleece to precision-engineered

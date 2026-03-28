@@ -19,9 +19,7 @@ export function FaqAccordion({ faqs }: { faqs: FaqItem[] }) {
           className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark overflow-hidden"
         >
           <button
-            onClick={() =>
-              setOpenIndex(openIndex === index ? null : index)
-            }
+            onClick={() => setOpenIndex(openIndex === index ? null : index)}
             className="flex w-full items-center justify-between px-6 py-4 text-left transition-colors hover:bg-brand-medium-grey/10"
           >
             <span className="pr-4 text-sm font-medium text-brand-pale-gold">

@@ -20,11 +20,56 @@ type User = {
 };
 
 const TIERS = [
-  { name: "BRONZE", min: 0, max: 5000, barGradient: "from-amber-900 via-amber-700 to-amber-500", titleGradient: "from-amber-500 via-amber-400 to-yellow-300", perks: [] as string[] },
-  { name: "SILVER", min: 5000, max: 15000, barGradient: "from-gray-500 via-gray-400 to-gray-300", titleGradient: "from-gray-300 via-gray-200 to-white", perks: ["10% monthly discount code"] },
-  { name: "GOLD", min: 15000, max: 30000, barGradient: "from-yellow-700 via-yellow-500 to-amber-300", titleGradient: "from-yellow-400 via-yellow-300 to-amber-200", perks: ["early access", "15% monthly discount code", "birthday rewards"] },
-  { name: "PLATINUM", min: 30000, max: 50000, barGradient: "from-cyan-700 via-cyan-400 to-cyan-200", titleGradient: "from-cyan-300 via-cyan-200 to-white", perks: ["early access", "18% monthly discount code", "birthday rewards", "free shipping"] },
-  { name: "CHAMPION", min: 50000, max: Infinity, barGradient: "from-fuchsia-700 via-purple-500 to-amber-400", titleGradient: "from-fuchsia-300 via-purple-300 to-amber-200", perks: ["exclusive access", "20% monthly discount code", "free shipping", "birthday rewards"] },
+  {
+    name: "BRONZE",
+    min: 0,
+    max: 5000,
+    barGradient: "from-amber-900 via-amber-700 to-amber-500",
+    titleGradient: "from-amber-500 via-amber-400 to-yellow-300",
+    perks: [] as string[],
+  },
+  {
+    name: "SILVER",
+    min: 5000,
+    max: 15000,
+    barGradient: "from-gray-500 via-gray-400 to-gray-300",
+    titleGradient: "from-gray-300 via-gray-200 to-white",
+    perks: ["10% monthly discount code"],
+  },
+  {
+    name: "GOLD",
+    min: 15000,
+    max: 30000,
+    barGradient: "from-yellow-700 via-yellow-500 to-amber-300",
+    titleGradient: "from-yellow-400 via-yellow-300 to-amber-200",
+    perks: ["early access", "15% monthly discount code", "birthday rewards"],
+  },
+  {
+    name: "PLATINUM",
+    min: 30000,
+    max: 50000,
+    barGradient: "from-cyan-700 via-cyan-400 to-cyan-200",
+    titleGradient: "from-cyan-300 via-cyan-200 to-white",
+    perks: [
+      "early access",
+      "18% monthly discount code",
+      "birthday rewards",
+      "free shipping",
+    ],
+  },
+  {
+    name: "CHAMPION",
+    min: 50000,
+    max: Infinity,
+    barGradient: "from-fuchsia-700 via-purple-500 to-amber-400",
+    titleGradient: "from-fuchsia-300 via-purple-300 to-amber-200",
+    perks: [
+      "exclusive access",
+      "20% monthly discount code",
+      "free shipping",
+      "birthday rewards",
+    ],
+  },
 ];
 
 function getTier(points: number) {
@@ -192,9 +237,10 @@ export default function ProfileContent() {
           lastName: lastName.trim() || "",
           phone: phone ? phoneToE164(phone) : "",
           acceptsMarketing: newsletter,
-          dob: dobDay && dobMonth && dobYear
-            ? `${dobYear}-${dobMonth.padStart(2, "0")}-${dobDay.padStart(2, "0")}`
-            : undefined,
+          dob:
+            dobDay && dobMonth && dobYear
+              ? `${dobYear}-${dobMonth.padStart(2, "0")}-${dobDay.padStart(2, "0")}`
+              : undefined,
         }),
       });
       const data = await res.json();
@@ -373,8 +419,18 @@ export default function ProfileContent() {
                 POINTS EARNED
               </p>
               {/* Decorative sparkles */}
-              <span className="absolute -left-4 -top-1 animate-pulse text-brand-gold/40" style={{ animationDuration: "2.5s" }}>&#10022;</span>
-              <span className="absolute -right-4 top-2 animate-pulse text-brand-gold/30" style={{ animationDuration: "3s", animationDelay: "0.8s" }}>&#10022;</span>
+              <span
+                className="absolute -left-4 -top-1 animate-pulse text-brand-gold/40"
+                style={{ animationDuration: "2.5s" }}
+              >
+                &#10022;
+              </span>
+              <span
+                className="absolute -right-4 top-2 animate-pulse text-brand-gold/30"
+                style={{ animationDuration: "3s", animationDelay: "0.8s" }}
+              >
+                &#10022;
+              </span>
             </div>
           </div>
 
@@ -392,7 +448,9 @@ export default function ProfileContent() {
                 {nextTier.name}
               </span>
             ) : (
-              <span className="text-[10px] tracking-wider text-brand-pale-gold/50">MAX</span>
+              <span className="text-[10px] tracking-wider text-brand-pale-gold/50">
+                MAX
+              </span>
             )}
           </div>
 
@@ -405,20 +463,49 @@ export default function ProfileContent() {
                 style={{ width: `${Math.max(progressInTier, 3)}%` }}
               >
                 {/* Smooth shimmer */}
-                <div className="absolute inset-0 rounded-full" style={{ animation: "shimmerFlow 3s ease-in-out infinite" }}>
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{ animation: "shimmerFlow 3s ease-in-out infinite" }}
+                >
                   <div
                     className="h-full w-full rounded-full"
                     style={{
-                      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 40%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.12) 60%, transparent 100%)",
+                      background:
+                        "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 40%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.12) 60%, transparent 100%)",
                     }}
                   />
                 </div>
                 {/* Sparkles across the bar */}
-                <span className="absolute left-[12%] top-1 animate-pulse text-[5px] text-white/50" style={{ animationDuration: "2s" }}>&#10022;</span>
-                <span className="absolute left-[30%] top-3 animate-pulse text-[4px] text-white/40" style={{ animationDuration: "2.5s", animationDelay: "0.5s" }}>&#10022;</span>
-                <span className="absolute left-[50%] top-0.5 animate-pulse text-[5px] text-white/50" style={{ animationDuration: "2.2s", animationDelay: "1s" }}>&#10022;</span>
-                <span className="absolute left-[70%] top-2.5 animate-pulse text-[4px] text-white/35" style={{ animationDuration: "2.8s", animationDelay: "1.5s" }}>&#10022;</span>
-                <span className="absolute left-[88%] top-1 animate-pulse text-[5px] text-white/45" style={{ animationDuration: "2.3s", animationDelay: "0.3s" }}>&#10022;</span>
+                <span
+                  className="absolute left-[12%] top-1 animate-pulse text-[5px] text-white/50"
+                  style={{ animationDuration: "2s" }}
+                >
+                  &#10022;
+                </span>
+                <span
+                  className="absolute left-[30%] top-3 animate-pulse text-[4px] text-white/40"
+                  style={{ animationDuration: "2.5s", animationDelay: "0.5s" }}
+                >
+                  &#10022;
+                </span>
+                <span
+                  className="absolute left-[50%] top-0.5 animate-pulse text-[5px] text-white/50"
+                  style={{ animationDuration: "2.2s", animationDelay: "1s" }}
+                >
+                  &#10022;
+                </span>
+                <span
+                  className="absolute left-[70%] top-2.5 animate-pulse text-[4px] text-white/35"
+                  style={{ animationDuration: "2.8s", animationDelay: "1.5s" }}
+                >
+                  &#10022;
+                </span>
+                <span
+                  className="absolute left-[88%] top-1 animate-pulse text-[5px] text-white/45"
+                  style={{ animationDuration: "2.3s", animationDelay: "0.3s" }}
+                >
+                  &#10022;
+                </span>
                 {/* Edge glow */}
                 <div className="absolute right-0 top-0 h-full w-4 rounded-full bg-white/15 blur-sm" />
               </div>
@@ -428,9 +515,18 @@ export default function ProfileContent() {
           {/* Progress text */}
           <div className="mb-5 text-center">
             {nextTier ? (
-              <p className="text-xs text-brand-grey" style={{ textTransform: "none" }}>
-                <span className="text-brand-pale-gold">{(nextTier.min - points).toLocaleString()}</span> points to{" "}
-                <span className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-medium text-transparent`} style={{ textTransform: "uppercase" }}>
+              <p
+                className="text-xs text-brand-grey"
+                style={{ textTransform: "none" }}
+              >
+                <span className="text-brand-pale-gold">
+                  {(nextTier.min - points).toLocaleString()}
+                </span>{" "}
+                points to{" "}
+                <span
+                  className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-medium text-transparent`}
+                  style={{ textTransform: "uppercase" }}
+                >
                   {nextTier.name}
                 </span>
               </p>
@@ -442,13 +538,28 @@ export default function ProfileContent() {
           </div>
 
           {/* Current perks */}
-          <div className="mb-5 rounded-lg border border-brand-dark-gold/20 bg-brand-medium-grey/10 p-4" style={{ textTransform: "none" }}>
-            <p className="mb-2.5 text-[10px] font-medium tracking-[0.15em] text-brand-pale-gold" style={{ textTransform: "uppercase" }}>YOUR PERKS</p>
+          <div
+            className="mb-5 rounded-lg border border-brand-dark-gold/20 bg-brand-medium-grey/10 p-4"
+            style={{ textTransform: "none" }}
+          >
+            <p
+              className="mb-2.5 text-[10px] font-medium tracking-[0.15em] text-brand-pale-gold"
+              style={{ textTransform: "uppercase" }}
+            >
+              YOUR PERKS
+            </p>
             {tier.perks.length > 0 ? (
               <ul className="space-y-2">
                 {tier.perks.map((perk) => (
-                  <li key={perk} className="flex items-center gap-2.5 text-sm text-white">
-                    <span className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] text-transparent`}>&#10022;</span>
+                  <li
+                    key={perk}
+                    className="flex items-center gap-2.5 text-sm text-white"
+                  >
+                    <span
+                      className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] text-transparent`}
+                    >
+                      &#10022;
+                    </span>
                     {perk}
                   </li>
                 ))}
@@ -456,23 +567,42 @@ export default function ProfileContent() {
             ) : (
               <p className="text-sm text-white/70">
                 reach{" "}
-                <span className={`bg-gradient-to-r ${TIERS[1]!.titleGradient} bg-clip-text font-medium text-transparent`} style={{ textTransform: "uppercase" }}>SILVER</span>
-                {" "}to unlock your first perks
+                <span
+                  className={`bg-gradient-to-r ${TIERS[1]!.titleGradient} bg-clip-text font-medium text-transparent`}
+                  style={{ textTransform: "uppercase" }}
+                >
+                  SILVER
+                </span>{" "}
+                to unlock your first perks
               </p>
             )}
             {nextTier && nextTier.perks.length > 0 && (
               <div className="mt-3.5 border-t border-brand-dark-gold/15 pt-3.5">
-                <p className="mb-2 text-[10px] font-medium tracking-[0.15em] text-brand-grey" style={{ textTransform: "uppercase" }}>
+                <p
+                  className="mb-2 text-[10px] font-medium tracking-[0.15em] text-brand-grey"
+                  style={{ textTransform: "uppercase" }}
+                >
                   NEXT AT{" "}
-                  <span className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-transparent`}>{nextTier.name}</span>
+                  <span
+                    className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-transparent`}
+                  >
+                    {nextTier.name}
+                  </span>
                 </p>
                 <ul className="space-y-1.5">
-                  {nextTier.perks.filter((p) => !tier.perks.includes(p)).map((perk) => (
-                    <li key={perk} className="flex items-center gap-2.5 text-sm text-white/50">
-                      <span className="text-[10px] text-brand-dark-gold">&#10022;</span>
-                      {perk}
-                    </li>
-                  ))}
+                  {nextTier.perks
+                    .filter((p) => !tier.perks.includes(p))
+                    .map((perk) => (
+                      <li
+                        key={perk}
+                        className="flex items-center gap-2.5 text-sm text-white/50"
+                      >
+                        <span className="text-[10px] text-brand-dark-gold">
+                          &#10022;
+                        </span>
+                        {perk}
+                      </li>
+                    ))}
                 </ul>
               </div>
             )}
@@ -497,19 +627,29 @@ export default function ProfileContent() {
           </div>
 
           <p className="mt-4 text-center text-[10px] text-brand-grey/50">
-            earn <span className="text-brand-pale-gold">50 points</span> per $1 spent &#183; unlock exclusive tiers & perks
+            earn <span className="text-brand-pale-gold">50 points</span> per $1
+            spent &#183; unlock exclusive tiers & perks
           </p>
         </div>
 
         {/* Animation keyframes */}
         <style jsx>{`
           @keyframes shimmerFlow {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
+            0% {
+              transform: translateX(-100%);
+            }
+            100% {
+              transform: translateX(200%);
+            }
           }
           @keyframes glitter {
-            0%, 100% { opacity: 0; }
-            50% { opacity: 0.7; }
+            0%,
+            100% {
+              opacity: 0;
+            }
+            50% {
+              opacity: 0.7;
+            }
           }
         `}</style>
       </div>
@@ -585,7 +725,9 @@ export default function ProfileContent() {
           <div>
             <label className="mb-1 flex items-baseline gap-1.5 text-[10px] uppercase tracking-wider text-brand-grey">
               last name
-              <span className="normal-case tracking-normal text-brand-grey/40">optional</span>
+              <span className="normal-case tracking-normal text-brand-grey/40">
+                optional
+              </span>
             </label>
             {editing ? (
               <input
@@ -619,40 +761,73 @@ export default function ProfileContent() {
             </label>
             {editing ? (
               <div className="grid grid-cols-3 gap-2">
-                <select value={dobDay} onChange={(e) => setDobDay(e.target.value)}
+                <select
+                  value={dobDay}
+                  onChange={(e) => setDobDay(e.target.value)}
                   className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
-                  aria-label="Day">
+                  aria-label="Day"
+                >
                   <option value="">day</option>
                   {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
-                    <option key={d} value={String(d)}>{d}</option>
+                    <option key={d} value={String(d)}>
+                      {d}
+                    </option>
                   ))}
                 </select>
-                <select value={dobMonth} onChange={(e) => setDobMonth(e.target.value)}
+                <select
+                  value={dobMonth}
+                  onChange={(e) => setDobMonth(e.target.value)}
                   className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
-                  aria-label="Month">
+                  aria-label="Month"
+                >
                   <option value="">month</option>
-                  {["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].map((m, i) => (
-                    <option key={m} value={String(i + 1)}>{m}</option>
+                  {[
+                    "jan",
+                    "feb",
+                    "mar",
+                    "apr",
+                    "may",
+                    "jun",
+                    "jul",
+                    "aug",
+                    "sep",
+                    "oct",
+                    "nov",
+                    "dec",
+                  ].map((m, i) => (
+                    <option key={m} value={String(i + 1)}>
+                      {m}
+                    </option>
                   ))}
                 </select>
-                <select value={dobYear} onChange={(e) => setDobYear(e.target.value)}
+                <select
+                  value={dobYear}
+                  onChange={(e) => setDobYear(e.target.value)}
                   className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
-                  aria-label="Year">
+                  aria-label="Year"
+                >
                   <option value="">year</option>
-                  {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => (
-                    <option key={y} value={String(y)}>{y}</option>
+                  {Array.from(
+                    { length: 100 },
+                    (_, i) => new Date().getFullYear() - 13 - i,
+                  ).map((y) => (
+                    <option key={y} value={String(y)}>
+                      {y}
+                    </option>
                   ))}
                 </select>
               </div>
             ) : (
               <p className="px-3 py-2 text-sm text-white">
-                {user.dob
-                  ? new Date(user.dob + "T00:00:00").toLocaleDateString("en-US", {
-                      day: "numeric",
-                      month: "long",
-                      year: "numeric",
-                    })
-                  : <span className="text-brand-grey/50">not set</span>}
+                {user.dob ? (
+                  new Date(user.dob + "T00:00:00").toLocaleDateString("en-US", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
+                ) : (
+                  <span className="text-brand-grey/50">not set</span>
+                )}
               </p>
             )}
           </div>
@@ -661,7 +836,9 @@ export default function ProfileContent() {
           <div>
             <label className="mb-1 flex items-baseline gap-1.5 text-[10px] uppercase tracking-wider text-brand-grey">
               phone number
-              <span className="normal-case tracking-normal text-brand-grey/40">optional</span>
+              <span className="normal-case tracking-normal text-brand-grey/40">
+                optional
+              </span>
             </label>
             {editing ? (
               <input
@@ -681,7 +858,9 @@ export default function ProfileContent() {
               />
             ) : (
               <p className="px-3 py-2 text-sm text-white">
-                {user.phone ? formatPhoneDisplay(user.phone) : (
+                {user.phone ? (
+                  formatPhoneDisplay(user.phone)
+                ) : (
                   <span className="text-brand-grey/50">not set</span>
                 )}
               </p>

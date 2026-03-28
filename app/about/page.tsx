@@ -52,15 +52,15 @@ export default function AboutPage() {
             <div className="grid gap-8 md:grid-cols-2">
               <div className="space-y-4 text-sm leading-relaxed text-brand-grey">
                 <p>
-                  ATHELES was born from a singular vision: to create athletic wear
-                  that embodies the strength, beauty, and discipline of the ancient
-                  Greek gods. The name itself is derived from the Greek word for
-                  athlete — those who competed not just for victory, but for the
-                  pursuit of human excellence.
+                  ATHELES was born from a singular vision: to create athletic
+                  wear that embodies the strength, beauty, and discipline of the
+                  ancient Greek gods. The name itself is derived from the Greek
+                  word for athlete — those who competed not just for victory,
+                  but for the pursuit of human excellence.
                 </p>
                 <p>
-                  In ancient Greece, athletes were revered as living embodiments of
-                  divine potential. They trained their bodies to mirror the
+                  In ancient Greece, athletes were revered as living embodiments
+                  of divine potential. They trained their bodies to mirror the
                   perfection of the gods depicted in marble and bronze. ATHELES
                   channels this same ethos into every garment we create.
                 </p>
@@ -155,11 +155,11 @@ export default function AboutPage() {
             </div>
             <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8 text-center">
               <p className="mb-6 text-sm leading-relaxed text-brand-grey">
-                Our tagline is not arrogance — it is aspiration. &ldquo;Authentic
-                Superiority&rdquo; means striving for the highest version of
-                yourself, authentically and without compromise. It is the same
-                pursuit that drove Greek athletes to compete naked under the sun,
-                baring everything, hiding nothing.
+                Our tagline is not arrogance — it is aspiration.
+                &ldquo;Authentic Superiority&rdquo; means striving for the
+                highest version of yourself, authentically and without
+                compromise. It is the same pursuit that drove Greek athletes to
+                compete naked under the sun, baring everything, hiding nothing.
               </p>
               <p className="text-xs uppercase tracking-[0.2em] text-brand-gold">
                 Est. 2026 &middot; Designed with divine intent
@@ -179,9 +179,10 @@ export default function AboutPage() {
               <div className="h-px flex-1 bg-brand-dark-gold/20" />
             </div>
             <p className="mb-6 text-sm text-brand-grey">
-              Inspired by ancient Greek temples at dusk — dark stone lit by golden
-              hour light. All color effects in our garments are achieved through
-              fabric dye and pigment only. No metallic, foil, or glossy finishes.
+              Inspired by ancient Greek temples at dusk — dark stone lit by
+              golden hour light. All color effects in our garments are achieved
+              through fabric dye and pigment only. No metallic, foil, or glossy
+              finishes.
             </p>
             <div className="grid grid-cols-3 gap-3 sm:grid-cols-6">
               {[

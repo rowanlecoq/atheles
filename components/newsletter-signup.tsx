@@ -89,9 +89,7 @@ export function NewsletterSignup() {
               </button>
             </form>
           )}
-          {error && (
-            <p className="mt-3 text-xs text-red-400">{error}</p>
-          )}
+          {error && <p className="mt-3 text-xs text-red-400">{error}</p>}
         </div>
       </div>
     </section>

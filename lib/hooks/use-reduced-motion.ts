@@ -13,7 +13,8 @@ export function useReducedMotion() {
     }
 
     const mediaQueryList = window.matchMedia(REDUCED_MOTION_QUERY);
-    const updatePreference = () => setPrefersReducedMotion(mediaQueryList.matches);
+    const updatePreference = () =>
+      setPrefersReducedMotion(mediaQueryList.matches);
 
     updatePreference();
     mediaQueryList.addEventListener("change", updatePreference);

@@ -13,7 +13,7 @@ const adminEndpoint = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
 
 async function shopifyCustomerFetch<T>(
   query: string,
-  variables: Record<string, unknown>
+  variables: Record<string, unknown>,
 ): Promise<T> {
   const res = await fetch(endpoint, {
     method: "POST",
@@ -43,7 +43,7 @@ async function shopifyCustomerFetch<T>(
 
 async function shopifyAdminFetch<T>(
   query: string,
-  variables: Record<string, unknown>
+  variables: Record<string, unknown>,
 ): Promise<T> {
   const res = await fetch(adminEndpoint, {
     method: "POST",
@@ -67,7 +67,7 @@ async function shopifyAdminFetch<T>(
 
 export async function updateCustomerDob(
   customerId: string,
-  dob: string
+  dob: string,
 ): Promise<{ success: boolean; error?: string }> {
   if (!adminEndpoint || !adminToken) {
     return { success: false, error: "admin API not configured" };
@@ -80,7 +80,7 @@ export async function updateCustomerDob(
     `query customer($id: ID!) {
       customer(id: $id) { tags }
     }`,
-    { id: customerId }
+    { id: customerId },
   );
 
   const existingTags = customerData.customer?.tags || [];
@@ -99,7 +99,7 @@ export async function updateCustomerDob(
         userErrors { message }
       }
     }`,
-    { input: { id: customerId, tags: newTags } }
+    { input: { id: customerId, tags: newTags } },
   );
 
   return { success: true };
@@ -111,7 +111,7 @@ export async function createCustomerAccount(
   firstName?: string,
   lastName?: string,
   acceptsMarketing?: boolean,
-  dob?: string
+  dob?: string,
 ): Promise<{ success: boolean; error?: string }> {
   if (!endpoint) return { success: false, error: "store not configured" };
 
@@ -139,7 +139,7 @@ export async function createCustomerAccount(
         acceptsMarketing: acceptsMarketing || false,
         ...(tags.length > 0 ? { tags } : {}),
       },
-    }
+    },
   );
 
   const errors = data.customerCreate.customerUserErrors;
@@ -154,7 +154,7 @@ export async function createCustomerAccount(
 
 export async function authenticateCustomer(
   email: string,
-  password: string
+  password: string,
 ): Promise<{ accessToken: string; expiresAt: string } | null> {
   if (!endpoint) return null;
 
@@ -173,7 +173,7 @@ export async function authenticateCustomer(
         customerUserErrors { code message }
       }
     }`,
-    { input: { email, password } }
+    { input: { email, password } },
   );
 
   return data.customerAccessTokenCreate.customerAccessToken;
@@ -181,7 +181,7 @@ export async function authenticateCustomer(
 
 export async function activateCustomerByUrl(
   activationUrl: string,
-  password: string
+  password: string,
 ): Promise<{ accessToken: string; expiresAt: string } | { error: string }> {
   if (!endpoint) return { error: "store not configured" };
 
@@ -200,7 +200,7 @@ export async function activateCustomerByUrl(
         customerUserErrors { code message }
       }
     }`,
-    { activationUrl, password }
+    { activationUrl, password },
   );
 
   const errors = data.customerActivateByUrl.customerUserErrors;
@@ -223,7 +223,7 @@ export async function updateCustomer(
     lastName?: string | null;
     phone?: string | null;
     acceptsMarketing?: boolean;
-  }
+  },
 ): Promise<{ success: boolean; error?: string }> {
   if (!endpoint) return { success: false, error: "store not configured" };
 
@@ -239,18 +239,21 @@ export async function updateCustomer(
         customerUserErrors { code message }
       }
     }`,
-    { customerAccessToken: accessToken, customer: input }
+    { customerAccessToken: accessToken, customer: input },
   );
 
   const errors = data.customerUpdate.customerUserErrors;
   if (errors.length > 0) {
-    return { success: false, error: errors[0]?.message || "failed to update profile" };
+    return {
+      success: false,
+      error: errors[0]?.message || "failed to update profile",
+    };
   }
   return { success: true };
 }
 
 export async function recoverCustomerPassword(
-  email: string
+  email: string,
 ): Promise<{ success: boolean; error?: string }> {
   if (!endpoint) return { success: false, error: "store not configured" };
 
@@ -264,7 +267,7 @@ export async function recoverCustomerPassword(
         customerUserErrors { code message }
       }
     }`,
-    { email }
+    { email },
   );
 
   // Always return success to avoid leaking whether an email exists
@@ -309,14 +312,17 @@ export async function getCustomerByToken(accessToken: string): Promise<{
         }
       }
     }`,
-    { customerAccessToken: accessToken }
+    { customerAccessToken: accessToken },
   );
 
   if (!data.customer) return null;
 
   const orders = data.customer.orders.edges;
   const totalSpent = orders
-    .reduce((sum, edge) => sum + parseFloat(edge.node.totalPrice.amount || "0"), 0)
+    .reduce(
+      (sum, edge) => sum + parseFloat(edge.node.totalPrice.amount || "0"),
+      0,
+    )
     .toFixed(2);
 
   // Try to fetch customer tags separately for DOB (may not be available on all Storefront API configs)
@@ -328,9 +334,11 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       `query customer($customerAccessToken: String!) {
         customer(customerAccessToken: $customerAccessToken) { tags }
       }`,
-      { customerAccessToken: accessToken }
+      { customerAccessToken: accessToken },
     );
-    const dobTag = (tagsData.customer?.tags || []).find((t) => t.startsWith("dob:"));
+    const dobTag = (tagsData.customer?.tags || []).find((t) =>
+      t.startsWith("dob:"),
+    );
     dob = dobTag ? dobTag.replace("dob:", "") : null;
   } catch {
     // Tags not available — DOB will show as "not set"

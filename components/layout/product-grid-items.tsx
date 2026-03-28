@@ -25,7 +25,11 @@ export default function ProductGridItems({
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
   const hiddenY = prefersReducedMotion ? 0 : isMobileViewport ? 14 : 22;
-  const hiddenScale = prefersReducedMotion ? 1 : isMobileViewport ? 0.985 : 0.97;
+  const hiddenScale = prefersReducedMotion
+    ? 1
+    : isMobileViewport
+      ? 0.985
+      : 0.97;
   const hiddenBlur = prefersReducedMotion
     ? "blur(0px)"
     : isMobileViewport
@@ -76,8 +80,7 @@ export default function ProductGridItems({
                 label={{
                   title: product.title,
                   amount: product.priceRange.maxVariantPrice.amount,
-                  currencyCode:
-                    product.priceRange.maxVariantPrice.currencyCode,
+                  currencyCode: product.priceRange.maxVariantPrice.currencyCode,
                 }}
                 src={product.featuredImage?.url}
                 fill

@@ -84,7 +84,11 @@ export default function CartModal() {
                 <p className="font-heading text-lg font-semibold text-brand-gold">
                   My Cart
                 </p>
-                <button type="button" aria-label="Close cart" onClick={closeCart}>
+                <button
+                  type="button"
+                  aria-label="Close cart"
+                  onClick={closeCart}
+                >
                   <CloseCart />
                 </button>
               </div>

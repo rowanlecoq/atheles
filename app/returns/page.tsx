@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "returns policy",
-  description: "ATHELES returns and exchange policy. Learn about our 30-day return window and process.",
+  description:
+    "ATHELES returns and exchange policy. Learn about our 30-day return window and process.",
 };
 
 export default function ReturnsPage() {
@@ -39,7 +40,8 @@ export default function ReturnsPage() {
               <li>Items must be in original packaging</li>
               <li>Sale items are final sale and cannot be returned</li>
               <li>
-                Undergarments and swimwear cannot be returned for hygiene reasons
+                Undergarments and swimwear cannot be returned for hygiene
+                reasons
               </li>
             </ul>
           </section>
@@ -64,9 +66,7 @@ export default function ReturnsPage() {
                   We will provide you with a return shipping label and
                   instructions
                 </li>
-                <li>
-                  Pack the item(s) securely in the original packaging
-                </li>
+                <li>Pack the item(s) securely in the original packaging</li>
                 <li>Ship the package using the provided label</li>
                 <li>
                   Once we receive and inspect the return, your refund will be

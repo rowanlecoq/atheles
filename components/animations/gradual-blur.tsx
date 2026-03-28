@@ -50,13 +50,22 @@ export function GradualBlur({
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, filter: hiddenBlur, scale: hiddenScale, y: hiddenY }}
+      initial={{
+        opacity: 0,
+        filter: hiddenBlur,
+        scale: hiddenScale,
+        y: hiddenY,
+      }}
       animate={
         isInView
           ? { opacity: 1, filter: "blur(0px)", scale: 1, y: 0 }
           : { opacity: 0, filter: hiddenBlur, scale: hiddenScale, y: hiddenY }
       }
-      transition={{ duration: transitionDuration, delay, ease: animationEasing }}
+      transition={{
+        duration: transitionDuration,
+        delay,
+        ease: animationEasing,
+      }}
       className={className}
     >
       {children}

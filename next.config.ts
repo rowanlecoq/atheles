@@ -6,10 +6,7 @@ export default {
   },
   images: {
     formats: ["image/avif", "image/webp"],
-    localPatterns: [
-      { pathname: "/statues/**" },
-      { pathname: "/*" },
-    ],
+    localPatterns: [{ pathname: "/statues/**" }, { pathname: "/*" }],
     remotePatterns: [
       {
         protocol: "https",

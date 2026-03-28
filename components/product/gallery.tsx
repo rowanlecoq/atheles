@@ -72,7 +72,10 @@ export function Gallery({
             const isActive = index === imageIndex;
 
             return (
-              <li key={image.src} className="h-16 w-16 flex-none sm:h-20 sm:w-20">
+              <li
+                key={image.src}
+                className="h-16 w-16 flex-none sm:h-20 sm:w-20"
+              >
                 <button
                   formAction={() => updateImage(index.toString())}
                   aria-label="Select product image"

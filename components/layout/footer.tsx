@@ -96,7 +96,9 @@ export default async function Footer() {
             <h3 className="mb-4 font-heading text-sm uppercase tracking-wider text-brand-gold">
               Follow Our Socials
             </h3>
-            <p className="mb-4 text-xs text-brand-grey">Follow the brand journey.</p>
+            <p className="mb-4 text-xs text-brand-grey">
+              Follow the brand journey.
+            </p>
             <div className="flex gap-4">
               <a
                 href="https://www.instagram.com/atheles.co/"
@@ -135,10 +137,16 @@ export default async function Footer() {
             &copy; {copyrightDate} ATHELES. All rights reserved.
           </p>
           <div className="flex flex-wrap items-center justify-center gap-4">
-            <Link href="/shipping" className="hover:text-brand-gold transition-colors">
+            <Link
+              href="/shipping"
+              className="hover:text-brand-gold transition-colors"
+            >
               Shipping Policy
             </Link>
-            <Link href="/returns" className="hover:text-brand-gold transition-colors">
+            <Link
+              href="/returns"
+              className="hover:text-brand-gold transition-colors"
+            >
               Returns Policy
             </Link>
           </div>

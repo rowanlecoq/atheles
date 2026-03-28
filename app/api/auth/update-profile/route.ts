@@ -1,4 +1,8 @@
-import { updateCustomer, updateCustomerDob, getCustomerByToken } from "lib/auth/shopify-customer";
+import {
+  updateCustomer,
+  updateCustomerDob,
+  getCustomerByToken,
+} from "lib/auth/shopify-customer";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -12,7 +16,7 @@ export async function POST(request: Request) {
     if (!token) {
       return NextResponse.json(
         { success: false, error: "not authenticated" },
-        { status: 401 }
+        { status: 401 },
       );
     }
 
@@ -48,7 +52,7 @@ export async function POST(request: Request) {
     if (!result.success) {
       return NextResponse.json(
         { success: false, error: result.error },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -78,7 +82,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json(
       { success: false, error: "something went wrong" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

@@ -11,7 +11,9 @@ export function useMobileViewport(breakpoint = mobileUiBaseline.breakpointMd) {
       return;
     }
 
-    const mediaQueryList = window.matchMedia(`(max-width: ${breakpoint - 1}px)`);
+    const mediaQueryList = window.matchMedia(
+      `(max-width: ${breakpoint - 1}px)`,
+    );
     const updateViewport = () => setIsMobileViewport(mediaQueryList.matches);
 
     updateViewport();

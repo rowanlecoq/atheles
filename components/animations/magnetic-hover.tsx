@@ -41,7 +41,10 @@ export function MagneticHover({
   return (
     <motion.div
       className={className}
-      style={{ x: motionDisabled ? 0 : springX, y: motionDisabled ? 0 : springY }}
+      style={{
+        x: motionDisabled ? 0 : springX,
+        y: motionDisabled ? 0 : springY,
+      }}
       onMouseMove={motionDisabled ? undefined : handlePointerMove}
       onMouseLeave={motionDisabled ? undefined : handlePointerLeave}
     >

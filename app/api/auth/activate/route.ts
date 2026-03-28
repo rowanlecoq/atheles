@@ -1,5 +1,8 @@
 import { setAuthCookie } from "lib/auth/set-auth-cookie";
-import { activateCustomerByUrl, getCustomerByToken } from "lib/auth/shopify-customer";
+import {
+  activateCustomerByUrl,
+  getCustomerByToken,
+} from "lib/auth/shopify-customer";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +14,7 @@ export async function POST(request: Request) {
     if (!customerId || !activationToken || !password) {
       return NextResponse.json(
         { success: false, error: "missing required fields" },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -26,7 +29,7 @@ export async function POST(request: Request) {
     if ("error" in result) {
       return NextResponse.json(
         { success: false, error: result.error },
-        { status: 400 }
+        { status: 400 },
       );
     }
 
@@ -50,7 +53,7 @@ export async function POST(request: Request) {
   } catch {
     return NextResponse.json(
       { success: false, error: "something went wrong" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
