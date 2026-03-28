@@ -77,6 +77,11 @@ export default function LoginForm() {
               </div>
             </div>
             {error && <p className="text-xs text-red-400">{error}</p>}
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-xs text-brand-grey hover:text-brand-gold transition-colors underline underline-offset-4">
+                forgot password?
+              </Link>
+            </div>
             <button type="submit" disabled={loading}
               className="w-full rounded bg-brand-gold px-6 py-3 font-heading text-sm uppercase tracking-wider text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50">
               {loading ? "signing in..." : "sign in"}

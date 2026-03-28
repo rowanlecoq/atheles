@@ -8,6 +8,8 @@ export default function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [dob, setDob] = useState("");
+  const [acceptsMarketing, setAcceptsMarketing] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
@@ -23,7 +25,7 @@ export default function RegisterForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ email, password, name, dob: dob || undefined, acceptsMarketing }),
       });
       const data = await res.json();
 
@@ -107,6 +109,18 @@ export default function RegisterForm() {
                 </button>
               </div>
             </div>
+            <div>
+              <label htmlFor="dob" className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold">date of birth</label>
+              <input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)}
+                className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none [color-scheme:dark]" />
+            </div>
+            <label className="flex cursor-pointer items-start gap-3 pt-1">
+              <input type="checkbox" checked={acceptsMarketing} onChange={(e) => setAcceptsMarketing(e.target.checked)}
+                className="mt-0.5 h-4 w-4 rounded border-brand-dark-gold/30 bg-brand-dark accent-brand-gold" />
+              <span className="text-xs leading-relaxed text-brand-grey">
+                sign me up for the atheles club newsletter to receive exclusive drops, birthday rewards, and member perks.
+              </span>
+            </label>
             {error && <p className="text-xs text-red-400">{error}</p>}
             <button type="submit" disabled={loading}
               className="w-full rounded bg-brand-gold px-6 py-3 font-heading text-sm uppercase tracking-wider text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50">

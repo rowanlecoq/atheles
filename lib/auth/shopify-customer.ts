@@ -43,9 +43,14 @@ export async function createCustomerAccount(
   email: string,
   password: string,
   firstName?: string,
-  lastName?: string
+  lastName?: string,
+  acceptsMarketing?: boolean,
+  dob?: string
 ): Promise<{ success: boolean; error?: string }> {
   if (!endpoint) return { success: false, error: "store not configured" };
+
+  const tags: string[] = [];
+  if (dob) tags.push(`dob:${dob}`);
 
   const data = await shopifyCustomerFetch<{
     customerCreate: {
@@ -65,7 +70,8 @@ export async function createCustomerAccount(
         password,
         firstName: firstName || undefined,
         lastName: lastName || undefined,
-        acceptsMarketing: false,
+        acceptsMarketing: acceptsMarketing || false,
+        ...(tags.length > 0 ? { tags } : {}),
       },
     }
   );
@@ -174,6 +180,28 @@ export async function updateCustomer(
   if (errors.length > 0) {
     return { success: false, error: errors[0]?.message || "failed to update profile" };
   }
+  return { success: true };
+}
+
+export async function recoverCustomerPassword(
+  email: string
+): Promise<{ success: boolean; error?: string }> {
+  if (!endpoint) return { success: false, error: "store not configured" };
+
+  await shopifyCustomerFetch<{
+    customerRecover: {
+      customerUserErrors: { code: string; message: string }[];
+    };
+  }>(
+    `mutation customerRecover($email: String!) {
+      customerRecover(email: $email) {
+        customerUserErrors { code message }
+      }
+    }`,
+    { email }
+  );
+
+  // Always return success to avoid leaking whether an email exists
   return { success: true };
 }
 
