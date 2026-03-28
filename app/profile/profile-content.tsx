@@ -414,34 +414,34 @@ export default function ProfileContent() {
           </div>
 
           {/* Current perks */}
-          <div className="mb-5 rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-4">
-            <p className="mb-2 text-[10px] tracking-[0.15em] text-brand-grey">YOUR PERKS</p>
+          <div className="mb-5 rounded-lg border border-brand-dark-gold/20 bg-brand-medium-grey/10 p-4" style={{ textTransform: "none" }}>
+            <p className="mb-2.5 text-[10px] font-medium tracking-[0.15em] text-brand-pale-gold" style={{ textTransform: "uppercase" }}>YOUR PERKS</p>
             {tier.perks.length > 0 ? (
-              <ul className="space-y-1.5">
+              <ul className="space-y-2">
                 {tier.perks.map((perk) => (
-                  <li key={perk} className="flex items-center gap-2 text-xs text-white/80" style={{ textTransform: "none" }}>
-                    <span className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[8px] text-transparent`}>&#10022;</span>
+                  <li key={perk} className="flex items-center gap-2.5 text-sm text-white">
+                    <span className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] text-transparent`}>&#10022;</span>
                     {perk}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-xs text-brand-grey/60" style={{ textTransform: "none" }}>
-                Reach{" "}
-                <span className={`bg-gradient-to-r ${TIERS[1]!.titleGradient} bg-clip-text font-medium text-transparent`}>SILVER</span>
+              <p className="text-sm text-white/70">
+                reach{" "}
+                <span className={`bg-gradient-to-r ${TIERS[1]!.titleGradient} bg-clip-text font-medium text-transparent`} style={{ textTransform: "uppercase" }}>SILVER</span>
                 {" "}to unlock your first perks
               </p>
             )}
             {nextTier && nextTier.perks.length > 0 && (
-              <div className="mt-3 border-t border-brand-dark-gold/10 pt-3">
-                <p className="mb-1.5 text-[10px] tracking-[0.15em] text-brand-grey/50">
+              <div className="mt-3.5 border-t border-brand-dark-gold/15 pt-3.5">
+                <p className="mb-2 text-[10px] font-medium tracking-[0.15em] text-brand-grey" style={{ textTransform: "uppercase" }}>
                   NEXT AT{" "}
                   <span className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-transparent`}>{nextTier.name}</span>
                 </p>
-                <ul className="space-y-1">
+                <ul className="space-y-1.5">
                   {nextTier.perks.filter((p) => !tier.perks.includes(p)).map((perk) => (
-                    <li key={perk} className="flex items-center gap-2 text-xs text-brand-grey/50" style={{ textTransform: "none" }}>
-                      <span className="text-[8px] text-brand-dark-gold">&#10022;</span>
+                    <li key={perk} className="flex items-center gap-2.5 text-sm text-white/50">
+                      <span className="text-[10px] text-brand-dark-gold">&#10022;</span>
                       {perk}
                     </li>
                   ))}
