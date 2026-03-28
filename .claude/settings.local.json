@@ -17,7 +17,8 @@
       "Bash(kill:*)",
       "Bash(npx tsc:*)",
       "Bash(sips:*)",
-      "Bash(md5:*)"
+      "Bash(md5:*)",
+      "mcp__cfabbef5-065b-4497-9947-286d95c9eaed__list_projects"
     ]
   }
 }
