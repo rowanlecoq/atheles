@@ -19,11 +19,11 @@ type User = {
 };
 
 const TIERS = [
-  { name: "BRONZE", min: 0, max: 1000, barGradient: "from-amber-900 via-amber-700 to-amber-500", titleGradient: "from-amber-700 via-amber-500 to-amber-400" },
-  { name: "SILVER", min: 1000, max: 3000, barGradient: "from-gray-500 via-gray-400 to-gray-300", titleGradient: "from-gray-400 via-gray-300 to-white" },
-  { name: "GOLD", min: 3000, max: 5000, barGradient: "from-yellow-700 via-yellow-500 to-amber-300", titleGradient: "from-yellow-600 via-yellow-400 to-amber-200" },
-  { name: "PLATINUM", min: 5000, max: 10000, barGradient: "from-cyan-700 via-cyan-400 to-cyan-200", titleGradient: "from-cyan-500 via-cyan-300 to-white" },
-  { name: "CHAMPION", min: 10000, max: Infinity, barGradient: "from-fuchsia-700 via-purple-500 to-amber-400", titleGradient: "from-fuchsia-400 via-purple-300 to-amber-300" },
+  { name: "BRONZE", min: 0, max: 1000, barGradient: "from-amber-900 via-amber-700 to-amber-500", titleGradient: "from-amber-700 via-amber-500 to-amber-400", perks: [] as string[] },
+  { name: "SILVER", min: 1000, max: 3000, barGradient: "from-gray-500 via-gray-400 to-gray-300", titleGradient: "from-gray-400 via-gray-300 to-white", perks: ["10% monthly discount code"] },
+  { name: "GOLD", min: 3000, max: 5000, barGradient: "from-yellow-700 via-yellow-500 to-amber-300", titleGradient: "from-yellow-600 via-yellow-400 to-amber-200", perks: ["early access", "15% monthly discount code", "birthday rewards"] },
+  { name: "PLATINUM", min: 5000, max: 10000, barGradient: "from-cyan-700 via-cyan-400 to-cyan-200", titleGradient: "from-cyan-500 via-cyan-300 to-white", perks: ["early access", "18% monthly discount code", "birthday rewards", "free shipping"] },
+  { name: "CHAMPION", min: 10000, max: Infinity, barGradient: "from-fuchsia-700 via-purple-500 to-amber-400", titleGradient: "from-fuchsia-400 via-purple-300 to-amber-300", perks: ["exclusive access", "20% monthly discount code", "free shipping", "birthday rewards"] },
 ];
 
 function getTier(points: number) {
@@ -324,14 +324,12 @@ export default function ProfileContent() {
           {/* Header - gradient title + tier name */}
           <div className="mb-5 text-center">
             <p
-              className={`mb-1 bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] tracking-[0.25em] text-transparent`}
-              style={{ textTransform: "uppercase" }}
+              className={`mb-1.5 bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] font-medium tracking-[0.25em] text-transparent`}
             >
               LOYALTY REWARDS
             </p>
             <p
-              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-3xl font-bold tracking-[0.2em] text-transparent`}
-              style={{ fontFamily: "inherit", textTransform: "uppercase" }}
+              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-2xl font-medium tracking-[0.25em] text-transparent`}
             >
               {tier.name}
             </p>
@@ -343,7 +341,7 @@ export default function ProfileContent() {
               <p className="text-center font-heading text-5xl tracking-tight text-brand-gold">
                 {points.toLocaleString()}
               </p>
-              <p className="mt-0.5 text-center text-[10px] uppercase tracking-[0.2em] text-brand-pale-gold/60">
+              <p className="mt-0.5 text-center text-[10px] tracking-[0.2em] text-brand-pale-gold/60">
                 POINTS EARNED
               </p>
             </div>
@@ -352,13 +350,13 @@ export default function ProfileContent() {
           {/* Current tier → Next tier labels */}
           <div className="mb-2 flex items-center justify-between">
             <span
-              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] font-bold tracking-[0.15em] text-transparent`}
+              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] font-medium tracking-[0.15em] text-transparent`}
             >
               {tier.name}
             </span>
             {nextTier ? (
               <span
-                className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-[10px] font-bold tracking-[0.15em] text-transparent`}
+                className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-[10px] font-medium tracking-[0.15em] text-transparent`}
               >
                 {nextTier.name}
               </span>
@@ -367,7 +365,7 @@ export default function ProfileContent() {
             )}
           </div>
 
-          {/* Tier progress bar - current to next only */}
+          {/* Tier progress bar */}
           <div className="mb-3">
             <div className="relative h-6 w-full overflow-hidden rounded-full bg-brand-dark-gold/10 shadow-inner">
               {/* Filled bar */}
@@ -375,14 +373,20 @@ export default function ProfileContent() {
                 className={`relative h-full rounded-full bg-gradient-to-r ${tier.barGradient} transition-all duration-1000 ease-out`}
                 style={{ width: `${Math.max(progressInTier, 3)}%` }}
               >
-                {/* Single smooth shimmer */}
-                <div
-                  className="absolute inset-0 rounded-full"
-                  style={{
-                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.08) 75%, transparent 100%)",
-                    animation: "liquidFlow 4s ease-in-out infinite",
-                  }}
-                />
+                {/* Smooth liquid shimmer */}
+                <div className="absolute inset-0 rounded-full" style={{ animation: "shimmerFlow 3s ease-in-out infinite" }}>
+                  <div
+                    className="h-full w-full rounded-full"
+                    style={{
+                      background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.12) 40%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.12) 60%, transparent 100%)",
+                    }}
+                  />
+                </div>
+                {/* Gentle glitter */}
+                <span className="absolute left-[15%] top-1.5 text-[3px] text-white/0" style={{ animation: "glitter 3s ease-in-out infinite" }}>&#10022;</span>
+                <span className="absolute left-[40%] top-0.5 text-[3px] text-white/0" style={{ animation: "glitter 3s ease-in-out infinite", animationDelay: "1s" }}>&#10022;</span>
+                <span className="absolute left-[65%] top-2.5 text-[3px] text-white/0" style={{ animation: "glitter 3s ease-in-out infinite", animationDelay: "2s" }}>&#10022;</span>
+                <span className="absolute left-[85%] top-1 text-[3px] text-white/0" style={{ animation: "glitter 3s ease-in-out infinite", animationDelay: "0.5s" }}>&#10022;</span>
                 {/* Edge glow */}
                 <div className="absolute right-0 top-0 h-full w-4 rounded-full bg-white/15 blur-sm" />
               </div>
@@ -395,7 +399,7 @@ export default function ProfileContent() {
               <p className="text-xs text-brand-grey">
                 <span className="text-brand-pale-gold">{(nextTier.min - points).toLocaleString()}</span> points to{" "}
                 <span
-                  className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-bold text-transparent`}
+                  className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-medium text-transparent`}
                 >
                   {nextTier.name}
                 </span>
@@ -404,6 +408,40 @@ export default function ProfileContent() {
               <p className="text-xs text-brand-pale-gold">
                 &#10022; MAX TIER ACHIEVED &#10022;
               </p>
+            )}
+          </div>
+
+          {/* Current perks */}
+          <div className="mb-5 rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-4">
+            <p className="mb-2 text-[10px] tracking-[0.15em] text-brand-grey">YOUR PERKS</p>
+            {tier.perks.length > 0 ? (
+              <ul className="space-y-1.5">
+                {tier.perks.map((perk) => (
+                  <li key={perk} className="flex items-center gap-2 text-xs text-brand-pale-gold">
+                    <span className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[8px] text-transparent`}>&#10022;</span>
+                    {perk}
+                  </li>
+                ))}
+              </ul>
+            ) : (
+              <p className="text-xs text-brand-grey/50">
+                reach <span className={`bg-gradient-to-r ${TIERS[1]!.titleGradient} bg-clip-text font-medium text-transparent`}>SILVER</span> to unlock your first perks
+              </p>
+            )}
+            {nextTier && nextTier.perks.length > 0 && (
+              <div className="mt-3 border-t border-brand-dark-gold/10 pt-3">
+                <p className="mb-1.5 text-[10px] tracking-[0.15em] text-brand-grey/50">
+                  NEXT AT <span className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-transparent`}>{nextTier.name}</span>
+                </p>
+                <ul className="space-y-1">
+                  {nextTier.perks.filter((p) => !tier.perks.includes(p)).map((perk) => (
+                    <li key={perk} className="flex items-center gap-2 text-xs text-brand-grey/40">
+                      <span className="text-[8px]">&#10022;</span>
+                      {perk}
+                    </li>
+                  ))}
+                </ul>
+              </div>
             )}
           </div>
 
@@ -432,9 +470,13 @@ export default function ProfileContent() {
 
         {/* Animation keyframes */}
         <style jsx>{`
-          @keyframes liquidFlow {
+          @keyframes shimmerFlow {
             0% { transform: translateX(-100%); }
             100% { transform: translateX(200%); }
+          }
+          @keyframes glitter {
+            0%, 100% { opacity: 0; }
+            50% { opacity: 0.7; }
           }
         `}</style>
       </div>
