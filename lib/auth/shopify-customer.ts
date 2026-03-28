@@ -144,13 +144,50 @@ export async function activateCustomerByUrl(
   return { accessToken: tokenData.accessToken, expiresAt: tokenData.expiresAt };
 }
 
+export async function updateCustomer(
+  accessToken: string,
+  input: {
+    firstName?: string;
+    lastName?: string;
+    phone?: string;
+    acceptsMarketing?: boolean;
+  }
+): Promise<{ success: boolean; error?: string }> {
+  if (!endpoint) return { success: false, error: "store not configured" };
+
+  const data = await shopifyCustomerFetch<{
+    customerUpdate: {
+      customer: { id: string } | null;
+      customerUserErrors: { code: string; message: string }[];
+    };
+  }>(
+    `mutation customerUpdate($customerAccessToken: String!, $customer: CustomerUpdateInput!) {
+      customerUpdate(customerAccessToken: $customerAccessToken, customer: $customer) {
+        customer { id }
+        customerUserErrors { code message }
+      }
+    }`,
+    { customerAccessToken: accessToken, customer: input }
+  );
+
+  const errors = data.customerUpdate.customerUserErrors;
+  if (errors.length > 0) {
+    return { success: false, error: errors[0]?.message || "failed to update profile" };
+  }
+  return { success: true };
+}
+
 export async function getCustomerByToken(accessToken: string): Promise<{
   id: string;
   email: string;
   firstName: string | null;
   lastName: string | null;
   displayName: string;
+  phone: string | null;
+  acceptsMarketing: boolean;
   createdAt: string;
+  numberOfOrders: string;
+  totalSpent: string;
 } | null> {
   if (!endpoint) return null;
 
@@ -161,16 +198,35 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       firstName: string | null;
       lastName: string | null;
       displayName: string;
+      phone: string | null;
+      acceptsMarketing: boolean;
       createdAt: string;
+      orders: { totalCount: string };
+      totalSpent: { amount: string };
     } | null;
   }>(
     `query customer($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {
-        id email firstName lastName displayName createdAt
+        id email firstName lastName displayName phone acceptsMarketing createdAt
+        orders(first: 1) { totalCount }
+        totalSpent { amount }
       }
     }`,
     { customerAccessToken: accessToken }
   );
 
-  return data.customer;
+  if (!data.customer) return null;
+
+  return {
+    id: data.customer.id,
+    email: data.customer.email,
+    firstName: data.customer.firstName,
+    lastName: data.customer.lastName,
+    displayName: data.customer.displayName,
+    phone: data.customer.phone,
+    acceptsMarketing: data.customer.acceptsMarketing,
+    createdAt: data.customer.createdAt,
+    numberOfOrders: data.customer.orders.totalCount,
+    totalSpent: data.customer.totalSpent.amount,
+  };
 }
