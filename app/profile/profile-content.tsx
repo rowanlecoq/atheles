@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import ImageCropModal from "components/image-crop-modal";
 
 type User = {
   id: string;
@@ -37,6 +38,7 @@ export default function ProfileContent() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -79,17 +81,32 @@ export default function ProfileContent() {
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
-    if (file.size > 2 * 1024 * 1024) {
-      setSaveMessage("image must be under 2mb.");
+    if (file.size > 5 * 1024 * 1024) {
+      setSaveMessage("image must be under 5mb.");
       return;
     }
     const reader = new FileReader();
     reader.onload = () => {
-      const dataUrl = reader.result as string;
-      setAvatar(dataUrl);
-      localStorage.setItem(`avatar-${user.id}`, dataUrl);
+      setCropSrc(reader.result as string);
     };
     reader.readAsDataURL(file);
+    // Reset input so the same file can be re-selected
+    e.target.value = "";
+  };
+
+  const handleCropSave = (croppedDataUrl: string) => {
+    if (!user) return;
+    setAvatar(croppedDataUrl);
+    try {
+      localStorage.setItem(`avatar-${user.id}`, croppedDataUrl);
+    } catch {
+      setSaveMessage("photo saved for this session only (storage full).");
+    }
+    setCropSrc(null);
+  };
+
+  const handleCropCancel = () => {
+    setCropSrc(null);
   };
 
   const handleRemoveAvatar = () => {
@@ -168,15 +185,27 @@ export default function ProfileContent() {
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+      {/* Crop Modal */}
+      {cropSrc && (
+        <ImageCropModal
+          imageSrc={cropSrc}
+          onSave={handleCropSave}
+          onCancel={handleCropCancel}
+        />
+      )}
+
       {/* Avatar & Name */}
       <div className="mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
           <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-brand-gold bg-brand-dark-gold/20">
             {avatar ? (
+              // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={avatar}
-                alt="Profile"
-                className="h-full w-full object-cover"
+                alt="Profile photo"
+                width={96}
+                height={96}
+                className="h-full w-full rounded-full object-cover"
               />
             ) : (
               <span className="font-heading text-2xl text-brand-gold">
@@ -207,7 +236,7 @@ export default function ProfileContent() {
           <input
             ref={fileInputRef}
             type="file"
-            accept="image/*"
+            accept="image/png,image/jpeg,image/webp"
             onChange={handleAvatarChange}
             className="hidden"
           />
