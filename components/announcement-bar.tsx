@@ -22,15 +22,23 @@ export function AnnouncementBar() {
   }, []);
 
   return (
-    <div className="relative flex h-8 items-center justify-center overflow-hidden bg-brand-gold">
+    <div className="relative flex h-8 items-center justify-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
+      {/* Subtle decorative lines */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 flex w-24 items-center justify-end pr-4 sm:w-40">
+        <div className="h-px w-full bg-gradient-to-r from-transparent to-brand-dark-gold/30" />
+      </div>
+      <div className="pointer-events-none absolute inset-y-0 right-0 flex w-24 items-center justify-start pl-4 sm:w-40">
+        <div className="h-px w-full bg-gradient-to-l from-transparent to-brand-dark-gold/30" />
+      </div>
+
       <AnimatePresence mode="wait">
         <motion.p
           key={index}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.3, ease: "easeInOut" }}
-          className="text-[11px] font-medium uppercase tracking-[0.15em] text-brand-dark sm:text-xs sm:tracking-[0.2em]"
+          initial={{ opacity: 0, filter: "blur(4px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          exit={{ opacity: 0, filter: "blur(4px)" }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          className="px-8 text-[10px] uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em]"
         >
           {announcements[index]}
         </motion.p>
