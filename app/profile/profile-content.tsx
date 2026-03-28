@@ -321,13 +321,17 @@ export default function ProfileContent() {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/5 via-transparent to-brand-gold/3" />
 
         <div className="relative p-6">
-          {/* Header - gradient tier name */}
+          {/* Header - gradient title + tier name */}
           <div className="mb-5 text-center">
-            <p className="mb-1 text-[10px] uppercase tracking-[0.25em] text-brand-grey">
-              loyalty rewards
+            <p
+              className={`mb-1 bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] tracking-[0.25em] text-transparent`}
+              style={{ textTransform: "uppercase" }}
+            >
+              LOYALTY REWARDS
             </p>
             <p
-              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text font-heading text-3xl tracking-[0.15em] text-transparent`}
+              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-3xl font-bold tracking-[0.2em] text-transparent`}
+              style={{ fontFamily: "inherit", textTransform: "uppercase" }}
             >
               {tier.name}
             </p>
@@ -340,7 +344,7 @@ export default function ProfileContent() {
                 {points.toLocaleString()}
               </p>
               <p className="mt-0.5 text-center text-[10px] uppercase tracking-[0.2em] text-brand-pale-gold/60">
-                points earned
+                POINTS EARNED
               </p>
             </div>
           </div>
@@ -348,13 +352,13 @@ export default function ProfileContent() {
           {/* Current tier → Next tier labels */}
           <div className="mb-2 flex items-center justify-between">
             <span
-              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] font-semibold tracking-[0.15em] text-transparent`}
+              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] font-bold tracking-[0.15em] text-transparent`}
             >
               {tier.name}
             </span>
             {nextTier ? (
               <span
-                className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-[10px] font-semibold tracking-[0.15em] text-transparent`}
+                className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-[10px] font-bold tracking-[0.15em] text-transparent`}
               >
                 {nextTier.name}
               </span>
@@ -371,33 +375,16 @@ export default function ProfileContent() {
                 className={`relative h-full rounded-full bg-gradient-to-r ${tier.barGradient} transition-all duration-1000 ease-out`}
                 style={{ width: `${Math.max(progressInTier, 3)}%` }}
               >
-                {/* Liquid flow layer 1 */}
+                {/* Single smooth shimmer */}
                 <div
-                  className="absolute inset-0 rounded-full opacity-50"
+                  className="absolute inset-0 rounded-full"
                   style={{
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 20%, transparent 40%, rgba(255,255,255,0.1) 60%, transparent 80%, rgba(255,255,255,0.2) 95%, transparent)",
-                    animation: "liquidFlow 3s ease-in-out infinite",
+                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.08) 25%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.08) 75%, transparent 100%)",
+                    animation: "liquidFlow 4s ease-in-out infinite",
                   }}
                 />
-                {/* Liquid flow layer 2 (offset) */}
-                <div
-                  className="absolute inset-0 rounded-full opacity-30"
-                  style={{
-                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25) 30%, transparent 50%, rgba(255,255,255,0.15) 70%, transparent)",
-                    animation: "liquidFlow 4.5s ease-in-out infinite reverse",
-                  }}
-                />
-                {/* Glitter particles */}
-                <div className="absolute inset-0 rounded-full" style={{ animation: "glitterShift 6s linear infinite" }}>
-                  <span className="absolute left-[10%] top-1 text-[4px] text-white/70" style={{ animation: "glitterFade 2s ease-in-out infinite", animationDelay: "0s" }}>&#10022;</span>
-                  <span className="absolute left-[25%] top-3 text-[3px] text-white/50" style={{ animation: "glitterFade 2.5s ease-in-out infinite", animationDelay: "0.4s" }}>&#10022;</span>
-                  <span className="absolute left-[45%] top-0.5 text-[4px] text-white/60" style={{ animation: "glitterFade 1.8s ease-in-out infinite", animationDelay: "0.8s" }}>&#10022;</span>
-                  <span className="absolute left-[60%] top-2.5 text-[3px] text-white/40" style={{ animation: "glitterFade 2.2s ease-in-out infinite", animationDelay: "1.2s" }}>&#10022;</span>
-                  <span className="absolute left-[75%] top-1 text-[4px] text-white/55" style={{ animation: "glitterFade 2.8s ease-in-out infinite", animationDelay: "0.6s" }}>&#10022;</span>
-                  <span className="absolute left-[88%] top-3 text-[3px] text-white/45" style={{ animation: "glitterFade 2s ease-in-out infinite", animationDelay: "1.5s" }}>&#10022;</span>
-                </div>
                 {/* Edge glow */}
-                <div className="absolute right-0 top-0 h-full w-3 rounded-full bg-white/20 blur-sm" />
+                <div className="absolute right-0 top-0 h-full w-4 rounded-full bg-white/15 blur-sm" />
               </div>
             </div>
           </div>
@@ -408,14 +395,14 @@ export default function ProfileContent() {
               <p className="text-xs text-brand-grey">
                 <span className="text-brand-pale-gold">{(nextTier.min - points).toLocaleString()}</span> points to{" "}
                 <span
-                  className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-semibold text-transparent`}
+                  className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-bold text-transparent`}
                 >
                   {nextTier.name}
                 </span>
               </p>
             ) : (
               <p className="text-xs text-brand-pale-gold">
-                &#10022; max tier achieved &#10022;
+                &#10022; MAX TIER ACHIEVED &#10022;
               </p>
             )}
           </div>
@@ -443,20 +430,11 @@ export default function ProfileContent() {
           </p>
         </div>
 
-        {/* Liquid & glitter keyframes */}
+        {/* Animation keyframes */}
         <style jsx>{`
           @keyframes liquidFlow {
-            0% { transform: translateX(-60%); }
-            50% { transform: translateX(60%); }
-            100% { transform: translateX(-60%); }
-          }
-          @keyframes glitterFade {
-            0%, 100% { opacity: 0; transform: scale(0.5); }
-            50% { opacity: 1; transform: scale(1.2); }
-          }
-          @keyframes glitterShift {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(8px); }
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
           }
         `}</style>
       </div>
