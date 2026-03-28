@@ -166,7 +166,7 @@ export function SearchToggle() {
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="search..."
-              className="h-9 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-gold focus:outline-none focus:ring-0"
+              className="h-9 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0"
             />
           </form>
           {/* Desktop dropdown */}
@@ -208,7 +208,7 @@ export function SearchToggle() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="search..."
                 autoFocus
-                className="h-10 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-gold focus:outline-none focus:ring-0"
+                className="h-10 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0"
               />
             </form>
             <button

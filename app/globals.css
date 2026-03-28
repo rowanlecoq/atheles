@@ -67,9 +67,13 @@ body {
 }
 
 a,
-input,
 button {
-  @apply focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-brand-gold focus-visible:ring-offset-2 focus-visible:ring-offset-brand-dark;
+  @apply focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-brand-dark-gold/40 focus-visible:ring-offset-1 focus-visible:ring-offset-brand-dark;
+}
+
+input,
+textarea {
+  @apply focus-visible:outline-hidden focus-visible:ring-0;
 }
 
 @layer utilities {
