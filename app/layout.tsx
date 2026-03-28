@@ -21,11 +21,15 @@ const playfair = Playfair_Display({
 export const metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "atheles - authentic superiority",
-    template: `%s | atheles`,
+    default: "atheles official store 🔱 to ascend",
+    template: `%s | atheles 🔱`,
   },
   description:
     "premium fitness and lifestyle clothing crafted for authentic superiority.",
+  icons: {
+    icon: "/logo-icon.png",
+    apple: "/logo-icon.png",
+  },
   robots: {
     follow: true,
     index: true,
