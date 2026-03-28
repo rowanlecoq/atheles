@@ -1,35 +1,21 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import { useCurrency, type RegionCode } from "components/currency-context";
 import { useCallback, useEffect, useRef, useState } from "react";
 
 const regions = [
-  { code: "US", flag: "🇺🇸", label: "US", language: "EN", currency: "USD" },
-  { code: "CA", flag: "🇨🇦", label: "CA", language: "EN", currency: "CAD" },
-  { code: "GB", flag: "🇬🇧", label: "UK", language: "EN", currency: "GBP" },
-  { code: "AU", flag: "🇦🇺", label: "AU", language: "EN", currency: "AUD" },
-  { code: "EU", flag: "🇪🇺", label: "EU", language: "EN", currency: "EUR" },
+  { code: "US" as RegionCode, flag: "🇺🇸", label: "US", language: "EN", currency: "USD" },
+  { code: "CA" as RegionCode, flag: "🇨🇦", label: "CA", language: "EN", currency: "CAD" },
+  { code: "GB" as RegionCode, flag: "🇬🇧", label: "UK", language: "EN", currency: "GBP" },
+  { code: "AU" as RegionCode, flag: "🇦🇺", label: "AU", language: "EN", currency: "AUD" },
+  { code: "EU" as RegionCode, flag: "🇪🇺", label: "EU", language: "EN", currency: "EUR" },
 ];
 
-const STORAGE_KEY = "atheles-country";
-
-function getStoredCountry(): string {
-  if (typeof window === "undefined") return "US";
-  try {
-    return localStorage.getItem(STORAGE_KEY) || "US";
-  } catch {
-    return "US";
-  }
-}
-
 export function CountrySelector() {
-  const [selected, setSelected] = useState("US");
+  const { region, setRegion } = useCurrency();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
-
-  useEffect(() => {
-    setSelected(getStoredCountry());
-  }, []);
 
   // Close on click outside
   useEffect(() => {
@@ -53,17 +39,12 @@ export function CountrySelector() {
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  const handleSelect = useCallback((code: string) => {
-    setSelected(code);
+  const handleSelect = useCallback((code: RegionCode) => {
+    setRegion(code);
     setOpen(false);
-    try {
-      localStorage.setItem(STORAGE_KEY, code);
-    } catch {
-      // storage unavailable
-    }
-  }, []);
+  }, [setRegion]);
 
-  const current = regions.find((r) => r.code === selected) || regions[0]!;
+  const current = regions.find((r) => r.code === region) || regions[0]!;
 
   return (
     <div ref={ref} className="relative hidden md:block">
@@ -90,21 +71,21 @@ export function CountrySelector() {
             : "pointer-events-none invisible -translate-y-1 opacity-0"
         }`}
       >
-        {regions.map((region) => (
+        {regions.map((r) => (
           <button
-            key={region.code}
+            key={r.code}
             type="button"
-            onClick={() => handleSelect(region.code)}
+            onClick={() => handleSelect(r.code)}
             className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors first:rounded-t-md last:rounded-b-md ${
-              selected === region.code
+              region === r.code
                 ? "bg-brand-dark-gold/10 text-brand-gold"
                 : "text-brand-grey hover:bg-brand-dark-gold/5 hover:text-brand-gold"
             }`}
           >
-            <span className="text-base leading-none">{region.flag}</span>
-            <span className="flex-1 uppercase tracking-wider">{region.label}</span>
+            <span className="text-base leading-none">{r.flag}</span>
+            <span className="flex-1 uppercase tracking-wider">{r.label}</span>
             <span className="text-[10px] tracking-wider text-brand-grey/60">
-              {region.language} / {region.currency}
+              {r.language} / {r.currency}
             </span>
           </button>
         ))}

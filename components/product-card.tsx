@@ -2,6 +2,7 @@
 
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
+import { useCurrency } from "components/currency-context";
 import { DEFAULT_OPTION } from "lib/constants";
 import { useFavorites } from "lib/hooks/use-favorites";
 import Image from "next/image";
@@ -27,6 +28,7 @@ export function ProductCard({
   tags = [],
 }: ProductCardProps) {
   const { isFavorite, toggleFavorite } = useFavorites();
+  const { currency, convert } = useCurrency();
   const liked = isFavorite(handle);
 
   // Get color from first variant title (e.g. "Black / M" → "Black")
@@ -39,9 +41,9 @@ export function ProductCard({
 
   const formattedPrice = new Intl.NumberFormat(undefined, {
     style: "currency",
-    currency: currencyCode,
+    currency,
     currencyDisplay: "narrowSymbol",
-  }).format(parseFloat(price));
+  }).format(parseFloat(convert(price)));
 
   return (
     <div className="group relative">

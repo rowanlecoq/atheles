@@ -1,5 +1,6 @@
 import { CartProvider } from "components/cart/cart-context";
 import { AnnouncementBar } from "components/announcement-bar";
+import { CurrencyProvider } from "components/currency-context";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
@@ -41,18 +42,20 @@ export default async function RootLayout({
   return (
     <html lang="en" className={`dark ${playfair.variable}`} style={{ colorScheme: "dark" }}>
       <body className="bg-brand-dark text-white">
-        <CartProvider cartPromise={cart}>
-          <AnnouncementBar />
-          <ScrollProgress />
-          <KonamiLightning />
-          <Navbar />
-          <main className="w-full overflow-x-hidden">
-            <PageTransition>
-              {children}
-            </PageTransition>
-            <Toaster closeButton />
-          </main>
-        </CartProvider>
+        <CurrencyProvider>
+          <CartProvider cartPromise={cart}>
+            <AnnouncementBar />
+            <ScrollProgress />
+            <KonamiLightning />
+            <Navbar />
+            <main className="w-full overflow-x-hidden">
+              <PageTransition>
+                {children}
+              </PageTransition>
+              <Toaster closeButton />
+            </main>
+          </CartProvider>
+        </CurrencyProvider>
       </body>
     </html>
   );
