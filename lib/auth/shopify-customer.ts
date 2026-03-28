@@ -186,7 +186,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   phone: string | null;
   acceptsMarketing: boolean;
   createdAt: string;
-  numberOfOrders: string;
+  numberOfOrders: number;
   totalSpent: string;
 } | null> {
   if (!endpoint) return null;
@@ -201,21 +201,28 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       phone: string | null;
       acceptsMarketing: boolean;
       createdAt: string;
-      orders: { totalCount: string };
-      totalSpent: { amount: string };
+      orders: {
+        edges: { node: { totalPrice: { amount: string } } }[];
+      };
     } | null;
   }>(
     `query customer($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {
         id email firstName lastName displayName phone acceptsMarketing createdAt
-        orders(first: 1) { totalCount }
-        totalSpent { amount }
+        orders(first: 100) {
+          edges { node { totalPrice { amount } } }
+        }
       }
     }`,
     { customerAccessToken: accessToken }
   );
 
   if (!data.customer) return null;
+
+  const orders = data.customer.orders.edges;
+  const totalSpent = orders
+    .reduce((sum, edge) => sum + parseFloat(edge.node.totalPrice.amount || "0"), 0)
+    .toFixed(2);
 
   return {
     id: data.customer.id,
@@ -226,7 +233,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     phone: data.customer.phone,
     acceptsMarketing: data.customer.acceptsMarketing,
     createdAt: data.customer.createdAt,
-    numberOfOrders: data.customer.orders.totalCount,
-    totalSpent: data.customer.totalSpent.amount,
+    numberOfOrders: orders.length,
+    totalSpent,
   };
 }
