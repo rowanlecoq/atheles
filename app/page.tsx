@@ -4,7 +4,6 @@ import { ThreeItemGrid } from "components/grid/three-items";
 import { Hero } from "components/hero";
 import Footer from "components/layout/footer";
 import { NewsletterSignup } from "components/newsletter-signup";
-import { StatueInterstitial } from "components/statue-interstitial";
 
 export const metadata = {
   description:
@@ -20,7 +19,6 @@ export default function HomePage() {
       <Hero />
       <Carousel />
       <ThreeItemGrid />
-      <StatueInterstitial />
       <NewsletterSignup />
       <GreekQuote />
       <Footer />

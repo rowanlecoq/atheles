@@ -1,6 +1,7 @@
 "use client";
 
 import { FadeIn, GradualBlur, SplitText } from "components/animations";
+import Image from "next/image";
 import { useState } from "react";
 
 export function NewsletterSignup() {
@@ -16,8 +17,16 @@ export function NewsletterSignup() {
   };
 
   return (
-    <section className="border-y border-brand-dark-gold/20 py-20">
-      <div className="mx-auto max-w-2xl px-4 text-center">
+    <section className="relative overflow-hidden border-y border-brand-dark-gold/20 py-20">
+      <Image
+        src="/statues/hadrian-cuirassed.jpg"
+        alt=""
+        fill
+        className="object-cover object-[center_30%] opacity-10 grayscale"
+        sizes="100vw"
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-transparent to-brand-dark/60" />
+      <div className="relative z-10 mx-auto max-w-2xl px-4 text-center">
         {/* Heading */}
         <SplitText
           as="h2"
