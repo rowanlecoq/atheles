@@ -3,7 +3,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Fragment, Suspense, useEffect, useState } from "react";
+import { Fragment, Suspense, useCallback, useEffect, useState } from "react";
 
 import {
   Bars3Icon,
@@ -113,8 +113,54 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const searchParams = useSearchParams();
   const routeKey = `${pathname}?${searchParams?.toString() ?? ""}`;
   const [isOpen, setIsOpen] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [avatar, setAvatar] = useState<string | null>(null);
+  const [userId, setUserId] = useState<string | null>(null);
+
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
+
+  const refreshSession = useCallback(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user) {
+          setLoggedIn(true);
+          setUserName(data.user.name || data.user.firstName || "");
+          setUserId(data.user.id);
+          try {
+            setAvatar(localStorage.getItem(`avatar-${data.user.id}`));
+          } catch {
+            setAvatar(null);
+          }
+        } else {
+          setLoggedIn(false);
+          setUserName("");
+          setAvatar(null);
+          setUserId(null);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
+  useEffect(() => {
+    refreshSession();
+  }, [pathname, refreshSession]);
+
+  useEffect(() => {
+    const handleAvatarChange = () => {
+      if (userId) {
+        try {
+          setAvatar(localStorage.getItem(`avatar-${userId}`));
+        } catch {
+          setAvatar(null);
+        }
+      }
+    };
+    window.addEventListener("avatar-changed", handleAvatarChange);
+    return () => window.removeEventListener("avatar-changed", handleAvatarChange);
+  }, [userId]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -131,6 +177,15 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
       setIsOpen(false);
     }
   }, [routeKey]);
+
+  const initials = userName
+    ? userName
+        .split(" ")
+        .map((w: string) => w[0])
+        .join("")
+        .toUpperCase()
+        .slice(0, 2)
+    : null;
 
   return (
     <>
@@ -178,6 +233,55 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   </button>
                 </div>
 
+                {/* Account, Favorites at top */}
+                <div className="mb-5 border-b border-brand-dark-gold/20 pb-4">
+                  <Link
+                    href={loggedIn ? "/profile" : "/login"}
+                    onClick={closeMobileMenu}
+                    className="tap-target mb-1 flex min-h-[48px] items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-dark-gold/10"
+                  >
+                    {avatar ? (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img
+                        src={avatar}
+                        alt="Profile"
+                        width={36}
+                        height={36}
+                        className="h-9 w-9 rounded-full border border-brand-gold object-cover"
+                      />
+                    ) : loggedIn && initials ? (
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-gold bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
+                        {initials}
+                      </span>
+                    ) : (
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark-gold/10">
+                        <UserIcon className="h-5 w-5 text-brand-grey" />
+                      </span>
+                    )}
+                    <div>
+                      {loggedIn ? (
+                        <>
+                          <p className="text-sm font-medium text-white">{userName}</p>
+                          <p className="text-[10px] uppercase tracking-wider text-brand-dark-gold">view profile</p>
+                        </>
+                      ) : (
+                        <>
+                          <p className="text-sm font-medium text-brand-pale-gold">sign in</p>
+                          <p className="text-[10px] uppercase tracking-wider text-brand-dark-gold">or create account</p>
+                        </>
+                      )}
+                    </div>
+                  </Link>
+                  <Link
+                    href="/favorites"
+                    onClick={closeMobileMenu}
+                    className="tap-target flex min-h-[44px] items-center gap-3 rounded-lg px-2 py-2 text-sm uppercase tracking-wider text-brand-grey transition-colors hover:bg-brand-dark-gold/10 hover:text-brand-gold"
+                  >
+                    <HeartIcon className="h-5 w-5" />
+                    Favorites
+                  </Link>
+                </div>
+
                 <div className="mb-6 w-full">
                   <Suspense fallback={<SearchSkeleton />}>
                     <Search />
@@ -219,25 +323,9 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                 </div>
               </div>
 
-              {/* Account & Favorites + Social at bottom */}
+              {/* Social at bottom */}
               <div className="mt-auto px-4 pb-4">
-                <div className="flex flex-col gap-0 border-t border-brand-dark-gold/20 pt-3">
-                  <Link
-                    href="/favorites"
-                    onClick={closeMobileMenu}
-                    className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm uppercase tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
-                  >
-                    <HeartIcon className="h-5 w-5" />
-                    Favorites
-                  </Link>
-                  <Link
-                    href="/login"
-                    onClick={closeMobileMenu}
-                    className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm uppercase tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
-                  >
-                    <UserIcon className="h-5 w-5" />
-                    Account
-                  </Link>
+                <div className="border-t border-brand-dark-gold/20 pt-3">
                   <a
                     href="https://www.instagram.com/atheles.co/"
                     target="_blank"
