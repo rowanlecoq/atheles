@@ -19,11 +19,11 @@ type User = {
 };
 
 const TIERS = [
-  { name: "BRONZE", min: 0, max: 1000, barGradient: "from-amber-900 via-amber-700 to-amber-500", titleGradient: "from-amber-500 via-amber-400 to-yellow-300", perks: [] as string[] },
-  { name: "SILVER", min: 1000, max: 3000, barGradient: "from-gray-500 via-gray-400 to-gray-300", titleGradient: "from-gray-300 via-gray-200 to-white", perks: ["10% monthly discount code"] },
-  { name: "GOLD", min: 3000, max: 5000, barGradient: "from-yellow-700 via-yellow-500 to-amber-300", titleGradient: "from-yellow-400 via-yellow-300 to-amber-200", perks: ["early access", "15% monthly discount code", "birthday rewards"] },
-  { name: "PLATINUM", min: 5000, max: 10000, barGradient: "from-cyan-700 via-cyan-400 to-cyan-200", titleGradient: "from-cyan-300 via-cyan-200 to-white", perks: ["early access", "18% monthly discount code", "birthday rewards", "free shipping"] },
-  { name: "CHAMPION", min: 10000, max: Infinity, barGradient: "from-fuchsia-700 via-purple-500 to-amber-400", titleGradient: "from-fuchsia-300 via-purple-300 to-amber-200", perks: ["exclusive access", "20% monthly discount code", "free shipping", "birthday rewards"] },
+  { name: "BRONZE", min: 0, max: 5000, barGradient: "from-amber-900 via-amber-700 to-amber-500", titleGradient: "from-amber-500 via-amber-400 to-yellow-300", perks: [] as string[] },
+  { name: "SILVER", min: 5000, max: 15000, barGradient: "from-gray-500 via-gray-400 to-gray-300", titleGradient: "from-gray-300 via-gray-200 to-white", perks: ["10% monthly discount code"] },
+  { name: "GOLD", min: 15000, max: 30000, barGradient: "from-yellow-700 via-yellow-500 to-amber-300", titleGradient: "from-yellow-400 via-yellow-300 to-amber-200", perks: ["early access", "15% monthly discount code", "birthday rewards"] },
+  { name: "PLATINUM", min: 30000, max: 50000, barGradient: "from-cyan-700 via-cyan-400 to-cyan-200", titleGradient: "from-cyan-300 via-cyan-200 to-white", perks: ["early access", "18% monthly discount code", "birthday rewards", "free shipping"] },
+  { name: "CHAMPION", min: 50000, max: Infinity, barGradient: "from-fuchsia-700 via-purple-500 to-amber-400", titleGradient: "from-fuchsia-300 via-purple-300 to-amber-200", perks: ["exclusive access", "20% monthly discount code", "free shipping", "birthday rewards"] },
 ];
 
 function getTier(points: number) {
