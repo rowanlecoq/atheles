@@ -19,11 +19,11 @@ type User = {
 };
 
 const TIERS = [
-  { name: "BRONZE", min: 0, max: 1000, color: "text-amber-600", gradient: "from-amber-900 to-amber-600" },
-  { name: "SILVER", min: 1000, max: 3000, color: "text-gray-300", gradient: "from-gray-500 to-gray-300" },
-  { name: "GOLD", min: 3000, max: 5000, color: "text-yellow-400", gradient: "from-yellow-700 via-yellow-400 to-amber-300" },
-  { name: "PLATINUM", min: 5000, max: 10000, color: "text-cyan-200", gradient: "from-cyan-600 via-cyan-300 to-white" },
-  { name: "CHAMPION", min: 10000, max: Infinity, color: "text-fuchsia-300", gradient: "from-fuchsia-700 via-fuchsia-400 to-amber-300" },
+  { name: "BRONZE", min: 0, max: 1000, barGradient: "from-amber-900 via-amber-700 to-amber-500", titleGradient: "from-amber-700 via-amber-500 to-amber-400" },
+  { name: "SILVER", min: 1000, max: 3000, barGradient: "from-gray-500 via-gray-400 to-gray-300", titleGradient: "from-gray-400 via-gray-300 to-white" },
+  { name: "GOLD", min: 3000, max: 5000, barGradient: "from-yellow-700 via-yellow-500 to-amber-300", titleGradient: "from-yellow-600 via-yellow-400 to-amber-200" },
+  { name: "PLATINUM", min: 5000, max: 10000, barGradient: "from-cyan-700 via-cyan-400 to-cyan-200", titleGradient: "from-cyan-500 via-cyan-300 to-white" },
+  { name: "CHAMPION", min: 10000, max: Infinity, barGradient: "from-fuchsia-700 via-purple-500 to-amber-400", titleGradient: "from-fuchsia-400 via-purple-300 to-amber-300" },
 ];
 
 function getTier(points: number) {
@@ -321,12 +321,14 @@ export default function ProfileContent() {
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/5 via-transparent to-brand-gold/3" />
 
         <div className="relative p-6">
-          {/* Header */}
+          {/* Header - gradient tier name */}
           <div className="mb-5 text-center">
             <p className="mb-1 text-[10px] uppercase tracking-[0.25em] text-brand-grey">
               loyalty rewards
             </p>
-            <p className={`font-heading text-3xl tracking-wider ${tier.color}`}>
+            <p
+              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text font-heading text-3xl tracking-[0.15em] text-transparent`}
+            >
               {tier.name}
             </p>
           </div>
@@ -340,54 +342,64 @@ export default function ProfileContent() {
               <p className="mt-0.5 text-center text-[10px] uppercase tracking-[0.2em] text-brand-pale-gold/60">
                 points earned
               </p>
-              {/* Decorative sparkles around points */}
-              <span className="absolute -left-4 -top-1 animate-pulse text-brand-gold/40" style={{ animationDelay: "0s", animationDuration: "2s" }}>&#10022;</span>
-              <span className="absolute -right-4 top-1 animate-pulse text-brand-gold/30" style={{ animationDelay: "0.7s", animationDuration: "2.5s" }}>&#10022;</span>
-              <span className="absolute -right-2 -top-2 animate-pulse text-[8px] text-brand-gold/20" style={{ animationDelay: "1.3s", animationDuration: "1.8s" }}>&#10022;</span>
             </div>
           </div>
 
-          {/* Tier progress bar */}
-          <div className="mb-1">
-            <div className="relative h-5 w-full overflow-hidden rounded-full bg-brand-dark-gold/15">
-              {/* Filled bar with tier gradient */}
-              <div
-                className={`relative h-full rounded-full bg-gradient-to-r ${tier.gradient} transition-all duration-1000 ease-out`}
-                style={{ width: `${Math.max(progressInTier, 2)}%` }}
+          {/* Current tier → Next tier labels */}
+          <div className="mb-2 flex items-center justify-between">
+            <span
+              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] font-semibold tracking-[0.15em] text-transparent`}
+            >
+              {tier.name}
+            </span>
+            {nextTier ? (
+              <span
+                className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-[10px] font-semibold tracking-[0.15em] text-transparent`}
               >
-                {/* Shimmer/sparkle overlay */}
+                {nextTier.name}
+              </span>
+            ) : (
+              <span className="text-[10px] tracking-wider text-brand-pale-gold/50">MAX</span>
+            )}
+          </div>
+
+          {/* Tier progress bar - current to next only */}
+          <div className="mb-3">
+            <div className="relative h-6 w-full overflow-hidden rounded-full bg-brand-dark-gold/10 shadow-inner">
+              {/* Filled bar */}
+              <div
+                className={`relative h-full rounded-full bg-gradient-to-r ${tier.barGradient} transition-all duration-1000 ease-out`}
+                style={{ width: `${Math.max(progressInTier, 3)}%` }}
+              >
+                {/* Liquid flow layer 1 */}
                 <div
-                  className="absolute inset-0 rounded-full"
+                  className="absolute inset-0 rounded-full opacity-50"
                   style={{
-                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)",
-                    animation: "shimmer 2s ease-in-out infinite",
+                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.15) 20%, transparent 40%, rgba(255,255,255,0.1) 60%, transparent 80%, rgba(255,255,255,0.2) 95%, transparent)",
+                    animation: "liquidFlow 3s ease-in-out infinite",
                   }}
                 />
-                {/* Sparkle particles along the bar */}
-                <span className="absolute right-1 top-0.5 animate-ping text-[7px] text-white/60" style={{ animationDuration: "1.5s" }}>&#10022;</span>
-                <span className="absolute right-4 top-1 animate-ping text-[6px] text-white/40" style={{ animationDuration: "2s", animationDelay: "0.5s" }}>&#10022;</span>
-                <span className="absolute right-7 top-0 animate-ping text-[5px] text-white/30" style={{ animationDuration: "2.5s", animationDelay: "1s" }}>&#10022;</span>
-                <span className="absolute right-10 top-1.5 animate-ping text-[5px] text-white/20" style={{ animationDuration: "3s", animationDelay: "1.5s" }}>&#10022;</span>
+                {/* Liquid flow layer 2 (offset) */}
+                <div
+                  className="absolute inset-0 rounded-full opacity-30"
+                  style={{
+                    background: "linear-gradient(90deg, transparent, rgba(255,255,255,0.25) 30%, transparent 50%, rgba(255,255,255,0.15) 70%, transparent)",
+                    animation: "liquidFlow 4.5s ease-in-out infinite reverse",
+                  }}
+                />
+                {/* Glitter particles */}
+                <div className="absolute inset-0 rounded-full" style={{ animation: "glitterShift 6s linear infinite" }}>
+                  <span className="absolute left-[10%] top-1 text-[4px] text-white/70" style={{ animation: "glitterFade 2s ease-in-out infinite", animationDelay: "0s" }}>&#10022;</span>
+                  <span className="absolute left-[25%] top-3 text-[3px] text-white/50" style={{ animation: "glitterFade 2.5s ease-in-out infinite", animationDelay: "0.4s" }}>&#10022;</span>
+                  <span className="absolute left-[45%] top-0.5 text-[4px] text-white/60" style={{ animation: "glitterFade 1.8s ease-in-out infinite", animationDelay: "0.8s" }}>&#10022;</span>
+                  <span className="absolute left-[60%] top-2.5 text-[3px] text-white/40" style={{ animation: "glitterFade 2.2s ease-in-out infinite", animationDelay: "1.2s" }}>&#10022;</span>
+                  <span className="absolute left-[75%] top-1 text-[4px] text-white/55" style={{ animation: "glitterFade 2.8s ease-in-out infinite", animationDelay: "0.6s" }}>&#10022;</span>
+                  <span className="absolute left-[88%] top-3 text-[3px] text-white/45" style={{ animation: "glitterFade 2s ease-in-out infinite", animationDelay: "1.5s" }}>&#10022;</span>
+                </div>
+                {/* Edge glow */}
+                <div className="absolute right-0 top-0 h-full w-3 rounded-full bg-white/20 blur-sm" />
               </div>
             </div>
-          </div>
-
-          {/* Tier milestone markers */}
-          <div className="relative mb-5 flex justify-between px-0.5">
-            {TIERS.map((t, i) => {
-              const reached = points >= t.min;
-              return (
-                <div key={t.name} className="flex flex-col items-center" style={{ width: i === 0 || i === TIERS.length - 1 ? "auto" : undefined }}>
-                  <div className={`mb-0.5 h-1.5 w-1.5 rounded-full ${reached ? "bg-brand-gold" : "bg-brand-dark-gold/30"}`} />
-                  <span className={`text-[8px] font-medium tracking-wider ${reached ? t.color : "text-brand-grey/40"}`}>
-                    {t.name}
-                  </span>
-                  <span className={`text-[7px] ${reached ? "text-brand-grey" : "text-brand-grey/30"}`}>
-                    {t.min === 0 ? "0" : `${(t.min / 1000).toFixed(0)}K`}
-                  </span>
-                </div>
-              );
-            })}
           </div>
 
           {/* Progress text */}
@@ -395,7 +407,11 @@ export default function ProfileContent() {
             {nextTier ? (
               <p className="text-xs text-brand-grey">
                 <span className="text-brand-pale-gold">{(nextTier.min - points).toLocaleString()}</span> points to{" "}
-                <span className={`font-medium ${nextTier.color}`}>{nextTier.name}</span>
+                <span
+                  className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-semibold text-transparent`}
+                >
+                  {nextTier.name}
+                </span>
               </p>
             ) : (
               <p className="text-xs text-brand-pale-gold">
@@ -427,11 +443,20 @@ export default function ProfileContent() {
           </p>
         </div>
 
-        {/* Shimmer keyframes */}
+        {/* Liquid & glitter keyframes */}
         <style jsx>{`
-          @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(200%); }
+          @keyframes liquidFlow {
+            0% { transform: translateX(-60%); }
+            50% { transform: translateX(60%); }
+            100% { transform: translateX(-60%); }
+          }
+          @keyframes glitterFade {
+            0%, 100% { opacity: 0; transform: scale(0.5); }
+            50% { opacity: 1; transform: scale(1.2); }
+          }
+          @keyframes glitterShift {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(8px); }
           }
         `}</style>
       </div>
