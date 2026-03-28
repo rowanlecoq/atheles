@@ -1,0 +1,53 @@
+import { createCustomerAccount, authenticateCustomer, getCustomerByToken } from "lib/auth/shopify-customer";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+
+export async function POST(request: Request) {
+  try {
+    const { email, password, name } = await request.json();
+
+    if (!email || !password) {
+      return NextResponse.json({ success: false, error: "email and password are required" }, { status: 400 });
+    }
+    if (password.length < 5) {
+      return NextResponse.json({ success: false, error: "password must be at least 5 characters" }, { status: 400 });
+    }
+
+    const firstName = name?.split(" ")[0] || undefined;
+    const lastName = name?.split(" ").slice(1).join(" ") || undefined;
+
+    const result = await createCustomerAccount(email, password, firstName, lastName);
+    if (!result.success) {
+      return NextResponse.json({ success: false, error: result.error }, { status: 400 });
+    }
+
+    // Auto sign in after registration
+    const tokenResult = await authenticateCustomer(email, password);
+    if (tokenResult) {
+      const customer = await getCustomerByToken(tokenResult.accessToken);
+      const cookieStore = await cookies();
+      cookieStore.set("atheles-auth-token", tokenResult.accessToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 60 * 60 * 24 * 30, // 30 days
+        path: "/",
+      });
+      return NextResponse.json({
+        success: true,
+        user: customer ? {
+          id: customer.id,
+          email: customer.email,
+          name: customer.displayName || customer.firstName || email.split("@")[0],
+          createdAt: customer.createdAt,
+        } : null,
+      });
+    }
+
+    return NextResponse.json({ success: true, user: null });
+  } catch {
+    return NextResponse.json({ success: false, error: "something went wrong" }, { status: 500 });
+  }
+}
