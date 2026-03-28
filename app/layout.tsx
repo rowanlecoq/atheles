@@ -27,8 +27,8 @@ export const metadata = {
   description:
     "premium fitness and lifestyle clothing crafted for authentic superiority.",
   icons: {
-    icon: "/logo-icon.png",
-    apple: "/logo-icon.png",
+    icon: "/download.jpeg",
+    apple: "/download.jpeg",
   },
   robots: {
     follow: true,
