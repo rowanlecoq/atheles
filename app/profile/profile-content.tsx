@@ -19,10 +19,10 @@ type User = {
 };
 
 const TIERS = [
-  { name: "bronze", min: 0, max: 500, color: "text-amber-600" },
-  { name: "silver", min: 500, max: 1500, color: "text-gray-300" },
-  { name: "gold", min: 1500, max: 3000, color: "text-yellow-400" },
-  { name: "platinum", min: 3000, max: Infinity, color: "text-cyan-200" },
+  { name: "bronze", min: 0, max: 25000, color: "text-amber-600", gradient: "from-amber-900 to-amber-600" },
+  { name: "silver", min: 25000, max: 75000, color: "text-gray-300", gradient: "from-gray-500 to-gray-300" },
+  { name: "gold", min: 75000, max: 150000, color: "text-yellow-400", gradient: "from-yellow-700 via-yellow-400 to-amber-300" },
+  { name: "platinum", min: 150000, max: Infinity, color: "text-cyan-200", gradient: "from-cyan-600 via-cyan-300 to-white" },
 ];
 
 function getTier(points: number) {
@@ -228,7 +228,8 @@ export default function ProfileContent() {
     year: "numeric",
   });
 
-  const points = Math.floor(parseFloat(user.totalSpent || "0"));
+  const totalSpentNum = parseFloat(user.totalSpent || "0");
+  const points = Math.floor(totalSpentNum * 50);
   const orders = parseInt(user.numberOfOrders || "0", 10);
   const tier = getTier(points);
   const nextTier = getNextTier(points);
@@ -314,67 +315,121 @@ export default function ProfileContent() {
       </div>
 
       {/* Points & Tier Progress */}
-      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
-        <div className="mb-3 flex items-center justify-between">
-          <div>
-            <p className="text-xs uppercase tracking-wider text-brand-grey">
-              loyalty tier
+      <div className="relative mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
+        {/* Background glow */}
+        <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/5 via-transparent to-brand-gold/3" />
+
+        <div className="relative p-6">
+          {/* Header */}
+          <div className="mb-5 text-center">
+            <p className="mb-1 text-[10px] uppercase tracking-[0.25em] text-brand-grey">
+              loyalty rewards
             </p>
-            <p className={`font-heading text-lg capitalize ${tier.color}`}>
+            <p className={`font-heading text-3xl capitalize ${tier.color}`}>
               {tier.name}
             </p>
           </div>
-          <div className="text-right">
-            <p className="font-heading text-2xl text-brand-gold">{points}</p>
-            <p className="text-[10px] uppercase tracking-wider text-brand-grey">
-              points earned
-            </p>
-          </div>
-        </div>
 
-        {/* Progress bar */}
-        <div className="mb-2">
-          <div className="h-2 w-full overflow-hidden rounded-full bg-brand-dark-gold/20">
-            <div
-              className="h-full rounded-full bg-gradient-to-r from-brand-dark-gold to-brand-gold transition-all duration-700"
-              style={{ width: `${progressInTier}%` }}
-            />
+          {/* Points display */}
+          <div className="mb-6 flex justify-center">
+            <div className="relative">
+              <p className="text-center font-heading text-5xl tracking-tight text-brand-gold">
+                {points.toLocaleString()}
+              </p>
+              <p className="mt-0.5 text-center text-[10px] uppercase tracking-[0.2em] text-brand-pale-gold/60">
+                points earned
+              </p>
+              {/* Decorative sparkles around points */}
+              <span className="absolute -left-4 -top-1 animate-pulse text-brand-gold/40" style={{ animationDelay: "0s", animationDuration: "2s" }}>&#10022;</span>
+              <span className="absolute -right-4 top-1 animate-pulse text-brand-gold/30" style={{ animationDelay: "0.7s", animationDuration: "2.5s" }}>&#10022;</span>
+              <span className="absolute -right-2 -top-2 animate-pulse text-[8px] text-brand-gold/20" style={{ animationDelay: "1.3s", animationDuration: "1.8s" }}>&#10022;</span>
+            </div>
           </div>
-        </div>
-        <div className="flex justify-between text-[10px] uppercase tracking-wider text-brand-grey">
-          <span className={tier.color}>{tier.name}</span>
-          {nextTier ? (
-            <span>
-              {nextTier.min - points} pts to{" "}
-              <span className={nextTier.color}>{nextTier.name}</span>
+
+          {/* Tier progress bar */}
+          <div className="mb-2">
+            <div className="relative h-3 w-full overflow-hidden rounded-full bg-brand-dark-gold/15">
+              {/* Filled bar with tier gradient */}
+              <div
+                className={`relative h-full rounded-full bg-gradient-to-r ${tier.gradient} transition-all duration-1000 ease-out`}
+                style={{ width: `${Math.max(progressInTier, 2)}%` }}
+              >
+                {/* Shimmer/sparkle overlay */}
+                <div
+                  className="absolute inset-0 rounded-full"
+                  style={{
+                    background: "linear-gradient(90deg, transparent 0%, rgba(255,255,255,0.3) 50%, transparent 100%)",
+                    animation: "shimmer 2s ease-in-out infinite",
+                  }}
+                />
+                {/* Sparkle particles along the bar */}
+                <span className="absolute right-1 top-0 animate-ping text-[6px] text-white/60" style={{ animationDuration: "1.5s" }}>&#10022;</span>
+                <span className="absolute right-3 top-0.5 animate-ping text-[5px] text-white/40" style={{ animationDuration: "2s", animationDelay: "0.5s" }}>&#10022;</span>
+                <span className="absolute right-6 -top-0.5 animate-ping text-[4px] text-white/30" style={{ animationDuration: "2.5s", animationDelay: "1s" }}>&#10022;</span>
+              </div>
+
+              {/* Tier markers */}
+              {TIERS.slice(1).map((t) =>
+                t.max !== Infinity && tier.max !== Infinity ? (
+                  <div
+                    key={t.name}
+                    className="absolute top-0 h-full w-px bg-brand-grey/20"
+                    style={{
+                      left: `${((t.min - tier.min) / (tier.max - tier.min)) * 100}%`,
+                    }}
+                  />
+                ) : null
+              )}
+            </div>
+          </div>
+
+          {/* Tier labels under bar */}
+          <div className="mb-5 flex items-center justify-between">
+            <span className={`text-[10px] font-medium uppercase tracking-wider ${tier.color}`}>
+              {tier.name}
             </span>
-          ) : (
-            <span>max tier reached</span>
-          )}
+            {nextTier ? (
+              <span className="text-[10px] tracking-wider text-brand-grey">
+                <span className="text-brand-pale-gold">{(nextTier.min - points).toLocaleString()}</span> pts to{" "}
+                <span className={`font-medium uppercase ${nextTier.color}`}>{nextTier.name}</span>
+              </span>
+            ) : (
+              <span className="text-[10px] uppercase tracking-wider text-brand-pale-gold">
+                &#10022; max tier achieved &#10022;
+              </span>
+            )}
+          </div>
+
+          {/* Stats */}
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center">
+              <p className="font-heading text-xl text-brand-gold">{orders}</p>
+              <p className="text-[10px] uppercase tracking-wider text-brand-grey">
+                orders
+              </p>
+            </div>
+            <div className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center">
+              <p className="font-heading text-xl text-brand-gold">
+                ${totalSpentNum.toFixed(0)}
+              </p>
+              <p className="text-[10px] uppercase tracking-wider text-brand-grey">
+                total spent
+              </p>
+            </div>
+          </div>
+
+          <p className="mt-4 text-center text-[10px] text-brand-grey/50">
+            earn <span className="text-brand-pale-gold">50 points</span> per $1 spent &#183; unlock exclusive tiers & perks
+          </p>
         </div>
 
-        {/* Stats row */}
-        <div className="mt-4 grid grid-cols-2 gap-3">
-          <div className="rounded border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center">
-            <p className="font-heading text-xl text-brand-gold">{orders}</p>
-            <p className="text-[10px] uppercase tracking-wider text-brand-grey">
-              orders
-            </p>
-          </div>
-          <div className="rounded border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center">
-            <p className="font-heading text-xl text-brand-gold">
-              ${points}
-            </p>
-            <p className="text-[10px] uppercase tracking-wider text-brand-grey">
-              total spent
-            </p>
-          </div>
-        </div>
-
-        <p className="mt-3 text-center text-[10px] text-brand-grey/60">
-          earn 1 point per $1 spent. points unlock higher tiers with exclusive
-          perks.
-        </p>
+        {/* Shimmer keyframes */}
+        <style jsx>{`
+          @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(200%); }
+          }
+        `}</style>
       </div>
 
       {/* Profile Settings */}
