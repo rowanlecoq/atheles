@@ -1,4 +1,5 @@
 export default {
+  serverExternalPackages: ["next-auth", "@auth/core"],
   experimental: {
     ppr: true,
     inlineCss: true,
