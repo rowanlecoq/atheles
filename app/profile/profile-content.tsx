@@ -34,6 +34,26 @@ function getNextTier(points: number) {
   return idx < TIERS.length - 1 ? TIERS[idx + 1] : null;
 }
 
+// Format raw digits into display format: +1 (XXX) XXX-XXXX
+function formatPhoneDisplay(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  // Strip leading 1 for US to normalize
+  const d = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
+  if (d.length === 0) return "";
+  if (d.length <= 3) return `+1 (${d}`;
+  if (d.length <= 6) return `+1 (${d.slice(0, 3)}) ${d.slice(3)}`;
+  return `+1 (${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6, 10)}`;
+}
+
+// Convert display phone to E.164 for Shopify: +1XXXXXXXXXX
+function phoneToE164(raw: string): string {
+  const digits = raw.replace(/\D/g, "");
+  if (digits.length === 0) return "";
+  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
+  if (digits.length === 10) return `+1${digits}`;
+  return `+${digits}`;
+}
+
 export default function ProfileContent() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
@@ -57,7 +77,7 @@ export default function ProfileContent() {
           setUser(data.user);
           setFirstName(data.user.firstName || "");
           setLastName(data.user.lastName || "");
-          setPhone(data.user.phone || "");
+          setPhone(data.user.phone ? formatPhoneDisplay(data.user.phone) : "");
           setNewsletter(data.user.acceptsMarketing || false);
           const stored = localStorage.getItem(`avatar-${data.user.id}`);
           if (stored) setAvatar(stored);
@@ -125,15 +145,18 @@ export default function ProfileContent() {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
-          firstName,
-          lastName,
-          phone: phone || "",
+          firstName: firstName || undefined,
+          lastName: lastName || undefined,
+          phone: phone ? phoneToE164(phone) : "",
           acceptsMarketing: newsletter,
         }),
       });
       const data = await res.json();
       if (data.success && data.user) {
         setUser(data.user);
+        setFirstName(data.user.firstName || "");
+        setLastName(data.user.lastName || "");
+        setPhone(data.user.phone ? formatPhoneDisplay(data.user.phone) : "");
         setEditing(false);
         setSaveMessage("profile updated.");
         setTimeout(() => setSaveMessage(""), 3000);
@@ -150,7 +173,7 @@ export default function ProfileContent() {
     if (!user) return;
     setFirstName(user.firstName || "");
     setLastName(user.lastName || "");
-    setPhone(user.phone || "");
+    setPhone(user.phone ? formatPhoneDisplay(user.phone) : "");
     setNewsletter(user.acceptsMarketing);
     setEditing(false);
     setSaveMessage("");
@@ -371,8 +394,9 @@ export default function ProfileContent() {
         <div className="space-y-4">
           {/* First Name */}
           <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 flex items-baseline gap-1.5 text-[10px] uppercase tracking-wider text-brand-grey">
               first name
+              <span className="normal-case tracking-normal text-brand-grey/40">optional</span>
             </label>
             {editing ? (
               <input
@@ -380,7 +404,7 @@ export default function ProfileContent() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                placeholder="your first name"
+                placeholder="rowan"
               />
             ) : (
               <p className="px-3 py-2 text-sm text-white">
@@ -393,8 +417,9 @@ export default function ProfileContent() {
 
           {/* Last Name */}
           <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 flex items-baseline gap-1.5 text-[10px] uppercase tracking-wider text-brand-grey">
               last name
+              <span className="normal-case tracking-normal text-brand-grey/40">optional</span>
             </label>
             {editing ? (
               <input
@@ -402,7 +427,7 @@ export default function ProfileContent() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                placeholder="your last name"
+                placeholder="le coq"
               />
             ) : (
               <p className="px-3 py-2 text-sm text-white">
@@ -423,20 +448,35 @@ export default function ProfileContent() {
 
           {/* Phone */}
           <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 flex items-baseline gap-1.5 text-[10px] uppercase tracking-wider text-brand-grey">
               phone number
+              <span className="normal-case tracking-normal text-brand-grey/40">optional</span>
             </label>
             {editing ? (
               <input
                 type="tel"
                 value={phone}
-                onChange={(e) => setPhone(e.target.value)}
+                onChange={(e) => {
+                  const raw = e.target.value;
+                  // If user is deleting, allow it
+                  if (raw.length < phone.length) {
+                    // If they deleted back to empty or just "+1 (", clear it
+                    const digits = raw.replace(/\D/g, "");
+                    if (digits.length <= 1) {
+                      setPhone("");
+                      return;
+                    }
+                    setPhone(formatPhoneDisplay(raw));
+                    return;
+                  }
+                  setPhone(formatPhoneDisplay(raw));
+                }}
                 className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
                 placeholder="+1 (555) 000-0000"
               />
             ) : (
               <p className="px-3 py-2 text-sm text-white">
-                {user.phone || (
+                {user.phone ? formatPhoneDisplay(user.phone) : (
                   <span className="text-brand-grey/50">not set</span>
                 )}
               </p>
