@@ -203,6 +203,12 @@ export default function ProfileContent() {
         setFirstName(data.user.firstName || "");
         setLastName(data.user.lastName || "");
         setPhone(data.user.phone ? formatPhoneDisplay(data.user.phone) : "");
+        if (data.user.dob) {
+          const [y, m, d] = data.user.dob.split("-");
+          setDobYear(y || "");
+          setDobMonth(m ? String(parseInt(m)) : "");
+          setDobDay(d ? String(parseInt(d)) : "");
+        }
         setEditing(false);
         setSaveMessage("profile updated.");
         setTimeout(() => setSaveMessage(""), 3000);
@@ -236,11 +242,65 @@ export default function ProfileContent() {
   };
 
   if (loading || !user) {
+    if (redirecting) {
+      return (
+        <div className="flex min-h-[60vh] items-center justify-center">
+          <p className="text-sm text-brand-grey">redirecting to sign in...</p>
+        </div>
+      );
+    }
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-brand-grey">
-          {redirecting ? "redirecting to sign in..." : "loading..."}
-        </p>
+      <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16 animate-pulse">
+        {/* Avatar skeleton */}
+        <div className="mb-10 flex flex-col items-center">
+          <div className="mb-4 h-24 w-24 rounded-full bg-brand-dark-gold/20" />
+          <div className="mb-2 h-7 w-40 rounded bg-brand-dark-gold/15" />
+          <div className="h-4 w-48 rounded bg-brand-dark-gold/10" />
+          <div className="mt-2 h-3 w-32 rounded bg-brand-dark-gold/10" />
+        </div>
+        {/* Tier card skeleton */}
+        <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
+          <div className="mb-5 flex flex-col items-center gap-2">
+            <div className="h-3 w-24 rounded bg-brand-dark-gold/15" />
+            <div className="h-7 w-28 rounded bg-brand-dark-gold/15" />
+          </div>
+          <div className="mb-6 flex justify-center">
+            <div className="h-12 w-32 rounded bg-brand-dark-gold/10" />
+          </div>
+          <div className="mb-3 h-6 w-full rounded-full bg-brand-dark-gold/10" />
+          <div className="mb-5 flex justify-center">
+            <div className="h-4 w-40 rounded bg-brand-dark-gold/10" />
+          </div>
+          <div className="mb-5 rounded-lg border border-brand-dark-gold/20 bg-brand-medium-grey/10 p-4">
+            <div className="mb-3 h-3 w-20 rounded bg-brand-dark-gold/15" />
+            <div className="space-y-2">
+              <div className="h-4 w-36 rounded bg-brand-dark-gold/10" />
+              <div className="h-4 w-44 rounded bg-brand-dark-gold/10" />
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 flex flex-col items-center gap-1">
+              <div className="h-6 w-8 rounded bg-brand-dark-gold/15" />
+              <div className="h-3 w-12 rounded bg-brand-dark-gold/10" />
+            </div>
+            <div className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 flex flex-col items-center gap-1">
+              <div className="h-6 w-12 rounded bg-brand-dark-gold/15" />
+              <div className="h-3 w-16 rounded bg-brand-dark-gold/10" />
+            </div>
+          </div>
+        </div>
+        {/* Settings skeleton */}
+        <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
+          <div className="mb-4 h-5 w-20 rounded bg-brand-dark-gold/15" />
+          <div className="space-y-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i}>
+                <div className="mb-1 h-3 w-20 rounded bg-brand-dark-gold/10" />
+                <div className="h-9 w-full rounded bg-brand-dark-gold/10" />
+              </div>
+            ))}
+          </div>
+        </div>
       </div>
     );
   }

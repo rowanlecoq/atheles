@@ -319,21 +319,23 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     .reduce((sum, edge) => sum + parseFloat(edge.node.totalPrice.amount || "0"), 0)
     .toFixed(2);
 
-  // Try to fetch customer tags separately for DOB (may not be available on all Storefront API configs)
+  // Fetch customer tags via Admin API for DOB (Storefront API doesn't expose tags)
   let dob: string | null = null;
-  try {
-    const tagsData = await shopifyCustomerFetch<{
-      customer: { tags: string[] } | null;
-    }>(
-      `query customer($customerAccessToken: String!) {
-        customer(customerAccessToken: $customerAccessToken) { tags }
-      }`,
-      { customerAccessToken: accessToken }
-    );
-    const dobTag = (tagsData.customer?.tags || []).find((t) => t.startsWith("dob:"));
-    dob = dobTag ? dobTag.replace("dob:", "") : null;
-  } catch {
-    // Tags not available — DOB will show as "not set"
+  if (adminEndpoint && adminToken) {
+    try {
+      const tagsData = await shopifyAdminFetch<{
+        customer: { tags: string[] } | null;
+      }>(
+        `query customer($id: ID!) {
+          customer(id: $id) { tags }
+        }`,
+        { id: data.customer.id }
+      );
+      const dobTag = (tagsData.customer?.tags || []).find((t) => t.startsWith("dob:"));
+      dob = dobTag ? dobTag.replace("dob:", "") : null;
+    } catch {
+      // Tags not available — DOB will show as "not set"
+    }
   }
 
   return {
