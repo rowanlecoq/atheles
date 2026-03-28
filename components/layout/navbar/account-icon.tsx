@@ -1,29 +1,40 @@
 "use client";
 
 import { UserIcon } from "@heroicons/react/24/outline";
-import { useSession } from "next-auth/react";
 import Link from "next/link";
+import { useEffect, useState } from "react";
 
 export function AccountIcon() {
-  const { data: session } = useSession();
-  const isLoggedIn = !!session?.user;
-  const href = isLoggedIn ? "/profile" : "/login";
-  const initials = isLoggedIn
-    ? (session.user?.name || session.user?.email || "A")
-        .split(" ")
-        .map((w) => w[0])
-        .join("")
-        .toUpperCase()
-        .slice(0, 2)
-    : null;
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [initials, setInitials] = useState<string | null>(null);
+
+  useEffect(() => {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user) {
+          setLoggedIn(true);
+          const name = data.user.name || data.user.email || "A";
+          setInitials(
+            name
+              .split(" ")
+              .map((w: string) => w[0])
+              .join("")
+              .toUpperCase()
+              .slice(0, 2)
+          );
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   return (
     <Link
-      href={href}
+      href={loggedIn ? "/profile" : "/login"}
       className="hidden h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold md:flex"
       aria-label="Account"
     >
-      {isLoggedIn && initials ? (
+      {loggedIn && initials ? (
         <span className="flex h-7 w-7 items-center justify-center rounded-full border border-brand-gold bg-brand-dark-gold/20 text-[10px] font-bold text-brand-gold">
           {initials}
         </span>
