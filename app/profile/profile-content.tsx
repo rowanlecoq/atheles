@@ -34,39 +34,42 @@ function getNextTier(points: number) {
   return idx < TIERS.length - 1 ? TIERS[idx + 1] : null;
 }
 
-// Format phone for display: group digits with spaces after the country code
+// Format phone for display based on country code
 function formatPhoneDisplay(raw: string): string {
-  // If already has +, keep it; extract digits after +
-  const cleaned = raw.replace(/[^\d+]/g, "");
-  if (!cleaned) return "";
-  // Ensure it starts with +
-  const withPlus = cleaned.startsWith("+") ? cleaned : `+${cleaned}`;
-  // Format: + countrycode then groups of 3-4 digits with spaces
-  const afterPlus = withPlus.slice(1);
-  if (afterPlus.length === 0) return "+";
-  // Group: first 1-3 digits as country code, then pairs/triples
-  // Simple approach: just add spaces every 3-4 digits for readability
-  const parts: string[] = [];
-  let i = 0;
-  // Country code: 1-3 digits
-  if (afterPlus.startsWith("1") && afterPlus.length >= 4) {
-    // +1 style (US/Canada)
-    parts.push(afterPlus.slice(0, 1));
-    i = 1;
-  } else if (afterPlus.length > 2) {
-    // Most country codes are 2-3 digits
-    const ccLen = afterPlus.length <= 8 ? 2 : afterPlus.startsWith("7") ? 1 : 2;
-    parts.push(afterPlus.slice(0, ccLen));
-    i = ccLen;
-  } else {
-    return `+${afterPlus}`;
+  const digits = raw.replace(/\D/g, "");
+  if (!digits) return "";
+
+  // US/Canada: +1 (XXX) XXX-XXXX
+  if (digits.startsWith("1") && digits.length <= 11) {
+    const d = digits.slice(1);
+    if (d.length === 0) return "+1";
+    if (d.length <= 3) return `+1 (${d})`;
+    if (d.length <= 6) return `+1 (${d.slice(0, 3)}) ${d.slice(3)}`;
+    return `+1 (${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6, 10)}`;
   }
-  // Remaining digits in groups of 3-4
-  const rest = afterPlus.slice(i);
-  for (let j = 0; j < rest.length; j += 3) {
-    parts.push(rest.slice(j, j + 3));
+
+  // UK: +44 XXXX XXXXXX
+  if (digits.startsWith("44") && digits.length <= 12) {
+    const d = digits.slice(2);
+    if (d.length <= 4) return `+44 ${d}`;
+    return `+44 ${d.slice(0, 4)} ${d.slice(4)}`;
   }
-  return `+${parts.join(" ")}`;
+
+  // AU: +61 XXX XXX XXX
+  if (digits.startsWith("61") && digits.length <= 11) {
+    const d = digits.slice(2);
+    if (d.length <= 3) return `+61 ${d}`;
+    if (d.length <= 6) return `+61 ${d.slice(0, 3)} ${d.slice(3)}`;
+    return `+61 ${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`;
+  }
+
+  // Default: +CC XXX XXX XXXX (country code 2 digits, rest grouped)
+  if (digits.length <= 2) return `+${digits}`;
+  const cc = digits.slice(0, 2);
+  const d = digits.slice(2);
+  if (d.length <= 3) return `+${cc} ${d}`;
+  if (d.length <= 6) return `+${cc} ${d.slice(0, 3)} ${d.slice(3)}`;
+  return `+${cc} ${d.slice(0, 3)} ${d.slice(3, 6)} ${d.slice(6)}`;
 }
 
 // Convert display phone to E.164 for Shopify: just digits with +
