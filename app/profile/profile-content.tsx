@@ -103,6 +103,7 @@ export default function ProfileContent() {
       setSaveMessage("photo saved for this session only (storage full).");
     }
     setCropSrc(null);
+    window.dispatchEvent(new Event("avatar-changed"));
   };
 
   const handleCropCancel = () => {
@@ -113,6 +114,7 @@ export default function ProfileContent() {
     if (!user) return;
     setAvatar(null);
     localStorage.removeItem(`avatar-${user.id}`);
+    window.dispatchEvent(new Event("avatar-changed"));
   };
 
   const handleSave = async () => {
