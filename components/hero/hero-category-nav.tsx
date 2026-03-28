@@ -57,15 +57,12 @@ export function HeroCategoryNav() {
       <nav className="py-4">
         <div className="flex items-center justify-center gap-6 lg:gap-8">
           {categories.map((cat, i) => {
-            const hasDropdown =
-              cat.subcategories.length > 0 || cat.comingSoon;
+            const hasDropdown = cat.subcategories.length > 0 || cat.comingSoon;
             return (
               <div
                 key={cat.title}
                 className="relative"
-                onMouseEnter={
-                  hasDropdown ? () => handleEnter(i) : undefined
-                }
+                onMouseEnter={hasDropdown ? () => handleEnter(i) : undefined}
                 onMouseLeave={hasDropdown ? handleLeave : undefined}
               >
                 <Link
@@ -79,9 +76,7 @@ export function HeroCategoryNav() {
                   {cat.title}
                   <span
                     className={`absolute -bottom-0.5 left-0 h-px bg-brand-gold transition-all duration-300 ${
-                      activeIndex === i
-                        ? "w-full"
-                        : "w-0 group-hover:w-full"
+                      activeIndex === i ? "w-full" : "w-0 group-hover:w-full"
                     }`}
                   />
                 </Link>

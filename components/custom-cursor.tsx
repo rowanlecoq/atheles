@@ -3,7 +3,8 @@
 import { motion, useMotionValue, useSpring, useTransform } from "motion/react";
 import { useEffect, useRef, useState } from "react";
 
-const INTERACTIVE_SELECTOR = "a, button, [role='button'], input, textarea, select, label";
+const INTERACTIVE_SELECTOR =
+  "a, button, [role='button'], input, textarea, select, label";
 
 export function CustomCursor() {
   const [mounted, setMounted] = useState(false);
@@ -12,14 +13,26 @@ export function CustomCursor() {
   const mouseX = useMotionValue(-100);
   const mouseY = useMotionValue(-100);
 
-  const cursorX = useSpring(mouseX, { stiffness: 600, damping: 30, mass: 0.35 });
-  const cursorY = useSpring(mouseY, { stiffness: 600, damping: 30, mass: 0.35 });
+  const cursorX = useSpring(mouseX, {
+    stiffness: 600,
+    damping: 30,
+    mass: 0.35,
+  });
+  const cursorY = useSpring(mouseY, {
+    stiffness: 600,
+    damping: 30,
+    mass: 0.35,
+  });
 
   const trailX = useSpring(mouseX, { stiffness: 180, damping: 28, mass: 0.7 });
   const trailY = useSpring(mouseY, { stiffness: 180, damping: 28, mass: 0.7 });
 
   const size = useMotionValue(16);
-  const springSize = useSpring(size, { stiffness: 400, damping: 22, mass: 0.4 });
+  const springSize = useSpring(size, {
+    stiffness: 400,
+    damping: 22,
+    mass: 0.4,
+  });
   const borderW = useTransform(springSize, [16, 40], [1, 1.5]);
 
   useEffect(() => {
@@ -39,7 +52,10 @@ export function CustomCursor() {
       if (now - lastCheck < 60) return;
       lastCheck = now;
 
-      const el = document.elementFromPoint(e.clientX, e.clientY) as HTMLElement | null;
+      const el = document.elementFromPoint(
+        e.clientX,
+        e.clientY,
+      ) as HTMLElement | null;
       const isInteractive = el?.closest(INTERACTIVE_SELECTOR) != null;
 
       if (isInteractive !== hoverRef.current) {

@@ -26,7 +26,7 @@ export function AccountIcon() {
               .map((w: string) => w[0])
               .join("")
               .toUpperCase()
-              .slice(0, 2)
+              .slice(0, 2),
           );
           // Load avatar from localStorage
           try {
@@ -69,7 +69,8 @@ export function AccountIcon() {
     };
 
     window.addEventListener("avatar-changed", handleAvatarChange);
-    return () => window.removeEventListener("avatar-changed", handleAvatarChange);
+    return () =>
+      window.removeEventListener("avatar-changed", handleAvatarChange);
   }, [userId]);
 
   return (

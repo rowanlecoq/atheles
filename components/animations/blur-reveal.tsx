@@ -52,7 +52,11 @@ export function BlurReveal({
           ? { opacity: 1, filter: "blur(0px)" }
           : { opacity: 0, filter: hiddenBlur }
       }
-      transition={{ duration: transitionDuration, delay, ease: animationEasing }}
+      transition={{
+        duration: transitionDuration,
+        delay,
+        ease: animationEasing,
+      }}
       className={className}
     >
       {children}

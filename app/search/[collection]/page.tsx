@@ -86,8 +86,8 @@ export default async function CategoryPage(props: {
     const allProducts = (
       await Promise.all(
         parent.subcollections.map((sub) =>
-          getCollectionProducts({ collection: sub, sortKey, reverse })
-        )
+          getCollectionProducts({ collection: sub, sortKey, reverse }),
+        ),
       )
     ).flat();
 

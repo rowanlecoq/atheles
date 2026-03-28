@@ -1,6 +1,12 @@
 "use client";
 
-import { createContext, useContext, useEffect, useState, type ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  type ReactNode,
+} from "react";
 
 export type RegionCode = "US" | "CA" | "GB" | "AU" | "EU";
 
@@ -59,7 +65,9 @@ export function CurrencyProvider({ children }: { children: ReactNode }) {
   };
 
   return (
-    <CurrencyContext.Provider value={{ region, currency: info.currency, setRegion, convert }}>
+    <CurrencyContext.Provider
+      value={{ region, currency: info.currency, setRegion, convert }}
+    >
       {children}
     </CurrencyContext.Provider>
   );

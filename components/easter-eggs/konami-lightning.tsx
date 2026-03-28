@@ -4,9 +4,16 @@ import { AnimatePresence, motion } from "motion/react";
 import { useCallback, useEffect, useState } from "react";
 
 const KONAMI = [
-  "ArrowUp", "ArrowUp", "ArrowDown", "ArrowDown",
-  "ArrowLeft", "ArrowRight", "ArrowLeft", "ArrowRight",
-  "b", "a",
+  "ArrowUp",
+  "ArrowUp",
+  "ArrowDown",
+  "ArrowDown",
+  "ArrowLeft",
+  "ArrowRight",
+  "ArrowLeft",
+  "ArrowRight",
+  "b",
+  "a",
 ];
 
 export function KonamiLightning() {
@@ -28,7 +35,9 @@ export function KonamiLightning() {
       if (e.key === KONAMI[index]) {
         index++;
         clearTimeout(timer);
-        timer = setTimeout(() => { index = 0; }, 2000);
+        timer = setTimeout(() => {
+          index = 0;
+        }, 2000);
         if (index === KONAMI.length) {
           index = 0;
           handleSequence();
@@ -66,7 +75,11 @@ export function KonamiLightning() {
           <motion.p
             className="relative z-10 font-heading text-3xl uppercase tracking-[0.4em] text-brand-gold sm:text-5xl"
             initial={{ opacity: 0, scale: 0.8, filter: "blur(10px)" }}
-            animate={{ opacity: [0, 1, 1, 0], scale: [0.8, 1, 1, 1.05], filter: ["blur(10px)", "blur(0px)", "blur(0px)", "blur(4px)"] }}
+            animate={{
+              opacity: [0, 1, 1, 0],
+              scale: [0.8, 1, 1, 1.05],
+              filter: ["blur(10px)", "blur(0px)", "blur(0px)", "blur(4px)"],
+            }}
             transition={{ duration: 2, times: [0, 0.2, 0.7, 1] }}
           >
             Olympus Awaits

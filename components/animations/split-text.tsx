@@ -108,7 +108,11 @@ export function SplitText({
           ) : (
             <motion.span
               key={key}
-              className={mode === "chars" ? "inline-block whitespace-pre" : "inline-block"}
+              className={
+                mode === "chars"
+                  ? "inline-block whitespace-pre"
+                  : "inline-block"
+              }
               variants={{
                 hidden: { opacity: 0, y: hiddenY, filter: hiddenBlur },
                 visible: {

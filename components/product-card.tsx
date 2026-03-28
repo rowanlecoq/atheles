@@ -33,9 +33,7 @@ export function ProductCard({
 
   // Get color from first variant title (e.g. "Black / M" → "Black")
   const colorName =
-    variants.length > 0
-      ? variants[0]?.title.split(" / ")[0]
-      : undefined;
+    variants.length > 0 ? variants[0]?.title.split(" / ")[0] : undefined;
   const displayColorName =
     colorName && colorName !== DEFAULT_OPTION ? colorName : undefined;
 
@@ -48,7 +46,10 @@ export function ProductCard({
   return (
     <div className="group relative">
       {/* Image container */}
-      <Link href={`/product/${handle}`} className="relative block aspect-[3/4] overflow-hidden bg-[#1a1a1a]">
+      <Link
+        href={`/product/${handle}`}
+        className="relative block aspect-[3/4] overflow-hidden bg-[#1a1a1a]"
+      >
         {featuredImageUrl ? (
           <Image
             src={featuredImageUrl}

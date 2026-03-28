@@ -22,7 +22,6 @@ export function Hero() {
 
       {/* 3-column grid: image | center | image */}
       <div className="relative z-10 mx-auto grid h-[420px] grid-cols-1 py-4 md:h-[580px] md:grid-cols-[minmax(170px,1fr)_2fr_minmax(170px,1fr)] md:gap-3 md:py-4 lg:h-[620px] lg:gap-4">
-
         {/* === Left: statue image === */}
         <div className="hidden overflow-hidden rounded-sm md:block">
           <div className="relative h-full w-full">

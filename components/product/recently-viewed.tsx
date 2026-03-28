@@ -1,7 +1,10 @@
 "use client";
 
 import { GridTileImage } from "components/grid/tile";
-import { useRecentlyViewed, type RecentlyViewedItem } from "lib/hooks/use-recently-viewed";
+import {
+  useRecentlyViewed,
+  type RecentlyViewedItem,
+} from "lib/hooks/use-recently-viewed";
 import Link from "next/link";
 import { useEffect } from "react";
 

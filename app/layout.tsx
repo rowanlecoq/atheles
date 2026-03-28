@@ -1,3 +1,4 @@
+import { Analytics } from "@vercel/analytics/next";
 import { AnnouncementBar } from "components/announcement-bar";
 import { CartProvider } from "components/cart/cart-context";
 import { CurrencyProvider } from "components/currency-context";
@@ -44,7 +45,11 @@ export default async function RootLayout({
   const cart = getCart();
 
   return (
-    <html lang="en" className={`dark ${playfair.variable}`} style={{ colorScheme: "dark" }}>
+    <html
+      lang="en"
+      className={`dark ${playfair.variable}`}
+      style={{ colorScheme: "dark" }}
+    >
       <body className="bg-brand-dark text-white">
         <CurrencyProvider>
           <CartProvider cartPromise={cart}>
@@ -53,13 +58,12 @@ export default async function RootLayout({
             <KonamiLightning />
             <Navbar />
             <main className="w-full overflow-x-hidden">
-              <PageTransition>
-                {children}
-              </PageTransition>
+              <PageTransition>{children}</PageTransition>
               <Toaster closeButton />
             </main>
           </CartProvider>
         </CurrencyProvider>
+        <Analytics />
       </body>
     </html>
   );

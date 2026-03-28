@@ -73,7 +73,13 @@ export default function ImageCropModal({
     ctx.strokeStyle = "rgba(181, 149, 72, 0.6)";
     ctx.lineWidth = 2;
     ctx.beginPath();
-    ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CANVAS_SIZE / 2 - 1, 0, Math.PI * 2);
+    ctx.arc(
+      CANVAS_SIZE / 2,
+      CANVAS_SIZE / 2,
+      CANVAS_SIZE / 2 - 1,
+      0,
+      Math.PI * 2,
+    );
     ctx.stroke();
 
     // Darken corners outside the circle
@@ -81,7 +87,14 @@ export default function ImageCropModal({
     ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
     ctx.beginPath();
     ctx.rect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    ctx.arc(CANVAS_SIZE / 2, CANVAS_SIZE / 2, CANVAS_SIZE / 2, 0, Math.PI * 2, true);
+    ctx.arc(
+      CANVAS_SIZE / 2,
+      CANVAS_SIZE / 2,
+      CANVAS_SIZE / 2,
+      0,
+      Math.PI * 2,
+      true,
+    );
     ctx.fill();
     ctx.restore();
   }, [zoom, offset]);
@@ -114,8 +127,12 @@ export default function ImageCropModal({
     e.preventDefault();
     const img = imageRef.current;
     if (!img) return;
-    const minZoom = Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height) * 0.5;
-    const newZoom = Math.max(minZoom, Math.min(zoom * 3, zoom - e.deltaY * 0.001));
+    const minZoom =
+      Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height) * 0.5;
+    const newZoom = Math.max(
+      minZoom,
+      Math.min(zoom * 3, zoom - e.deltaY * 0.001),
+    );
     setZoom(newZoom);
   };
 

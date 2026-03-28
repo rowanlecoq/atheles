@@ -44,11 +44,13 @@ export function ScaleIn({
       ref={ref}
       initial={{ opacity: 0, scale: hiddenScale }}
       animate={
-        isInView
-          ? { opacity: 1, scale: 1 }
-          : { opacity: 0, scale: hiddenScale }
+        isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: hiddenScale }
       }
-      transition={{ duration: transitionDuration, delay, ease: animationEasing }}
+      transition={{
+        duration: transitionDuration,
+        delay,
+        ease: animationEasing,
+      }}
       className={className}
     >
       {children}

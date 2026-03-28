@@ -37,8 +37,7 @@ export const sizeCategories: SizeCategory[] = [
   },
   {
     name: "Regular Tops",
-    description:
-      "Standard fit t-shirts and tops. 100% Cotton. 350 GSM.",
+    description: "Standard fit t-shirts and tops. 100% Cotton. 350 GSM.",
     unit: "inches",
     columns: [
       "Chest",
@@ -62,8 +61,7 @@ export const sizeCategories: SizeCategory[] = [
   },
   {
     name: "Oversized Tops",
-    description:
-      "Relaxed oversized fit. 100% Cotton. 350 GSM.",
+    description: "Relaxed oversized fit. 100% Cotton. 350 GSM.",
     unit: "inches",
     columns: [
       "Chest",

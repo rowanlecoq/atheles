@@ -3,7 +3,8 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: "shipping policy",
-  description: "ATHELES shipping policy. Learn about our shipping methods, timeframes, and international delivery.",
+  description:
+    "ATHELES shipping policy. Learn about our shipping methods, timeframes, and international delivery.",
 };
 
 export default function ShippingPage() {
@@ -22,11 +23,15 @@ export default function ShippingPage() {
             <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
               <div className="space-y-3">
                 <div className="flex flex-col gap-1 border-b border-brand-dark-gold/10 pb-3 sm:flex-row sm:items-center sm:justify-between">
-                  <span className="text-brand-pale-gold">Standard Shipping</span>
+                  <span className="text-brand-pale-gold">
+                    Standard Shipping
+                  </span>
                   <span>5-7 business days</span>
                 </div>
                 <div className="flex flex-col gap-1 border-b border-brand-dark-gold/10 pb-3 sm:flex-row sm:items-center sm:justify-between">
-                  <span className="text-brand-pale-gold">Expedited Shipping</span>
+                  <span className="text-brand-pale-gold">
+                    Expedited Shipping
+                  </span>
                   <span>2-3 business days</span>
                 </div>
                 <div className="flex flex-col gap-1 sm:flex-row sm:items-center sm:justify-between">
@@ -48,8 +53,8 @@ export default function ShippingPage() {
             </h2>
             <p>
               We ship worldwide. International shipping typically takes 10-14
-              business days depending on the destination. Delivery times may vary
-              based on customs processing in your country.
+              business days depending on the destination. Delivery times may
+              vary based on customs processing in your country.
             </p>
             <p className="mt-3">
               <strong className="text-brand-pale-gold">

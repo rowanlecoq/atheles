@@ -77,7 +77,10 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
         </div>
 
         {/* Content */}
-        <div className="overflow-y-auto p-6" style={{ maxHeight: "calc(85vh - 130px)" }}>
+        <div
+          className="overflow-y-auto p-6"
+          style={{ maxHeight: "calc(85vh - 130px)" }}
+        >
           <SizeTable category={sizeCategories[activeTab]!} />
           {fitGuide[activeTab] && (
             <div className="mt-6 rounded border border-brand-dark-gold/20 bg-brand-medium-grey/10 p-4">
@@ -99,7 +102,11 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
   );
 }
 
-function SizeTable({ category }: { category: typeof sizeCategories[number] }) {
+function SizeTable({
+  category,
+}: {
+  category: (typeof sizeCategories)[number];
+}) {
   const sizes = Object.keys(category.sizes);
 
   return (
@@ -152,9 +159,7 @@ export default function SizeGuidePage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <h1 className="mb-2 font-heading text-4xl text-brand-gold">
-        Size Guide
-      </h1>
+      <h1 className="mb-2 font-heading text-4xl text-brand-gold">Size Guide</h1>
       <p className="mb-8 text-sm text-brand-grey">
         All measurements are in inches. Find your perfect fit across our product
         categories.

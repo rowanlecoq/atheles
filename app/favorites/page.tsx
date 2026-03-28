@@ -32,7 +32,10 @@ function FavoriteItem({
 
   return (
     <div className="group relative overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark transition-colors hover:border-brand-gold/30">
-      <Link href={`/product/${product.handle}`} className="flex items-center gap-4 p-3">
+      <Link
+        href={`/product/${product.handle}`}
+        className="flex items-center gap-4 p-3"
+      >
         {/* Product image */}
         <div className="relative h-20 w-20 flex-none overflow-hidden rounded bg-[#222]">
           {product.featuredImage?.url ? (
@@ -45,7 +48,9 @@ function FavoriteItem({
             />
           ) : (
             <div className="flex h-full w-full items-center justify-center">
-              <span className="font-heading text-xs text-brand-gold/30">ATHELES</span>
+              <span className="font-heading text-xs text-brand-gold/30">
+                ATHELES
+              </span>
             </div>
           )}
         </div>
@@ -91,17 +96,19 @@ export default function FavoritesPage() {
         const results = await Promise.all(
           favorites.map(async (handle) => {
             try {
-              const res = await fetch(`/api/search?q=${encodeURIComponent(handle)}`);
+              const res = await fetch(
+                `/api/search?q=${encodeURIComponent(handle)}`,
+              );
               if (res.ok) {
                 const data = await res.json();
                 const match = data.products?.find(
-                  (p: FavoriteProduct) => p.handle === handle
+                  (p: FavoriteProduct) => p.handle === handle,
                 );
                 return match || null;
               }
             } catch {}
             return null;
-          })
+          }),
         );
         setProducts(results.filter(Boolean) as FavoriteProduct[]);
       } catch {
