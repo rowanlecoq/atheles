@@ -4,7 +4,7 @@ import { defaultSort, sorting } from "lib/constants";
 import { getProducts } from "lib/shopify";
 
 export const metadata = {
-  title: "Search",
+  title: "search",
   description: "Search for products in the store.",
 };
 

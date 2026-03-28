@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Create Account",
+  title: "create account",
   description: "Create your ATHELES account and join the club.",
 };
 

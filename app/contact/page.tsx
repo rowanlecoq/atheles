@@ -3,7 +3,7 @@ import { ContactForm } from "./contact-form";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Contact Us",
+  title: "contact us",
   description:
     "Get in touch with ATHELES. We'd love to hear from you about orders, collaborations, or general inquiries.",
 };

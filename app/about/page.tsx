@@ -4,7 +4,7 @@ import { FadeIn, BlurReveal, ScaleIn } from "components/animations";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "About",
+  title: "about",
   description:
     "discover the story behind atheles, designed for those who demand authentic superiority.",
 };

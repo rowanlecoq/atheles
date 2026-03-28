@@ -21,8 +21,8 @@ const playfair = Playfair_Display({
 export const metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "atheles official store 🔱 to ascend",
-    template: `%s | atheles 🔱`,
+    default: "atheles: official store 🔱 TO ASCEND.",
+    template: `%s | atheles 🔱 to ascend`,
   },
   description:
     "premium fitness and lifestyle clothing crafted for authentic superiority.",

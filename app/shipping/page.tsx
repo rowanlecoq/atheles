@@ -2,7 +2,7 @@ import Footer from "components/layout/footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Shipping Policy",
+  title: "shipping policy",
   description: "ATHELES shipping policy. Learn about our shipping methods, timeframes, and international delivery.",
 };
 

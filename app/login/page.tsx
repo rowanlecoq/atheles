@@ -4,7 +4,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 
 export const metadata: Metadata = {
-  title: "Sign In",
+  title: "sign in",
   description: "Sign in to your ATHELES account.",
 };
 

@@ -2,7 +2,7 @@ import Footer from "components/layout/footer";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "Returns Policy",
+  title: "returns policy",
   description: "ATHELES returns and exchange policy. Learn about our 30-day return window and process.",
 };
 

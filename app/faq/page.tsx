@@ -3,7 +3,7 @@ import { FaqAccordion } from "./faq-accordion";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
-  title: "FAQ",
+  title: "faq",
   description:
     "Frequently asked questions about ATHELES products, sizing, shipping, returns, and more.",
 };
