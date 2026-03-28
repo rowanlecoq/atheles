@@ -46,13 +46,6 @@ html {
 body {
   font-family: var(--font-family-body);
   background-color: var(--color-brand-dark);
-  background-image:
-    radial-gradient(circle at 50% 0%, rgba(204, 177, 115, 0.1) 0%, rgba(26, 26, 26, 0) 62%),
-    linear-gradient(135deg, rgba(204, 177, 115, 0.03) 0%, rgba(204, 177, 115, 0) 45%, rgba(204, 177, 115, 0.03) 100%);
-  background-repeat: no-repeat, no-repeat;
-  background-size: 100% 100%, 100% 100%;
-  background-position: center top, center top;
-  background-attachment: fixed, fixed;
   color: #ffffff;
   min-width: 320px;
   width: 100%;
