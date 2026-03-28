@@ -82,21 +82,52 @@ function phoneToE164(raw: string): string {
 }
 
 export default function ProfileContent() {
-  const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [user, setUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const cached = sessionStorage.getItem("atheles-profile-cache");
+        return cached ? JSON.parse(cached) : null;
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  });
+  const [loading, setLoading] = useState(!user);
   const [redirecting, setRedirecting] = useState(false);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
-  const [firstName, setFirstName] = useState("");
-  const [lastName, setLastName] = useState("");
-  const [phone, setPhone] = useState("");
-  const [newsletter, setNewsletter] = useState(false);
-  const [dobDay, setDobDay] = useState("");
-  const [dobMonth, setDobMonth] = useState("");
-  const [dobYear, setDobYear] = useState("");
+  const [firstName, setFirstName] = useState(() => user?.firstName || "");
+  const [lastName, setLastName] = useState(() => user?.lastName || "");
+  const [phone, setPhone] = useState(() =>
+    user?.phone ? formatPhoneDisplay(user.phone) : ""
+  );
+  const [newsletter, setNewsletter] = useState(
+    () => user?.acceptsMarketing || false
+  );
+  const [dobDay, setDobDay] = useState(() => {
+    if (user?.dob) {
+      const d = user.dob.split("-")[2];
+      return d ? String(parseInt(d)) : "";
+    }
+    return "";
+  });
+  const [dobMonth, setDobMonth] = useState(() => {
+    if (user?.dob) {
+      const m = user.dob.split("-")[1];
+      return m ? String(parseInt(m)) : "";
+    }
+    return "";
+  });
+  const [dobYear, setDobYear] = useState(() => {
+    if (user?.dob) {
+      return user.dob.split("-")[0] || "";
+    }
+    return "";
+  });
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -115,6 +146,14 @@ export default function ProfileContent() {
             setDobYear(y || "");
             setDobMonth(m ? String(parseInt(m)) : "");
             setDobDay(d ? String(parseInt(d)) : "");
+          }
+          try {
+            sessionStorage.setItem(
+              "atheles-profile-cache",
+              JSON.stringify(data.user)
+            );
+          } catch {
+            // Storage full or unavailable
           }
           const stored = localStorage.getItem(`avatar-${data.user.id}`);
           if (stored) setAvatar(stored);
