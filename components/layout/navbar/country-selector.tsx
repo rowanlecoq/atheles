@@ -3,12 +3,12 @@
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useCallback, useEffect, useRef, useState } from "react";
 
-const countries = [
-  { code: "US", flag: "🇺🇸", name: "United States" },
-  { code: "CA", flag: "🇨🇦", name: "Canada" },
-  { code: "GB", flag: "🇬🇧", name: "United Kingdom" },
-  { code: "AU", flag: "🇦🇺", name: "Australia" },
-  { code: "EU", flag: "🇪🇺", name: "Europe" },
+const regions = [
+  { code: "US", flag: "🇺🇸", label: "US", language: "EN", currency: "USD" },
+  { code: "CA", flag: "🇨🇦", label: "CA", language: "EN", currency: "CAD" },
+  { code: "GB", flag: "🇬🇧", label: "UK", language: "EN", currency: "GBP" },
+  { code: "AU", flag: "🇦🇺", label: "AU", language: "EN", currency: "AUD" },
+  { code: "EU", flag: "🇪🇺", label: "EU", language: "EN", currency: "EUR" },
 ];
 
 const STORAGE_KEY = "atheles-country";
@@ -63,18 +63,20 @@ export function CountrySelector() {
     }
   }, []);
 
-  const current = countries.find((c) => c.code === selected) || countries[0]!;
+  const current = regions.find((r) => r.code === selected) || regions[0]!;
 
   return (
     <div ref={ref} className="relative hidden md:block">
       <button
         type="button"
         onClick={() => setOpen((v) => !v)}
-        aria-label="Select country"
+        aria-label="Select region"
         className="flex h-11 items-center gap-1.5 px-1 text-brand-grey transition-colors hover:text-brand-gold"
       >
         <span className="text-base leading-none">{current.flag}</span>
-        <span className="text-xs uppercase tracking-wider">{current.code}</span>
+        <span className="text-[10px] uppercase tracking-wider">
+          {current.language}
+        </span>
         <ChevronDownIcon
           className={`h-3 w-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
@@ -82,25 +84,28 @@ export function CountrySelector() {
 
       {/* Dropdown */}
       <div
-        className={`absolute left-0 top-full z-50 mt-2 min-w-[180px] rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-lg shadow-black/30 transition-all duration-200 ${
+        className={`absolute left-0 top-full z-50 mt-2 min-w-[200px] rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-lg shadow-black/30 transition-all duration-200 ${
           open
             ? "pointer-events-auto visible translate-y-0 opacity-100"
             : "pointer-events-none invisible -translate-y-1 opacity-0"
         }`}
       >
-        {countries.map((country) => (
+        {regions.map((region) => (
           <button
-            key={country.code}
+            key={region.code}
             type="button"
-            onClick={() => handleSelect(country.code)}
+            onClick={() => handleSelect(region.code)}
             className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors first:rounded-t-md last:rounded-b-md ${
-              selected === country.code
+              selected === region.code
                 ? "bg-brand-dark-gold/10 text-brand-gold"
                 : "text-brand-grey hover:bg-brand-dark-gold/5 hover:text-brand-gold"
             }`}
           >
-            <span className="text-base leading-none">{country.flag}</span>
-            <span className="uppercase tracking-wider">{country.name}</span>
+            <span className="text-base leading-none">{region.flag}</span>
+            <span className="flex-1 uppercase tracking-wider">{region.label}</span>
+            <span className="text-[10px] tracking-wider text-brand-grey/60">
+              {region.language} / {region.currency}
+            </span>
           </button>
         ))}
       </div>

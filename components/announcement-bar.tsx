@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
 const announcements = [
@@ -13,24 +13,33 @@ const announcements = [
 
 export function AnnouncementBar() {
   const [index, setIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  useEffect(() => {
-    const interval = setInterval(() => {
+  const startTimer = useCallback(() => {
+    intervalRef.current = setInterval(() => {
       setIndex((prev) => (prev + 1) % announcements.length);
     }, 5000);
-    return () => clearInterval(interval);
   }, []);
+
+  const stopTimer = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!paused) startTimer();
+    return () => stopTimer();
+  }, [paused, startTimer, stopTimer]);
+
+  const togglePause = () => {
+    setPaused((p) => !p);
+  };
 
   return (
     <div className="relative flex h-8 items-center justify-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
-      {/* Subtle decorative lines */}
-      <div className="pointer-events-none absolute inset-y-0 left-0 flex w-24 items-center justify-end pr-4 sm:w-40">
-        <div className="h-px w-full bg-gradient-to-r from-transparent to-brand-dark-gold/30" />
-      </div>
-      <div className="pointer-events-none absolute inset-y-0 right-0 flex w-24 items-center justify-start pl-4 sm:w-40">
-        <div className="h-px w-full bg-gradient-to-l from-transparent to-brand-dark-gold/30" />
-      </div>
-
       <AnimatePresence mode="wait">
         <motion.p
           key={index}
@@ -43,6 +52,25 @@ export function AnnouncementBar() {
           {announcements[index]}
         </motion.p>
       </AnimatePresence>
+
+      {/* Pause / Play */}
+      <button
+        type="button"
+        onClick={togglePause}
+        aria-label={paused ? "Play announcements" : "Pause announcements"}
+        className="absolute right-3 flex h-5 w-5 items-center justify-center text-brand-dark-gold/40 transition-colors hover:text-brand-dark-gold sm:right-4"
+      >
+        {paused ? (
+          <svg viewBox="0 0 10 12" fill="currentColor" className="h-2.5 w-2.5">
+            <path d="M0 0l10 6-10 6z" />
+          </svg>
+        ) : (
+          <svg viewBox="0 0 10 12" fill="currentColor" className="h-2.5 w-2.5">
+            <rect x="0" y="0" width="3" height="12" />
+            <rect x="7" y="0" width="3" height="12" />
+          </svg>
+        )}
+      </button>
     </div>
   );
 }
