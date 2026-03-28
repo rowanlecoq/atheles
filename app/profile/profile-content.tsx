@@ -34,23 +34,45 @@ function getNextTier(points: number) {
   return idx < TIERS.length - 1 ? TIERS[idx + 1] : null;
 }
 
-// Format raw digits into display format: +1 (XXX) XXX-XXXX
+// Format phone for display: group digits with spaces after the country code
 function formatPhoneDisplay(raw: string): string {
-  const digits = raw.replace(/\D/g, "");
-  // Strip leading 1 for US to normalize
-  const d = digits.length === 11 && digits.startsWith("1") ? digits.slice(1) : digits;
-  if (d.length === 0) return "";
-  if (d.length <= 3) return `+1 (${d}`;
-  if (d.length <= 6) return `+1 (${d.slice(0, 3)}) ${d.slice(3)}`;
-  return `+1 (${d.slice(0, 3)}) ${d.slice(3, 6)}-${d.slice(6, 10)}`;
+  // If already has +, keep it; extract digits after +
+  const cleaned = raw.replace(/[^\d+]/g, "");
+  if (!cleaned) return "";
+  // Ensure it starts with +
+  const withPlus = cleaned.startsWith("+") ? cleaned : `+${cleaned}`;
+  // Format: + countrycode then groups of 3-4 digits with spaces
+  const afterPlus = withPlus.slice(1);
+  if (afterPlus.length === 0) return "+";
+  // Group: first 1-3 digits as country code, then pairs/triples
+  // Simple approach: just add spaces every 3-4 digits for readability
+  const parts: string[] = [];
+  let i = 0;
+  // Country code: 1-3 digits
+  if (afterPlus.startsWith("1") && afterPlus.length >= 4) {
+    // +1 style (US/Canada)
+    parts.push(afterPlus.slice(0, 1));
+    i = 1;
+  } else if (afterPlus.length > 2) {
+    // Most country codes are 2-3 digits
+    const ccLen = afterPlus.length <= 8 ? 2 : afterPlus.startsWith("7") ? 1 : 2;
+    parts.push(afterPlus.slice(0, ccLen));
+    i = ccLen;
+  } else {
+    return `+${afterPlus}`;
+  }
+  // Remaining digits in groups of 3-4
+  const rest = afterPlus.slice(i);
+  for (let j = 0; j < rest.length; j += 3) {
+    parts.push(rest.slice(j, j + 3));
+  }
+  return `+${parts.join(" ")}`;
 }
 
-// Convert display phone to E.164 for Shopify: +1XXXXXXXXXX
+// Convert display phone to E.164 for Shopify: just digits with +
 function phoneToE164(raw: string): string {
   const digits = raw.replace(/\D/g, "");
   if (digits.length === 0) return "";
-  if (digits.length === 11 && digits.startsWith("1")) return `+${digits}`;
-  if (digits.length === 10) return `+1${digits}`;
   return `+${digits}`;
 }
 
@@ -138,6 +160,10 @@ export default function ProfileContent() {
   };
 
   const handleSave = async () => {
+    if (!firstName.trim()) {
+      setSaveMessage("first name is required.");
+      return;
+    }
     setSaving(true);
     setSaveMessage("");
     try {
@@ -394,15 +420,15 @@ export default function ProfileContent() {
         <div className="space-y-4">
           {/* First Name */}
           <div>
-            <label className="mb-1 flex items-baseline gap-1.5 text-[10px] uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">
               first name
-              <span className="normal-case tracking-normal text-brand-grey/40">optional</span>
             </label>
             {editing ? (
               <input
                 type="text"
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
+                required
                 className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
                 placeholder="rowan"
               />
@@ -458,21 +484,15 @@ export default function ProfileContent() {
                 value={phone}
                 onChange={(e) => {
                   const raw = e.target.value;
-                  // If user is deleting, allow it
-                  if (raw.length < phone.length) {
-                    // If they deleted back to empty or just "+1 (", clear it
-                    const digits = raw.replace(/\D/g, "");
-                    if (digits.length <= 1) {
-                      setPhone("");
-                      return;
-                    }
-                    setPhone(formatPhoneDisplay(raw));
+                  const digits = raw.replace(/\D/g, "");
+                  if (digits.length === 0) {
+                    setPhone("");
                     return;
                   }
                   setPhone(formatPhoneDisplay(raw));
                 }}
                 className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                placeholder="+1 (555) 000-0000"
+                placeholder="+44 7911 123456"
               />
             ) : (
               <p className="px-3 py-2 text-sm text-white">
