@@ -61,6 +61,7 @@ export async function POST(request: Request) {
             createdAt: customer.createdAt,
             numberOfOrders: customer.numberOfOrders,
             totalSpent: customer.totalSpent,
+            dob: customer.dob,
           }
         : null,
     });

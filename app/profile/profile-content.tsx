@@ -16,6 +16,7 @@ type User = {
   createdAt: string;
   numberOfOrders: string;
   totalSpent: string;
+  dob: string | null;
 };
 
 const TIERS = [
@@ -582,6 +583,22 @@ export default function ProfileContent() {
               email
             </label>
             <p className="px-3 py-2 text-sm text-brand-grey">{user.email}</p>
+          </div>
+
+          {/* Date of Birth (read-only) */}
+          <div>
+            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">
+              date of birth
+            </label>
+            <p className="px-3 py-2 text-sm text-brand-grey">
+              {user.dob
+                ? new Date(user.dob + "T00:00:00").toLocaleDateString("en-US", {
+                    day: "numeric",
+                    month: "long",
+                    year: "numeric",
+                  })
+                : <span className="text-brand-grey/50">not set</span>}
+            </p>
           </div>
 
           {/* Phone */}

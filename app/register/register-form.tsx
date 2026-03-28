@@ -8,7 +8,9 @@ export default function RegisterForm() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [dob, setDob] = useState("");
+  const [dobDay, setDobDay] = useState("");
+  const [dobMonth, setDobMonth] = useState("");
+  const [dobYear, setDobYear] = useState("");
   const [acceptsMarketing, setAcceptsMarketing] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -25,7 +27,10 @@ export default function RegisterForm() {
       const res = await fetch("/api/auth/register", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email, password, name, dob: dob || undefined, acceptsMarketing }),
+        body: JSON.stringify({
+          email, password, name, acceptsMarketing,
+          dob: dobDay && dobMonth && dobYear ? `${dobYear}-${dobMonth.padStart(2, "0")}-${dobDay.padStart(2, "0")}` : undefined,
+        }),
       });
       const data = await res.json();
 
@@ -110,9 +115,33 @@ export default function RegisterForm() {
               </div>
             </div>
             <div>
-              <label htmlFor="dob" className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold">date of birth</label>
-              <input id="dob" type="date" value={dob} onChange={(e) => setDob(e.target.value)}
-                className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none [color-scheme:dark]" />
+              <label className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold">date of birth</label>
+              <div className="grid grid-cols-3 gap-2">
+                <select value={dobDay} onChange={(e) => setDobDay(e.target.value)}
+                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold focus:outline-none [&:invalid]:text-brand-grey/50"
+                  aria-label="Day">
+                  <option value="" disabled>day</option>
+                  {Array.from({ length: 31 }, (_, i) => i + 1).map((d) => (
+                    <option key={d} value={String(d)}>{d}</option>
+                  ))}
+                </select>
+                <select value={dobMonth} onChange={(e) => setDobMonth(e.target.value)}
+                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold focus:outline-none [&:invalid]:text-brand-grey/50"
+                  aria-label="Month">
+                  <option value="" disabled>month</option>
+                  {["jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"].map((m, i) => (
+                    <option key={m} value={String(i + 1)}>{m}</option>
+                  ))}
+                </select>
+                <select value={dobYear} onChange={(e) => setDobYear(e.target.value)}
+                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold focus:outline-none [&:invalid]:text-brand-grey/50"
+                  aria-label="Year">
+                  <option value="" disabled>year</option>
+                  {Array.from({ length: 100 }, (_, i) => new Date().getFullYear() - 13 - i).map((y) => (
+                    <option key={y} value={String(y)}>{y}</option>
+                  ))}
+                </select>
+              </div>
             </div>
             <label className="flex cursor-pointer items-start gap-3 pt-1">
               <input type="checkbox" checked={acceptsMarketing} onChange={(e) => setAcceptsMarketing(e.target.checked)}

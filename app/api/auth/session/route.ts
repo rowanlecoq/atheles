@@ -30,6 +30,7 @@ export async function GET() {
         createdAt: customer.createdAt,
         numberOfOrders: customer.numberOfOrders,
         totalSpent: customer.totalSpent,
+        dob: customer.dob,
       },
     });
   } catch {

@@ -216,6 +216,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   createdAt: string;
   numberOfOrders: number;
   totalSpent: string;
+  dob: string | null;
 } | null> {
   if (!endpoint) return null;
 
@@ -229,6 +230,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       phone: string | null;
       acceptsMarketing: boolean;
       createdAt: string;
+      tags: string[];
       orders: {
         edges: { node: { totalPrice: { amount: string } } }[];
       };
@@ -236,7 +238,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   }>(
     `query customer($customerAccessToken: String!) {
       customer(customerAccessToken: $customerAccessToken) {
-        id email firstName lastName displayName phone acceptsMarketing createdAt
+        id email firstName lastName displayName phone acceptsMarketing createdAt tags
         orders(first: 100) {
           edges { node { totalPrice { amount } } }
         }
@@ -252,6 +254,9 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     .reduce((sum, edge) => sum + parseFloat(edge.node.totalPrice.amount || "0"), 0)
     .toFixed(2);
 
+  const dobTag = data.customer.tags.find((t) => t.startsWith("dob:"));
+  const dob = dobTag ? dobTag.replace("dob:", "") : null;
+
   return {
     id: data.customer.id,
     email: data.customer.email,
@@ -263,5 +268,6 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     createdAt: data.customer.createdAt,
     numberOfOrders: orders.length,
     totalSpent,
+    dob,
   };
 }
