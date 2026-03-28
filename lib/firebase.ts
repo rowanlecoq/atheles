@@ -1,5 +1,7 @@
-import { initializeApp, getApps } from "firebase/app";
-import { getAuth } from "firebase/auth";
+"use client";
+
+import { initializeApp, getApps, type FirebaseApp } from "firebase/app";
+import { getAuth, type Auth } from "firebase/auth";
 
 const firebaseConfig = {
   apiKey: "AIzaSyDt9l46jwcXMkbJsvPEV0TzU00XoVZMpdo",
@@ -11,7 +13,21 @@ const firebaseConfig = {
   measurementId: "G-H1SPKRERGF",
 };
 
-const app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]!;
-const auth = getAuth(app);
+let _app: FirebaseApp | undefined;
+let _auth: Auth | undefined;
 
-export { app, auth };
+function getFirebaseApp(): FirebaseApp {
+  if (!_app) {
+    _app = getApps().length === 0 ? initializeApp(firebaseConfig) : getApps()[0]!;
+  }
+  return _app;
+}
+
+function getFirebaseAuth(): Auth {
+  if (!_auth) {
+    _auth = getAuth(getFirebaseApp());
+  }
+  return _auth;
+}
+
+export { getFirebaseAuth };

@@ -1,6 +1,6 @@
 "use client";
 
-import { auth } from "lib/firebase";
+import { getFirebaseAuth } from "lib/firebase";
 import {
   createUserWithEmailAndPassword,
   GoogleAuthProvider,
@@ -51,7 +51,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const unsubscribe = onAuthStateChanged(auth, (user) => {
+    const unsubscribe = onAuthStateChanged(getFirebaseAuth(), (user) => {
       setUser(user);
       setLoading(false);
     });
@@ -60,14 +60,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithEmail = useCallback(
     async (email: string, password: string) => {
-      await signInWithEmailAndPassword(auth, email, password);
+      await signInWithEmailAndPassword(getFirebaseAuth(), email, password);
     },
     []
   );
 
   const signUpWithEmail = useCallback(
     async (email: string, password: string, displayName: string) => {
-      const cred = await createUserWithEmailAndPassword(auth, email, password);
+      const cred = await createUserWithEmailAndPassword(getFirebaseAuth(), email, password);
       await updateProfile(cred.user, { displayName });
     },
     []
@@ -75,27 +75,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signInWithGoogle = useCallback(async () => {
     const provider = new GoogleAuthProvider();
-    await signInWithPopup(auth, provider);
+    await signInWithPopup(getFirebaseAuth(), provider);
   }, []);
 
   const signOut = useCallback(async () => {
-    await firebaseSignOut(auth);
+    await firebaseSignOut(getFirebaseAuth());
   }, []);
 
   const updateDisplayName = useCallback(
     async (name: string) => {
-      if (auth.currentUser) {
-        await updateProfile(auth.currentUser, { displayName: name });
-        setUser({ ...auth.currentUser });
+      if (getFirebaseAuth().currentUser) {
+        await updateProfile(getFirebaseAuth().currentUser, { displayName: name });
+        setUser({ ...getFirebaseAuth().currentUser });
       }
     },
     []
   );
 
   const updateAvatar = useCallback(async (url: string) => {
-    if (auth.currentUser) {
-      await updateProfile(auth.currentUser, { photoURL: url });
-      setUser({ ...auth.currentUser });
+    if (getFirebaseAuth().currentUser) {
+      await updateProfile(getFirebaseAuth().currentUser, { photoURL: url });
+      setUser({ ...getFirebaseAuth().currentUser });
     }
   }, []);
 
