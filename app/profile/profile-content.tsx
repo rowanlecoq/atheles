@@ -19,11 +19,11 @@ type User = {
 };
 
 const TIERS = [
-  { name: "BRONZE", min: 0, max: 1000, barGradient: "from-amber-900 via-amber-700 to-amber-500", titleGradient: "from-amber-700 via-amber-500 to-amber-400", perks: [] as string[] },
-  { name: "SILVER", min: 1000, max: 3000, barGradient: "from-gray-500 via-gray-400 to-gray-300", titleGradient: "from-gray-400 via-gray-300 to-white", perks: ["10% monthly discount code"] },
-  { name: "GOLD", min: 3000, max: 5000, barGradient: "from-yellow-700 via-yellow-500 to-amber-300", titleGradient: "from-yellow-600 via-yellow-400 to-amber-200", perks: ["early access", "15% monthly discount code", "birthday rewards"] },
-  { name: "PLATINUM", min: 5000, max: 10000, barGradient: "from-cyan-700 via-cyan-400 to-cyan-200", titleGradient: "from-cyan-500 via-cyan-300 to-white", perks: ["early access", "18% monthly discount code", "birthday rewards", "free shipping"] },
-  { name: "CHAMPION", min: 10000, max: Infinity, barGradient: "from-fuchsia-700 via-purple-500 to-amber-400", titleGradient: "from-fuchsia-400 via-purple-300 to-amber-300", perks: ["exclusive access", "20% monthly discount code", "free shipping", "birthday rewards"] },
+  { name: "BRONZE", min: 0, max: 1000, barGradient: "from-amber-900 via-amber-700 to-amber-500", titleGradient: "from-amber-500 via-amber-400 to-yellow-300", perks: [] as string[] },
+  { name: "SILVER", min: 1000, max: 3000, barGradient: "from-gray-500 via-gray-400 to-gray-300", titleGradient: "from-gray-300 via-gray-200 to-white", perks: ["10% monthly discount code"] },
+  { name: "GOLD", min: 3000, max: 5000, barGradient: "from-yellow-700 via-yellow-500 to-amber-300", titleGradient: "from-yellow-400 via-yellow-300 to-amber-200", perks: ["early access", "15% monthly discount code", "birthday rewards"] },
+  { name: "PLATINUM", min: 5000, max: 10000, barGradient: "from-cyan-700 via-cyan-400 to-cyan-200", titleGradient: "from-cyan-300 via-cyan-200 to-white", perks: ["early access", "18% monthly discount code", "birthday rewards", "free shipping"] },
+  { name: "CHAMPION", min: 10000, max: Infinity, barGradient: "from-fuchsia-700 via-purple-500 to-amber-400", titleGradient: "from-fuchsia-300 via-purple-300 to-amber-200", perks: ["exclusive access", "20% monthly discount code", "free shipping", "birthday rewards"] },
 ];
 
 function getTier(points: number) {
@@ -320,7 +320,7 @@ export default function ProfileContent() {
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/5 via-transparent to-brand-gold/3" />
 
-        <div className="relative p-6">
+        <div className="relative p-6" style={{ textTransform: "uppercase" }}>
           {/* Header - gradient title + tier name */}
           <div className="mb-5 text-center">
             <p
@@ -338,12 +338,15 @@ export default function ProfileContent() {
           {/* Points display */}
           <div className="mb-6 flex justify-center">
             <div className="relative">
-              <p className="text-center font-heading text-5xl tracking-tight text-brand-gold">
+              <p className="text-center text-5xl font-light tracking-tight text-brand-gold">
                 {points.toLocaleString()}
               </p>
               <p className="mt-0.5 text-center text-[10px] tracking-[0.2em] text-brand-pale-gold/60">
                 POINTS EARNED
               </p>
+              {/* Decorative sparkles */}
+              <span className="absolute -left-4 -top-1 animate-pulse text-brand-gold/40" style={{ animationDuration: "2.5s" }}>&#10022;</span>
+              <span className="absolute -right-4 top-2 animate-pulse text-brand-gold/30" style={{ animationDuration: "3s", animationDelay: "0.8s" }}>&#10022;</span>
             </div>
           </div>
 
@@ -373,7 +376,7 @@ export default function ProfileContent() {
                 className={`relative h-full rounded-full bg-gradient-to-r ${tier.barGradient} transition-all duration-1000 ease-out`}
                 style={{ width: `${Math.max(progressInTier, 3)}%` }}
               >
-                {/* Smooth liquid shimmer */}
+                {/* Smooth shimmer */}
                 <div className="absolute inset-0 rounded-full" style={{ animation: "shimmerFlow 3s ease-in-out infinite" }}>
                   <div
                     className="h-full w-full rounded-full"
@@ -382,11 +385,12 @@ export default function ProfileContent() {
                     }}
                   />
                 </div>
-                {/* Gentle glitter */}
-                <span className="absolute left-[15%] top-1.5 text-[3px] text-white/0" style={{ animation: "glitter 3s ease-in-out infinite" }}>&#10022;</span>
-                <span className="absolute left-[40%] top-0.5 text-[3px] text-white/0" style={{ animation: "glitter 3s ease-in-out infinite", animationDelay: "1s" }}>&#10022;</span>
-                <span className="absolute left-[65%] top-2.5 text-[3px] text-white/0" style={{ animation: "glitter 3s ease-in-out infinite", animationDelay: "2s" }}>&#10022;</span>
-                <span className="absolute left-[85%] top-1 text-[3px] text-white/0" style={{ animation: "glitter 3s ease-in-out infinite", animationDelay: "0.5s" }}>&#10022;</span>
+                {/* Sparkles across the bar */}
+                <span className="absolute left-[12%] top-1 animate-pulse text-[5px] text-white/50" style={{ animationDuration: "2s" }}>&#10022;</span>
+                <span className="absolute left-[30%] top-3 animate-pulse text-[4px] text-white/40" style={{ animationDuration: "2.5s", animationDelay: "0.5s" }}>&#10022;</span>
+                <span className="absolute left-[50%] top-0.5 animate-pulse text-[5px] text-white/50" style={{ animationDuration: "2.2s", animationDelay: "1s" }}>&#10022;</span>
+                <span className="absolute left-[70%] top-2.5 animate-pulse text-[4px] text-white/35" style={{ animationDuration: "2.8s", animationDelay: "1.5s" }}>&#10022;</span>
+                <span className="absolute left-[88%] top-1 animate-pulse text-[5px] text-white/45" style={{ animationDuration: "2.3s", animationDelay: "0.3s" }}>&#10022;</span>
                 {/* Edge glow */}
                 <div className="absolute right-0 top-0 h-full w-4 rounded-full bg-white/15 blur-sm" />
               </div>
@@ -396,11 +400,9 @@ export default function ProfileContent() {
           {/* Progress text */}
           <div className="mb-5 text-center">
             {nextTier ? (
-              <p className="text-xs text-brand-grey">
+              <p className="text-xs text-brand-grey" style={{ textTransform: "none" }}>
                 <span className="text-brand-pale-gold">{(nextTier.min - points).toLocaleString()}</span> points to{" "}
-                <span
-                  className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-medium text-transparent`}
-                >
+                <span className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-medium text-transparent`} style={{ textTransform: "uppercase" }}>
                   {nextTier.name}
                 </span>
               </p>
@@ -417,26 +419,29 @@ export default function ProfileContent() {
             {tier.perks.length > 0 ? (
               <ul className="space-y-1.5">
                 {tier.perks.map((perk) => (
-                  <li key={perk} className="flex items-center gap-2 text-xs text-brand-pale-gold">
+                  <li key={perk} className="flex items-center gap-2 text-xs text-white/80" style={{ textTransform: "none" }}>
                     <span className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[8px] text-transparent`}>&#10022;</span>
                     {perk}
                   </li>
                 ))}
               </ul>
             ) : (
-              <p className="text-xs text-brand-grey/50">
-                reach <span className={`bg-gradient-to-r ${TIERS[1]!.titleGradient} bg-clip-text font-medium text-transparent`}>SILVER</span> to unlock your first perks
+              <p className="text-xs text-brand-grey/60" style={{ textTransform: "none" }}>
+                Reach{" "}
+                <span className={`bg-gradient-to-r ${TIERS[1]!.titleGradient} bg-clip-text font-medium text-transparent`}>SILVER</span>
+                {" "}to unlock your first perks
               </p>
             )}
             {nextTier && nextTier.perks.length > 0 && (
               <div className="mt-3 border-t border-brand-dark-gold/10 pt-3">
                 <p className="mb-1.5 text-[10px] tracking-[0.15em] text-brand-grey/50">
-                  NEXT AT <span className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-transparent`}>{nextTier.name}</span>
+                  NEXT AT{" "}
+                  <span className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-transparent`}>{nextTier.name}</span>
                 </p>
                 <ul className="space-y-1">
                   {nextTier.perks.filter((p) => !tier.perks.includes(p)).map((perk) => (
-                    <li key={perk} className="flex items-center gap-2 text-xs text-brand-grey/40">
-                      <span className="text-[8px]">&#10022;</span>
+                    <li key={perk} className="flex items-center gap-2 text-xs text-brand-grey/50" style={{ textTransform: "none" }}>
+                      <span className="text-[8px] text-brand-dark-gold">&#10022;</span>
                       {perk}
                     </li>
                   ))}
