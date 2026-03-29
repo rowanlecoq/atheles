@@ -22,7 +22,7 @@ export function HeroCenter() {
             href="/search"
             className="inline-block border border-brand-gold px-6 py-2.5 text-xs uppercase tracking-[0.18em] text-brand-gold transition-colors duration-300 hover:bg-brand-gold hover:text-brand-dark sm:px-8 sm:tracking-[0.24em]"
           >
-            shop for more
+            enter store
           </Link>
         </MagneticHover>
       </FadeIn>

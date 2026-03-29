@@ -11,7 +11,7 @@ import { SearchToggle } from "./search-toggle";
 
 const fallbackMenu: Menu[] = [
   { title: "Home", path: "/" },
-  { title: "Shop", path: "/search" },
+  { title: "Store", path: "/search" },
 ];
 
 export async function Navbar() {

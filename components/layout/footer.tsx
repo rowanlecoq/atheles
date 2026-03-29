@@ -8,7 +8,7 @@ import FooterMenu from "./footer-menu";
 const { SITE_NAME } = process.env;
 
 const quickLinks = [
-  { title: "Shop", path: "/search" },
+  { title: "Store", path: "/search" },
   { title: "About", path: "/about" },
   { title: "Size Guide", path: "/size-guide" },
   { title: "FAQ", path: "/faq" },

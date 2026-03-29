@@ -20,7 +20,7 @@ export default function SearchPageHeader() {
   const segments = pathname.split("/").filter(Boolean);
   // /search/mens → ["search", "mens"] → collection = "mens"
   const collection = segments.length > 1 ? segments[segments.length - 1]! : null;
-  const title = collection ? collectionTitles[collection] || collection : "shop";
+  const title = collection ? collectionTitles[collection] || collection : "store";
 
   return (
     <div className="relative overflow-hidden border-b border-brand-dark-gold/10">
