@@ -27,6 +27,7 @@ export async function getApprovedReviews(
   productHandle?: string,
   limit = 50,
 ): Promise<Review[]> {
+  if (!supabase) return [];
   let query = supabase
     .from("reviews")
     .select("*")
@@ -44,6 +45,7 @@ export async function getApprovedReviews(
 }
 
 export async function getAllReviews(limit = 50): Promise<Review[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from("reviews")
     .select("*")
@@ -56,6 +58,7 @@ export async function getAllReviews(limit = 50): Promise<Review[]> {
 }
 
 export async function getPendingReviews(): Promise<Review[]> {
+  if (!supabase) return [];
   const { data, error } = await supabase
     .from("reviews")
     .select("*")
@@ -69,6 +72,7 @@ export async function getPendingReviews(): Promise<Review[]> {
 export async function submitReview(
   input: ReviewInput,
 ): Promise<{ success: boolean; error?: string }> {
+  if (!supabase) return { success: false, error: "reviews not configured" };
   // Check for duplicate review (same email + product)
   const duplicateQuery = supabase
     .from("reviews")
@@ -104,6 +108,7 @@ export async function submitReview(
 }
 
 export async function approveReview(id: string): Promise<void> {
+  if (!supabase) return;
   const { error } = await supabase
     .from("reviews")
     .update({ approved: true })
@@ -113,6 +118,7 @@ export async function approveReview(id: string): Promise<void> {
 }
 
 export async function rejectReview(id: string): Promise<void> {
+  if (!supabase) return;
   // Get images to delete from storage
   const { data: review } = await supabase
     .from("reviews")
@@ -140,6 +146,7 @@ export async function uploadReviewImage(
   fileName: string,
   contentType: string,
 ): Promise<string> {
+  if (!supabase) throw new Error("reviews not configured");
   const path = `${Date.now()}-${fileName}`;
 
   const { error } = await supabase.storage
