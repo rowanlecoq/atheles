@@ -413,26 +413,84 @@ export default function ProfileContent() {
         </div>
       ) : profileBg !== "none" ? (
         <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          <div className={`absolute inset-0 ${
-            profileBg === "gold" ? "bg-gradient-to-br from-yellow-900/25 via-amber-800/15 to-yellow-950/20" :
-            profileBg === "ember" ? "bg-gradient-to-br from-red-900/25 via-orange-800/15 to-red-950/20" :
-            profileBg === "ocean" ? "bg-gradient-to-br from-cyan-900/25 via-teal-800/15 to-blue-950/20" :
-            profileBg === "aurora" ? "bg-gradient-to-br from-purple-900/25 via-fuchsia-800/10 to-emerald-900/20" :
-            profileBg === "midnight" ? "bg-gradient-to-br from-indigo-900/25 via-blue-800/15 to-violet-950/20" :
-            ""
-          }`} style={{ animation: "bgFloat 8s ease-in-out infinite" }} />
-          {/* Floating particles */}
-          <div className="absolute inset-0">
-            <span className="absolute left-[10%] top-[20%] animate-pulse text-[6px] opacity-20" style={{ animationDuration: "3s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
-            <span className="absolute left-[70%] top-[15%] animate-pulse text-[8px] opacity-15" style={{ animationDuration: "4s", animationDelay: "1s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
-            <span className="absolute left-[40%] top-[60%] animate-pulse text-[5px] opacity-20" style={{ animationDuration: "3.5s", animationDelay: "2s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
-            <span className="absolute left-[85%] top-[45%] animate-pulse text-[7px] opacity-15" style={{ animationDuration: "4.5s", animationDelay: "0.5s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
-            <span className="absolute left-[25%] top-[80%] animate-pulse text-[6px] opacity-20" style={{ animationDuration: "3.8s", animationDelay: "1.5s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
-          </div>
+          {/* Flowing blob layers */}
+          {(() => {
+            const colors = {
+              gold: { a: "rgba(193,163,104,0.15)", b: "rgba(161,133,64,0.12)", c: "rgba(217,195,138,0.08)", particle: "#c1a368" },
+              ember: { a: "rgba(220,60,40,0.14)", b: "rgba(234,120,50,0.10)", c: "rgba(180,40,30,0.08)", particle: "#ef4444" },
+              ocean: { a: "rgba(34,211,238,0.12)", b: "rgba(20,160,200,0.10)", c: "rgba(30,100,180,0.08)", particle: "#22d3ee" },
+              aurora: { a: "rgba(168,85,247,0.12)", b: "rgba(52,211,153,0.10)", c: "rgba(236,72,153,0.07)", particle: "#a855f7" },
+              midnight: { a: "rgba(99,102,241,0.14)", b: "rgba(59,130,246,0.10)", c: "rgba(124,58,237,0.08)", particle: "#6366f1" },
+            }[profileBg] || { a: "transparent", b: "transparent", c: "transparent", particle: "#888" };
+            return (
+              <>
+                {/* Layer 1 — slow drift */}
+                <div
+                  className="absolute -inset-[50%] rounded-full blur-3xl"
+                  style={{
+                    background: `radial-gradient(ellipse 60% 50% at 30% 40%, ${colors.a}, transparent 70%)`,
+                    animation: "drift1 12s ease-in-out infinite",
+                  }}
+                />
+                {/* Layer 2 — counter drift */}
+                <div
+                  className="absolute -inset-[50%] rounded-full blur-3xl"
+                  style={{
+                    background: `radial-gradient(ellipse 50% 60% at 70% 60%, ${colors.b}, transparent 70%)`,
+                    animation: "drift2 15s ease-in-out infinite",
+                  }}
+                />
+                {/* Layer 3 — gentle pulse */}
+                <div
+                  className="absolute -inset-[30%] rounded-full blur-2xl"
+                  style={{
+                    background: `radial-gradient(ellipse 40% 40% at 50% 50%, ${colors.c}, transparent 60%)`,
+                    animation: "drift3 10s ease-in-out infinite",
+                  }}
+                />
+                {/* Floating sparkles */}
+                {[
+                  { x: "12%", y: "18%", size: "6px", dur: "3s", delay: "0s" },
+                  { x: "68%", y: "12%", size: "8px", dur: "4s", delay: "1s" },
+                  { x: "35%", y: "55%", size: "5px", dur: "3.5s", delay: "2s" },
+                  { x: "82%", y: "42%", size: "7px", dur: "4.5s", delay: "0.5s" },
+                  { x: "22%", y: "78%", size: "6px", dur: "3.8s", delay: "1.5s" },
+                  { x: "55%", y: "88%", size: "5px", dur: "4.2s", delay: "0.8s" },
+                  { x: "90%", y: "72%", size: "7px", dur: "3.2s", delay: "2.5s" },
+                ].map((p, i) => (
+                  <span
+                    key={i}
+                    className="absolute animate-pulse"
+                    style={{
+                      left: p.x, top: p.y,
+                      fontSize: p.size,
+                      animationDuration: p.dur,
+                      animationDelay: p.delay,
+                      color: colors.particle,
+                      opacity: 0.25,
+                    }}
+                  >&#10022;</span>
+                ))}
+              </>
+            );
+          })()}
           <style jsx>{`
-            @keyframes bgFloat {
-              0%, 100% { transform: scale(1) rotate(0deg); }
-              50% { transform: scale(1.05) rotate(1deg); }
+            @keyframes drift1 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); }
+              25% { transform: translate(8%, -5%) scale(1.1); }
+              50% { transform: translate(-5%, 8%) scale(0.95); }
+              75% { transform: translate(-8%, -3%) scale(1.05); }
+            }
+            @keyframes drift2 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); }
+              25% { transform: translate(-10%, 6%) scale(1.08); }
+              50% { transform: translate(7%, -8%) scale(0.92); }
+              75% { transform: translate(5%, 10%) scale(1.03); }
+            }
+            @keyframes drift3 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.8; }
+              33% { transform: translate(5%, -5%) scale(1.15); opacity: 1; }
+              66% { transform: translate(-5%, 5%) scale(0.9); opacity: 0.7; }
             }
           `}</style>
         </div>
