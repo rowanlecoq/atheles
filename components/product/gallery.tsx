@@ -10,7 +10,9 @@ export function Gallery({
   images: { src: string; altText: string }[];
 }) {
   const [imageIndex, setImageIndex] = useState(0);
-  const touchStartX = useRef<number | null>(null);
+  const [zoomed, setZoomed] = useState(false);
+  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const scrollRef = useRef<HTMLDivElement>(null);
 
   const nextImage = useCallback(() => {
     setImageIndex((prev) => (prev + 1 < images.length ? prev + 1 : 0));
@@ -30,56 +32,95 @@ export function Gallery({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [nextImage, prevImage]);
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    touchStartX.current = e.touches[0]?.clientX ?? null;
+  // Sync scroll to current image on mobile
+  useEffect(() => {
+    if (scrollRef.current) {
+      const el = scrollRef.current;
+      const child = el.children[imageIndex] as HTMLElement;
+      if (child) {
+        el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
+      }
+    }
+  }, [imageIndex]);
+
+  // Handle scroll snap on mobile to update index
+  const handleScroll = () => {
+    if (!scrollRef.current) return;
+    const el = scrollRef.current;
+    const scrollLeft = el.scrollLeft;
+    const childWidth = el.children[0]?.clientWidth || 1;
+    const newIndex = Math.round(scrollLeft / childWidth);
+    if (newIndex !== imageIndex && newIndex >= 0 && newIndex < images.length) {
+      setImageIndex(newIndex);
+    }
   };
 
-  const handleTouchEnd = (e: React.TouchEvent) => {
-    if (touchStartX.current === null) return;
-    const diff = (e.changedTouches[0]?.clientX ?? 0) - touchStartX.current;
-    if (Math.abs(diff) > 50) {
-      if (diff < 0) nextImage();
-      else prevImage();
-    }
-    touchStartX.current = null;
+  // Desktop zoom on hover
+  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    if (!zoomed) return;
+    const rect = e.currentTarget.getBoundingClientRect();
+    const x = ((e.clientX - rect.left) / rect.width) * 100;
+    const y = ((e.clientY - rect.top) / rect.height) * 100;
+    setZoomPos({ x, y });
   };
 
   return (
     <div>
-      {/* Main image with swipe support */}
+      {/* Mobile: horizontal scroll gallery */}
       <div
-        className="relative aspect-square h-full max-h-[500px] w-full overflow-hidden rounded-lg sm:max-h-[600px]"
-        onTouchStart={handleTouchStart}
-        onTouchEnd={handleTouchEnd}
+        ref={scrollRef}
+        onScroll={handleScroll}
+        className="flex snap-x snap-mandatory overflow-x-auto scrollbar-hide lg:hidden"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {images[imageIndex] && (
-          <Image
-            className="h-full w-full object-contain"
-            fill
-            sizes="(min-width: 1024px) 66vw, 100vw"
-            alt={images[imageIndex]?.altText as string}
-            src={images[imageIndex]?.src as string}
-            priority={imageIndex === 0}
-          />
-        )}
+        {images.map((image, index) => (
+          <div
+            key={image.src}
+            className="aspect-square w-full flex-none snap-center"
+          >
+            <div className="relative h-full w-full">
+              <Image
+                className="h-full w-full object-contain"
+                fill
+                sizes="100vw"
+                alt={image.altText}
+                src={image.src}
+                priority={index === 0}
+              />
+            </div>
+          </div>
+        ))}
+      </div>
 
-        {/* Left/Right click zones (invisible, large tap targets) */}
-        {images.length > 1 && (
-          <>
-            <button
-              type="button"
-              onClick={prevImage}
-              className="absolute left-0 top-0 h-full w-1/3 cursor-w-resize opacity-0"
-              aria-label="Previous image"
+      {/* Desktop: single image with zoom on click */}
+      <div className="hidden lg:block">
+        <div
+          className={`relative aspect-square h-full max-h-[600px] w-full overflow-hidden rounded-lg ${
+            zoomed ? "cursor-zoom-out" : "cursor-zoom-in"
+          }`}
+          onClick={() => setZoomed(!zoomed)}
+          onMouseMove={handleMouseMove}
+          onMouseLeave={() => setZoomed(false)}
+        >
+          {images[imageIndex] && (
+            <Image
+              className="h-full w-full object-contain transition-transform duration-200"
+              fill
+              sizes="66vw"
+              alt={images[imageIndex]?.altText as string}
+              src={images[imageIndex]?.src as string}
+              priority={imageIndex === 0}
+              style={
+                zoomed
+                  ? {
+                      transform: "scale(2.5)",
+                      transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
+                    }
+                  : undefined
+              }
             />
-            <button
-              type="button"
-              onClick={nextImage}
-              className="absolute right-0 top-0 h-full w-1/3 cursor-e-resize opacity-0"
-              aria-label="Next image"
-            />
-          </>
-        )}
+          )}
+        </div>
       </div>
 
       {/* Dot indicators */}
