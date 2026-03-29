@@ -406,20 +406,36 @@ export default function ProfileContent() {
     <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16">
       {/* Background layer */}
       {profileBg === "custom" && customBgImage ? (
-        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={customBgImage} alt="" className="h-full w-full object-cover opacity-15 blur-sm" />
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-brand-dark/80 to-brand-dark" />
+          <img src={customBgImage} alt="" className="h-full w-full object-cover opacity-10" />
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/70 to-brand-dark" />
         </div>
       ) : profileBg !== "none" ? (
-        <div className={`pointer-events-none absolute inset-0 ${
-          profileBg === "gold" ? "bg-gradient-to-br from-yellow-900/30 via-brand-dark-gold/20 to-amber-950/25" :
-          profileBg === "ember" ? "bg-gradient-to-br from-red-900/30 via-orange-950/20 to-red-950/25" :
-          profileBg === "ocean" ? "bg-gradient-to-br from-cyan-900/30 via-teal-950/20 to-blue-950/25" :
-          profileBg === "aurora" ? "bg-gradient-to-br from-purple-900/30 via-fuchsia-950/15 to-emerald-950/25" :
-          profileBg === "midnight" ? "bg-gradient-to-br from-indigo-900/30 via-blue-950/20 to-violet-950/25" :
-          ""
-        }`} />
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+          <div className={`absolute inset-0 ${
+            profileBg === "gold" ? "bg-gradient-to-br from-yellow-900/25 via-amber-800/15 to-yellow-950/20" :
+            profileBg === "ember" ? "bg-gradient-to-br from-red-900/25 via-orange-800/15 to-red-950/20" :
+            profileBg === "ocean" ? "bg-gradient-to-br from-cyan-900/25 via-teal-800/15 to-blue-950/20" :
+            profileBg === "aurora" ? "bg-gradient-to-br from-purple-900/25 via-fuchsia-800/10 to-emerald-900/20" :
+            profileBg === "midnight" ? "bg-gradient-to-br from-indigo-900/25 via-blue-800/15 to-violet-950/20" :
+            ""
+          }`} style={{ animation: "bgFloat 8s ease-in-out infinite" }} />
+          {/* Floating particles */}
+          <div className="absolute inset-0">
+            <span className="absolute left-[10%] top-[20%] animate-pulse text-[6px] opacity-20" style={{ animationDuration: "3s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
+            <span className="absolute left-[70%] top-[15%] animate-pulse text-[8px] opacity-15" style={{ animationDuration: "4s", animationDelay: "1s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
+            <span className="absolute left-[40%] top-[60%] animate-pulse text-[5px] opacity-20" style={{ animationDuration: "3.5s", animationDelay: "2s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
+            <span className="absolute left-[85%] top-[45%] animate-pulse text-[7px] opacity-15" style={{ animationDuration: "4.5s", animationDelay: "0.5s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
+            <span className="absolute left-[25%] top-[80%] animate-pulse text-[6px] opacity-20" style={{ animationDuration: "3.8s", animationDelay: "1.5s", color: profileBg === "gold" ? "#c1a368" : profileBg === "ember" ? "#ef4444" : profileBg === "ocean" ? "#22d3ee" : profileBg === "aurora" ? "#a855f7" : "#6366f1" }}>&#10022;</span>
+          </div>
+          <style jsx>{`
+            @keyframes bgFloat {
+              0%, 100% { transform: scale(1) rotate(0deg); }
+              50% { transform: scale(1.05) rotate(1deg); }
+            }
+          `}</style>
+        </div>
       ) : null}
 
       <div className="relative">
