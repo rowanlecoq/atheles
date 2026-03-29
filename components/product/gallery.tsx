@@ -1,37 +1,57 @@
 "use client";
 
-import { ArrowLeftIcon, ArrowRightIcon } from "@heroicons/react/24/outline";
 import { GridTileImage } from "components/grid/tile";
 import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useState, useCallback, useEffect, useRef } from "react";
 
 export function Gallery({
   images,
 }: {
   images: { src: string; altText: string }[];
 }) {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  const imageIndex = searchParams.has("image")
-    ? parseInt(searchParams.get("image")!)
-    : 0;
+  const [imageIndex, setImageIndex] = useState(0);
+  const touchStartX = useRef<number | null>(null);
 
-  const updateImage = (index: string) => {
-    const params = new URLSearchParams(searchParams.toString());
-    params.set("image", index);
-    router.replace(`?${params.toString()}`, { scroll: false });
+  const nextImage = useCallback(() => {
+    setImageIndex((prev) => (prev + 1 < images.length ? prev + 1 : 0));
+  }, [images.length]);
+
+  const prevImage = useCallback(() => {
+    setImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
+  }, [images.length]);
+
+  // Keyboard navigation
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === "ArrowLeft") prevImage();
+      if (e.key === "ArrowRight") nextImage();
+    };
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [nextImage, prevImage]);
+
+  const handleTouchStart = (e: React.TouchEvent) => {
+    touchStartX.current = e.touches[0]?.clientX ?? null;
   };
 
-  const nextImageIndex = imageIndex + 1 < images.length ? imageIndex + 1 : 0;
-  const previousImageIndex =
-    imageIndex === 0 ? images.length - 1 : imageIndex - 1;
-
-  const buttonClassName =
-    "flex h-full items-center justify-center px-4 transition-all ease-in-out hover:scale-110 hover:text-brand-gold sm:px-6";
+  const handleTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null) return;
+    const diff = (e.changedTouches[0]?.clientX ?? 0) - touchStartX.current;
+    if (Math.abs(diff) > 50) {
+      if (diff < 0) nextImage();
+      else prevImage();
+    }
+    touchStartX.current = null;
+  };
 
   return (
-    <form>
-      <div className="relative aspect-square h-full max-h-[460px] w-full overflow-hidden sm:max-h-[550px]">
+    <div>
+      {/* Main image with swipe support */}
+      <div
+        className="relative aspect-square h-full max-h-[500px] w-full overflow-hidden rounded-lg sm:max-h-[600px]"
+        onTouchStart={handleTouchStart}
+        onTouchEnd={handleTouchEnd}
+      >
         {images[imageIndex] && (
           <Image
             className="h-full w-full object-contain"
@@ -39,46 +59,62 @@ export function Gallery({
             sizes="(min-width: 1024px) 66vw, 100vw"
             alt={images[imageIndex]?.altText as string}
             src={images[imageIndex]?.src as string}
-            priority={true}
+            priority={imageIndex === 0}
           />
         )}
 
-        {images.length > 1 ? (
-          <div className="absolute bottom-4 flex w-full justify-center sm:bottom-[15%]">
-            <div className="mx-auto flex h-11 items-center rounded-full border border-brand-dark-gold/30 bg-brand-dark/80 text-brand-grey backdrop-blur-sm">
-              <button
-                formAction={() => updateImage(previousImageIndex.toString())}
-                aria-label="Previous product image"
-                className={buttonClassName}
-              >
-                <ArrowLeftIcon className="h-5" />
-              </button>
-              <div className="mx-1 h-6 w-px bg-brand-medium-grey"></div>
-              <button
-                formAction={() => updateImage(nextImageIndex.toString())}
-                aria-label="Next product image"
-                className={buttonClassName}
-              >
-                <ArrowRightIcon className="h-5" />
-              </button>
-            </div>
-          </div>
-        ) : null}
+        {/* Left/Right click zones (invisible, large tap targets) */}
+        {images.length > 1 && (
+          <>
+            <button
+              type="button"
+              onClick={prevImage}
+              className="absolute left-0 top-0 h-full w-1/3 cursor-w-resize opacity-0"
+              aria-label="Previous image"
+            />
+            <button
+              type="button"
+              onClick={nextImage}
+              className="absolute right-0 top-0 h-full w-1/3 cursor-e-resize opacity-0"
+              aria-label="Next image"
+            />
+          </>
+        )}
       </div>
 
-      {images.length > 1 ? (
-        <ul className="my-8 flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto py-1 sm:my-12 sm:flex-wrap sm:justify-center lg:mb-0">
+      {/* Dot indicators */}
+      {images.length > 1 && (
+        <div className="mt-4 flex items-center justify-center gap-2">
+          {images.map((_, index) => (
+            <button
+              key={index}
+              type="button"
+              onClick={() => setImageIndex(index)}
+              aria-label={`View image ${index + 1}`}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                index === imageIndex
+                  ? "w-6 bg-brand-gold"
+                  : "w-2 bg-brand-dark-gold/40 hover:bg-brand-dark-gold/60"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Thumbnail strip */}
+      {images.length > 1 && (
+        <ul className="mt-4 flex w-full flex-nowrap items-center justify-start gap-2 overflow-x-auto py-1 sm:flex-wrap sm:justify-center lg:mb-0">
           {images.map((image, index) => {
             const isActive = index === imageIndex;
-
             return (
               <li
                 key={image.src}
                 className="h-16 w-16 flex-none sm:h-20 sm:w-20"
               >
                 <button
-                  formAction={() => updateImage(index.toString())}
-                  aria-label="Select product image"
+                  type="button"
+                  onClick={() => setImageIndex(index)}
+                  aria-label={`Select image ${index + 1}`}
                   className="h-full w-full"
                 >
                   <GridTileImage
@@ -93,7 +129,7 @@ export function Gallery({
             );
           })}
         </ul>
-      ) : null}
-    </form>
+      )}
+    </div>
   );
 }
