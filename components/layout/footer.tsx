@@ -163,40 +163,6 @@ export default async function Footer() {
             &copy; {copyrightDate} atheles. all rights reserved.
           </p>
 
-          {/* Payment icons */}
-          <div className="flex items-center gap-2">
-            {/* Visa */}
-            <svg viewBox="0 0 750 471" className="h-6 w-auto opacity-40 transition-opacity hover:opacity-70" aria-label="Visa">
-              <rect width="750" height="471" rx="40" fill="#1a1f71"/>
-              <path d="M278.2 334.2h-60.6l37.9-233.9h60.6L278.2 334.2zM524.7 106.2c-12-4.5-30.9-9.4-54.4-9.4-60 0-102.2 31.9-102.5 77.5-.3 33.7 30.1 52.5 53.1 63.7 23.6 11.5 31.5 18.8 31.4 29.1-.2 15.7-18.8 22.9-36.2 22.9-24.2 0-37.1-3.5-57-12.2l-7.8-3.7-8.5 52.4c14.2 6.5 40.4 12.2 67.6 12.5 63.8 0 105.3-31.5 105.7-80.2.2-26.7-15.9-47.1-50.9-63.9-21.2-10.9-34.2-18.1-34.1-29.1.1-10 11-20.4 34.7-20.4 19.8-.3 34.2 4.2 45.4 9l5.4 2.7 8.2-50.9-.1-.1z" fill="#fff"/>
-              <path d="M661.6 100.3h-46.9c-14.5 0-25.4 4.2-31.8 19.5l-90.1 215.4h63.7s10.4-28.9 12.8-35.3h77.8c1.8 8.2 7.4 35.3 7.4 35.3H712L661.6 100.3zm-74.9 185.4c5-13.6 24.3-65.8 24.3-65.8-.4.6 5-13.7 8.1-22.6l4.1 20.4 14.1 68H581.2l5.5-0z" fill="#fff"/>
-              <path d="M232.8 100.3L173.5 261l-6.4-32.4c-11-37.5-45.5-78.2-84-98.5l54.3 204h64.2l95.4-233.8h-64.3z" fill="#fff"/>
-              <path d="M131.9 100.3H37.5l-.8 4.7c76.1 19.4 126.5 66.4 147.4 122.8L163 125.5c-3.5-14.7-14.3-19.6-31.1-25.2z" fill="#f9a533"/>
-            </svg>
-            {/* Mastercard */}
-            <svg viewBox="0 0 152.407 108" className="h-6 w-auto opacity-40 transition-opacity hover:opacity-70" aria-label="Mastercard">
-              <rect width="152.407" height="108" rx="12" fill="#252525"/>
-              <circle cx="60.4" cy="54" r="28" fill="#eb001b"/>
-              <circle cx="92" cy="54" r="28" fill="#f79e1b"/>
-              <path d="M76.2 31.5a28 28 0 0 1 10.2 22.5 28 28 0 0 1-10.2 22.5 28 28 0 0 1-10.2-22.5 28 28 0 0 1 10.2-22.5z" fill="#ff5f00"/>
-            </svg>
-            {/* Apple Pay */}
-            <div className="flex h-6 items-center rounded bg-brand-grey/10 px-2 opacity-40 transition-opacity hover:opacity-70">
-              <svg viewBox="0 0 43 18" className="h-3 w-auto" fill="currentColor" aria-label="Apple Pay">
-                <path d="M7.3 3.3c-.5.6-1.2 1-2 .9-.1-.8.3-1.6.7-2.1C6.6 1.5 7.3 1 8 1c.1.8-.2 1.6-.7 2.3zm.7 1.2c-1.1-.1-2.1.6-2.6.6s-1.4-.6-2.3-.6C1.7 4.6.3 6.1.3 9c0 1.8.7 3.7 1.6 5 .7 1 1.6 2.2 2.8 2.1 1.1 0 1.5-.7 2.8-.7s1.7.7 2.9.7c1.2 0 2-1 2.7-2 .5-.7.9-1.5 1.1-2.3-2.5-1-2.9-4.6-.4-6z" className="text-brand-grey"/>
-                <path d="M17.7 4.8h-3l-1.3 3.8h-.1L12 4.8H9.2l3 7.2-1.6 4.5h2.7l4.4-11.7zm3.3 8c1.8 0 3.2-1 3.2-2.5h-2.3c-.1.7-.7 1.2-1.4 1.2-.9 0-1.5-.7-1.5-2s.6-2 1.5-2c.7 0 1.2.4 1.4 1.1h2.3c-.1-1.5-1.4-2.4-3.2-2.4-2.1 0-3.5 1.4-3.5 3.3s1.4 3.3 3.5 3.3zm4.5 3.7h2.3c-.1-.3-.2-.9-.2-1.4V6.4h-2.3V15c0 .6.1 1.2.2 1.5zm6.3-3.7c1.7 0 2.9-1.1 3-2.5h-2.2c-.1.6-.5 1.1-1.1 1.1-.8 0-1.3-.7-1.3-2s.5-2 1.3-2c.6 0 1 .4 1.1 1h2.2c-.1-1.4-1.3-2.4-3-2.4-2 0-3.3 1.4-3.3 3.3s1.3 3.5 3.3 3.5z" className="text-brand-grey"/>
-              </svg>
-            </div>
-            {/* Shop Pay */}
-            <div className="flex h-6 items-center rounded bg-[#5A31F4]/20 px-2 opacity-50 transition-opacity hover:opacity-70">
-              <span className="text-xs font-bold text-[#5A31F4]/70">Shop</span>
-            </div>
-            {/* Google Pay */}
-            <div className="flex h-6 items-center rounded bg-brand-grey/10 px-2 opacity-40 transition-opacity hover:opacity-70">
-              <span className="text-xs font-medium text-brand-grey/70">G Pay</span>
-            </div>
-          </div>
-
           <div className="flex flex-wrap items-center justify-center gap-4">
             <Link
               href="/shipping"
