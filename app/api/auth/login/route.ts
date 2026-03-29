@@ -35,9 +35,16 @@ export async function POST(request: Request) {
         ? {
             id: customer.id,
             email: customer.email,
+            firstName: customer.firstName,
+            lastName: customer.lastName,
             name:
               customer.displayName || customer.firstName || email.split("@")[0],
+            phone: customer.phone,
+            acceptsMarketing: customer.acceptsMarketing,
             createdAt: customer.createdAt,
+            numberOfOrders: customer.numberOfOrders,
+            totalSpent: customer.totalSpent,
+            dob: customer.dob,
           }
         : null,
     });

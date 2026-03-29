@@ -26,6 +26,10 @@ export default function LoginForm() {
       const data = await res.json();
 
       if (data.success) {
+        // Pre-cache basic session so profile loads instantly
+        if (data.user) {
+          sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+        }
         router.push("/profile");
         router.refresh();
       } else {
