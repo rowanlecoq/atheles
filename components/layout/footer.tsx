@@ -164,34 +164,17 @@ export default async function Footer() {
           </p>
 
           {/* Payment icons */}
-          <div className="flex items-center gap-2.5">
-            {/* Visa */}
-            <div className="flex h-7 w-11 items-center justify-center rounded bg-white">
-              <span className="text-[11px] font-black italic text-[#1A1F71]">VISA</span>
-            </div>
-            {/* Mastercard */}
-            <div className="flex h-7 w-11 items-center justify-center rounded bg-[#252525]">
-              <div className="flex">
-                <div className="h-4 w-4 rounded-full bg-[#EB001B]" />
-                <div className="-ml-1.5 h-4 w-4 rounded-full bg-[#F79E1B] opacity-80" />
-              </div>
-            </div>
-            {/* Apple Pay */}
-            <div className="flex h-7 w-11 items-center justify-center rounded bg-black">
-              <span className="text-[10px] font-semibold text-white">Pay</span>
-            </div>
-            {/* Shop Pay */}
-            <div className="flex h-7 w-11 items-center justify-center rounded bg-[#5A31F4]">
-              <span className="text-[10px] font-bold text-white">Shop</span>
-            </div>
-            {/* Google Pay */}
-            <div className="flex h-7 w-11 items-center justify-center rounded bg-white">
-              <span className="text-[10px] font-semibold text-[#3C4043]">GPay</span>
-            </div>
-            {/* PayPal */}
-            <div className="flex h-7 w-11 items-center justify-center rounded bg-[#FFC439]">
-              <span className="text-[9px] font-bold italic text-[#003087]">PayPal</span>
-            </div>
+          <div className="flex items-center gap-3 text-brand-grey">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5" aria-label="Credit card payments">
+              <rect x="1" y="4" width="22" height="16" rx="2" ry="2" />
+              <line x1="1" y1="10" x2="23" y2="10" />
+            </svg>
+            <span className="text-xs text-brand-grey/50">visa</span>
+            <span className="text-xs text-brand-grey/50">mastercard</span>
+            <span className="text-xs text-brand-grey/50">apple pay</span>
+            <span className="text-xs text-brand-grey/50">shop pay</span>
+            <span className="text-xs text-brand-grey/50">google pay</span>
+            <span className="text-xs text-brand-grey/50">paypal</span>
           </div>
 
           <div className="flex flex-wrap items-center justify-center gap-4">

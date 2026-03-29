@@ -34,40 +34,30 @@ function SubmitButton({
       onMouseEnter={() => setHovering(true)}
       onMouseLeave={() => setHovering(false)}
       className={clsx(
-        "group relative flex w-full items-center justify-center overflow-hidden rounded-full p-4 font-heading text-sm uppercase tracking-wider transition-all duration-500",
+        "group relative flex w-full items-center justify-center overflow-hidden rounded-full p-4 font-heading text-sm uppercase tracking-wider text-brand-dark transition-all duration-300",
         selectedVariantId
-          ? "cursor-pointer bg-brand-gold text-brand-dark"
-          : "cursor-not-allowed bg-brand-gold/50 text-brand-dark/60 opacity-60",
+          ? "cursor-pointer"
+          : "cursor-not-allowed opacity-60",
       )}
+      style={{
+        background: !selectedVariantId
+          ? "rgba(193,163,104,0.5)"
+          : hovering
+            ? "linear-gradient(270deg, #c1a368, #e8d5a3, #a08540, #c1a368)"
+            : "#c1a368",
+        backgroundSize: hovering && selectedVariantId ? "300% 100%" : "100% 100%",
+        animation: hovering && selectedVariantId ? "colorShift 3s ease infinite" : "none",
+      }}
     >
-      {/* Subtle shimmer sweep on hover */}
-      {selectedVariantId && (
-        <div
-          className={clsx(
-            "absolute inset-0 transition-opacity duration-700",
-            hovering ? "opacity-100" : "opacity-0",
-          )}
-          style={{
-            background:
-              "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.12) 48%, rgba(255,255,255,0.18) 50%, rgba(255,255,255,0.12) 52%, transparent 70%)",
-            animation: hovering ? "shimmerBtn 2s ease-in-out infinite" : "none",
-          }}
-        />
-      )}
-
-      <span
-        className={clsx(
-          "relative z-10 transition-all duration-300",
-          hovering && selectedVariantId ? "tracking-[0.2em]" : "tracking-wider",
-        )}
-      >
+      <span className="relative z-10">
         {selectedVariantId ? "Add To Cart" : "Select a Size"}
       </span>
 
       <style jsx>{`
-        @keyframes shimmerBtn {
-          0% { transform: translateX(-100%); }
-          100% { transform: translateX(100%); }
+        @keyframes colorShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
         }
       `}</style>
     </button>
@@ -92,22 +82,35 @@ export function AddToCart({ product }: { product: Product }) {
     (variant) => variant.id === selectedVariantId,
   );
 
+  // Calculate points earned
+  const price = parseFloat(product.priceRange.maxVariantPrice.amount);
+  const pointsEarned = Math.floor(price * 50);
+
   return (
-    <form
-      action={async () => {
-        if (finalVariant) {
-          addCartItem(finalVariant, product);
-        }
-        addItemAction();
-      }}
-    >
-      <SubmitButton
-        availableForSale={availableForSale}
-        selectedVariantId={selectedVariantId}
-      />
-      <p aria-live="polite" className="sr-only" role="status">
-        {message}
-      </p>
-    </form>
+    <div className="space-y-3">
+      <form
+        action={async () => {
+          if (finalVariant) {
+            addCartItem(finalVariant, product);
+          }
+          addItemAction();
+        }}
+      >
+        <SubmitButton
+          availableForSale={availableForSale}
+          selectedVariantId={selectedVariantId}
+        />
+        <p aria-live="polite" className="sr-only" role="status">
+          {message}
+        </p>
+      </form>
+
+      {/* Points earned info */}
+      {availableForSale && pointsEarned > 0 && (
+        <p className="text-center text-xs text-brand-grey">
+          earn <span className="text-brand-gold">{pointsEarned.toLocaleString()} points</span> with this purchase
+        </p>
+      )}
+    </div>
   );
 }
