@@ -86,6 +86,23 @@ export default function ProductGridItems({
                 fill
                 sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
               />
+              {/* Stock indicator */}
+              <div className="absolute left-3 top-3 z-10">
+                {product.availableForSale ? (
+                  <div className="flex items-center gap-1.5 rounded-full bg-brand-dark/80 px-2.5 py-1 backdrop-blur-sm">
+                    <span className="relative flex h-2 w-2">
+                      <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                      <span className="relative inline-flex h-2 w-2 rounded-full bg-green-500" />
+                    </span>
+                    <span className="text-xs uppercase tracking-wider text-green-400">In Stock</span>
+                  </div>
+                ) : (
+                  <div className="flex items-center gap-1.5 rounded-full bg-brand-dark/80 px-2.5 py-1 backdrop-blur-sm">
+                    <span className="h-2 w-2 rounded-full bg-red-500" />
+                    <span className="text-xs uppercase tracking-wider text-red-400">Sold Out</span>
+                  </div>
+                )}
+              </div>
             </Link>
             {product.availableForSale && (
               <div className="absolute bottom-3 right-3 z-10 opacity-100 transition-opacity md:bottom-14 md:opacity-0 md:group-hover:opacity-100">
