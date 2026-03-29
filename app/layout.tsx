@@ -7,14 +7,14 @@ import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ScrollProgress } from "components/scroll-progress";
 import { getCart } from "lib/shopify";
-import { Playfair_Display } from "next/font/google";
+import localFont from "next/font/local";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { baseUrl } from "lib/utils";
 
-const playfair = Playfair_Display({
-  subsets: ["latin"],
+const playfair = localFont({
+  src: "../public/fonts/PlayfairDisplay-Variable.ttf",
   variable: "--font-playfair",
   display: "swap",
 });
