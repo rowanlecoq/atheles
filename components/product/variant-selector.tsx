@@ -47,11 +47,8 @@ export function VariantSelector({
 
   return options.map((option) => (
     <form key={option.id}>
-      <dl className="mb-8">
-        <dt className="mb-4 text-sm uppercase tracking-wide text-brand-pale-gold">
-          {option.name}
-        </dt>
-        <dd className="flex flex-wrap gap-3">
+      <div className="mb-6">
+        <div className="flex flex-wrap gap-2 rounded-lg border border-brand-dark-gold/20 p-2">
           {option.values.map((value) => {
             const optionNameLowerCase = option.name.toLowerCase();
 
@@ -82,14 +79,14 @@ export function VariantSelector({
                 key={value}
                 aria-disabled={!isAvailableForSale}
                 disabled={!isAvailableForSale}
-                title={`${option.name} ${value}${!isAvailableForSale ? " (Out of Stock)" : ""}`}
+                title={`${value}${!isAvailableForSale ? " (Out of Stock)" : ""}`}
                 className={clsx(
-                  "flex min-w-[48px] items-center justify-center rounded-full border bg-brand-medium-grey/30 px-2 py-1 text-sm text-white",
+                  "flex flex-1 items-center justify-center rounded-md px-4 py-3 text-sm font-medium transition-all duration-200",
                   {
-                    "cursor-default ring-2 ring-brand-gold": isActive,
-                    "ring-1 ring-transparent transition duration-300 ease-in-out hover:ring-brand-gold":
+                    "bg-brand-gold text-brand-dark": isActive,
+                    "bg-transparent text-white hover:bg-brand-dark-gold/20":
                       !isActive && isAvailableForSale,
-                    "relative z-10 cursor-not-allowed overflow-hidden bg-brand-medium-grey/20 text-brand-grey ring-1 ring-brand-medium-grey/50 before:absolute before:inset-x-0 before:-z-10 before:h-px before:-rotate-45 before:bg-brand-medium-grey before:transition-transform":
+                    "cursor-not-allowed bg-transparent text-brand-grey/40 line-through":
                       !isAvailableForSale,
                   },
                 )}
@@ -98,8 +95,8 @@ export function VariantSelector({
               </button>
             );
           })}
-        </dd>
-      </dl>
+        </div>
+      </div>
     </form>
   ));
 }

@@ -164,29 +164,33 @@ export default async function Footer() {
           </p>
 
           {/* Payment icons */}
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-2.5">
             {/* Visa */}
-            <svg viewBox="0 0 38 24" className="h-6 w-auto opacity-50 transition-opacity hover:opacity-80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="38" height="24" rx="3" fill="#1A1F71" />
-              <path d="M15.3 15.8H13l1.4-8.6h2.3l-1.4 8.6zm7.5-8.4c-.5-.2-1.2-.4-2.1-.4-2.3 0-3.9 1.2-3.9 2.9 0 1.3 1.2 2 2 2.4.9.4 1.2.7 1.2 1.1 0 .6-.7.9-1.4.9-1 0-1.5-.1-2.3-.5l-.3-.2-.3 2c.6.3 1.6.5 2.7.5 2.4 0 4-1.2 4-3 0-1-.6-1.8-2-2.4-.8-.4-1.3-.7-1.3-1.1 0-.4.4-.8 1.3-.8.7 0 1.3.2 1.7.3l.2.1.5-1.8zm5.8-.2h-1.8c-.5 0-1 .2-1.2.7l-3.4 8.1h2.4l.5-1.3h2.9l.3 1.3h2.1l-1.8-8.8zm-2.8 5.7l1.2-3.2.3 1 .5 2.2h-2zm-11.5-5.7L12.1 13l-.2-1.2c-.4-1.4-1.7-2.9-3.2-3.7l2.1 7.7h2.4l3.7-8.6h-2.6z" fill="white" />
-              <path d="M9.6 7.2H6l0 .2c2.9.7 4.8 2.5 5.6 4.6l-.8-4.1c-.1-.5-.5-.7-1.2-.7z" fill="#F9A533" />
-            </svg>
+            <div className="flex h-7 w-11 items-center justify-center rounded bg-white">
+              <span className="text-[11px] font-black italic text-[#1A1F71]">VISA</span>
+            </div>
             {/* Mastercard */}
-            <svg viewBox="0 0 38 24" className="h-6 w-auto opacity-50 transition-opacity hover:opacity-80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="38" height="24" rx="3" fill="#252525" />
-              <circle cx="15" cy="12" r="7" fill="#EB001B" />
-              <circle cx="23" cy="12" r="7" fill="#F79E1B" />
-              <path d="M19 6.7a7 7 0 0 1 2.6 5.3A7 7 0 0 1 19 17.3a7 7 0 0 1-2.6-5.3A7 7 0 0 1 19 6.7z" fill="#FF5F00" />
-            </svg>
+            <div className="flex h-7 w-11 items-center justify-center rounded bg-[#252525]">
+              <div className="flex">
+                <div className="h-4 w-4 rounded-full bg-[#EB001B]" />
+                <div className="-ml-1.5 h-4 w-4 rounded-full bg-[#F79E1B] opacity-80" />
+              </div>
+            </div>
             {/* Apple Pay */}
-            <svg viewBox="0 0 38 24" className="h-6 w-auto opacity-50 transition-opacity hover:opacity-80" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect width="38" height="24" rx="3" fill="#000" />
-              <path d="M13.3 8.3c.3-.4.5-.9.5-1.4-.5 0-1.1.3-1.4.7-.3.3-.6.9-.5 1.4.5 0 1.1-.3 1.4-.7zm.4.8c-.8 0-1.5.4-1.8.4-.4 0-1-.4-1.6-.4-.8 0-1.6.5-2 1.2-.9 1.5-.2 3.7.6 4.9.4.6.9 1.2 1.5 1.2.6 0 .8-.4 1.6-.4.7 0 .9.4 1.5.4.7 0 1.1-.6 1.5-1.2.5-.7.7-1.4.7-1.4-.8-.3-1-1.3-.9-1.3 0-1 .8-1.5.8-1.5-.4-.7-1.1-.8-1.4-.9h.5zm5.6-.7h-1.8l-1.2 4.2-.1.4h0l-.1-.4-1.2-4.2h-1.9l2.2 6.5-.1.3c-.2.5-.5.7-.9.7-.2 0-.3 0-.4 0v1.4c.2 0 .4.1.7.1.9 0 1.6-.4 2.1-1.6l2.7-7.4z" fill="white" />
-            </svg>
+            <div className="flex h-7 w-11 items-center justify-center rounded bg-black">
+              <span className="text-[10px] font-semibold text-white">Pay</span>
+            </div>
             {/* Shop Pay */}
-            <div className="flex h-6 items-center rounded bg-[#5A31F4] px-1.5 opacity-50 transition-opacity hover:opacity-80">
+            <div className="flex h-7 w-11 items-center justify-center rounded bg-[#5A31F4]">
               <span className="text-[10px] font-bold text-white">Shop</span>
-              <span className="ml-0.5 text-[10px] font-bold text-white/70">Pay</span>
+            </div>
+            {/* Google Pay */}
+            <div className="flex h-7 w-11 items-center justify-center rounded bg-white">
+              <span className="text-[10px] font-semibold text-[#3C4043]">GPay</span>
+            </div>
+            {/* PayPal */}
+            <div className="flex h-7 w-11 items-center justify-center rounded bg-[#FFC439]">
+              <span className="text-[9px] font-bold italic text-[#003087]">PayPal</span>
             </div>
           </div>
 

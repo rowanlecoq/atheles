@@ -32,10 +32,12 @@ export function ProductCard({
   const liked = isFavorite(handle);
 
   // Get color from first variant title (e.g. "Black / M" → "Black")
+  // Filter out size-only names to avoid showing "XS", "S", "M" etc. as colors
+  const sizeNames = new Set(["XS", "S", "M", "L", "XL", "XXL", "2XL", "3XL", "OS", "One Size", DEFAULT_OPTION]);
   const colorName =
     variants.length > 0 ? variants[0]?.title.split(" / ")[0] : undefined;
   const displayColorName =
-    colorName && colorName !== DEFAULT_OPTION ? colorName : undefined;
+    colorName && !sizeNames.has(colorName) ? colorName : undefined;
 
   const formattedPrice = new Intl.NumberFormat(undefined, {
     style: "currency",
