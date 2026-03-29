@@ -24,6 +24,38 @@ export default function ImageCropModal({
   const CANVAS_SIZE = 280;
   const OUTPUT_SIZE = 256;
 
+  // Calculate the minimum zoom so the image always covers the circle
+  const getMinZoom = useCallback(
+    (img: HTMLImageElement) => {
+      return Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height);
+    },
+    [],
+  );
+
+  // Clamp offset so the image always covers the entire circle
+  const clampOffset = useCallback(
+    (ox: number, oy: number, z: number, img: HTMLImageElement) => {
+      const drawW = img.width * z;
+      const drawH = img.height * z;
+      const radius = CANVAS_SIZE / 2;
+
+      // Image center is at (CANVAS_SIZE/2 + ox, CANVAS_SIZE/2 + oy)
+      // The drawn image spans from (CANVAS_SIZE/2 - drawW/2 + ox) to (CANVAS_SIZE/2 + drawW/2 + ox)
+      // For coverage: left edge <= 0 and right edge >= CANVAS_SIZE
+      // (CANVAS_SIZE - drawW)/2 + ox <= 0  =>  ox <= (drawW - CANVAS_SIZE)/2
+      // (CANVAS_SIZE + drawW)/2 + ox >= CANVAS_SIZE  =>  ox >= (CANVAS_SIZE - drawW)/2
+      // But we use circle, so we need to cover the circle bounding box which is the full canvas
+      const maxOffX = Math.max(0, (drawW - CANVAS_SIZE) / 2);
+      const maxOffY = Math.max(0, (drawH - CANVAS_SIZE) / 2);
+
+      return {
+        x: Math.max(-maxOffX, Math.min(maxOffX, ox)),
+        y: Math.max(-maxOffY, Math.min(maxOffY, oy)),
+      };
+    },
+    [],
+  );
+
   // Load image
   useEffect(() => {
     const img = new Image();
@@ -31,13 +63,13 @@ export default function ImageCropModal({
       imageRef.current = img;
       setImageLoaded(true);
 
-      // Auto-fit: calculate initial zoom so shortest side fills the canvas
-      const scale = Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height);
+      // Auto-fit: zoom so shortest side fills the canvas exactly
+      const scale = getMinZoom(img);
       setZoom(scale);
       setOffset({ x: 0, y: 0 });
     };
     img.src = imageSrc;
-  }, [imageSrc]);
+  }, [imageSrc, getMinZoom]);
 
   // Draw to canvas
   const draw = useCallback(() => {
@@ -112,10 +144,11 @@ export default function ImageCropModal({
 
   const handlePointerMove = (e: React.PointerEvent) => {
     if (!dragging) return;
-    setOffset({
-      x: e.clientX - dragStart.x,
-      y: e.clientY - dragStart.y,
-    });
+    const img = imageRef.current;
+    if (!img) return;
+    const rawX = e.clientX - dragStart.x;
+    const rawY = e.clientY - dragStart.y;
+    setOffset(clampOffset(rawX, rawY, zoom, img));
   };
 
   const handlePointerUp = () => {
@@ -127,17 +160,33 @@ export default function ImageCropModal({
     e.preventDefault();
     const img = imageRef.current;
     if (!img) return;
-    const minZoom =
-      Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height) * 0.5;
+    const minZoom = getMinZoom(img);
+    const maxZoom = minZoom * 4;
     const newZoom = Math.max(
       minZoom,
-      Math.min(zoom * 3, zoom - e.deltaY * 0.001),
+      Math.min(maxZoom, zoom - e.deltaY * 0.001),
     );
     setZoom(newZoom);
+    // Re-clamp offset at new zoom level
+    setOffset((prev) => clampOffset(prev.x, prev.y, newZoom, img));
   };
 
   const handleZoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setZoom(parseFloat(e.target.value));
+    const img = imageRef.current;
+    if (!img) return;
+    const newZoom = parseFloat(e.target.value);
+    setZoom(newZoom);
+    // Re-clamp offset at new zoom level
+    setOffset((prev) => clampOffset(prev.x, prev.y, newZoom, img));
+  };
+
+  // Reset position to center
+  const handleReset = () => {
+    const img = imageRef.current;
+    if (!img) return;
+    const scale = getMinZoom(img);
+    setZoom(scale);
+    setOffset({ x: 0, y: 0 });
   };
 
   const handleSave = () => {
@@ -168,12 +217,8 @@ export default function ImageCropModal({
   };
 
   const img = imageRef.current;
-  const minZoom = img
-    ? Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height) * 0.5
-    : 0.1;
-  const maxZoom = img
-    ? Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height) * 3
-    : 5;
+  const minZoom = img ? getMinZoom(img) : 0.1;
+  const maxZoom = img ? getMinZoom(img) * 4 : 5;
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm">
@@ -192,7 +237,7 @@ export default function ImageCropModal({
             width={CANVAS_SIZE}
             height={CANVAS_SIZE}
             className="cursor-grab rounded-full active:cursor-grabbing"
-            style={{ width: CANVAS_SIZE, height: CANVAS_SIZE }}
+            style={{ width: CANVAS_SIZE, height: CANVAS_SIZE, touchAction: "none" }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -202,7 +247,7 @@ export default function ImageCropModal({
         </div>
 
         {/* Zoom slider */}
-        <div className="mb-6 flex items-center gap-3 px-2">
+        <div className="mb-4 flex items-center gap-3 px-2">
           <svg
             xmlns="http://www.w3.org/2000/svg"
             viewBox="0 0 24 24"
@@ -237,6 +282,17 @@ export default function ImageCropModal({
             <line x1="8" y1="11" x2="14" y2="11" />
             <line x1="11" y1="8" x2="11" y2="14" />
           </svg>
+        </div>
+
+        {/* Reset button */}
+        <div className="mb-6 flex justify-center">
+          <button
+            type="button"
+            onClick={handleReset}
+            className="text-[10px] text-brand-grey transition-colors hover:text-brand-gold"
+          >
+            reset position
+          </button>
         </div>
 
         {/* Actions */}

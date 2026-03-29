@@ -126,12 +126,48 @@ function phoneToE164(raw: string): string {
   return `+${digits}`;
 }
 
+const PROFILE_BACKGROUNDS = [
+  { id: "none", label: "none", value: "" },
+  {
+    id: "ember",
+    label: "ember",
+    value: "radial-gradient(ellipse at 30% 20%, rgba(181,149,72,0.15) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(204,177,115,0.1) 0%, transparent 50%)",
+  },
+  {
+    id: "aurora",
+    label: "aurora",
+    value: "linear-gradient(135deg, rgba(56,189,248,0.08) 0%, rgba(139,92,246,0.08) 50%, rgba(236,72,153,0.06) 100%)",
+  },
+  {
+    id: "midnight",
+    label: "midnight",
+    value: "radial-gradient(ellipse at 50% 0%, rgba(30,58,138,0.2) 0%, transparent 60%), radial-gradient(ellipse at 80% 100%, rgba(88,28,135,0.12) 0%, transparent 50%)",
+  },
+  {
+    id: "forest",
+    label: "forest",
+    value: "radial-gradient(ellipse at 20% 50%, rgba(34,197,94,0.08) 0%, transparent 50%), radial-gradient(ellipse at 80% 30%, rgba(16,185,129,0.06) 0%, transparent 50%)",
+  },
+  {
+    id: "sunset",
+    label: "sunset",
+    value: "linear-gradient(160deg, rgba(251,146,60,0.1) 0%, rgba(236,72,153,0.08) 50%, rgba(139,92,246,0.06) 100%)",
+  },
+  {
+    id: "crimson",
+    label: "crimson",
+    value: "radial-gradient(ellipse at 40% 20%, rgba(220,38,38,0.1) 0%, transparent 50%), radial-gradient(ellipse at 70% 80%, rgba(225,29,72,0.06) 0%, transparent 50%)",
+  },
+];
+
 export default function ProfileContent() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
   const [avatar, setAvatar] = useState<string | null>(null);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
+  const [showAvatarPreview, setShowAvatarPreview] = useState(false);
+  const [profileBg, setProfileBg] = useState("");
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
@@ -160,6 +196,8 @@ export default function ProfileContent() {
       }
       const stored = localStorage.getItem(`avatar-${u.id}`);
       if (stored) setAvatar(stored);
+      const storedBg = localStorage.getItem(`profile-bg-${u.id}`);
+      if (storedBg) setProfileBg(storedBg);
     };
 
     // Show cached session instantly while fetching fresh data
@@ -403,69 +441,146 @@ export default function ProfileContent() {
         />
       )}
 
-      {/* Avatar & Name */}
-      <div className="mb-10 flex flex-col items-center text-center">
-        <div className="group relative mb-4">
-          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-brand-gold bg-brand-dark-gold/20">
-            {avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatar}
-                alt="Profile photo"
-                width={96}
-                height={96}
-                className="h-full w-full rounded-full object-cover"
-              />
-            ) : (
-              <span className="font-heading text-2xl text-brand-gold">
-                {initials}
-              </span>
-            )}
+      {/* Avatar Preview Modal */}
+      {showAvatarPreview && avatar && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm"
+          onClick={() => setShowAvatarPreview(false)}
+        >
+          <div
+            className="relative mx-4 flex flex-col items-center"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={avatar}
+              alt="Profile photo preview"
+              width={256}
+              height={256}
+              className="h-64 w-64 rounded-full border-2 border-brand-gold object-cover shadow-2xl shadow-brand-gold/20"
+            />
+            <div className="mt-6 flex gap-3">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAvatarPreview(false);
+                  setCropSrc(avatar);
+                }}
+                className="rounded border border-brand-dark-gold/30 px-4 py-2 text-xs text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+              >
+                re-edit
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAvatarPreview(false);
+                  fileInputRef.current?.click();
+                }}
+                className="rounded border border-brand-dark-gold/30 px-4 py-2 text-xs text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+              >
+                new photo
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAvatarPreview(false)}
+                className="rounded bg-brand-gold px-4 py-2 text-xs font-medium text-brand-dark transition-colors hover:bg-brand-light-gold"
+              >
+                close
+              </button>
+            </div>
           </div>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
-            aria-label="Change profile photo"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-3.5 w-3.5"
-            >
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
-          </button>
-          <input
-            ref={fileInputRef}
-            type="file"
-            accept="image/png,image/jpeg,image/webp"
-            onChange={handleAvatarChange}
-            className="hidden"
-          />
         </div>
-        {avatar && (
-          <button
-            type="button"
-            onClick={handleRemoveAvatar}
-            className="mb-2 text-[10px] text-brand-grey transition-colors hover:text-red-400"
-          >
-            remove photo
-          </button>
-        )}
-        <h1 className="font-heading text-2xl text-brand-gold sm:text-3xl">
-          {user.name}
-        </h1>
-        <p className="mt-1 text-sm text-brand-grey">{user.email}</p>
-        <p className="mt-1 text-[10px] uppercase tracking-wider text-brand-dark-gold">
-          member since {memberSince}
-        </p>
+      )}
+
+      {/* Avatar & Name */}
+      <div
+        className="relative mb-10 overflow-hidden rounded-xl px-4 py-10"
+        style={profileBg ? { background: profileBg } : undefined}
+      >
+        <div className="flex flex-col items-center text-center">
+          <div className="group relative mb-4">
+            <button
+              type="button"
+              onClick={() => {
+                if (avatar) {
+                  setShowAvatarPreview(true);
+                } else {
+                  fileInputRef.current?.click();
+                }
+              }}
+              className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-brand-gold bg-brand-dark-gold/20 transition-transform hover:scale-105"
+              aria-label={avatar ? "View profile photo" : "Upload profile photo"}
+            >
+              {avatar ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={avatar}
+                  alt="Profile photo"
+                  width={96}
+                  height={96}
+                  className="h-full w-full rounded-full object-cover"
+                />
+              ) : (
+                <span className="font-heading text-2xl text-brand-gold">
+                  {initials}
+                </span>
+              )}
+            </button>
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+              aria-label="Change profile photo"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-3.5 w-3.5"
+              >
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+            </button>
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept="image/png,image/jpeg,image/webp"
+              onChange={handleAvatarChange}
+              className="hidden"
+            />
+          </div>
+          {avatar && (
+            <div className="mb-2 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setCropSrc(avatar)}
+                className="text-[10px] text-brand-grey transition-colors hover:text-brand-gold"
+              >
+                re-edit photo
+              </button>
+              <span className="text-[10px] text-brand-dark-gold/30">|</span>
+              <button
+                type="button"
+                onClick={handleRemoveAvatar}
+                className="text-[10px] text-brand-grey transition-colors hover:text-red-400"
+              >
+                remove photo
+              </button>
+            </div>
+          )}
+          <h1 className="font-heading text-2xl text-brand-gold sm:text-3xl">
+            {user.name}
+          </h1>
+          <p className="mt-1 text-sm text-brand-grey">{user.email}</p>
+          <p className="mt-1 text-[10px] uppercase tracking-wider text-brand-dark-gold">
+            member since {memberSince}
+          </p>
+        </div>
       </div>
 
       {/* Points & Tier Progress */}
@@ -971,6 +1086,51 @@ export default function ProfileContent() {
                 }`}
               />
             </button>
+          </div>
+
+          {/* Profile Background */}
+          <div>
+            <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">
+              profile background
+            </label>
+            <div className="grid grid-cols-4 gap-2 sm:grid-cols-7">
+              {PROFILE_BACKGROUNDS.map((bg) => (
+                <button
+                  key={bg.id}
+                  type="button"
+                  onClick={() => {
+                    setProfileBg(bg.value);
+                    if (user) {
+                      if (bg.value) {
+                        localStorage.setItem(`profile-bg-${user.id}`, bg.value);
+                      } else {
+                        localStorage.removeItem(`profile-bg-${user.id}`);
+                      }
+                    }
+                  }}
+                  className={`group/bg relative flex h-10 items-center justify-center overflow-hidden rounded border transition-all ${
+                    profileBg === bg.value
+                      ? "border-brand-gold ring-1 ring-brand-gold/50"
+                      : "border-brand-dark-gold/20 hover:border-brand-dark-gold/40"
+                  }`}
+                  title={bg.label}
+                >
+                  <div
+                    className="absolute inset-0 bg-brand-dark"
+                    style={bg.value ? { background: `#1a1a1a` } : undefined}
+                  />
+                  {bg.value && (
+                    <div
+                      className="absolute inset-0"
+                      style={{ background: bg.value }}
+                    />
+                  )}
+                  <span className="relative z-10 text-[8px] uppercase tracking-wider text-brand-grey group-hover/bg:text-white">
+                    {bg.label}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>
