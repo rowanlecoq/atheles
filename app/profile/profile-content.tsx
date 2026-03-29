@@ -142,6 +142,8 @@ export default function ProfileContent() {
   const [dobDay, setDobDay] = useState("");
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear] = useState("");
+  const [showAvatarPreview, setShowAvatarPreview] = useState(false);
+  const [profileBg, setProfileBg] = useState("none");
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -160,6 +162,8 @@ export default function ProfileContent() {
       }
       const stored = localStorage.getItem(`avatar-${u.id}`);
       if (stored) setAvatar(stored);
+      const bg = localStorage.getItem(`profile-bg-${u.id}`);
+      if (bg) setProfileBg(bg);
     };
 
     // Show cached session instantly while fetching fresh data
@@ -395,7 +399,14 @@ export default function ProfileContent() {
       : Math.min(100, ((points - tier.min) / (tier.max - tier.min)) * 100);
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16">
+    <div className={`mx-auto max-w-2xl px-4 py-12 sm:py-16 ${
+      profileBg === "gold" ? "bg-gradient-to-br from-brand-dark via-brand-dark-gold/10 to-brand-dark" :
+      profileBg === "ember" ? "bg-gradient-to-br from-brand-dark via-red-950/20 to-brand-dark" :
+      profileBg === "ocean" ? "bg-gradient-to-br from-brand-dark via-cyan-950/20 to-brand-dark" :
+      profileBg === "aurora" ? "bg-gradient-to-br from-purple-950/20 via-brand-dark to-emerald-950/15" :
+      profileBg === "midnight" ? "bg-gradient-to-br from-indigo-950/20 via-brand-dark to-blue-950/15" :
+      ""
+    }`}>
       {/* Crop Modal */}
       {cropSrc && (
         <ImageCropModal
@@ -405,10 +416,40 @@ export default function ProfileContent() {
         />
       )}
 
+      {/* Avatar Preview Modal */}
+      {showAvatarPreview && avatar && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setShowAvatarPreview(false)}
+        >
+          <button
+            type="button"
+            onClick={() => setShowAvatarPreview(false)}
+            className="absolute right-4 top-4 text-white/70 transition-colors hover:text-white"
+            aria-label="Close"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-8 w-8">
+              <line x1="18" y1="6" x2="6" y2="18" />
+              <line x1="6" y1="6" x2="18" y2="18" />
+            </svg>
+          </button>
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img
+            src={avatar}
+            alt="Profile photo"
+            className="max-h-[70vh] max-w-[70vw] rounded-2xl object-contain"
+            onClick={(e) => e.stopPropagation()}
+          />
+        </div>
+      )}
+
       {/* Avatar & Name */}
       <div className="mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
-          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-brand-gold bg-brand-dark-gold/20">
+          <div
+            className={`flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-brand-gold ${avatar ? "cursor-pointer" : ""} bg-brand-dark-gold/20`}
+            onClick={() => avatar && setShowAvatarPreview(true)}
+          >
             {avatar ? (
               // eslint-disable-next-line @next/next/no-img-element
               <img
@@ -416,7 +457,7 @@ export default function ProfileContent() {
                 alt="Profile photo"
                 width={96}
                 height={96}
-                className="h-full w-full rounded-full object-cover"
+                className="h-full w-full rounded-full object-cover transition-transform group-hover:scale-105"
               />
             ) : (
               <span className="font-heading text-2xl text-brand-gold">
@@ -453,13 +494,23 @@ export default function ProfileContent() {
           />
         </div>
         {avatar && (
-          <button
-            type="button"
-            onClick={handleRemoveAvatar}
-            className="mb-2 text-xs text-brand-grey transition-colors hover:text-red-400"
-          >
-            remove photo
-          </button>
+          <div className="mb-2 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-xs text-brand-grey transition-colors hover:text-brand-gold"
+            >
+              change photo
+            </button>
+            <span className="text-brand-dark-gold/30">|</span>
+            <button
+              type="button"
+              onClick={handleRemoveAvatar}
+              className="text-xs text-brand-grey transition-colors hover:text-red-400"
+            >
+              remove
+            </button>
+          </div>
         )}
         <h1 className="font-heading text-2xl text-brand-gold sm:text-3xl">
           {user.name}
@@ -974,6 +1025,44 @@ export default function ProfileContent() {
               />
             </button>
           </div>
+        </div>
+      </div>
+
+      {/* Profile Background */}
+      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
+        <h2 className="mb-4 font-heading text-lg text-brand-pale-gold">
+          profile theme
+        </h2>
+        <div className="flex flex-wrap gap-2">
+          {[
+            { id: "none", label: "default", style: "bg-brand-dark" },
+            { id: "gold", label: "gold", style: "bg-gradient-to-br from-brand-dark via-brand-dark-gold/20 to-brand-dark" },
+            { id: "ember", label: "ember", style: "bg-gradient-to-br from-brand-dark via-red-950/30 to-brand-dark" },
+            { id: "ocean", label: "ocean", style: "bg-gradient-to-br from-brand-dark via-cyan-950/30 to-brand-dark" },
+            { id: "aurora", label: "aurora", style: "bg-gradient-to-br from-purple-950/30 via-brand-dark to-emerald-950/20" },
+            { id: "midnight", label: "midnight", style: "bg-gradient-to-br from-indigo-950/30 via-brand-dark to-blue-950/20" },
+          ].map((theme) => (
+            <button
+              key={theme.id}
+              type="button"
+              onClick={() => {
+                setProfileBg(theme.id);
+                if (user) localStorage.setItem(`profile-bg-${user.id}`, theme.id);
+              }}
+              className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${theme.style} ${
+                profileBg === theme.id
+                  ? "border-brand-gold scale-110"
+                  : "border-brand-dark-gold/30 hover:border-brand-gold/50"
+              }`}
+              title={theme.label}
+            >
+              {profileBg === theme.id && (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-4 w-4 text-brand-gold">
+                  <polyline points="20 6 9 17 4 12" />
+                </svg>
+              )}
+            </button>
+          ))}
         </div>
       </div>
 
