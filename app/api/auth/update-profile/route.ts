@@ -43,7 +43,7 @@ export async function POST(request: Request) {
     if (dob) {
       const customer = await getCustomerByToken(token);
       if (customer) {
-        await updateCustomerDob(customer.id, dob).catch(() => {
+        await updateCustomerDob(customer.email, dob).catch(() => {
           // DOB update is best-effort — don't fail the whole save
         });
       }

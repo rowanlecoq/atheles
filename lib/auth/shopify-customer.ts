@@ -66,24 +66,31 @@ async function shopifyAdminFetch<T>(
 }
 
 export async function updateCustomerDob(
-  customerId: string,
+  customerEmail: string,
   dob: string,
 ): Promise<{ success: boolean; error?: string }> {
   if (!adminEndpoint || !adminToken) {
     return { success: false, error: "admin API not configured" };
   }
 
-  // Fetch current tags first
-  const customerData = await shopifyAdminFetch<{
-    customer: { tags: string[] } | null;
+  // Look up customer by email in Admin API to get the correct admin GID
+  const searchResult = await shopifyAdminFetch<{
+    customers: { edges: { node: { id: string; tags: string[] } }[] };
   }>(
-    `query customer($id: ID!) {
-      customer(id: $id) { tags }
+    `query customers($query: String!) {
+      customers(first: 1, query: $query) {
+        edges { node { id tags } }
+      }
     }`,
-    { id: customerId },
+    { query: `email:${customerEmail}` },
   );
 
-  const existingTags = customerData.customer?.tags || [];
+  const adminCustomer = searchResult.customers.edges[0]?.node;
+  if (!adminCustomer) {
+    return { success: false, error: "customer not found in admin" };
+  }
+
+  const existingTags = adminCustomer.tags || [];
   const filteredTags = existingTags.filter((t) => !t.startsWith("dob:"));
   const newTags = [...filteredTags, `dob:${dob}`];
 
@@ -99,7 +106,7 @@ export async function updateCustomerDob(
         userErrors { message }
       }
     }`,
-    { input: { id: customerId, tags: newTags } },
+    { input: { id: adminCustomer.id, tags: newTags } },
   );
 
   return { success: true };
@@ -329,17 +336,18 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   let dob: string | null = null;
   if (adminEndpoint && adminToken) {
     try {
-      const tagsData = await shopifyAdminFetch<{
-        customer: { tags: string[] } | null;
+      const adminCustomer = await shopifyAdminFetch<{
+        customers: { edges: { node: { id: string; tags: string[] } }[] };
       }>(
-        `query customer($id: ID!) {
-          customer(id: $id) { tags }
+        `query customers($query: String!) {
+          customers(first: 1, query: $query) {
+            edges { node { id tags } }
+          }
         }`,
-        { id: data.customer.id },
+        { query: `email:${data.customer.email}` },
       );
-      const dobTag = (tagsData.customer?.tags || []).find((t) =>
-        t.startsWith("dob:"),
-      );
+      const tags = adminCustomer.customers.edges[0]?.node?.tags || [];
+      const dobTag = tags.find((t) => t.startsWith("dob:"));
       dob = dobTag ? dobTag.replace("dob:", "") : null;
     } catch {
       // Tags not available — DOB will show as "not set"
