@@ -1,8 +1,8 @@
-import { SplitText } from "components/animations";
 import Footer from "components/layout/footer";
 import Collections from "components/layout/search/collections";
 import FilterList from "components/layout/search/filter";
 import ViewToggle from "components/layout/search/filter/view-toggle";
+import SearchPageHeader from "components/layout/search/page-header";
 import { sorting } from "lib/constants";
 import ChildrenWrapper from "./children-wrapper";
 import { Suspense } from "react";
@@ -15,15 +15,9 @@ export default function SearchLayout({
   return (
     <>
       {/* Page header */}
-      <div className="border-b border-brand-dark-gold/10 px-4 pb-6 pt-8 sm:pt-10">
-        <div className="mx-auto max-w-(--breakpoint-2xl) text-center">
-          <SplitText
-            as="h1"
-            text="Shop"
-            className="mb-2 font-heading text-3xl tracking-[0.08em] text-brand-gold sm:text-4xl md:text-5xl"
-          />
-        </div>
-      </div>
+      <Suspense fallback={null}>
+        <SearchPageHeader />
+      </Suspense>
 
       {/* Toolbar: filters + view toggle */}
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pt-6">
