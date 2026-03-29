@@ -146,30 +146,47 @@ export default function ProfileContent() {
   const router = useRouter();
 
   useEffect(() => {
+    const applyUser = (u: User) => {
+      setUser(u);
+      setFirstName(u.firstName || "");
+      setLastName(u.lastName || "");
+      setPhone(u.phone ? formatPhoneDisplay(u.phone) : "");
+      setNewsletter(u.acceptsMarketing || false);
+      if (u.dob) {
+        const [y, m, d] = u.dob.split("-");
+        setDobYear(y || "");
+        setDobMonth(m ? String(parseInt(m)) : "");
+        setDobDay(d ? String(parseInt(d)) : "");
+      }
+      const stored = localStorage.getItem(`avatar-${u.id}`);
+      if (stored) setAvatar(stored);
+    };
+
+    // Show cached session instantly while fetching fresh data
+    try {
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached) as User;
+        applyUser(u);
+        setLoading(false);
+      }
+    } catch { /* ignore */ }
+
     fetch("/api/auth/session")
       .then((res) => res.json())
       .then((data) => {
         if (data.user) {
-          setUser(data.user);
-          setFirstName(data.user.firstName || "");
-          setLastName(data.user.lastName || "");
-          setPhone(data.user.phone ? formatPhoneDisplay(data.user.phone) : "");
-          setNewsletter(data.user.acceptsMarketing || false);
-          if (data.user.dob) {
-            const [y, m, d] = data.user.dob.split("-");
-            setDobYear(y || "");
-            setDobMonth(m ? String(parseInt(m)) : "");
-            setDobDay(d ? String(parseInt(d)) : "");
-          }
-          const stored = localStorage.getItem(`avatar-${data.user.id}`);
-          if (stored) setAvatar(stored);
+          applyUser(data.user);
+          sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
         } else {
+          sessionStorage.removeItem("atheles-session");
           setRedirecting(true);
           router.push("/login");
         }
         setLoading(false);
       })
       .catch(() => {
+        sessionStorage.removeItem("atheles-session");
         setRedirecting(true);
         router.push("/login");
         setLoading(false);
@@ -177,6 +194,7 @@ export default function ProfileContent() {
   }, [router]);
 
   const handleSignOut = async () => {
+    sessionStorage.removeItem("atheles-session");
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
     router.refresh();
@@ -255,6 +273,7 @@ export default function ProfileContent() {
           setDobMonth(m ? String(parseInt(m)) : "");
           setDobDay(d ? String(parseInt(d)) : "");
         }
+        sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
         setEditing(false);
         setSaveMessage("profile updated.");
         setTimeout(() => setSaveMessage(""), 3000);
