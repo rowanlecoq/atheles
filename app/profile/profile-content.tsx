@@ -181,14 +181,14 @@ export default function ProfileContent() {
         } else {
           sessionStorage.removeItem("atheles-session");
           setRedirecting(true);
-          router.push("/login");
+          window.location.href = "/login";
         }
         setLoading(false);
       })
       .catch(() => {
         sessionStorage.removeItem("atheles-session");
         setRedirecting(true);
-        router.push("/login");
+        window.location.href = "/login";
         setLoading(false);
       });
   }, [router]);
