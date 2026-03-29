@@ -32,12 +32,11 @@ export function QuickAddButton({ product }: { product: Product }) {
     } catch {
       // Already updated optimistically
     }
-    // Force cart modal open
     window.dispatchEvent(new Event("open-cart"));
     setAdding(false);
   };
 
-  // Single variant — direct add
+  // Single variant
   if (!hasMultipleVariants) {
     const variant = availableVariants[0]!;
     return (
@@ -72,72 +71,86 @@ export function QuickAddButton({ product }: { product: Product }) {
     );
   }
 
-  // Multiple variants — size picker
-  return (
-    <div onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}>
-      {/* Size picker overlay */}
-      {showSizes && (
-        <>
-          <div className="fixed inset-0 z-40" onClick={() => setShowSizes(false)} />
-          <div className="absolute inset-x-3 bottom-3 z-50 rounded-lg border border-brand-dark-gold/30 bg-brand-dark/95 p-3 shadow-xl backdrop-blur-sm">
-            <p className="mb-2 text-center text-xs uppercase tracking-wider text-brand-grey">
-              select size
-            </p>
-            <div className="grid grid-cols-4 gap-1.5">
-              {product.variants.map((variant) => {
-                const size =
-                  variant.selectedOptions.find(
-                    (o) => o.name.toLowerCase() === "size",
-                  )?.value || variant.title;
-                const available = variant.availableForSale;
-
-                return (
-                  <button
-                    key={variant.id}
-                    type="button"
-                    disabled={!available || adding}
-                    onClick={() => available && handleAdd(variant.id)}
-                    className={clsx(
-                      "rounded-md py-2 text-xs font-medium transition-all",
-                      available
-                        ? "bg-brand-dark-gold/15 text-white hover:bg-brand-gold hover:text-brand-dark"
-                        : "cursor-not-allowed text-brand-grey/30 line-through",
-                    )}
-                  >
-                    {size}
-                  </button>
-                );
-              })}
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Trigger */}
-      <button
-        type="button"
-        onClick={() => setShowSizes(!showSizes)}
-        onMouseEnter={() => setHovering(true)}
-        onMouseLeave={() => setHovering(false)}
-        disabled={adding}
-        className="overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-brand-dark transition-all disabled:opacity-50"
-        style={{
-          background: hovering
-            ? "linear-gradient(270deg, #c1a368, #e8d5a3, #a08540, #c1a368)"
-            : "#c1a368",
-          backgroundSize: hovering ? "300% 100%" : "100% 100%",
-          animation: hovering ? "qaShift 3s ease infinite" : "none",
-        }}
+  // Multiple variants
+  if (showSizes) {
+    return (
+      <div
+        className="absolute inset-0 z-20 flex flex-col items-center justify-center rounded-lg bg-brand-dark/95 p-4 backdrop-blur-sm"
+        onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
       >
-        {adding ? "adding..." : "quick add"}
-        <style jsx>{`
-          @keyframes qaShift {
-            0% { background-position: 0% 50%; }
-            50% { background-position: 100% 50%; }
-            100% { background-position: 0% 50%; }
-          }
-        `}</style>
-      </button>
-    </div>
+        <button
+          type="button"
+          onClick={() => setShowSizes(false)}
+          className="absolute right-3 top-3 text-brand-grey transition-colors hover:text-white"
+          aria-label="Close"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4">
+            <line x1="18" y1="6" x2="6" y2="18" />
+            <line x1="6" y1="6" x2="18" y2="18" />
+          </svg>
+        </button>
+
+        <p className="mb-3 text-xs uppercase tracking-wider text-brand-grey">
+          select size
+        </p>
+        <div className="flex flex-wrap justify-center gap-2">
+          {product.variants.map((variant) => {
+            const size =
+              variant.selectedOptions.find(
+                (o) => o.name.toLowerCase() === "size",
+              )?.value || variant.title;
+            const available = variant.availableForSale;
+
+            return (
+              <button
+                key={variant.id}
+                type="button"
+                disabled={!available || adding}
+                onClick={() => available && handleAdd(variant.id)}
+                className={clsx(
+                  "min-w-[48px] rounded-md px-4 py-2.5 text-sm font-medium transition-all",
+                  available
+                    ? "border border-brand-dark-gold/30 text-white hover:bg-brand-gold hover:text-brand-dark"
+                    : "cursor-not-allowed border border-brand-dark-gold/10 text-brand-grey/30 line-through",
+                )}
+              >
+                {size}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <button
+      type="button"
+      onClick={(e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        setShowSizes(true);
+      }}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      disabled={adding}
+      className="overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-brand-dark transition-all disabled:opacity-50"
+      style={{
+        background: hovering
+          ? "linear-gradient(270deg, #c1a368, #e8d5a3, #a08540, #c1a368)"
+          : "#c1a368",
+        backgroundSize: hovering ? "300% 100%" : "100% 100%",
+        animation: hovering ? "qaShift 3s ease infinite" : "none",
+      }}
+    >
+      {adding ? "adding..." : "quick add"}
+      <style jsx>{`
+        @keyframes qaShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
+    </button>
   );
 }
