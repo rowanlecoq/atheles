@@ -223,6 +223,43 @@ export async function activateCustomerByUrl(
   return { accessToken: tokenData.accessToken, expiresAt: tokenData.expiresAt };
 }
 
+export async function resetCustomerByUrl(
+  resetUrl: string,
+  password: string,
+): Promise<{ accessToken: string; expiresAt: string } | { error: string }> {
+  if (!endpoint) return { error: "store not configured" };
+
+  const data = await shopifyCustomerFetch<{
+    customerResetByUrl: {
+      customerAccessToken: {
+        accessToken: string;
+        expiresAt: string;
+      } | null;
+      customerUserErrors: { code: string; message: string }[];
+    };
+  }>(
+    `mutation customerResetByUrl($resetUrl: URL!, $password: String!) {
+      customerResetByUrl(resetUrl: $resetUrl, password: $password) {
+        customerAccessToken { accessToken expiresAt }
+        customerUserErrors { code message }
+      }
+    }`,
+    { resetUrl, password },
+  );
+
+  const errors = data.customerResetByUrl.customerUserErrors;
+  if (errors.length > 0) {
+    return { error: errors[0]?.message || "failed to reset password" };
+  }
+
+  const tokenData = data.customerResetByUrl.customerAccessToken;
+  if (!tokenData) {
+    return { error: "failed to reset password" };
+  }
+
+  return { accessToken: tokenData.accessToken, expiresAt: tokenData.expiresAt };
+}
+
 export async function updateCustomer(
   accessToken: string,
   input: {
