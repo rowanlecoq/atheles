@@ -111,18 +111,18 @@ function SizeTable({
 
   return (
     <div>
-      <p className="mb-4 text-xs text-brand-grey">{category.description}</p>
+      <p className="mb-4 text-sm text-brand-grey">{category.description}</p>
       <div className="overflow-x-auto">
-        <table className="w-full text-xs">
+        <table className="w-full text-sm">
           <thead>
-            <tr className="border-b border-brand-dark-gold/30">
-              <th className="px-3 py-2 text-left uppercase tracking-wider text-brand-pale-gold">
+            <tr className="border-b-2 border-brand-dark-gold/30">
+              <th className="px-4 py-3 text-left text-xs uppercase tracking-wider text-brand-pale-gold">
                 Size
               </th>
               {category.columns.map((col) => (
                 <th
                   key={col}
-                  className="px-3 py-2 text-left uppercase tracking-wider text-brand-pale-gold"
+                  className="px-4 py-3 text-left text-xs uppercase tracking-wider text-brand-pale-gold"
                 >
                   {col}
                 </th>
@@ -133,16 +133,16 @@ function SizeTable({
             {sizes.map((size, si) => (
               <tr
                 key={size}
-                className={`border-b border-brand-dark-gold/10 ${
+                className={`border-b border-brand-dark-gold/10 transition-colors hover:bg-brand-dark-gold/10 ${
                   si % 2 === 0 ? "bg-brand-medium-grey/5" : ""
                 }`}
               >
-                <td className="px-3 py-2 font-medium text-brand-gold">
+                <td className="px-4 py-3 font-heading text-base font-medium text-brand-gold">
                   {size}
                 </td>
                 {category.sizes[size]!.map((val, vi) => (
-                  <td key={vi} className="px-3 py-2 text-brand-grey">
-                    {val}
+                  <td key={vi} className="px-4 py-3 text-white/90">
+                    {val}&quot;
                   </td>
                 ))}
               </tr>

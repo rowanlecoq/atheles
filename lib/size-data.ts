@@ -14,7 +14,6 @@ export const sizeCategories: SizeCategory[] = [
     unit: "inches",
     columns: ["Chest", "Waist", "Length", "Shoulder Width", "Sleeve Length"],
     sizes: {
-      XS: [32, 25, 27, 16, 6.5],
       S: [34, 27, 28, 16.75, 6.75],
       M: [36, 29, 29, 17.5, 7],
       L: [38, 31, 30, 18.25, 7.25],
@@ -27,7 +26,6 @@ export const sizeCategories: SizeCategory[] = [
     unit: "inches",
     columns: ["Chest", "Waist", "Length", "Shoulder Width", "Sleeve Length"],
     sizes: {
-      XS: [38, 35, 27, 16.5, 7.5],
       S: [40, 37, 27.5, 17.25, 8],
       M: [42, 39, 28, 18, 8.5],
       L: [44, 41, 28.5, 18.75, 9],
@@ -40,7 +38,6 @@ export const sizeCategories: SizeCategory[] = [
     unit: "inches",
     columns: ["Chest", "Length", "Shoulder Width", "Sleeve Length"],
     sizes: {
-      XS: [42, 28, 18.5, 9],
       S: [44, 28.5, 19.5, 9.5],
       M: [46, 29.5, 20.5, 10],
       L: [48, 30, 21.5, 10.5],
@@ -62,7 +59,6 @@ export const sizeCategories: SizeCategory[] = [
       "Leg Opening",
     ],
     sizes: {
-      XS: [28, 33, 36, 28.5, 39.5, 12, 9.5],
       S: [30, 35, 38, 29, 40.5, 12.5, 10],
       M: [32, 37, 40, 29.5, 41.5, 13, 10.5],
       L: [34, 39, 42, 30, 42.5, 13.75, 11],
