@@ -67,11 +67,11 @@ export default function ProductGridItems({
             delay: index * staggerDelay,
             ease: animationEasing,
           }}
-          className="aspect-square transition-opacity group"
+          className="transition-opacity group"
         >
-          <div className="relative h-full w-full">
+          <div className="relative">
             <Link
-              className="relative inline-block h-full w-full"
+              className="relative block aspect-square"
               href={`/product/${product.handle}`}
               prefetch={true}
             >
@@ -105,7 +105,7 @@ export default function ProductGridItems({
               </div>
             </Link>
             {product.availableForSale && (
-              <div className="absolute bottom-3 right-3 z-10 opacity-100 transition-opacity md:bottom-14 md:opacity-0 md:group-hover:opacity-100">
+              <div className="mt-2">
                 <QuickAddButton product={product} />
               </div>
             )}
