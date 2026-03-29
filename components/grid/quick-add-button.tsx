@@ -5,6 +5,45 @@ import { useCart } from "components/cart/cart-context";
 import type { Product } from "lib/shopify/types";
 import { useState } from "react";
 
+function GoldButton({
+  children,
+  onClick,
+  disabled,
+}: {
+  children: React.ReactNode;
+  onClick: (e: React.MouseEvent) => void;
+  disabled?: boolean;
+}) {
+  const [hovering, setHovering] = useState(false);
+
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      onMouseEnter={() => setHovering(true)}
+      onMouseLeave={() => setHovering(false)}
+      disabled={disabled}
+      className="overflow-hidden rounded-full px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-brand-dark transition-all disabled:opacity-50"
+      style={{
+        background: hovering
+          ? "linear-gradient(270deg, #c1a368, #e8d5a3, #a08540, #c1a368)"
+          : "#c1a368",
+        backgroundSize: hovering ? "300% 100%" : "100% 100%",
+        animation: hovering ? "qaShift 3s ease infinite" : "none",
+      }}
+    >
+      {children}
+      <style jsx>{`
+        @keyframes qaShift {
+          0% { background-position: 0% 50%; }
+          50% { background-position: 100% 50%; }
+          100% { background-position: 0% 50%; }
+        }
+      `}</style>
+    </button>
+  );
+}
+
 export function QuickAddButton({ product }: { product: Product }) {
   const { addCartItem } = useCart();
   const [showSizes, setShowSizes] = useState(false);
@@ -25,7 +64,6 @@ export function QuickAddButton({ product }: { product: Product }) {
     addCartItem(variant, product);
     setShowSizes(false);
 
-    // Add to cart via API without triggering server action loading state
     try {
       const { addItem } = await import("components/cart/actions");
       await addItem(null, variantId);
@@ -39,18 +77,16 @@ export function QuickAddButton({ product }: { product: Product }) {
   if (!hasMultipleVariants) {
     const variant = availableVariants[0]!;
     return (
-      <button
-        type="button"
+      <GoldButton
         onClick={(e) => {
           e.preventDefault();
           e.stopPropagation();
           handleAdd(variant.id);
         }}
         disabled={adding}
-        className="rounded-full bg-brand-gold px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-brand-dark transition-all hover:bg-brand-light-gold disabled:opacity-50"
       >
-        {adding ? "+" : "quick add"}
-      </button>
+        {adding ? "adding..." : "quick add"}
+      </GoldButton>
     );
   }
 
@@ -90,14 +126,12 @@ export function QuickAddButton({ product }: { product: Product }) {
         </>
       )}
 
-      <button
-        type="button"
+      <GoldButton
         onClick={() => setShowSizes(!showSizes)}
         disabled={adding}
-        className="rounded-full bg-brand-gold px-3 py-1.5 text-xs font-medium uppercase tracking-wider text-brand-dark transition-all hover:bg-brand-light-gold disabled:opacity-50"
       >
-        {adding ? "+" : "quick add"}
-      </button>
+        {adding ? "adding..." : "quick add"}
+      </GoldButton>
     </div>
   );
 }

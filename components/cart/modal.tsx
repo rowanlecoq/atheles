@@ -40,12 +40,10 @@ export default function CartModal() {
       cart?.totalQuantity !== quantityRef.current &&
       cart?.totalQuantity > 0
     ) {
-      if (!isOpen) {
-        setIsOpen(true);
-      }
+      setIsOpen(true);
       quantityRef.current = cart?.totalQuantity;
     }
-  }, [isOpen, cart?.totalQuantity]);
+  }, [cart?.totalQuantity]);
 
   return (
     <>
