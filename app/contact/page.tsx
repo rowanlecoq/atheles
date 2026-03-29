@@ -42,10 +42,10 @@ export default function ContactPage() {
                   Email
                 </h3>
                 <a
-                  href="mailto:contact@atheles.co"
+                  href="mailto:athelesbrand@gmail.com"
                   className="break-all text-sm text-brand-grey transition-colors hover:text-brand-gold"
                 >
-                  contact@atheles.co
+                  athelesbrand@gmail.com
                 </a>
               </div>
               <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">

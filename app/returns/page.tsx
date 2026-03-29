@@ -55,10 +55,10 @@ export default function ReturnsPage() {
                 <li>
                   Contact us at{" "}
                   <a
-                    href="mailto:contact@atheles.co"
+                    href="mailto:athelesbrand@gmail.com"
                     className="text-brand-gold underline underline-offset-4"
                   >
-                    contact@atheles.co
+                    athelesbrand@gmail.com
                   </a>{" "}
                   with your order number and reason for return
                 </li>
