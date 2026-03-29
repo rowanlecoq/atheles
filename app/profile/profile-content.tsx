@@ -120,13 +120,13 @@ export default function ProfileContent() {
           if (stored) setAvatar(stored);
         } else {
           setRedirecting(true);
-          router.push("/login");
+          window.location.href = "/login";
         }
         setLoading(false);
       })
       .catch(() => {
         setRedirecting(true);
-        router.push("/login");
+        window.location.href = "/login";
         setLoading(false);
       });
   }, [router]);
