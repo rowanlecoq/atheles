@@ -27,13 +27,13 @@ export default function SearchPageHeader() {
       {/* Hero background image */}
       <div className="absolute inset-0">
         <Image
-          src="/statues/doryphoros.jpg"
+          src="/statues/greek-god-hero.png"
           alt=""
           fill
-          className="object-cover object-top opacity-15"
+          className="object-cover object-center opacity-25 sm:opacity-20"
           priority
         />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/70 to-brand-dark" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/30 via-brand-dark/60 to-brand-dark" />
       </div>
       {/* Content */}
       <div className="relative px-4 pb-8 pt-10 sm:pb-10 sm:pt-14">

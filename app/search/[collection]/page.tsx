@@ -17,7 +17,12 @@ const parentCategories: Record<string, ParentCategory> = {
   mens: {
     title: "mens",
     description: "Shop all mens athletic wear.",
-    subcollections: ["compressions", "tees", "sweatpants"],
+    subcollections: ["compressions", "t-shirts", "sweatpants"],
+  },
+  "t-shirts": {
+    title: "tees",
+    description: "Shop all tees.",
+    subcollections: ["t-shirts"],
   },
   womens: {
     title: "womens",
