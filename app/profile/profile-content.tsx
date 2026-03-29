@@ -144,7 +144,9 @@ export default function ProfileContent() {
   const [dobYear, setDobYear] = useState("");
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
   const [profileBg, setProfileBg] = useState("none");
+  const [customBgImage, setCustomBgImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const bgFileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -164,6 +166,8 @@ export default function ProfileContent() {
       if (stored) setAvatar(stored);
       const bg = localStorage.getItem(`profile-bg-${u.id}`);
       if (bg) setProfileBg(bg);
+      const customBg = localStorage.getItem(`profile-bg-img-${u.id}`);
+      if (customBg) setCustomBgImage(customBg);
     };
 
     // Show cached session instantly while fetching fresh data
@@ -399,14 +403,26 @@ export default function ProfileContent() {
       : Math.min(100, ((points - tier.min) / (tier.max - tier.min)) * 100);
 
   return (
-    <div className={`mx-auto max-w-2xl px-4 py-12 sm:py-16 ${
-      profileBg === "gold" ? "bg-gradient-to-br from-brand-dark via-brand-dark-gold/10 to-brand-dark" :
-      profileBg === "ember" ? "bg-gradient-to-br from-brand-dark via-red-950/20 to-brand-dark" :
-      profileBg === "ocean" ? "bg-gradient-to-br from-brand-dark via-cyan-950/20 to-brand-dark" :
-      profileBg === "aurora" ? "bg-gradient-to-br from-purple-950/20 via-brand-dark to-emerald-950/15" :
-      profileBg === "midnight" ? "bg-gradient-to-br from-indigo-950/20 via-brand-dark to-blue-950/15" :
-      ""
-    }`}>
+    <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16">
+      {/* Background layer */}
+      {profileBg === "custom" && customBgImage ? (
+        <div className="pointer-events-none absolute inset-0 overflow-hidden">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={customBgImage} alt="" className="h-full w-full object-cover opacity-15 blur-sm" />
+          <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-brand-dark/80 to-brand-dark" />
+        </div>
+      ) : profileBg !== "none" ? (
+        <div className={`pointer-events-none absolute inset-0 ${
+          profileBg === "gold" ? "bg-gradient-to-br from-yellow-900/30 via-brand-dark-gold/20 to-amber-950/25" :
+          profileBg === "ember" ? "bg-gradient-to-br from-red-900/30 via-orange-950/20 to-red-950/25" :
+          profileBg === "ocean" ? "bg-gradient-to-br from-cyan-900/30 via-teal-950/20 to-blue-950/25" :
+          profileBg === "aurora" ? "bg-gradient-to-br from-purple-900/30 via-fuchsia-950/15 to-emerald-950/25" :
+          profileBg === "midnight" ? "bg-gradient-to-br from-indigo-900/30 via-blue-950/20 to-violet-950/25" :
+          ""
+        }`} />
+      ) : null}
+
+      <div className="relative">
       {/* Crop Modal */}
       {cropSrc && (
         <ImageCropModal
@@ -419,7 +435,7 @@ export default function ProfileContent() {
       {/* Avatar Preview Modal */}
       {showAvatarPreview && avatar && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-4"
           onClick={() => setShowAvatarPreview(false)}
         >
           <button
@@ -433,13 +449,18 @@ export default function ProfileContent() {
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src={avatar}
-            alt="Profile photo"
-            className="max-h-[70vh] max-w-[70vw] rounded-2xl object-contain"
-            onClick={(e) => e.stopPropagation()}
-          />
+          <div className="flex flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
+            <div className="overflow-hidden rounded-full border-4 border-brand-gold/50 shadow-[0_0_40px_rgba(193,163,104,0.2)]">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={avatar}
+                alt="Profile photo"
+                className="h-64 w-64 object-cover sm:h-80 sm:w-80"
+              />
+            </div>
+            <p className="font-heading text-xl text-brand-gold">{user.name}</p>
+            <p className="text-sm text-brand-grey">{user.email}</p>
+          </div>
         </div>
       )}
 
@@ -1033,14 +1054,14 @@ export default function ProfileContent() {
         <h2 className="mb-4 font-heading text-lg text-brand-pale-gold">
           profile theme
         </h2>
-        <div className="flex flex-wrap gap-2">
+        <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
           {[
-            { id: "none", label: "default", style: "bg-brand-dark" },
-            { id: "gold", label: "gold", style: "bg-gradient-to-br from-brand-dark via-brand-dark-gold/20 to-brand-dark" },
-            { id: "ember", label: "ember", style: "bg-gradient-to-br from-brand-dark via-red-950/30 to-brand-dark" },
-            { id: "ocean", label: "ocean", style: "bg-gradient-to-br from-brand-dark via-cyan-950/30 to-brand-dark" },
-            { id: "aurora", label: "aurora", style: "bg-gradient-to-br from-purple-950/30 via-brand-dark to-emerald-950/20" },
-            { id: "midnight", label: "midnight", style: "bg-gradient-to-br from-indigo-950/30 via-brand-dark to-blue-950/20" },
+            { id: "none", label: "default", colors: "from-[#1a1a1a] to-[#222]" },
+            { id: "gold", label: "gold", colors: "from-yellow-800/60 to-amber-900/60" },
+            { id: "ember", label: "ember", colors: "from-red-800/60 to-orange-900/60" },
+            { id: "ocean", label: "ocean", colors: "from-cyan-800/60 to-teal-900/60" },
+            { id: "aurora", label: "aurora", colors: "from-purple-800/60 to-emerald-900/60" },
+            { id: "midnight", label: "midnight", colors: "from-indigo-800/60 to-blue-900/60" },
           ].map((theme) => (
             <button
               key={theme.id}
@@ -1049,21 +1070,82 @@ export default function ProfileContent() {
                 setProfileBg(theme.id);
                 if (user) localStorage.setItem(`profile-bg-${user.id}`, theme.id);
               }}
-              className={`flex h-10 w-10 items-center justify-center rounded-full border-2 transition-all ${theme.style} ${
+              className={`flex flex-col items-center gap-1.5 rounded-lg p-2 transition-all ${
                 profileBg === theme.id
-                  ? "border-brand-gold scale-110"
-                  : "border-brand-dark-gold/30 hover:border-brand-gold/50"
+                  ? "ring-2 ring-brand-gold"
+                  : "hover:ring-1 hover:ring-brand-dark-gold/50"
               }`}
-              title={theme.label}
             >
-              {profileBg === theme.id && (
-                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-4 w-4 text-brand-gold">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              )}
+              <div className={`h-10 w-10 rounded-full bg-gradient-to-br ${theme.colors} border border-white/10`} />
+              <span className="text-[10px] text-brand-grey">{theme.label}</span>
             </button>
           ))}
+
+          {/* Custom image */}
+          <button
+            type="button"
+            onClick={() => {
+              if (profileBg === "custom" && customBgImage) {
+                // Already custom — let them pick a new image
+                bgFileInputRef.current?.click();
+              } else if (customBgImage) {
+                // Has a saved custom image — apply it
+                setProfileBg("custom");
+                if (user) localStorage.setItem(`profile-bg-${user.id}`, "custom");
+              } else {
+                // No custom image yet — pick one
+                bgFileInputRef.current?.click();
+              }
+            }}
+            className={`flex flex-col items-center gap-1.5 rounded-lg p-2 transition-all ${
+              profileBg === "custom"
+                ? "ring-2 ring-brand-gold"
+                : "hover:ring-1 hover:ring-brand-dark-gold/50"
+            }`}
+          >
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-dashed border-brand-dark-gold/40 bg-brand-dark-gold/10 overflow-hidden">
+              {customBgImage ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img src={customBgImage} alt="" className="h-full w-full object-cover" />
+              ) : (
+                <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4 text-brand-grey">
+                  <rect x="3" y="3" width="18" height="18" rx="2" />
+                  <circle cx="8.5" cy="8.5" r="1.5" />
+                  <path d="M21 15l-5-5L5 21" />
+                </svg>
+              )}
+            </div>
+            <span className="text-[10px] text-brand-grey">custom</span>
+          </button>
         </div>
+        <input
+          ref={bgFileInputRef}
+          type="file"
+          accept="image/png,image/jpeg,image/webp"
+          onChange={(e) => {
+            const file = e.target.files?.[0];
+            if (!file || !user) return;
+            if (file.size > 5 * 1024 * 1024) {
+              setSaveMessage("image must be under 5mb.");
+              return;
+            }
+            const reader = new FileReader();
+            reader.onload = () => {
+              const dataUrl = reader.result as string;
+              setCustomBgImage(dataUrl);
+              setProfileBg("custom");
+              try {
+                localStorage.setItem(`profile-bg-img-${user.id}`, dataUrl);
+                localStorage.setItem(`profile-bg-${user.id}`, "custom");
+              } catch {
+                setSaveMessage("image saved for this session only (storage full).");
+              }
+            };
+            reader.readAsDataURL(file);
+            e.target.value = "";
+          }}
+          className="hidden"
+        />
       </div>
 
       {/* Quick Links */}
@@ -1093,6 +1175,7 @@ export default function ProfileContent() {
           <span className="text-sm text-red-400">sign out</span>
           <span className="text-xs text-red-400/50">&rarr;</span>
         </button>
+      </div>
       </div>
     </div>
   );
