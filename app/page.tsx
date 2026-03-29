@@ -4,7 +4,6 @@ import { ThreeItemGrid } from "components/grid/three-items";
 import { Hero } from "components/hero";
 import Footer from "components/layout/footer";
 import { NewsletterSignup } from "components/newsletter-signup";
-import { ReviewsSection } from "components/reviews";
 
 export const metadata = {
   description:
@@ -20,9 +19,6 @@ export default function HomePage() {
       <Hero />
       <Carousel />
       <ThreeItemGrid />
-      <div className="mx-auto max-w-(--breakpoint-2xl) px-4">
-        <ReviewsSection />
-      </div>
       <NewsletterSignup />
       <GreekQuote />
       <Footer />
