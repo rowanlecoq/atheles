@@ -1,7 +1,7 @@
 "use client";
 
 import { GridTileImage } from "components/grid/tile";
-import { QuickAddButton } from "components/grid/quick-add-button";
+
 import {
   animationDurations,
   animationDurationsMobile,
@@ -104,11 +104,6 @@ export default function ProductGridItems({
                 )}
               </div>
             </Link>
-            {product.availableForSale && (
-              <div className="absolute bottom-4 right-4 z-10">
-                <QuickAddButton product={product} />
-              </div>
-            )}
           </div>
         </motion.li>
       ))}
