@@ -50,7 +50,8 @@ export async function POST(request: Request) {
           }
         : null,
     });
-  } catch {
+  } catch (err) {
+    console.error("[reset] Error:", err);
     return NextResponse.json(
       { success: false, error: "something went wrong" },
       { status: 500 },
