@@ -70,56 +70,46 @@ export async function updateCustomerDob(
   dob: string,
 ): Promise<{ success: boolean; error?: string }> {
   if (!adminEndpoint || !adminToken) {
-    console.error("[DOB write] Admin API not configured");
     return { success: false, error: "admin API not configured" };
   }
 
-  try {
-    // Look up customer by email in Admin API to get the correct admin GID
-    const searchResult = await shopifyAdminFetch<{
-      customers: { edges: { node: { id: string; tags: string[] } }[] };
-    }>(
-      `query customers($query: String!) {
-        customers(first: 1, query: $query) {
-          edges { node { id tags } }
-        }
-      }`,
-      { query: `email:${customerEmail}` },
-    );
+  // Look up customer by email in Admin API to get the correct admin GID
+  const searchResult = await shopifyAdminFetch<{
+    customers: { edges: { node: { id: string; tags: string[] } }[] };
+  }>(
+    `query customers($query: String!) {
+      customers(first: 1, query: $query) {
+        edges { node { id tags } }
+      }
+    }`,
+    { query: `email:${customerEmail}` },
+  );
 
-    const adminCustomer = searchResult.customers.edges[0]?.node;
-    if (!adminCustomer) {
-      console.error("[DOB write] Customer not found in admin for:", customerEmail);
-      return { success: false, error: "customer not found in admin" };
-    }
-
-    console.error("[DOB write] Found admin customer:", adminCustomer.id, "tags:", adminCustomer.tags);
-
-    const existingTags = adminCustomer.tags || [];
-    const filteredTags = existingTags.filter((t) => !t.startsWith("dob:"));
-    const newTags = [...filteredTags, `dob:${dob}`];
-
-    const updateResult = await shopifyAdminFetch<{
-      customerUpdate: {
-        customer: { id: string } | null;
-        userErrors: { message: string }[];
-      };
-    }>(
-      `mutation customerUpdate($input: CustomerInput!) {
-        customerUpdate(input: $input) {
-          customer { id }
-          userErrors { message }
-        }
-      }`,
-      { input: { id: adminCustomer.id, tags: newTags } },
-    );
-
-    console.error("[DOB write] Update result:", JSON.stringify(updateResult));
-    return { success: true };
-  } catch (err) {
-    console.error("[DOB write] Failed:", err);
-    return { success: false, error: String(err) };
+  const adminCustomer = searchResult.customers.edges[0]?.node;
+  if (!adminCustomer) {
+    return { success: false, error: "customer not found in admin" };
   }
+
+  const existingTags = adminCustomer.tags || [];
+  const filteredTags = existingTags.filter((t) => !t.startsWith("dob:"));
+  const newTags = [...filteredTags, `dob:${dob}`];
+
+  await shopifyAdminFetch<{
+    customerUpdate: {
+      customer: { id: string } | null;
+      userErrors: { message: string }[];
+    };
+  }>(
+    `mutation customerUpdate($input: CustomerInput!) {
+      customerUpdate(input: $input) {
+        customer { id }
+        userErrors { message }
+      }
+    }`,
+    { input: { id: adminCustomer.id, tags: newTags } },
+  );
+
+  return { success: true };
 }
 
 export async function createCustomerAccount(
@@ -359,11 +349,9 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       const tags = adminCustomer.customers.edges[0]?.node?.tags || [];
       const dobTag = tags.find((t) => t.startsWith("dob:"));
       dob = dobTag ? dobTag.replace("dob:", "") : null;
-    } catch (err) {
-      console.error("[DOB read] Failed to fetch tags via Admin API:", err);
+    } catch {
+      // Tags not available — DOB will show as "not set"
     }
-  } else {
-    console.error("[DOB read] Admin API not configured — endpoint:", !!adminEndpoint, "token:", !!adminToken);
   }
 
   return {
