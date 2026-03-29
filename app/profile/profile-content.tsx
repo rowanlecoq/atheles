@@ -237,10 +237,18 @@ export default function ProfileContent() {
 
   if (loading || !user) {
     return (
-      <div className="flex min-h-[60vh] items-center justify-center">
+      <div className="flex min-h-[60vh] flex-col items-center justify-center gap-4">
         <p className="text-sm text-brand-grey">
           {redirecting ? "redirecting to sign in..." : "loading..."}
         </p>
+        {redirecting && (
+          <Link
+            href="/login"
+            className="text-xs text-brand-gold underline underline-offset-2 transition-colors hover:text-brand-light-gold"
+          >
+            click here if not redirected
+          </Link>
+        )}
       </div>
     );
   }
