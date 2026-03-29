@@ -39,7 +39,7 @@ export default async function Footer() {
               <LogoSquare size="sm" />
             </Link>
             <p className="text-xs uppercase tracking-[0.14em] text-brand-pale-gold sm:tracking-[0.2em]">
-              Authentic Superiority
+              AUTHENTIC SUPERIORITY.
             </p>
           </div>
 
