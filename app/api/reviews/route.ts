@@ -55,7 +55,8 @@ export async function POST(request: NextRequest) {
     const userName =
       customer.displayName ||
       customer.firstName ||
-      customer.email.split("@")[0];
+      customer.email.split("@")[0] ||
+      "anonymous";
 
     const result = await submitReview({
       user_name: userName,
