@@ -105,7 +105,7 @@ export default function ProductGridItems({
               </div>
             </Link>
             {product.availableForSale && (
-              <div className="absolute bottom-3 right-3 z-10">
+              <div className="absolute bottom-4 right-4 z-10">
                 <QuickAddButton product={product} />
               </div>
             )}

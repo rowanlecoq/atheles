@@ -45,6 +45,13 @@ export default function CartModal() {
     }
   }, [cart?.totalQuantity]);
 
+  // Listen for custom open-cart events (from quick-add etc.)
+  useEffect(() => {
+    const handleOpenCart = () => setIsOpen(true);
+    window.addEventListener("open-cart", handleOpenCart);
+    return () => window.removeEventListener("open-cart", handleOpenCart);
+  }, []);
+
   return (
     <>
       <button
