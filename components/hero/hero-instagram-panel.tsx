@@ -14,10 +14,10 @@ export function HeroInstagramPanel() {
       >
         {/* Header */}
         <div className="flex items-center justify-between border-b border-brand-dark-gold/15 px-4 py-2.5">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-brand-dark-gold">
+          <span className="text-xs uppercase tracking-[0.2em] text-brand-dark-gold">
             @atheles.co
           </span>
-          <span className="text-[9px] uppercase tracking-[0.15em] text-brand-gold transition-colors group-hover:text-brand-light-gold">
+          <span className="text-[11px] uppercase tracking-[0.15em] text-brand-gold transition-colors group-hover:text-brand-light-gold">
             follow
           </span>
         </div>
@@ -49,7 +49,7 @@ export function HeroInstagramPanel() {
 
           {/* Bottom label */}
           <div className="absolute bottom-3 left-4 right-4 text-center">
-            <p className="text-[9px] uppercase tracking-[0.2em] text-brand-dark-gold/80">
+            <p className="text-[11px] uppercase tracking-[0.2em] text-brand-dark-gold/80">
               follow the journey
             </p>
           </div>

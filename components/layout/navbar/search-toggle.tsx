@@ -48,7 +48,7 @@ function ResultItem({
         </div>
       ) : (
         <div className="flex h-10 w-10 flex-none items-center justify-center rounded bg-[#222]">
-          <span className="text-[8px] text-brand-grey">ATHELES</span>
+          <span className="text-[11px] text-brand-grey">ATHELES</span>
         </div>
       )}
       <div className="min-w-0 flex-1">

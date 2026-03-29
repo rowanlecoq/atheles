@@ -456,7 +456,7 @@ export default function ProfileContent() {
           <button
             type="button"
             onClick={handleRemoveAvatar}
-            className="mb-2 text-[10px] text-brand-grey transition-colors hover:text-red-400"
+            className="mb-2 text-xs text-brand-grey transition-colors hover:text-red-400"
           >
             remove photo
           </button>
@@ -465,7 +465,7 @@ export default function ProfileContent() {
           {user.name}
         </h1>
         <p className="mt-1 text-sm text-brand-grey">{user.email}</p>
-        <p className="mt-1 text-[10px] uppercase tracking-wider text-brand-dark-gold">
+        <p className="mt-1 text-xs uppercase tracking-wider text-brand-dark-gold">
           member since {memberSince}
         </p>
       </div>
@@ -479,7 +479,7 @@ export default function ProfileContent() {
           {/* Header - gradient title + tier name */}
           <div className="mb-5 text-center">
             <p
-              className={`mb-1.5 bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] font-medium tracking-[0.25em] text-transparent`}
+              className={`mb-1.5 bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.25em] text-transparent`}
             >
               LOYALTY REWARDS
             </p>
@@ -496,7 +496,7 @@ export default function ProfileContent() {
               <p className="text-center text-5xl font-light tracking-tight text-brand-gold">
                 {points.toLocaleString()}
               </p>
-              <p className="mt-0.5 text-center text-[10px] tracking-[0.2em] text-brand-pale-gold/60">
+              <p className="mt-0.5 text-center text-xs tracking-[0.2em] text-brand-pale-gold/60">
                 POINTS EARNED
               </p>
               {/* Decorative sparkles */}
@@ -518,18 +518,18 @@ export default function ProfileContent() {
           {/* Current tier → Next tier labels */}
           <div className="mb-2 flex items-center justify-between">
             <span
-              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] font-medium tracking-[0.15em] text-transparent`}
+              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.15em] text-transparent`}
             >
               {tier.name}
             </span>
             {nextTier ? (
               <span
-                className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-[10px] font-medium tracking-[0.15em] text-transparent`}
+                className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.15em] text-transparent`}
               >
                 {nextTier.name}
               </span>
             ) : (
-              <span className="text-[10px] tracking-wider text-brand-pale-gold/50">
+              <span className="text-xs tracking-wider text-brand-pale-gold/50">
                 MAX
               </span>
             )}
@@ -624,7 +624,7 @@ export default function ProfileContent() {
             style={{ textTransform: "none" }}
           >
             <p
-              className="mb-2.5 text-[10px] font-medium tracking-[0.15em] text-brand-pale-gold"
+              className="mb-2.5 text-xs font-medium tracking-[0.15em] text-brand-pale-gold"
               style={{ textTransform: "uppercase" }}
             >
               YOUR PERKS
@@ -637,7 +637,7 @@ export default function ProfileContent() {
                     className="flex items-center gap-2.5 text-sm text-white"
                   >
                     <span
-                      className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-[10px] text-transparent`}
+                      className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-xs text-transparent`}
                     >
                       &#10022;
                     </span>
@@ -660,7 +660,7 @@ export default function ProfileContent() {
             {nextTier && nextTier.perks.length > 0 && (
               <div className="mt-3.5 border-t border-brand-dark-gold/15 pt-3.5">
                 <p
-                  className="mb-2 text-[10px] font-medium tracking-[0.15em] text-brand-grey"
+                  className="mb-2 text-xs font-medium tracking-[0.15em] text-brand-grey"
                   style={{ textTransform: "uppercase" }}
                 >
                   NEXT AT{" "}
@@ -678,7 +678,7 @@ export default function ProfileContent() {
                         key={perk}
                         className="flex items-center gap-2.5 text-sm text-white/50"
                       >
-                        <span className="text-[10px] text-brand-dark-gold">
+                        <span className="text-xs text-brand-dark-gold">
                           &#10022;
                         </span>
                         {perk}
@@ -693,7 +693,7 @@ export default function ProfileContent() {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center">
               <p className="font-heading text-xl text-brand-gold">{orders}</p>
-              <p className="text-[10px] uppercase tracking-wider text-brand-grey">
+              <p className="text-xs uppercase tracking-wider text-brand-grey">
                 orders
               </p>
             </div>
@@ -701,13 +701,13 @@ export default function ProfileContent() {
               <p className="font-heading text-xl text-brand-gold">
                 ${totalSpentNum.toFixed(0)}
               </p>
-              <p className="text-[10px] uppercase tracking-wider text-brand-grey">
+              <p className="text-xs uppercase tracking-wider text-brand-grey">
                 total spent
               </p>
             </div>
           </div>
 
-          <p className="mt-4 text-center text-[10px] text-brand-grey/50">
+          <p className="mt-4 text-center text-xs text-brand-grey/50">
             earn <span className="text-brand-pale-gold">50 points</span> per $1
             spent &#183; unlock exclusive tiers & perks
           </p>
@@ -781,7 +781,7 @@ export default function ProfileContent() {
         <div className="space-y-4">
           {/* First Name */}
           <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 block text-xs uppercase tracking-wider text-brand-grey">
               first name
             </label>
             {editing ? (
@@ -804,7 +804,7 @@ export default function ProfileContent() {
 
           {/* Last Name */}
           <div>
-            <label className="mb-1 flex items-baseline gap-1.5 text-[10px] uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 flex items-baseline gap-1.5 text-xs uppercase tracking-wider text-brand-grey">
               last name
               <span className="normal-case tracking-normal text-brand-grey/40">
                 optional
@@ -829,7 +829,7 @@ export default function ProfileContent() {
 
           {/* Email (read-only) */}
           <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 block text-xs uppercase tracking-wider text-brand-grey">
               email
             </label>
             <p className="px-3 py-2 text-sm text-brand-grey">{user.email}</p>
@@ -837,7 +837,7 @@ export default function ProfileContent() {
 
           {/* Date of Birth */}
           <div>
-            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 block text-xs uppercase tracking-wider text-brand-grey">
               date of birth
             </label>
             {editing ? (
@@ -915,7 +915,7 @@ export default function ProfileContent() {
 
           {/* Phone */}
           <div>
-            <label className="mb-1 flex items-baseline gap-1.5 text-[10px] uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 flex items-baseline gap-1.5 text-xs uppercase tracking-wider text-brand-grey">
               phone number
               <span className="normal-case tracking-normal text-brand-grey/40">
                 optional
@@ -952,7 +952,7 @@ export default function ProfileContent() {
           <div className="flex items-center justify-between rounded border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-3">
             <div>
               <p className="text-sm text-white">newsletter</p>
-              <p className="text-[10px] text-brand-grey">
+              <p className="text-xs text-brand-grey">
                 get notified about drops, offers & updates
               </p>
             </div>

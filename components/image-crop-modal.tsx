@@ -181,7 +181,7 @@ export default function ImageCropModal({
         <h3 className="mb-4 text-center font-heading text-lg text-brand-gold">
           adjust photo
         </h3>
-        <p className="mb-4 text-center text-[10px] text-brand-grey">
+        <p className="mb-4 text-center text-xs text-brand-grey">
           drag to reposition, use slider to zoom
         </p>
 

@@ -72,7 +72,7 @@ export function ProductCard({
             {tags.slice(0, 2).map((tag) => (
               <span
                 key={tag}
-                className="bg-brand-dark/90 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wider text-white"
+                className="bg-brand-dark/90 px-2.5 py-1 text-xs font-bold uppercase tracking-wider text-white"
               >
                 {tag}
               </span>

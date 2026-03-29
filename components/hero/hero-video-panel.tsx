@@ -9,10 +9,10 @@ export function HeroVideoPanel() {
       <div className="flex h-full flex-col overflow-hidden rounded-sm border border-brand-dark-gold/25 bg-[#1e1e1e]">
         {/* Header */}
         <div className="flex items-center justify-between border-b border-brand-dark-gold/15 px-4 py-2.5">
-          <span className="text-[10px] uppercase tracking-[0.2em] text-brand-dark-gold">
+          <span className="text-xs uppercase tracking-[0.2em] text-brand-dark-gold">
             the brand
           </span>
-          <span className="text-[9px] uppercase tracking-[0.15em] text-brand-dark-gold/50">
+          <span className="text-[11px] uppercase tracking-[0.15em] text-brand-dark-gold/50">
             coming soon
           </span>
         </div>
@@ -33,7 +33,7 @@ export function HeroVideoPanel() {
             <p className="text-xs uppercase tracking-[0.15em] text-brand-gold">
               the atheles story
             </p>
-            <p className="mt-1 text-[9px] tracking-wider text-brand-grey/70">
+            <p className="mt-1 text-[11px] tracking-wider text-brand-grey/70">
               behind the brand
             </p>
           </div>

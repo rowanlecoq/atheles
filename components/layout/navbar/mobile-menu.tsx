@@ -65,7 +65,7 @@ function CategoryItem({
         >
           {item.title}
           {item.comingSoon && (
-            <span className="ml-2 text-[10px] italic tracking-wide text-brand-dark-gold">
+            <span className="ml-2 text-xs italic tracking-wide text-brand-dark-gold">
               Soon
             </span>
           )}
@@ -267,7 +267,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                           <p className="text-sm font-medium text-white">
                             {userName}
                           </p>
-                          <p className="text-[10px] uppercase tracking-wider text-brand-dark-gold">
+                          <p className="text-xs uppercase tracking-wider text-brand-dark-gold">
                             view profile
                           </p>
                         </>
@@ -276,7 +276,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                           <p className="text-sm font-medium text-brand-pale-gold">
                             sign in
                           </p>
-                          <p className="text-[10px] uppercase tracking-wider text-brand-dark-gold">
+                          <p className="text-xs uppercase tracking-wider text-brand-dark-gold">
                             or create account
                           </p>
                         </>
@@ -322,7 +322,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
 
                 {/* Category links with expandable subcategories */}
                 <div className="mt-4">
-                  <p className="mb-2 text-[10px] uppercase tracking-[0.2em] text-brand-dark-gold">
+                  <p className="mb-2 text-xs uppercase tracking-[0.2em] text-brand-dark-gold">
                     Categories
                   </p>
                   <ul className="flex w-full flex-col">

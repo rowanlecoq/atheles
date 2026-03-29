@@ -198,8 +198,8 @@ export default function AboutPage() {
                     className="mx-auto mb-2 h-12 w-12 rounded-full border border-brand-dark-gold/30"
                     style={{ backgroundColor: color.hex }}
                   />
-                  <p className="text-[10px] text-brand-grey">{color.name}</p>
-                  <p className="text-[10px] text-brand-grey/60">{color.hex}</p>
+                  <p className="text-xs text-brand-grey">{color.name}</p>
+                  <p className="text-xs text-brand-grey/60">{color.hex}</p>
                 </div>
               ))}
             </div>

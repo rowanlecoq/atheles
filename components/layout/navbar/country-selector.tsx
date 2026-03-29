@@ -88,7 +88,7 @@ export function CountrySelector() {
         className="flex h-11 items-center gap-1.5 px-1 text-brand-grey transition-colors hover:text-brand-gold"
       >
         <span className="text-base leading-none">{current.flag}</span>
-        <span className="text-[10px] uppercase tracking-wider">
+        <span className="text-xs uppercase tracking-wider">
           {current.language}
         </span>
         <ChevronDownIcon
@@ -117,7 +117,7 @@ export function CountrySelector() {
           >
             <span className="text-base leading-none">{r.flag}</span>
             <span className="flex-1 uppercase tracking-wider">{r.label}</span>
-            <span className="text-[10px] tracking-wider text-brand-grey/60">
+            <span className="text-xs tracking-wider text-brand-grey/60">
               {r.language} / {r.currency}
             </span>
           </button>

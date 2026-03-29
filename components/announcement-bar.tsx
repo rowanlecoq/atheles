@@ -47,7 +47,7 @@ export function AnnouncementBar() {
           animate={{ opacity: 1, filter: "blur(0px)" }}
           exit={{ opacity: 0, filter: "blur(4px)" }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
-          className="px-8 text-[10px] uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em]"
+          className="px-8 text-xs uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em]"
         >
           {announcements[index]}
         </motion.p>
