@@ -125,38 +125,6 @@ export default async function ProductPage(props: {
           <RecentlyViewedProducts currentHandle={product.handle} />
         </Suspense>
 
-        {/* Need Help? */}
-        <div className="border-t border-brand-dark-gold/20 py-8">
-          <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
-            need help?
-          </h3>
-          <div className="flex flex-wrap gap-x-8 gap-y-2 text-sm text-brand-grey">
-            <Link
-              href="/size-guide"
-              className="underline underline-offset-4 transition-colors hover:text-brand-gold"
-            >
-              sizing chart
-            </Link>
-            <Link
-              href="/shipping"
-              className="underline underline-offset-4 transition-colors hover:text-brand-gold"
-            >
-              shipping & delivery
-            </Link>
-            <Link
-              href="/returns"
-              className="underline underline-offset-4 transition-colors hover:text-brand-gold"
-            >
-              returns & exchanges
-            </Link>
-            <Link
-              href="/contact"
-              className="underline underline-offset-4 transition-colors hover:text-brand-gold"
-            >
-              contact us
-            </Link>
-          </div>
-        </div>
       </div>
       <Footer />
     </>
