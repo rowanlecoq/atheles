@@ -281,42 +281,74 @@ export default function ProfileContent() {
       {/* Avatar & Name */}
       <div className="mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
-          <div className="flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-brand-gold bg-brand-dark-gold/20">
+          <div className="relative flex h-24 w-24 items-center justify-center overflow-hidden rounded-full border-2 border-brand-gold bg-brand-dark-gold/20">
             {avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={avatar}
-                alt="Profile photo"
-                width={96}
-                height={96}
-                className="h-full w-full rounded-full object-cover"
-              />
+              <>
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={avatar}
+                  alt="Profile photo"
+                  width={96}
+                  height={96}
+                  className="h-full w-full rounded-full object-cover"
+                />
+                {/* Hover overlay for editing */}
+                <button
+                  type="button"
+                  onClick={() => fileInputRef.current?.click()}
+                  className="absolute inset-0 flex items-center justify-center rounded-full bg-black/0 opacity-0 transition-all duration-200 hover:bg-black/50 hover:opacity-100"
+                  aria-label="Change profile photo"
+                >
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth={1.5}
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    className="h-5 w-5 text-white"
+                  >
+                    <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                    <circle cx="12" cy="13" r="4" />
+                  </svg>
+                </button>
+              </>
             ) : (
-              <span className="font-heading text-2xl text-brand-gold">
-                {initials}
-              </span>
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="flex h-full w-full items-center justify-center rounded-full transition-colors hover:bg-brand-dark-gold/30"
+                aria-label="Add profile photo"
+              >
+                <span className="font-heading text-2xl text-brand-gold">
+                  {initials}
+                </span>
+              </button>
             )}
           </div>
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
-            aria-label="Change profile photo"
-          >
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth={1.5}
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className="h-3.5 w-3.5"
+          {!avatar && (
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+              aria-label="Add profile photo"
             >
-              <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
-              <circle cx="12" cy="13" r="4" />
-            </svg>
-          </button>
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth={1.5}
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-3.5 w-3.5"
+              >
+                <path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z" />
+                <circle cx="12" cy="13" r="4" />
+              </svg>
+            </button>
+          )}
           <input
             ref={fileInputRef}
             type="file"
@@ -326,13 +358,23 @@ export default function ProfileContent() {
           />
         </div>
         {avatar && (
-          <button
-            type="button"
-            onClick={handleRemoveAvatar}
-            className="mb-2 text-[10px] text-brand-grey transition-colors hover:text-red-400"
-          >
-            remove photo
-          </button>
+          <div className="mb-2 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={() => fileInputRef.current?.click()}
+              className="text-[10px] text-brand-grey transition-colors hover:text-brand-gold"
+            >
+              change photo
+            </button>
+            <span className="text-[10px] text-brand-dark-gold/40">|</span>
+            <button
+              type="button"
+              onClick={handleRemoveAvatar}
+              className="text-[10px] text-brand-grey transition-colors hover:text-red-400"
+            >
+              remove
+            </button>
+          </div>
         )}
         <h1 className="font-heading text-2xl text-brand-gold sm:text-3xl">
           {user.name}
