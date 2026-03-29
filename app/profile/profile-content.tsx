@@ -180,16 +180,18 @@ export default function ProfileContent() {
           sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
         } else {
           sessionStorage.removeItem("atheles-session");
+          setUser(null);
           setRedirecting(true);
           window.location.href = "/login";
+          return;
         }
         setLoading(false);
       })
       .catch(() => {
         sessionStorage.removeItem("atheles-session");
+        setUser(null);
         setRedirecting(true);
         window.location.href = "/login";
-        setLoading(false);
       });
   }, [router]);
 
