@@ -14,31 +14,87 @@ function getStoredFavorites(): string[] {
   }
 }
 
+function storeLocal(favorites: string[]) {
+  try {
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(favorites));
+  } catch {
+    // storage full or unavailable
+  }
+}
+
 export function useFavorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
   const favoritesRef = useRef(favorites);
-
-  useEffect(() => {
-    const stored = getStoredFavorites();
-    setFavorites(stored);
-    favoritesRef.current = stored;
-  }, []);
+  const loggedInRef = useRef(false);
+  const syncedRef = useRef(false);
+  const savingRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   // Keep ref in sync
   useEffect(() => {
     favoritesRef.current = favorites;
   }, [favorites]);
 
-  const persist = useCallback((next: string[]) => {
-    favoritesRef.current = next;
-    setFavorites(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-      window.dispatchEvent(new Event("favorites-changed"));
-    } catch {
-      // storage full or unavailable
+  // On mount: load from localStorage immediately, then fetch from server
+  useEffect(() => {
+    const local = getStoredFavorites();
+    setFavorites(local);
+    favoritesRef.current = local;
+
+    // Check if logged in and fetch server favorites
+    const loggedIn = document.cookie.includes("atheles-logged-in=1");
+    loggedInRef.current = loggedIn;
+
+    if (loggedIn) {
+      fetch("/api/auth/favorites")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (!data || data.favorites === null) return;
+          const server: string[] = data.favorites;
+          const local = favoritesRef.current;
+
+          // Merge: union of local + server (keeps items from both devices)
+          const merged = Array.from(new Set([...server, ...local]));
+          favoritesRef.current = merged;
+          setFavorites(merged);
+          storeLocal(merged);
+          syncedRef.current = true;
+
+          // If merged differs from server, push merged back
+          if (merged.length !== server.length || !merged.every((h) => server.includes(h))) {
+            fetch("/api/auth/favorites", {
+              method: "POST",
+              headers: { "Content-Type": "application/json" },
+              body: JSON.stringify({ favorites: merged }),
+            }).catch(() => {});
+          }
+        })
+        .catch(() => {});
     }
   }, []);
+
+  // Debounced save to server
+  const saveToServer = useCallback((next: string[]) => {
+    if (!loggedInRef.current) return;
+    if (savingRef.current) clearTimeout(savingRef.current);
+    savingRef.current = setTimeout(() => {
+      fetch("/api/auth/favorites", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ favorites: next }),
+      }).catch(() => {});
+    }, 500);
+  }, []);
+
+  const persist = useCallback(
+    (next: string[]) => {
+      favoritesRef.current = next;
+      setFavorites(next);
+      storeLocal(next);
+      saveToServer(next);
+      window.dispatchEvent(new Event("favorites-changed"));
+    },
+    [saveToServer],
+  );
 
   const addFavorite = useCallback(
     (handle: string) => {

@@ -5,7 +5,7 @@ import { useCurrency } from "components/currency-context";
 import { useFavorites } from "lib/hooks/use-favorites";
 import Image from "next/image";
 import Link from "next/link";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 type FavoriteProduct = {
   handle: string;
@@ -81,43 +81,59 @@ export default function FavoritesPage() {
   const { favorites, removeFavorite } = useFavorites();
   const [products, setProducts] = useState<FavoriteProduct[]>([]);
   const [loading, setLoading] = useState(true);
+  const fetchedHandlesRef = useRef<string>("");
 
   useEffect(() => {
+    // Build a key from sorted handles to avoid refetching the same set
+    const key = [...favorites].sort().join(",");
+
     if (favorites.length === 0) {
       setProducts([]);
       setLoading(false);
+      fetchedHandlesRef.current = "";
       return;
     }
 
-    async function fetchProducts() {
-      setLoading(true);
-      try {
-        // Fetch each favorite product
-        const results = await Promise.all(
-          favorites.map(async (handle) => {
-            try {
-              const res = await fetch(
-                `/api/search?q=${encodeURIComponent(handle)}`,
-              );
-              if (res.ok) {
-                const data = await res.json();
-                const match = data.products?.find(
-                  (p: FavoriteProduct) => p.handle === handle,
-                );
-                return match || null;
-              }
-            } catch {}
-            return null;
-          }),
-        );
-        setProducts(results.filter(Boolean) as FavoriteProduct[]);
-      } catch {
-        setProducts([]);
-      }
-      setLoading(false);
+    // Skip fetch if we already have this exact set
+    if (key === fetchedHandlesRef.current) {
+      // Just filter out removed items from existing products
+      setProducts((prev) =>
+        prev.filter((p) => favorites.includes(p.handle)),
+      );
+      return;
     }
 
-    fetchProducts();
+    // Check which handles we already have cached
+    setProducts((prev) => {
+      const cached = prev.filter((p) => favorites.includes(p.handle));
+      const missing = favorites.filter(
+        (h) => !cached.some((p) => p.handle === h),
+      );
+
+      if (missing.length === 0) {
+        fetchedHandlesRef.current = key;
+        setLoading(false);
+        return cached;
+      }
+
+      // Fetch only missing products
+      setLoading(true);
+      fetch("/api/products/by-handles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ handles: missing }),
+      })
+        .then((r) => (r.ok ? r.json() : { products: [] }))
+        .then((data) => {
+          const newProducts: FavoriteProduct[] = data.products || [];
+          setProducts([...cached, ...newProducts]);
+          fetchedHandlesRef.current = key;
+        })
+        .catch(() => {})
+        .finally(() => setLoading(false));
+
+      return cached;
+    });
   }, [favorites]);
 
   return (
@@ -127,9 +143,22 @@ export default function FavoritesPage() {
       </h1>
       <div className="mb-8 h-px w-24 bg-brand-dark-gold/40" />
 
-      {loading ? (
-        <div className="py-12 text-center">
-          <p className="text-sm text-brand-grey">loading...</p>
+      {loading && products.length === 0 ? (
+        <div className="grid gap-3 sm:grid-cols-2">
+          {Array.from({ length: Math.min(favorites.length || 2, 4) }).map(
+            (_, i) => (
+              <div
+                key={i}
+                className="flex items-center gap-4 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-3"
+              >
+                <div className="h-20 w-20 flex-none animate-pulse rounded bg-brand-dark-gold/15" />
+                <div className="flex-1 space-y-2">
+                  <div className="h-4 w-3/4 animate-pulse rounded bg-brand-dark-gold/15" />
+                  <div className="h-4 w-1/3 animate-pulse rounded bg-brand-dark-gold/15" />
+                </div>
+              </div>
+            ),
+          )}
         </div>
       ) : favorites.length === 0 ? (
         <div className="py-12 text-center">
