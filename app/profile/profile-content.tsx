@@ -189,10 +189,10 @@ export default function ProfileContent() {
       if (customBg) setCustomBgImage(customBg);
     };
 
-    // Check if auth cookie exists — if not, skip everything and redirect immediately
-    const hasAuthCookie = document.cookie.includes("atheles-logged-in");
-    if (!hasAuthCookie) {
-      sessionStorage.removeItem("atheles-session");
+    // If no login indicator cookie AND no cached session, redirect immediately
+    const hasIndicator = document.cookie.includes("atheles-logged-in");
+    const cached = sessionStorage.getItem("atheles-session");
+    if (!hasIndicator && !cached) {
       setLoading(false);
       setRedirecting(true);
       window.location.replace("/login");
@@ -200,14 +200,13 @@ export default function ProfileContent() {
     }
 
     // Show cached session instantly while fetching fresh data
-    try {
-      const cached = sessionStorage.getItem("atheles-session");
-      if (cached) {
+    if (cached) {
+      try {
         const u = JSON.parse(cached) as User;
         applyUser(u);
         setLoading(false);
-      }
-    } catch { /* ignore */ }
+      } catch { /* ignore */ }
+    }
 
     fetch("/api/auth/session")
       .then((res) => res.json())
