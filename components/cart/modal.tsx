@@ -111,7 +111,9 @@ export default function CartModal() {
       .catch(() => {});
   }, [isOpen]);
 
-  // Load favorited products (up to 3, excluding items already in cart)
+  const favCacheRef = useRef<{ handles: string; products: FavProduct[] } | null>(null);
+
+  // Load favorited products (excluding items already in cart), cached
   useEffect(() => {
     if (!isOpen) return;
     try {
@@ -121,11 +123,16 @@ export default function CartModal() {
         setFavProducts([]);
         return;
       }
-      // Filter out items already in cart
       const cartHandles = cart?.lines.map((l) => l.merchandise.product.handle) || [];
-      const missing = favHandles.filter((h) => !cartHandles.includes(h)).slice(0, 3);
+      const missing = favHandles.filter((h) => !cartHandles.includes(h)).slice(0, 6);
       if (missing.length === 0) {
         setFavProducts([]);
+        return;
+      }
+      const key = missing.sort().join(",");
+      // Use cache if same set
+      if (favCacheRef.current?.handles === key) {
+        setFavProducts(favCacheRef.current.products);
         return;
       }
       fetch("/api/products/by-handles", {
@@ -134,7 +141,11 @@ export default function CartModal() {
         body: JSON.stringify({ handles: missing }),
       })
         .then((r) => (r.ok ? r.json() : { products: [] }))
-        .then((d) => setFavProducts(d.products || []))
+        .then((d) => {
+          const products = d.products || [];
+          favCacheRef.current = { handles: key, products };
+          setFavProducts(products);
+        })
         .catch(() => {});
     } catch {
       setFavProducts([]);
@@ -331,7 +342,7 @@ export default function CartModal() {
                       </div>
                       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                         {favProducts.map((p) => {
-                          const canAdd = !!p.firstVariantId;
+                          const canAdd = !!p.firstVariantId && !!p.availableForSale;
                           return (
                           <div
                             key={p.handle}
@@ -386,7 +397,7 @@ export default function CartModal() {
                                       src={p.featuredImage.url}
                                       alt={p.title}
                                       fill
-                                      className="object-cover"
+                                      className="object-cover opacity-50"
                                       sizes="130px"
                                     />
                                   ) : (
@@ -394,8 +405,11 @@ export default function CartModal() {
                                       <span className="text-[8px] text-brand-grey">ATHELES</span>
                                     </div>
                                   )}
+                                  <div className="absolute inset-0 flex items-center justify-center">
+                                    <span className="text-[10px] uppercase tracking-wider text-red-400">sold out</span>
+                                  </div>
                                 </div>
-                                <p className="truncate text-[10px] text-white group-hover:text-brand-gold">
+                                <p className="truncate text-[10px] text-white/50 group-hover:text-brand-gold">
                                   {p.title}
                                 </p>
                               </Link>
