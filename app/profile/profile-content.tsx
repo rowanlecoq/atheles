@@ -28,6 +28,8 @@ const TIERS = [
     barGradient: "from-amber-900 via-amber-700 to-amber-500",
     titleGradient: "from-amber-500 via-amber-400 to-yellow-300",
     perks: [] as string[],
+    discountCode: null as string | null,
+    discountPercent: null as number | null,
   },
   {
     name: "SILVER",
@@ -36,6 +38,8 @@ const TIERS = [
     barGradient: "from-gray-500 via-gray-400 to-gray-300",
     titleGradient: "from-gray-300 via-gray-200 to-white",
     perks: ["10% monthly discount code"],
+    discountCode: "monthlysilver10",
+    discountPercent: 10,
   },
   {
     name: "GOLD",
@@ -44,6 +48,8 @@ const TIERS = [
     barGradient: "from-yellow-700 via-yellow-500 to-amber-300",
     titleGradient: "from-yellow-400 via-yellow-300 to-amber-200",
     perks: ["early access", "15% monthly discount code", "birthday rewards"],
+    discountCode: "monthlygoldOGseason",
+    discountPercent: 15,
   },
   {
     name: "PLATINUM",
@@ -57,6 +63,8 @@ const TIERS = [
       "birthday rewards",
       "free shipping",
     ],
+    discountCode: "monthlyplatinumOGseason",
+    discountPercent: 18,
   },
   {
     name: "CHAMPION",
@@ -70,6 +78,8 @@ const TIERS = [
       "free shipping",
       "birthday rewards",
     ],
+    discountCode: "monthlychampionOGseason",
+    discountPercent: 20,
   },
 ];
 
@@ -144,6 +154,7 @@ export default function ProfileContent() {
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear] = useState("");
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
+  const [discountRevealed, setDiscountRevealed] = useState(false);
   const [profileBg, setProfileBg] = useState("none");
   const [customBgImage, setCustomBgImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
@@ -950,6 +961,65 @@ export default function ProfileContent() {
           }
         `}</style>
       </div>
+
+      {/* Monthly Discount Code */}
+      {tier.discountCode && (
+        <div className="mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
+          <div className="p-5">
+            <div className="mb-3 flex items-center gap-2">
+              <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-brand-gold">
+                <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
+                <line x1="7" y1="7" x2="7.01" y2="7" />
+              </svg>
+              <h2 className="font-heading text-lg text-brand-pale-gold">
+                your monthly discount
+              </h2>
+            </div>
+            <p className="mb-4 text-sm text-brand-grey">
+              as a{" "}
+              <span className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text font-medium text-transparent`}>
+                {tier.name}
+              </span>
+              {" "}member, you get {tier.discountPercent}% off your next order. use this code at checkout:
+            </p>
+
+            {discountRevealed ? (
+              <div className="flex items-center gap-3">
+                <div className="flex-1 rounded-lg border border-brand-dark-gold/30 bg-brand-dark-gold/10 px-4 py-3 text-center font-mono text-lg tracking-wider text-brand-gold">
+                  {tier.discountCode}
+                </div>
+                <button
+                  type="button"
+                  onClick={() => {
+                    navigator.clipboard.writeText(tier.discountCode!).catch(() => {});
+                    setSaveMessage("code copied!");
+                    setTimeout(() => setSaveMessage(""), 2000);
+                  }}
+                  className="flex h-12 w-12 flex-none items-center justify-center rounded-lg border border-brand-dark-gold/30 text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+                  title="Copy code"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                  </svg>
+                </button>
+              </div>
+            ) : (
+              <button
+                type="button"
+                onClick={() => setDiscountRevealed(true)}
+                className={`w-full rounded-lg bg-gradient-to-r ${tier.barGradient} px-4 py-3 font-heading text-sm uppercase tracking-wider text-white transition-opacity hover:opacity-90`}
+              >
+                reveal your code
+              </button>
+            )}
+
+            <p className="mt-3 text-xs text-brand-grey/50">
+              one use per customer &#183; valid on your entire order
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Profile Settings */}
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
