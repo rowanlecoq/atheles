@@ -45,7 +45,7 @@ export async function ThreeItemGrid() {
         <div className="mx-auto h-px w-24 bg-brand-dark-gold/40" />
       </div>
 
-      <div className="mx-auto grid max-w-(--breakpoint-2xl) gap-3 px-4 pb-4 sm:gap-4 md:grid-cols-6 md:grid-rows-2 lg:max-h-[500px]">
+      <div className="mx-auto grid max-w-(--breakpoint-2xl) gap-3 px-4 pb-4 sm:gap-4 md:grid-cols-6 md:grid-rows-2 md:max-h-[400px] lg:max-h-[500px]">
         <ThreeItemGridItem size="full" item={firstProduct} priority={true} />
         <ThreeItemGridItem size="half" item={secondProduct} priority={true} />
         <ThreeItemGridItem size="half" item={thirdProduct} />
