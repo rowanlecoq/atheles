@@ -5,14 +5,39 @@ import { useState } from "react";
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
     setLoading(true);
-    // Simulate form submission - replace with actual API call
-    await new Promise((resolve) => setTimeout(resolve, 1000));
+    setError("");
+
+    const form = e.currentTarget;
+    const formData = new FormData(form);
+
+    try {
+      const res = await fetch("/api/contact", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: formData.get("name"),
+          email: formData.get("email"),
+          subject: formData.get("subject"),
+          message: formData.get("message"),
+        }),
+      });
+
+      const data = await res.json();
+
+      if (data.success) {
+        setSubmitted(true);
+      } else {
+        setError(data.error || "failed to send message. please try again.");
+      }
+    } catch {
+      setError("something went wrong. please try again.");
+    }
     setLoading(false);
-    setSubmitted(true);
   }
 
   if (submitted) {
@@ -76,11 +101,11 @@ export function ContactForm() {
           className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white focus:border-brand-gold focus:outline-none"
         >
           <option value="">Select a subject</option>
-          <option value="order">Order Inquiry</option>
-          <option value="sizing">Sizing Help</option>
-          <option value="returns">Returns & Exchanges</option>
-          <option value="collaboration">Collaboration</option>
-          <option value="other">Other</option>
+          <option value="Order Inquiry">Order Inquiry</option>
+          <option value="Sizing Help">Sizing Help</option>
+          <option value="Returns & Exchanges">Returns & Exchanges</option>
+          <option value="Collaboration">Collaboration</option>
+          <option value="Other">Other</option>
         </select>
       </div>
       <div>
@@ -95,10 +120,11 @@ export function ContactForm() {
           name="message"
           required
           rows={5}
-          className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none resize-none"
+          className="w-full resize-none rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
           placeholder="How can we help?"
         />
       </div>
+      {error && <p className="text-xs text-red-400">{error}</p>}
       <button
         type="submit"
         disabled={loading}
