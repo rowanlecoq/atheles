@@ -118,7 +118,6 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
@@ -130,17 +129,18 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
         if (data?.user) {
           setLoggedIn(true);
           setUserName(data.user.name || data.user.firstName || "");
-          setUserId(data.user.id);
-          try {
-            setAvatar(localStorage.getItem(`avatar-${data.user.id}`));
-          } catch {
-            setAvatar(null);
-          }
+          // Fetch avatar from server (blob storage)
+          fetch("/api/auth/avatar")
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => {
+              if (d?.avatar) setAvatar(d.avatar);
+              else setAvatar(null);
+            })
+            .catch(() => setAvatar(null));
         } else {
           setLoggedIn(false);
           setUserName("");
           setAvatar(null);
-          setUserId(null);
         }
       })
       .catch(() => {});
@@ -152,18 +152,18 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
 
   useEffect(() => {
     const handleAvatarChange = () => {
-      if (userId) {
-        try {
-          setAvatar(localStorage.getItem(`avatar-${userId}`));
-        } catch {
-          setAvatar(null);
-        }
-      }
+      fetch("/api/auth/avatar")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((d) => {
+          if (d?.avatar) setAvatar(d.avatar);
+          else setAvatar(null);
+        })
+        .catch(() => {});
     };
     window.addEventListener("avatar-changed", handleAvatarChange);
     return () =>
       window.removeEventListener("avatar-changed", handleAvatarChange);
-  }, [userId]);
+  }, []);
 
   useEffect(() => {
     const handleResize = () => {
@@ -264,19 +264,19 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     <div>
                       {loggedIn ? (
                         <>
-                          <p className="text-sm font-medium text-white">
+                          <p className="text-base font-medium text-white">
                             {userName}
                           </p>
-                          <p className="text-xs uppercase tracking-wider text-brand-dark-gold">
+                          <p className="text-sm uppercase tracking-wider text-brand-dark-gold">
                             view profile
                           </p>
                         </>
                       ) : (
                         <>
-                          <p className="text-sm font-medium text-brand-pale-gold">
+                          <p className="text-base font-medium text-brand-pale-gold">
                             sign in
                           </p>
-                          <p className="text-xs uppercase tracking-wider text-brand-dark-gold">
+                          <p className="text-sm uppercase tracking-wider text-brand-dark-gold">
                             or create account
                           </p>
                         </>

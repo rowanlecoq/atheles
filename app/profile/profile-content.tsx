@@ -694,8 +694,8 @@ export default function ProfileContent() {
         <h1 className="font-heading text-2xl text-brand-gold sm:text-3xl">
           {user.name}
         </h1>
-        <p className="mt-1 text-sm text-brand-grey">{user.email}</p>
-        <p className="mt-1 text-xs uppercase tracking-wider text-brand-dark-gold">
+        <p className="mt-1 text-base text-brand-grey sm:text-sm">{user.email}</p>
+        <p className="mt-1 text-sm uppercase tracking-wider text-brand-dark-gold sm:text-xs">
           member since {memberSince}
         </p>
       </div>
@@ -923,7 +923,7 @@ export default function ProfileContent() {
           <div className="grid grid-cols-2 gap-3">
             <div className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center">
               <p className="font-heading text-xl text-brand-gold">{orders}</p>
-              <p className="text-xs uppercase tracking-wider text-brand-grey">
+              <p className="text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
                 orders
               </p>
             </div>
@@ -931,7 +931,7 @@ export default function ProfileContent() {
               <p className="font-heading text-xl text-brand-gold">
                 ${totalSpentNum.toFixed(0)}
               </p>
-              <p className="text-xs uppercase tracking-wider text-brand-grey">
+              <p className="text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
                 total spent
               </p>
             </div>
@@ -974,7 +974,7 @@ export default function ProfileContent() {
                 <path d="M20.59 13.41l-7.17 7.17a2 2 0 0 1-2.83 0L2 12V2h10l8.59 8.59a2 2 0 0 1 0 2.82z" />
                 <line x1="7" y1="7" x2="7.01" y2="7" />
               </svg>
-              <h2 className="font-heading text-lg text-brand-pale-gold">
+              <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">
                 your loyalty discount
               </h2>
             </div>
@@ -1054,7 +1054,7 @@ export default function ProfileContent() {
       {/* Profile Settings */}
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
         <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-lg text-brand-pale-gold">
+          <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">
             settings
           </h2>
           {!editing ? (
@@ -1097,7 +1097,7 @@ export default function ProfileContent() {
         <div className="space-y-4">
           {/* First Name */}
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 block text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
               first name
             </label>
             {editing ? (
@@ -1120,7 +1120,7 @@ export default function ProfileContent() {
 
           {/* Last Name */}
           <div>
-            <label className="mb-1 flex items-baseline gap-1.5 text-xs uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 flex items-baseline gap-1.5 text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
               last name
               <span className="normal-case tracking-normal text-brand-grey/40">
                 optional
@@ -1145,7 +1145,7 @@ export default function ProfileContent() {
 
           {/* Email (read-only) */}
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 block text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
               email
             </label>
             <p className="px-3 py-2 text-sm text-brand-grey">{user.email}</p>
@@ -1153,7 +1153,7 @@ export default function ProfileContent() {
 
           {/* Date of Birth */}
           <div>
-            <label className="mb-1 block text-xs uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 block text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
               date of birth
             </label>
             {editing ? (
@@ -1231,7 +1231,7 @@ export default function ProfileContent() {
 
           {/* Phone */}
           <div>
-            <label className="mb-1 flex items-baseline gap-1.5 text-xs uppercase tracking-wider text-brand-grey">
+            <label className="mb-1 flex items-baseline gap-1.5 text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
               phone number
               <span className="normal-case tracking-normal text-brand-grey/40">
                 optional
@@ -1295,7 +1295,7 @@ export default function ProfileContent() {
 
       {/* Profile Background */}
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
-        <h2 className="mb-4 font-heading text-lg text-brand-pale-gold">
+        <h2 className="mb-4 font-heading text-xl text-brand-pale-gold sm:text-lg">
           profile theme
         </h2>
         <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
@@ -1469,7 +1469,7 @@ export default function ProfileContent() {
 
       {/* Quick Links */}
       <div className="space-y-3">
-        <h2 className="mb-4 font-heading text-lg text-brand-pale-gold">
+        <h2 className="mb-4 font-heading text-xl text-brand-pale-gold sm:text-lg">
           quick links
         </h2>
         <Link

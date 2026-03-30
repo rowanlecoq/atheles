@@ -43,13 +43,13 @@ export default function FilterItemDropdown({ list }: { list: ListItem[] }) {
         onClick={() => {
           setOpenSelect(!openSelect);
         }}
-        className="tap-target flex min-h-[44px] w-full items-center justify-between rounded-sm border border-brand-dark-gold/30 px-4 py-2.5 text-left text-sm text-white"
+        className="tap-target flex min-h-[40px] items-center gap-1.5 rounded-full border border-brand-dark-gold/30 px-3.5 py-2 text-left text-sm text-white"
       >
-        <div>{active}</div>
-        <ChevronDownIcon className="h-4 text-brand-gold" />
+        <div className="whitespace-nowrap">{active || "Sort"}</div>
+        <ChevronDownIcon className={`h-3.5 w-3.5 text-brand-gold transition-transform duration-200 ${openSelect ? "rotate-180" : ""}`} />
       </button>
       {openSelect && (
-        <div className="absolute z-40 mt-1 max-h-72 w-full overflow-auto rounded-b-md border border-brand-dark-gold/30 bg-brand-dark p-4 shadow-md">
+        <div className="absolute right-0 z-40 mt-1 min-w-[200px] overflow-auto rounded-lg border border-brand-dark-gold/30 bg-brand-dark p-3 shadow-lg">
           {list.map((item: ListItem) => (
             <FilterItem
               key={"path" in item ? item.path : item.slug || item.title}

@@ -127,3 +127,40 @@ function CollectionPill({ item }: { item: PathFilterItem }) {
     </DynamicTag>
   );
 }
+
+// Mobile horizontal scrolling collection pills
+export function MobileCollectionFilter({ list }: { list: ListItem[] }) {
+  return (
+    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <Suspense fallback={null}>
+        {list.map((item, i) =>
+          "path" in item ? <MobileCollectionPill key={i} item={item} /> : null,
+        )}
+      </Suspense>
+    </div>
+  );
+}
+
+function MobileCollectionPill({ item }: { item: PathFilterItem }) {
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const active = pathname === item.path;
+  const newParams = new URLSearchParams(searchParams.toString());
+  const DynamicTag = active ? "p" : Link;
+
+  newParams.delete("q");
+
+  return (
+    <DynamicTag
+      href={createUrl(item.path, newParams)}
+      className={clsx(
+        "flex-none whitespace-nowrap rounded-full border px-4 py-2 text-sm transition-all",
+        active
+          ? "border-brand-gold bg-brand-gold/10 text-brand-gold"
+          : "border-brand-dark-gold/25 text-white hover:border-brand-gold/50 hover:text-brand-gold",
+      )}
+    >
+      {item.title}
+    </DynamicTag>
+  );
+}

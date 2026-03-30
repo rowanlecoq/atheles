@@ -111,13 +111,13 @@ function ProductCard({ product }: { product: Product }) {
           )}
         </div>
 
-        {/* Size picker overlay on hover (desktop) */}
+        {/* Size picker overlay */}
         {hasMultipleVariants && product.availableForSale && showSizes && (
           <div
             className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-brand-dark via-brand-dark/95 to-transparent p-4 pt-10"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
           >
-            <div className="grid grid-cols-4 gap-1.5">
+            <div className="grid grid-cols-4 gap-2">
               {product.variants.map((variant) => {
                 const size = variant.selectedOptions.find(
                   (o) => o.name.toLowerCase() === "size",
@@ -128,9 +128,9 @@ function ProductCard({ product }: { product: Product }) {
                     type="button"
                     disabled={!variant.availableForSale || adding}
                     onClick={() => variant.availableForSale && handleAdd(variant.id)}
-                    className={`rounded py-2 text-xs font-medium transition-all ${
+                    className={`min-h-[40px] rounded-md py-2.5 text-sm font-medium transition-all ${
                       variant.availableForSale
-                        ? "bg-white/10 text-white hover:bg-brand-gold hover:text-brand-dark"
+                        ? "bg-white/10 text-white hover:bg-brand-gold hover:text-brand-dark active:bg-brand-gold active:text-brand-dark"
                         : "cursor-not-allowed text-white/20 line-through"
                     }`}
                   >
@@ -147,14 +147,14 @@ function ProductCard({ product }: { product: Product }) {
       <div className="mt-3">
         <div className="flex items-start justify-between gap-2">
           <Link href={`/product/${product.handle}`} className="flex-1">
-            <h3 className="text-sm font-medium text-white transition-colors group-hover:text-brand-gold">
+            <h3 className="text-base font-medium text-white transition-colors group-hover:text-brand-gold sm:text-sm">
               {product.title}
             </h3>
           </Link>
         </div>
         <div className="mt-1 flex items-center justify-between">
           <Price
-            className="text-sm text-brand-grey"
+            className="text-base text-brand-grey sm:text-sm"
             amount={product.priceRange.maxVariantPrice.amount}
             currencyCode={product.priceRange.maxVariantPrice.currencyCode}
           />
@@ -166,7 +166,7 @@ function ProductCard({ product }: { product: Product }) {
                 e.stopPropagation();
                 setShowSizes(!showSizes);
               }}
-              className="text-xs text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold"
+              className="text-sm text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold sm:text-xs"
             >
               {showSizes ? "close" : "quick add"}
             </button>
@@ -181,7 +181,7 @@ function ProductCard({ product }: { product: Product }) {
                 if (variant) handleAdd(variant.id);
               }}
               disabled={adding}
-              className="text-xs text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold disabled:opacity-50"
+              className="text-sm text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold sm:text-xs disabled:opacity-50"
             >
               {adding ? "adding..." : "quick add"}
             </button>

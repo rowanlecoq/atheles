@@ -7,8 +7,8 @@ export default function LogoSquare({ size }: { size?: "sm" | undefined }) {
   return (
     <div
       className={clsx("relative", {
-        "w-[80px] md:w-[110px]": !size,
-        "w-[60px]": size === "sm",
+        "w-[95px] md:w-[110px]": !size,
+        "w-[70px]": size === "sm",
       })}
       style={{ aspectRatio: `${tan2Logo.width} / ${tan2Logo.height}` }}
     >

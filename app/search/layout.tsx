@@ -1,5 +1,5 @@
 import Footer from "components/layout/footer";
-import Collections from "components/layout/search/collections";
+import Collections, { MobileCollections } from "components/layout/search/collections";
 import FilterList from "components/layout/search/filter";
 import { ClearFilters } from "components/layout/search/clear-filters";
 import SearchPageHeader from "components/layout/search/page-header";
@@ -19,16 +19,21 @@ export default function SearchLayout({
         <SearchPageHeader />
       </Suspense>
 
-      {/* Mobile filters */}
-      <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pt-6 md:hidden">
-        <div className="mb-6 flex items-center gap-4 border-b border-brand-dark-gold/10 pb-4">
-          <Collections />
+      {/* Mobile filters — compact horizontal pills + sort dropdown */}
+      <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pt-4 md:hidden">
+        <div className="mb-2">
+          <MobileCollections />
+        </div>
+        <div className="mb-4 flex items-center justify-between border-b border-brand-dark-gold/10 pb-3">
+          <Suspense fallback={null}>
+            <ClearFilters />
+          </Suspense>
           <FilterList list={sorting} title="Sort by" />
         </div>
       </div>
 
       {/* Main content area */}
-      <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-8 pt-8 text-white">
+      <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-8 pt-4 text-white md:pt-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-[180px_1fr]">
           {/* Desktop sidebar: filter & sort */}
           <div className="hidden md:block">

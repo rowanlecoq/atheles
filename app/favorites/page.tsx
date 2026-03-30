@@ -57,10 +57,10 @@ function FavoriteItem({
 
         {/* Product info */}
         <div className="min-w-0 flex-1">
-          <h3 className="truncate text-sm font-medium tracking-wide text-white transition-colors group-hover:text-brand-gold">
+          <h3 className="truncate text-base font-medium tracking-wide text-white transition-colors group-hover:text-brand-gold sm:text-sm">
             {product.title}
           </h3>
-          <p className="mt-1 text-sm text-brand-grey">{price}</p>
+          <p className="mt-1 text-base text-brand-grey sm:text-sm">{price}</p>
         </div>
       </Link>
 
@@ -123,7 +123,7 @@ export default function FavoritesPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
       <h1 className="mb-2 font-heading text-3xl uppercase tracking-wider text-brand-gold sm:text-4xl">
-        your favorites
+        your favorites.
       </h1>
       <div className="mb-8 h-px w-24 bg-brand-dark-gold/40" />
 
@@ -133,7 +133,7 @@ export default function FavoritesPage() {
         </div>
       ) : favorites.length === 0 ? (
         <div className="py-12 text-center">
-          <p className="mb-6 text-brand-grey">
+          <p className="mb-6 text-base text-brand-grey">
             you haven&apos;t saved any favorites yet.
           </p>
           <Link

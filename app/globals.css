@@ -57,6 +57,15 @@ html {
   scrollbar-color: var(--color-brand-medium-grey) var(--color-brand-dark);
 }
 
+/* Hide scrollbar for horizontal scroll containers */
+.scrollbar-hide {
+  -ms-overflow-style: none;
+  scrollbar-width: none;
+}
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
 body {
   font-family: var(--font-family-body);
   background-color: var(--color-brand-dark);
