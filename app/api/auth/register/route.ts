@@ -10,12 +10,18 @@ export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {
-    const { email, password, name, dob, acceptsMarketing } =
+    const { email, password, firstName, lastName, dob, acceptsMarketing } =
       await request.json();
 
     if (!email || !password) {
       return NextResponse.json(
         { success: false, error: "email and password are required" },
+        { status: 400 },
+      );
+    }
+    if (!firstName?.trim()) {
+      return NextResponse.json(
+        { success: false, error: "first name is required" },
         { status: 400 },
       );
     }
@@ -26,18 +32,27 @@ export async function POST(request: Request) {
       );
     }
 
-    const firstName = name?.split(" ")[0] || undefined;
-    const lastName = name?.split(" ").slice(1).join(" ") || undefined;
-
     const result = await createCustomerAccount(
       email,
       password,
-      firstName,
-      lastName,
+      firstName.trim(),
+      lastName?.trim() || undefined,
       acceptsMarketing,
       dob,
     );
     if (!result.success) {
+      // Improve error messages
+      const err = result.error || "";
+      if (err.toLowerCase().includes("taken") || err.toLowerCase().includes("already")) {
+        return NextResponse.json(
+          {
+            success: false,
+            error:
+              "an account with this email already exists. try signing in, or use forgot password to reset your password.",
+          },
+          { status: 400 },
+        );
+      }
       return NextResponse.json(
         { success: false, error: result.error },
         { status: 400 },
@@ -66,7 +81,7 @@ export async function POST(request: Request) {
               numberOfOrders: customer.numberOfOrders,
               totalSpent: customer.totalSpent,
               dob: customer.dob,
-            theme: customer.theme,
+              theme: customer.theme,
             }
           : null,
       });

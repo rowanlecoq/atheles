@@ -5,7 +5,8 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 
 export default function RegisterForm() {
-  const [name, setName] = useState("");
+  const [firstName, setFirstName] = useState("");
+  const [lastName, setLastName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [dobDay, setDobDay] = useState("");
@@ -30,7 +31,8 @@ export default function RegisterForm() {
         body: JSON.stringify({
           email,
           password,
-          name,
+          firstName: firstName.trim(),
+          lastName: lastName.trim() || undefined,
           acceptsMarketing,
           dob:
             dobDay && dobMonth && dobYear
@@ -103,18 +105,36 @@ export default function RegisterForm() {
             <form onSubmit={handleSubmit} className="space-y-4">
               <div>
                 <label
-                  htmlFor="name"
+                  htmlFor="firstName"
                   className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold"
                 >
-                  display name
+                  first name
                 </label>
                 <input
-                  id="name"
+                  id="firstName"
                   type="text"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
+                  required
+                  value={firstName}
+                  onChange={(e) => setFirstName(e.target.value)}
                   className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                  placeholder="your name"
+                  placeholder="rowan"
+                />
+              </div>
+              <div>
+                <label
+                  htmlFor="lastName"
+                  className="mb-1 flex items-baseline gap-1.5 text-xs uppercase tracking-wider text-brand-pale-gold"
+                >
+                  last name
+                  <span className="normal-case tracking-normal text-brand-grey/40">optional</span>
+                </label>
+                <input
+                  id="lastName"
+                  type="text"
+                  value={lastName}
+                  onChange={(e) => setLastName(e.target.value)}
+                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                  placeholder="le coq"
                 />
               </div>
               <div>
