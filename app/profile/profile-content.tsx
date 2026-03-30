@@ -193,17 +193,15 @@ export default function ProfileContent() {
         .catch(() => {});
 
       // Theme: server is source of truth
-      if (u.theme) {
-        setProfileBg(u.theme);
-      }
+      const serverTheme = u.theme || "none";
+      setProfileBg(serverTheme);
 
-      // Custom background: fetch from server (blob storage)
+      // Custom background: always fetch so it's ready if user switches to custom
       fetch("/api/auth/background")
         .then((r) => r.json())
         .then((d) => {
           if (d.background) {
             setCustomBgImage(d.background);
-            setProfileBg("custom");
           }
         })
         .catch(() => {});
@@ -1312,7 +1310,6 @@ export default function ProfileContent() {
               onClick={() => {
                 setProfileBg(theme.id);
                 if (user) {
-                  localStorage.setItem(`profile-bg-${user.id}`, theme.id);
                   // Update cached session so refresh doesn't revert
                   try {
                     const cached = sessionStorage.getItem("atheles-session");
@@ -1351,7 +1348,6 @@ export default function ProfileContent() {
                 // Has a saved custom image — apply it
                 setProfileBg("custom");
                 if (user) {
-                  localStorage.setItem(`profile-bg-${user.id}`, "custom");
                   fetch("/api/auth/update-theme", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -1435,11 +1431,6 @@ export default function ProfileContent() {
                   const d = await res.json();
                   if (d.success && d.url) {
                     setCustomBgImage(d.url);
-                    try {
-                      localStorage.removeItem(`profile-bg-img-${user.id}`);
-                      localStorage.setItem(`profile-bg-img-${user.id}`, d.url);
-                      localStorage.setItem(`profile-bg-${user.id}`, "custom");
-                    } catch {}
                   }
                 } catch {}
 
