@@ -277,7 +277,6 @@ export default function ProfileContent() {
     if (!user) return;
     setAvatar(croppedDataUrl);
     setCropSrc(null);
-    // Upload to Vercel Blob
     try {
       const res = await fetch("/api/auth/avatar", {
         method: "POST",
@@ -287,8 +286,12 @@ export default function ProfileContent() {
       const d = await res.json();
       if (d.success && d.url) {
         setAvatar(d.url);
+      } else if (d.error) {
+        setSaveMessage(d.error);
       }
-    } catch {}
+    } catch {
+      setSaveMessage("failed to upload photo.");
+    }
     window.dispatchEvent(new Event("avatar-changed"));
   };
 
@@ -1431,8 +1434,12 @@ export default function ProfileContent() {
                   const d = await res.json();
                   if (d.success && d.url) {
                     setCustomBgImage(d.url);
+                  } else if (d.error) {
+                    setSaveMessage(d.error);
                   }
-                } catch {}
+                } catch {
+                  setSaveMessage("failed to upload background.");
+                }
 
                 // Update theme on server
                 try {

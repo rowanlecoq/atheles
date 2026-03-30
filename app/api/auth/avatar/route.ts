@@ -9,6 +9,8 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+
 export async function GET() {
   try {
     const cookieStore = await cookies();
@@ -25,14 +27,20 @@ export async function GET() {
     );
 
     return NextResponse.json({ avatar: avatar || null });
-  } catch (err) {
-    console.error("[avatar] GET error:", err);
+  } catch {
     return NextResponse.json({ avatar: null });
   }
 }
 
 export async function POST(request: Request) {
   try {
+    if (!blobToken) {
+      return NextResponse.json(
+        { success: false, error: "blob storage not configured" },
+        { status: 500 },
+      );
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get("atheles-auth-token")?.value;
 
@@ -51,7 +59,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { avatar } = await request.json();
+    const body = await request.json();
+    const avatar = body.avatar;
 
     // Delete old blob if one exists
     const oldUrl = await getCustomerMetafield(
@@ -61,7 +70,7 @@ export async function POST(request: Request) {
     );
     if (oldUrl?.includes("vercel-storage.com")) {
       try {
-        await del(oldUrl);
+        await del(oldUrl, { token: blobToken });
       } catch {
         // Old blob may already be gone
       }
@@ -77,17 +86,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, url: null });
     }
 
-    // avatar is a base64 data URL — upload to Vercel Blob
-    const matches = avatar.match(/^data:(.+);base64,(.+)$/);
-    if (!matches) {
+    if (typeof avatar !== "string" || !avatar.startsWith("data:")) {
       return NextResponse.json(
         { success: false, error: "invalid image data" },
         { status: 400 },
       );
     }
 
-    const contentType = matches[1] as string;
-    const buffer = Buffer.from(matches[2] as string, "base64");
+    const commaIdx = avatar.indexOf(",");
+    if (commaIdx === -1) {
+      return NextResponse.json(
+        { success: false, error: "invalid data URL format" },
+        { status: 400 },
+      );
+    }
+
+    const meta = avatar.slice(0, commaIdx);
+    const base64 = avatar.slice(commaIdx + 1);
+    const contentType = meta.replace("data:", "").replace(";base64", "");
+    const buffer = Buffer.from(base64, "base64");
 
     if (buffer.byteLength > 5 * 1024 * 1024) {
       return NextResponse.json(
@@ -103,7 +120,7 @@ export async function POST(request: Request) {
     const blob = await put(filename, buffer, {
       access: "public",
       contentType,
-      addRandomSuffix: false,
+      token: blobToken,
     });
 
     await updateCustomerMetafield(
@@ -115,9 +132,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, url: blob.url });
   } catch (err) {
-    console.error("[avatar] Upload error:", err);
+    const message = err instanceof Error ? err.message : "unknown error";
+    console.error("[avatar] Upload error:", message);
     return NextResponse.json(
-      { success: false, error: "something went wrong" },
+      { success: false, error: message },
       { status: 500 },
     );
   }

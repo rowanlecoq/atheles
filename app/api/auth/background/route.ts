@@ -9,6 +9,8 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
+
 export async function GET() {
   try {
     const cookieStore = await cookies();
@@ -24,7 +26,7 @@ export async function GET() {
       "custom_bg",
     );
 
-    return NextResponse.json({ background });
+    return NextResponse.json({ background: background || null });
   } catch {
     return NextResponse.json({ background: null });
   }
@@ -32,6 +34,13 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
+    if (!blobToken) {
+      return NextResponse.json(
+        { success: false, error: "blob storage not configured" },
+        { status: 500 },
+      );
+    }
+
     const cookieStore = await cookies();
     const token = cookieStore.get("atheles-auth-token")?.value;
 
@@ -50,7 +59,8 @@ export async function POST(request: Request) {
       );
     }
 
-    const { background } = await request.json();
+    const body = await request.json();
+    const background = body.background;
 
     // Delete old blob if one exists
     const oldUrl = await getCustomerMetafield(
@@ -60,7 +70,7 @@ export async function POST(request: Request) {
     );
     if (oldUrl?.includes("vercel-storage.com")) {
       try {
-        await del(oldUrl);
+        await del(oldUrl, { token: blobToken });
       } catch {
         // Old blob may already be gone
       }
@@ -76,16 +86,25 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, url: null });
     }
 
-    const matches = background.match(/^data:(.+);base64,(.+)$/);
-    if (!matches) {
+    if (typeof background !== "string" || !background.startsWith("data:")) {
       return NextResponse.json(
         { success: false, error: "invalid image data" },
         { status: 400 },
       );
     }
 
-    const contentType = matches[1] as string;
-    const buffer = Buffer.from(matches[2] as string, "base64");
+    const commaIdx = background.indexOf(",");
+    if (commaIdx === -1) {
+      return NextResponse.json(
+        { success: false, error: "invalid data URL format" },
+        { status: 400 },
+      );
+    }
+
+    const meta = background.slice(0, commaIdx);
+    const base64 = background.slice(commaIdx + 1);
+    const contentType = meta.replace("data:", "").replace(";base64", "");
+    const buffer = Buffer.from(base64, "base64");
 
     if (buffer.byteLength > 10 * 1024 * 1024) {
       return NextResponse.json(
@@ -101,10 +120,9 @@ export async function POST(request: Request) {
     const blob = await put(filename, buffer, {
       access: "public",
       contentType,
-      addRandomSuffix: false,
+      token: blobToken,
     });
 
-    // Save blob URL to customer metafield for cross-device sync
     await updateCustomerMetafield(
       customer.email,
       "atheles",
@@ -114,9 +132,10 @@ export async function POST(request: Request) {
 
     return NextResponse.json({ success: true, url: blob.url });
   } catch (err) {
-    console.error("[background] Upload error:", err);
+    const message = err instanceof Error ? err.message : "unknown error";
+    console.error("[background] Upload error:", message);
     return NextResponse.json(
-      { success: false, error: "something went wrong" },
+      { success: false, error: message },
       { status: 500 },
     );
   }
