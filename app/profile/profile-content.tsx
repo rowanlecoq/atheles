@@ -163,21 +163,23 @@ export default function ProfileContent() {
         setDobMonth(m ? String(parseInt(m)) : "");
         setDobDay(d ? String(parseInt(d)) : "");
       }
+      // Show local avatar instantly, then sync from server
       const stored = localStorage.getItem(`avatar-${u.id}`);
-      if (stored) {
-        setAvatar(stored);
-      } else {
-        // Try loading from server
-        fetch("/api/auth/avatar")
-          .then((r) => r.json())
-          .then((d) => {
-            if (d.avatar) {
-              setAvatar(d.avatar);
-              try { localStorage.setItem(`avatar-${u.id}`, d.avatar); } catch {}
-            }
-          })
-          .catch(() => {});
-      }
+      if (stored) setAvatar(stored);
+      // Always fetch latest from server to stay in sync across devices
+      fetch("/api/auth/avatar")
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.avatar && d.avatar !== stored) {
+            setAvatar(d.avatar);
+            try { localStorage.setItem(`avatar-${u.id}`, d.avatar); } catch {}
+          } else if (!d.avatar && stored) {
+            // Server has no avatar but local does — was removed on another device
+            setAvatar(null);
+            localStorage.removeItem(`avatar-${u.id}`);
+          }
+        })
+        .catch(() => {});
       // Load theme from server data, fallback to localStorage
       if (u.theme) {
         setProfileBg(u.theme);
