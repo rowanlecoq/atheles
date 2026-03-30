@@ -48,15 +48,17 @@ const categoryLinks: CategoryLink[] = [
 function CategoryItem({
   item,
   onNavigate,
+  isLast,
 }: {
   item: CategoryLink;
   onNavigate: () => void;
+  isLast?: boolean;
 }) {
   const [expanded, setExpanded] = useState(false);
   const hasSubs = item.subcategories && item.subcategories.length > 0;
 
   return (
-    <li className="border-b border-brand-dark-gold/10">
+    <li className={isLast ? "" : "border-b border-brand-dark-gold/10"}>
       <div className="flex items-center">
         <Link
           href={item.path}
@@ -286,7 +288,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   <Link
                     href="/favorites"
                     onClick={closeMobileMenu}
-                    className="tap-target flex min-h-[44px] items-center gap-3 rounded-lg px-2 py-2 text-sm uppercase tracking-wider text-brand-grey transition-colors hover:bg-brand-dark-gold/10 hover:text-brand-gold"
+                    className="tap-target flex min-h-[44px] items-center gap-3 rounded-lg px-2 py-2 text-base uppercase tracking-wider text-brand-grey transition-colors hover:bg-brand-dark-gold/10 hover:text-brand-gold"
                   >
                     <HeartIcon className="h-5 w-5" />
                     Favorites
@@ -326,11 +328,12 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     Categories
                   </p>
                   <ul className="flex w-full flex-col">
-                    {categoryLinks.map((item) => (
+                    {categoryLinks.map((item, idx) => (
                       <CategoryItem
                         key={item.title}
                         item={item}
                         onNavigate={closeMobileMenu}
+                        isLast={idx === categoryLinks.length - 1}
                       />
                     ))}
                   </ul>

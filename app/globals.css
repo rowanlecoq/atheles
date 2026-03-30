@@ -31,6 +31,15 @@
   }
 }
 
+@keyframes beta-pulse {
+  0%, 100% {
+    opacity: 0.55;
+  }
+  50% {
+    opacity: 1;
+  }
+}
+
 :root {
   --mobile-baseline-width: 375;
   --mobile-content-gutter: clamp(1rem, 4vw, 1.5rem);

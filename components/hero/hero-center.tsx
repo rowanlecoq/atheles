@@ -26,6 +26,27 @@ export function HeroCenter() {
           </Link>
         </MagneticHover>
       </FadeIn>
+
+      <FadeIn direction="up" delay={0.85}>
+        <p className="mt-6 max-w-sm text-xs leading-relaxed tracking-wide text-brand-dark-gold animate-[beta-pulse_3s_ease-in-out_infinite] sm:text-[13px]">
+          currently in beta. if there are any issues please send a message to{" "}
+          <a
+            href="https://www.instagram.com/atheles.co/"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="text-brand-grey transition-colors hover:text-brand-gold"
+          >
+            @atheles.co
+          </a>{" "}
+          or{" "}
+          <a
+            href="mailto:athelesbrand@gmail.com"
+            className="text-brand-grey transition-colors hover:text-brand-gold"
+          >
+            athelesbrand@gmail.com
+          </a>
+        </p>
+      </FadeIn>
     </div>
   );
 }
