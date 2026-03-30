@@ -3,13 +3,13 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 
-// Lower opacity than profile page for subtle ambient effect
+// Visible but not overpowering — roughly 70% of profile page intensity
 const THEME_COLORS: Record<string, { a: string; b: string; c: string; d: string; particle: string }> = {
-  gold: { a: "rgba(193,163,104,0.08)", b: "rgba(180,140,60,0.06)", c: "rgba(220,200,140,0.05)", d: "rgba(160,120,40,0.04)", particle: "#c1a368" },
-  ocean: { a: "rgba(30,180,220,0.07)", b: "rgba(20,100,200,0.06)", c: "rgba(40,210,240,0.05)", d: "rgba(15,60,160,0.04)", particle: "#22d3ee" },
-  tropical: { a: "rgba(16,185,129,0.07)", b: "rgba(245,158,11,0.05)", c: "rgba(20,200,160,0.05)", d: "rgba(250,180,50,0.03)", particle: "#10b981" },
-  midnight: { a: "rgba(30,30,80,0.10)", b: "rgba(60,60,160,0.06)", c: "rgba(90,50,200,0.05)", d: "rgba(20,20,60,0.05)", particle: "#6366f1" },
-  aurora: { a: "rgba(120,60,220,0.07)", b: "rgba(40,200,140,0.06)", c: "rgba(220,60,180,0.05)", d: "rgba(80,180,255,0.04)", particle: "#a855f7" },
+  gold: { a: "rgba(193,163,104,0.13)", b: "rgba(180,140,60,0.10)", c: "rgba(220,200,140,0.08)", d: "rgba(160,120,40,0.06)", particle: "#c1a368" },
+  ocean: { a: "rgba(30,180,220,0.12)", b: "rgba(20,100,200,0.10)", c: "rgba(40,210,240,0.08)", d: "rgba(15,60,160,0.06)", particle: "#22d3ee" },
+  tropical: { a: "rgba(16,185,129,0.12)", b: "rgba(245,158,11,0.09)", c: "rgba(20,200,160,0.07)", d: "rgba(250,180,50,0.05)", particle: "#10b981" },
+  midnight: { a: "rgba(30,30,80,0.16)", b: "rgba(60,60,160,0.10)", c: "rgba(90,50,200,0.08)", d: "rgba(20,20,60,0.08)", particle: "#6366f1" },
+  aurora: { a: "rgba(120,60,220,0.12)", b: "rgba(40,200,140,0.10)", c: "rgba(220,60,180,0.08)", d: "rgba(80,180,255,0.06)", particle: "#a855f7" },
 };
 
 const SPARKLES = [
@@ -103,8 +103,8 @@ export function ThemeBackground() {
     return (
       <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={customBg} alt="" className="h-full w-full object-cover opacity-[0.06]" />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/50 via-brand-dark/80 to-brand-dark" />
+        <img src={customBg} alt="" className="h-full w-full object-cover opacity-[0.08]" />
+        <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/70 to-brand-dark" />
       </div>
     );
   }
@@ -156,7 +156,7 @@ export function ThemeBackground() {
             animationDuration: p.dur,
             animationDelay: p.delay,
             color: colors.particle,
-            opacity: 0.12,
+            opacity: 0.18,
           }}
         >&#10022;</span>
       ))}
