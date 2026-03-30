@@ -28,12 +28,12 @@ export default function SearchLayout({
       </div>
 
       {/* Main content area */}
-      <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-8 text-white">
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-[180px_1fr]">
+      <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-8 pt-8 text-white">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-[180px_1fr]">
           {/* Desktop sidebar: filter & sort */}
           <div className="hidden md:block">
             <div className="sticky top-20 pr-4">
-              <div className="mb-2 flex items-center justify-between pb-3">
+              <div className="mb-4 flex items-center justify-between">
                 <h2 className="text-sm font-medium uppercase tracking-wider text-brand-pale-gold">
                   filter & sort
                 </h2>
