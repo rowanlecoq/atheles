@@ -4,6 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
+// Hidden on homepage since HeroCategoryNav handles it there
+
 type Category = {
   title: string;
   href: string;
@@ -58,6 +60,9 @@ export function CategoryNav() {
   const isActive = (cat: Category) =>
     pathname === cat.href ||
     cat.subcategories.some((sub) => pathname === sub.href);
+
+  // Hide on homepage — HeroCategoryNav is used there instead
+  if (pathname === "/") return null;
 
   return (
     <div className="relative hidden md:block">
