@@ -47,12 +47,17 @@ export function CountrySelector() {
   const { region, setRegion } = useCurrency();
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const dropdownRef = useRef<HTMLDivElement>(null);
 
   // Close on click outside
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (ref.current && !ref.current.contains(e.target as Node)) {
+      const target = e.target as Node;
+      if (
+        ref.current && !ref.current.contains(target) &&
+        dropdownRef.current && !dropdownRef.current.contains(target)
+      ) {
         setOpen(false);
       }
     };
@@ -100,6 +105,7 @@ export function CountrySelector() {
       {/* Dropdown — portaled to body to avoid z-index issues */}
       {open && typeof document !== "undefined" && createPortal(
         <div
+          ref={dropdownRef}
           style={{
             position: "fixed",
             top: ref.current ? ref.current.getBoundingClientRect().bottom + 8 : 0,
