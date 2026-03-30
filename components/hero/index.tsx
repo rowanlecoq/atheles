@@ -26,7 +26,7 @@ export function Hero() {
         <div className="hidden overflow-hidden rounded-sm md:block">
           <div className="relative h-full w-full">
             <Image
-              src="/statues/doryphoros.jpg"
+              src="/statues/augustus-primaporta.jpg"
               alt=""
               fill
               className="object-cover object-top opacity-50 grayscale"
