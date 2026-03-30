@@ -31,6 +31,8 @@ type FavProduct = {
   title: string;
   featuredImage?: { url: string } | null;
   priceRange: { maxVariantPrice: { amount: string; currencyCode: string } };
+  firstVariantId?: string | null;
+  availableForSale?: boolean;
 };
 
 export default function CartModal() {
@@ -40,8 +42,10 @@ export default function CartModal() {
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
   const [discountApplied, setDiscountApplied] = useState(false);
+  const [discountPercent, setDiscountPercent] = useState<number | null>(null);
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
+  const [addingFav, setAddingFav] = useState<string | null>(null);
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
@@ -69,23 +73,32 @@ export default function CartModal() {
     return () => window.removeEventListener("open-cart", handleOpenCart);
   }, []);
 
-  // Check user tier for free shipping
+  // Check user tier for free shipping and discount
+  const TIER_DISCOUNTS: Record<string, number> = {
+    SILVER: 10, GOLD: 12, PLATINUM: 15, CHAMPION: 18,
+  };
+
   useEffect(() => {
     if (!isOpen) return;
     if (!document.cookie.includes("atheles-logged-in=1")) {
       setFreeShipping(false);
       setTierName(null);
+      setDiscountPercent(null);
       return;
     }
+    const applyTier = (totalSpent: string) => {
+      const points = Math.floor(parseFloat(totalSpent || "0") * 50);
+      const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
+      setTierName(tier);
+      setFreeShipping(tier === "CHAMPION");
+      setDiscountPercent(TIER_DISCOUNTS[tier] || null);
+    };
     // Try cache first
     try {
       const cached = sessionStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
-        const points = Math.floor(parseFloat(u.totalSpent || "0") * 50);
-        const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
-        setTierName(tier);
-        setFreeShipping(tier === "CHAMPION");
+        applyTier(u.totalSpent);
         return;
       }
     } catch {}
@@ -93,10 +106,7 @@ export default function CartModal() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.user) {
-          const points = Math.floor(parseFloat(data.user.totalSpent || "0") * 50);
-          const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
-          setTierName(tier);
-          setFreeShipping(tier === "CHAMPION");
+          applyTier(data.user.totalSpent);
         }
       })
       .catch(() => {});
@@ -322,13 +332,11 @@ export default function CartModal() {
                       </div>
                       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                         {favProducts.map((p) => (
-                          <Link
+                          <div
                             key={p.handle}
-                            href={`/product/${p.handle}`}
-                            onClick={closeCart}
-                            className="flex-none"
+                            className="group flex w-[130px] flex-none flex-col rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-2 transition-colors hover:border-brand-gold/30"
                           >
-                            <div className="group flex w-[120px] flex-col rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-2 transition-colors hover:border-brand-gold/30">
+                            <Link href={`/product/${p.handle}`} onClick={closeCart}>
                               <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
                                 {p.featuredImage?.url ? (
                                   <Image
@@ -336,7 +344,7 @@ export default function CartModal() {
                                     alt={p.title}
                                     fill
                                     className="object-cover"
-                                    sizes="120px"
+                                    sizes="130px"
                                   />
                                 ) : (
                                   <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
@@ -347,13 +355,33 @@ export default function CartModal() {
                               <p className="truncate text-[10px] text-white group-hover:text-brand-gold">
                                 {p.title}
                               </p>
+                            </Link>
+                            <div className="mt-1 flex items-center justify-between">
                               <Price
                                 className="text-[10px] text-brand-grey"
                                 amount={p.priceRange.maxVariantPrice.amount}
                                 currencyCode={p.priceRange.maxVariantPrice.currencyCode}
                               />
+                              {p.firstVariantId && p.availableForSale && (
+                                <button
+                                  type="button"
+                                  disabled={addingFav === p.handle}
+                                  onClick={async () => {
+                                    if (!p.firstVariantId) return;
+                                    setAddingFav(p.handle);
+                                    try {
+                                      const { addItem } = await import("components/cart/actions");
+                                      await addItem(null, p.firstVariantId);
+                                    } catch {}
+                                    setAddingFav(null);
+                                  }}
+                                  className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold disabled:opacity-50"
+                                >
+                                  {addingFav === p.handle ? "adding..." : "+ add"}
+                                </button>
+                              )}
                             </div>
-                          </Link>
+                          </div>
                         ))}
                       </div>
                     </div>
@@ -368,25 +396,53 @@ export default function CartModal() {
                       </p>
                     </div>
                     {discountApplied ? (
-                      <div className="flex items-center justify-between rounded-lg border border-brand-gold/30 bg-brand-gold/5 px-3 py-2">
-                        <span className="text-sm text-brand-gold">{discountCode}</span>
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setDiscountCode("");
-                            setDiscountApplied(false);
-                          }}
-                          className="text-xs text-brand-grey hover:text-red-400"
-                        >
-                          remove
-                        </button>
+                      <div>
+                        <div className="flex items-center justify-between rounded-lg border border-brand-gold/30 bg-brand-gold/5 px-3 py-2">
+                          <div className="flex items-center gap-2">
+                            <span className="text-sm text-brand-gold">{discountCode}</span>
+                            {discountPercent && (
+                              <span className="rounded bg-green-500/10 px-1.5 py-0.5 text-[10px] text-green-400">
+                                -{discountPercent}%
+                              </span>
+                            )}
+                          </div>
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setDiscountCode("");
+                              setDiscountApplied(false);
+                            }}
+                            className="text-xs text-brand-grey hover:text-red-400"
+                          >
+                            remove
+                          </button>
+                        </div>
+                        {discountPercent && cart && (
+                          <div className="mt-2 flex items-center justify-between px-1">
+                            <span className="text-xs text-brand-grey">with discount</span>
+                            <div className="flex items-center gap-2">
+                              <span className="text-xs text-brand-grey line-through">
+                                <Price
+                                  className="inline text-xs"
+                                  amount={cart.cost.totalAmount.amount}
+                                  currencyCode={cart.cost.totalAmount.currencyCode}
+                                />
+                              </span>
+                              <Price
+                                className="text-sm font-medium text-green-400"
+                                amount={(parseFloat(cart.cost.totalAmount.amount) * (1 - discountPercent / 100)).toFixed(2)}
+                                currencyCode={cart.cost.totalAmount.currencyCode}
+                              />
+                            </div>
+                          </div>
+                        )}
                       </div>
                     ) : (
                       <div className="flex gap-2">
                         <input
                           type="text"
                           value={discountCode}
-                          onChange={(e) => setDiscountCode(e.target.value.toUpperCase())}
+                          onChange={(e) => setDiscountCode(e.target.value)}
                           placeholder="Enter code"
                           className="flex-1 rounded-lg border border-brand-dark-gold/25 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
                         />

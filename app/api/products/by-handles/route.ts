@@ -19,6 +19,7 @@ export async function POST(request: Request) {
         try {
           const product = await getProduct(handle);
           if (!product) return null;
+          const firstVariant = product.variants.find((v) => v.availableForSale) || product.variants[0];
           return {
             handle: product.handle,
             title: product.title,
@@ -31,6 +32,8 @@ export async function POST(request: Request) {
                 currencyCode: product.priceRange.maxVariantPrice.currencyCode,
               },
             },
+            firstVariantId: firstVariant?.id || null,
+            availableForSale: product.availableForSale,
           };
         } catch {
           return null;
