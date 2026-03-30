@@ -498,36 +498,48 @@ export default function ProfileContent() {
           {/* Flowing blob layers */}
           {(() => {
             const colors = {
-              gold: { a: "rgba(193,163,104,0.15)", b: "rgba(161,133,64,0.12)", c: "rgba(217,195,138,0.08)", particle: "#c1a368" },
-              ember: { a: "rgba(220,60,40,0.14)", b: "rgba(234,120,50,0.10)", c: "rgba(180,40,30,0.08)", particle: "#ef4444" },
-              ocean: { a: "rgba(34,211,238,0.12)", b: "rgba(20,160,200,0.10)", c: "rgba(30,100,180,0.08)", particle: "#22d3ee" },
-              aurora: { a: "rgba(168,85,247,0.12)", b: "rgba(52,211,153,0.10)", c: "rgba(236,72,153,0.07)", particle: "#a855f7" },
-              midnight: { a: "rgba(99,102,241,0.14)", b: "rgba(59,130,246,0.10)", c: "rgba(124,58,237,0.08)", particle: "#6366f1" },
-            }[profileBg] || { a: "transparent", b: "transparent", c: "transparent", particle: "#888" };
+              gold: { a: "rgba(193,163,104,0.18)", b: "rgba(180,140,60,0.14)", c: "rgba(220,200,140,0.10)", d: "rgba(160,120,40,0.08)", particle: "#c1a368" },
+              ocean: { a: "rgba(30,180,220,0.16)", b: "rgba(20,100,200,0.14)", c: "rgba(40,210,240,0.10)", d: "rgba(15,60,160,0.08)", particle: "#22d3ee" },
+              tropical: { a: "rgba(16,185,129,0.16)", b: "rgba(245,158,11,0.12)", c: "rgba(20,200,160,0.10)", d: "rgba(250,180,50,0.07)", particle: "#10b981" },
+              midnight: { a: "rgba(30,30,80,0.22)", b: "rgba(60,60,160,0.14)", c: "rgba(90,50,200,0.10)", d: "rgba(20,20,60,0.12)", particle: "#6366f1" },
+              aurora: { a: "rgba(120,60,220,0.16)", b: "rgba(40,200,140,0.14)", c: "rgba(220,60,180,0.10)", d: "rgba(80,180,255,0.08)", particle: "#a855f7" },
+            }[profileBg] || { a: "transparent", b: "transparent", c: "transparent", d: "transparent", particle: "#888" };
             return (
               <>
-                {/* Layer 1 — slow drift */}
+                {/* Layer 1 — slow wide drift */}
                 <div
-                  className="absolute -inset-[50%] rounded-full blur-3xl"
+                  className="absolute -inset-[60%]"
                   style={{
-                    background: `radial-gradient(ellipse 60% 50% at 30% 40%, ${colors.a}, transparent 70%)`,
-                    animation: "drift1 12s ease-in-out infinite",
+                    background: `radial-gradient(ellipse 70% 60% at 25% 35%, ${colors.a}, transparent 65%)`,
+                    filter: "blur(80px)",
+                    animation: "drift1 20s ease-in-out infinite",
                   }}
                 />
-                {/* Layer 2 — counter drift */}
+                {/* Layer 2 — counter flow */}
                 <div
-                  className="absolute -inset-[50%] rounded-full blur-3xl"
+                  className="absolute -inset-[60%]"
                   style={{
-                    background: `radial-gradient(ellipse 50% 60% at 70% 60%, ${colors.b}, transparent 70%)`,
-                    animation: "drift2 15s ease-in-out infinite",
+                    background: `radial-gradient(ellipse 55% 70% at 75% 65%, ${colors.b}, transparent 65%)`,
+                    filter: "blur(90px)",
+                    animation: "drift2 25s ease-in-out infinite",
                   }}
                 />
-                {/* Layer 3 — gentle pulse */}
+                {/* Layer 3 — breathing center */}
                 <div
-                  className="absolute -inset-[30%] rounded-full blur-2xl"
+                  className="absolute -inset-[40%]"
                   style={{
-                    background: `radial-gradient(ellipse 40% 40% at 50% 50%, ${colors.c}, transparent 60%)`,
-                    animation: "drift3 10s ease-in-out infinite",
+                    background: `radial-gradient(ellipse 50% 50% at 50% 45%, ${colors.c}, transparent 60%)`,
+                    filter: "blur(70px)",
+                    animation: "drift3 18s ease-in-out infinite",
+                  }}
+                />
+                {/* Layer 4 — subtle undertow */}
+                <div
+                  className="absolute -inset-[50%]"
+                  style={{
+                    background: `radial-gradient(ellipse 45% 55% at 40% 70%, ${colors.d}, transparent 60%)`,
+                    filter: "blur(100px)",
+                    animation: "drift4 22s ease-in-out infinite",
                   }}
                 />
                 {/* Floating sparkles */}
@@ -558,21 +570,30 @@ export default function ProfileContent() {
           })()}
           <style jsx>{`
             @keyframes drift1 {
-              0%, 100% { transform: translate(0%, 0%) scale(1); }
-              25% { transform: translate(8%, -5%) scale(1.1); }
-              50% { transform: translate(-5%, 8%) scale(0.95); }
-              75% { transform: translate(-8%, -3%) scale(1.05); }
+              0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+              20% { transform: translate(6%, -4%) scale(1.08) rotate(1deg); }
+              40% { transform: translate(-3%, 7%) scale(0.96) rotate(-0.5deg); }
+              60% { transform: translate(-7%, -2%) scale(1.04) rotate(0.5deg); }
+              80% { transform: translate(4%, 5%) scale(0.98) rotate(-1deg); }
             }
             @keyframes drift2 {
-              0%, 100% { transform: translate(0%, 0%) scale(1); }
-              25% { transform: translate(-10%, 6%) scale(1.08); }
-              50% { transform: translate(7%, -8%) scale(0.92); }
-              75% { transform: translate(5%, 10%) scale(1.03); }
+              0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+              20% { transform: translate(-8%, 5%) scale(1.06) rotate(-1deg); }
+              40% { transform: translate(5%, -6%) scale(0.94) rotate(0.5deg); }
+              60% { transform: translate(7%, 8%) scale(1.02) rotate(-0.5deg); }
+              80% { transform: translate(-4%, -5%) scale(1.07) rotate(1deg); }
             }
             @keyframes drift3 {
-              0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.8; }
-              33% { transform: translate(5%, -5%) scale(1.15); opacity: 1; }
-              66% { transform: translate(-5%, 5%) scale(0.9); opacity: 0.7; }
+              0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.7; }
+              25% { transform: translate(4%, -3%) scale(1.12); opacity: 0.9; }
+              50% { transform: translate(-3%, 4%) scale(0.92); opacity: 1; }
+              75% { transform: translate(-5%, -4%) scale(1.06); opacity: 0.8; }
+            }
+            @keyframes drift4 {
+              0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
+              25% { transform: translate(-5%, -6%) scale(1.1) rotate(1.5deg); }
+              50% { transform: translate(6%, 3%) scale(0.95) rotate(-1deg); }
+              75% { transform: translate(3%, -5%) scale(1.05) rotate(0.5deg); }
             }
           `}</style>
         </div>
@@ -1299,11 +1320,11 @@ export default function ProfileContent() {
         <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
           {[
             { id: "none", label: "default", colors: "from-[#1a1a1a] to-[#222]" },
-            { id: "gold", label: "gold", colors: "from-yellow-800/60 to-amber-900/60" },
-            { id: "ember", label: "ember", colors: "from-red-800/60 to-orange-900/60" },
-            { id: "ocean", label: "ocean", colors: "from-cyan-800/60 to-teal-900/60" },
-            { id: "aurora", label: "aurora", colors: "from-purple-800/60 to-emerald-900/60" },
-            { id: "midnight", label: "midnight", colors: "from-indigo-800/60 to-blue-900/60" },
+            { id: "gold", label: "gold", colors: "from-yellow-700/70 to-amber-900/70" },
+            { id: "ocean", label: "ocean", colors: "from-cyan-700/70 to-blue-900/70" },
+            { id: "tropical", label: "tropical", colors: "from-emerald-700/70 to-amber-700/70" },
+            { id: "midnight", label: "midnight", colors: "from-indigo-900/80 to-slate-900/80" },
+            { id: "aurora", label: "aurora", colors: "from-purple-700/70 to-teal-700/70" },
           ].map((theme) => (
             <button
               key={theme.id}
