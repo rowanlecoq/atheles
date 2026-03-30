@@ -390,7 +390,7 @@ export default function CartModal() {
                                 </p>
                               </button>
                             ) : (
-                              <Link href={`/product/${p.handle}`} onClick={closeCart}>
+                              <div>
                                 <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
                                   {p.featuredImage?.url ? (
                                     <Image
@@ -409,10 +409,10 @@ export default function CartModal() {
                                     <span className="text-[10px] uppercase tracking-wider text-red-400">sold out</span>
                                   </div>
                                 </div>
-                                <p className="truncate text-[10px] text-white/50 group-hover:text-brand-gold">
+                                <p className="truncate text-[10px] text-white/50">
                                   {p.title}
                                 </p>
-                              </Link>
+                              </div>
                             )}
                             <div className="mt-1 flex items-center justify-between">
                               <Price
