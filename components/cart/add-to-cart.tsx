@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { addItem } from "components/cart/actions";
 import type { Product, ProductVariant } from "lib/shopify/types";
 import { useSearchParams } from "next/navigation";
-import { useActionState, useState } from "react";
+import { useActionState } from "react";
 import { useCart } from "./cart-context";
 
 function SubmitButton({
@@ -14,7 +14,6 @@ function SubmitButton({
   availableForSale: boolean;
   selectedVariantId: string | undefined;
 }) {
-  const [hovering, setHovering] = useState(false);
 
   if (!availableForSale) {
     return (
@@ -31,33 +30,29 @@ function SubmitButton({
     <button
       aria-label={selectedVariantId ? "Add to cart" : "Please select a size"}
       disabled={!selectedVariantId}
-      onMouseEnter={() => setHovering(true)}
-      onMouseLeave={() => setHovering(false)}
       className={clsx(
-        "group relative flex w-full items-center justify-center overflow-hidden rounded-full p-4 font-heading text-sm uppercase tracking-wider text-brand-dark transition-all duration-300",
+        "group relative flex w-full items-center justify-center overflow-hidden rounded-full p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300",
         selectedVariantId
-          ? "cursor-pointer"
-          : "cursor-not-allowed opacity-60",
+          ? "cursor-pointer bg-brand-gold"
+          : "cursor-not-allowed bg-brand-gold/50 opacity-60",
       )}
-      style={{
-        background: !selectedVariantId
-          ? "rgba(193,163,104,0.5)"
-          : hovering
-            ? "linear-gradient(270deg, #c1a368, #e8d5a3, #a08540, #c1a368)"
-            : "#c1a368",
-        backgroundSize: hovering && selectedVariantId ? "300% 100%" : "100% 100%",
-        animation: hovering && selectedVariantId ? "colorShift 3s ease infinite" : "none",
-      }}
     >
-      <span className={`relative z-10 transition-all duration-300 ${hovering && selectedVariantId ? "tracking-[0.2em]" : "tracking-wider"}`}>
+      {/* Shimmer on hover */}
+      {selectedVariantId && (
+        <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{
+          background: "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
+          animation: "cartShimmer 2s ease-in-out infinite",
+        }} />
+      )}
+
+      <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
         {selectedVariantId ? "Add To Cart" : "Select a Size"}
       </span>
 
       <style jsx>{`
-        @keyframes colorShift {
-          0% { background-position: 0% 50%; }
-          50% { background-position: 100% 50%; }
-          100% { background-position: 0% 50%; }
+        @keyframes cartShimmer {
+          0% { transform: translateX(-100%); }
+          100% { transform: translateX(100%); }
         }
       `}</style>
     </button>
