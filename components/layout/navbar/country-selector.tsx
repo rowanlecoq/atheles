@@ -98,7 +98,7 @@ export function CountrySelector() {
 
       {/* Dropdown */}
       <div
-        className={`absolute left-0 top-full z-50 mt-2 min-w-[200px] rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-lg shadow-black/30 transition-all duration-200 ${
+        className={`absolute left-0 top-full z-[60] mt-2 min-w-[200px] rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-lg shadow-black/30 transition-all duration-200 ${
           open
             ? "pointer-events-auto visible translate-y-0 opacity-100"
             : "pointer-events-none invisible -translate-y-1 opacity-0"
