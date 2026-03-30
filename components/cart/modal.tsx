@@ -40,6 +40,8 @@ export default function CartModal() {
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
   const [discountApplied, setDiscountApplied] = useState(false);
+  const [freeShipping, setFreeShipping] = useState(false);
+  const [tierName, setTierName] = useState<string | null>(null);
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
@@ -66,6 +68,39 @@ export default function CartModal() {
     window.addEventListener("open-cart", handleOpenCart);
     return () => window.removeEventListener("open-cart", handleOpenCart);
   }, []);
+
+  // Check user tier for free shipping
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!document.cookie.includes("atheles-logged-in=1")) {
+      setFreeShipping(false);
+      setTierName(null);
+      return;
+    }
+    // Try cache first
+    try {
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        const points = Math.floor(parseFloat(u.totalSpent || "0") * 50);
+        const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
+        setTierName(tier);
+        setFreeShipping(tier === "PLATINUM" || tier === "CHAMPION");
+        return;
+      }
+    } catch {}
+    fetch("/api/auth/session")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.user) {
+          const points = Math.floor(parseFloat(data.user.totalSpent || "0") * 50);
+          const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
+          setTierName(tier);
+          setFreeShipping(tier === "PLATINUM" || tier === "CHAMPION");
+        }
+      })
+      .catch(() => {});
+  }, [isOpen]);
 
   // Load favorited products (up to 3, excluding items already in cart)
   useEffect(() => {
@@ -375,10 +410,23 @@ export default function CartModal() {
                   {/* Summary */}
                   <div className="border-t border-brand-dark-gold/20 pt-3 text-sm text-brand-grey">
                     <div className="mb-2 flex items-center justify-between">
-                      <p>Taxes &amp; Shipping</p>
+                      <p>Taxes</p>
                       <p className="text-right text-xs">Calculated at checkout</p>
                     </div>
-                    <div className="mb-3 flex items-center justify-between">
+                    <div className="mb-2 flex items-center justify-between">
+                      <p>Shipping</p>
+                      {freeShipping ? (
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs text-green-400">Free</span>
+                          <span className="rounded bg-brand-gold/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-brand-gold">
+                            {tierName}
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="text-right text-xs">Calculated at checkout</p>
+                      )}
+                    </div>
+                    <div className="mb-3 flex items-center justify-between border-t border-brand-dark-gold/15 pt-2">
                       <p className="font-medium text-white">Total</p>
                       <Price
                         className="text-right text-base font-medium text-brand-gold"
