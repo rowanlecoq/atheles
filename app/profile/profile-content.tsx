@@ -1191,13 +1191,22 @@ export default function ProfileContent() {
                 setProfileBg(theme.id);
                 if (user) {
                   localStorage.setItem(`profile-bg-${user.id}`, theme.id);
+                  // Update cached session so refresh doesn't revert
+                  try {
+                    const cached = sessionStorage.getItem("atheles-session");
+                    if (cached) {
+                      const u = JSON.parse(cached);
+                      u.theme = theme.id;
+                      sessionStorage.setItem("atheles-session", JSON.stringify(u));
+                    }
+                  } catch {}
                   fetch("/api/auth/update-theme", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
                     body: JSON.stringify({ theme: theme.id }),
                   }).catch(() => {});
                 }
-              }}
+              }}}
               className={`flex flex-col items-center gap-1.5 rounded-lg p-2 transition-all ${
                 profileBg === theme.id
                   ? "ring-2 ring-brand-gold"
@@ -1275,6 +1284,12 @@ export default function ProfileContent() {
               } catch {
                 setSaveMessage("image saved for this session only (storage full).");
               }
+              // Sync to server
+              fetch("/api/auth/update-theme", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ theme: "custom" }),
+              }).catch(() => {});
             };
             reader.readAsDataURL(file);
             e.target.value = "";
