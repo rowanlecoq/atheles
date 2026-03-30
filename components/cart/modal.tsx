@@ -331,7 +331,7 @@ export default function CartModal() {
                       </div>
                       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                         {favProducts.map((p) => {
-                          const canAdd = !!p.firstVariantId && !!p.availableForSale;
+                          const canAdd = !!p.firstVariantId;
                           return (
                           <div
                             key={p.handle}
@@ -503,7 +503,7 @@ export default function CartModal() {
                   })()}
 
                   {/* Summary */}
-                  <div className="border-t border-brand-dark-gold/20 pt-3 text-sm text-brand-grey">
+                  <div className="pt-3 text-sm text-brand-grey">
                     <div className="mb-2 flex items-center justify-between">
                       <p>Shipping</p>
                       {freeShipping ? (
