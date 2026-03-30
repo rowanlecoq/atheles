@@ -41,7 +41,7 @@ export function NewsletterSignup() {
   return (
     <section className="relative overflow-hidden border-t border-brand-dark-gold/20 bg-brand-dark py-20">
       <Image
-        src="/statues/hadrian-cuirassed.jpg"
+        src="/statues/roman-emperor-pergamon.jpg"
         alt=""
         fill
         className="object-cover object-[center_30%] opacity-10 grayscale"
@@ -55,8 +55,8 @@ export function NewsletterSignup() {
         </h2>
         <div className="mx-auto mb-6 h-px w-24 bg-brand-dark-gold/40" />
         <p className="mb-8 animate-fade-in text-sm text-brand-grey [animation-delay:200ms]">
-          Be the first to know about new drops, exclusive offers, and the
-          Atheles journey.
+          be the first to know about new drops, exclusive offers, and upcoming
+          releases.
         </p>
 
         {/* Form */}
