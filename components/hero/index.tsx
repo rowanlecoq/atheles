@@ -7,7 +7,7 @@ import { HeroCenter } from "./hero-center";
 
 export function Hero() {
   return (
-    <section className="relative overflow-x-hidden">
+    <section className="relative overflow-x-hidden bg-brand-dark">
       {/* Background */}
       <Image
         src="/statues/greek-god-hero.png?v=2"
