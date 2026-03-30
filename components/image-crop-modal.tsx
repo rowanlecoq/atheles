@@ -21,8 +21,8 @@ export default function ImageCropModal({
   const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  const CANVAS_SIZE = 280;
-  const OUTPUT_SIZE = 256;
+  const CANVAS_SIZE = 300;
+  const OUTPUT_SIZE = 400;
   const RADIUS = CANVAS_SIZE / 2;
 
   // Calculate minimum zoom to fully cover the circle
@@ -180,7 +180,7 @@ export default function ImageCropModal({
     ctx.clip();
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-    onSave(out.toDataURL("image/jpeg", 0.6));
+    onSave(out.toDataURL("image/jpeg", 0.85));
   };
 
   const minZoom = getMinZoom();

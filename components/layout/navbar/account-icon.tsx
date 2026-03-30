@@ -84,12 +84,12 @@ export function AccountIcon() {
         <img
           src={avatar}
           alt="Profile"
-          width={28}
-          height={28}
-          className="h-7 w-7 rounded-full border border-brand-gold object-cover"
+          width={36}
+          height={36}
+          className="h-9 w-9 rounded-full border-2 border-brand-gold object-cover"
         />
       ) : loggedIn && initials ? (
-        <span className="flex h-7 w-7 items-center justify-center rounded-full border border-brand-gold bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full border-2 border-brand-gold bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
           {initials}
         </span>
       ) : (
