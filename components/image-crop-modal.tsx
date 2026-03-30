@@ -15,61 +15,52 @@ export default function ImageCropModal({
 }: ImageCropModalProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
+  const zoomRef = useRef(1);
+  const offsetRef = useRef({ x: 0, y: 0 });
+  const draggingRef = useRef(false);
+  const dragStartRef = useRef({ x: 0, y: 0 });
+  const rafRef = useRef<number | null>(null);
   const [zoom, setZoom] = useState(1);
-  const [offset, setOffset] = useState({ x: 0, y: 0 });
-  const [dragging, setDragging] = useState(false);
-  const [dragStart, setDragStart] = useState({ x: 0, y: 0 });
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const CANVAS_SIZE = 300;
   const OUTPUT_SIZE = 400;
   const RADIUS = CANVAS_SIZE / 2;
 
-  // Calculate minimum zoom to fully cover the circle
   const getMinZoom = useCallback(() => {
     const img = imageRef.current;
     if (!img) return 1;
     return Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height);
   }, []);
 
-  // Clamp offset so image always covers the circle
-  const clampOffset = useCallback(
-    (ox: number, oy: number, z: number) => {
-      const img = imageRef.current;
-      if (!img) return { x: ox, y: oy };
-
-      const drawW = img.width * z;
-      const drawH = img.height * z;
-
-      // Image draw position: centered + offset
-      // drawX = (CANVAS_SIZE - drawW) / 2 + ox
-      // For the circle to be fully covered:
-      // drawX <= 0 and drawX + drawW >= CANVAS_SIZE
-      const maxOx = (drawW - CANVAS_SIZE) / 2;
-      const maxOy = (drawH - CANVAS_SIZE) / 2;
-
-      return {
-        x: Math.max(-maxOx, Math.min(maxOx, ox)),
-        y: Math.max(-maxOy, Math.min(maxOy, oy)),
-      };
-    },
-    [],
-  );
+  const clampOffset = useCallback((ox: number, oy: number, z: number) => {
+    const img = imageRef.current;
+    if (!img) return { x: ox, y: oy };
+    const drawW = img.width * z;
+    const drawH = img.height * z;
+    const maxOx = (drawW - CANVAS_SIZE) / 2;
+    const maxOy = (drawH - CANVAS_SIZE) / 2;
+    return {
+      x: Math.max(-maxOx, Math.min(maxOx, ox)),
+      y: Math.max(-maxOy, Math.min(maxOy, oy)),
+    };
+  }, []);
 
   // Load image
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
       imageRef.current = img;
-      setImageLoaded(true);
       const minZ = Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height);
+      zoomRef.current = minZ;
       setZoom(minZ);
-      setOffset({ x: 0, y: 0 });
+      offsetRef.current = { x: 0, y: 0 };
+      setImageLoaded(true);
     };
     img.src = imageSrc;
   }, [imageSrc]);
 
-  // Draw to canvas
+  // Draw to canvas using requestAnimationFrame
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const img = imageRef.current;
@@ -81,15 +72,17 @@ export default function ImageCropModal({
     canvas.width = CANVAS_SIZE;
     canvas.height = CANVAS_SIZE;
 
+    const z = zoomRef.current;
+    const off = offsetRef.current;
+
     ctx.fillStyle = "#111";
     ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
 
-    const drawW = img.width * zoom;
-    const drawH = img.height * zoom;
-    const drawX = (CANVAS_SIZE - drawW) / 2 + offset.x;
-    const drawY = (CANVAS_SIZE - drawH) / 2 + offset.y;
+    const drawW = img.width * z;
+    const drawH = img.height * z;
+    const drawX = (CANVAS_SIZE - drawW) / 2 + off.x;
+    const drawY = (CANVAS_SIZE - drawH) / 2 + off.y;
 
-    // Clip to circle and draw
     ctx.save();
     ctx.beginPath();
     ctx.arc(RADIUS, RADIUS, RADIUS, 0, Math.PI * 2);
@@ -99,64 +92,81 @@ export default function ImageCropModal({
 
     // Darken outside circle
     ctx.save();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.6)";
+    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
     ctx.beginPath();
     ctx.rect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
     ctx.arc(RADIUS, RADIUS, RADIUS, 0, Math.PI * 2, true);
     ctx.fill();
     ctx.restore();
 
-    // Circle border
-    ctx.strokeStyle = "rgba(181, 149, 72, 0.6)";
-    ctx.lineWidth = 2;
+    // Subtle circle outline
+    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    ctx.lineWidth = 1;
     ctx.beginPath();
-    ctx.arc(RADIUS, RADIUS, RADIUS - 1, 0, Math.PI * 2);
+    ctx.arc(RADIUS, RADIUS, RADIUS - 0.5, 0, Math.PI * 2);
     ctx.stroke();
-  }, [zoom, offset]);
+  }, []);
+
+  const scheduleDraw = useCallback(() => {
+    if (rafRef.current) cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(draw);
+  }, [draw]);
 
   useEffect(() => {
-    if (imageLoaded) draw();
-  }, [imageLoaded, draw]);
+    if (imageLoaded) scheduleDraw();
+  }, [imageLoaded, scheduleDraw, zoom]);
 
-  // Pointer handlers
+  // Pointer handlers — use refs for smooth dragging without re-renders
   const handlePointerDown = (e: React.PointerEvent) => {
-    setDragging(true);
-    setDragStart({ x: e.clientX - offset.x, y: e.clientY - offset.y });
+    draggingRef.current = true;
+    dragStartRef.current = {
+      x: e.clientX - offsetRef.current.x,
+      y: e.clientY - offsetRef.current.y,
+    };
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
   };
 
   const handlePointerMove = (e: React.PointerEvent) => {
-    if (!dragging) return;
+    if (!draggingRef.current) return;
     const newOffset = clampOffset(
-      e.clientX - dragStart.x,
-      e.clientY - dragStart.y,
-      zoom,
+      e.clientX - dragStartRef.current.x,
+      e.clientY - dragStartRef.current.y,
+      zoomRef.current,
     );
-    setOffset(newOffset);
+    offsetRef.current = newOffset;
+    scheduleDraw();
   };
 
-  const handlePointerUp = () => setDragging(false);
+  const handlePointerUp = () => {
+    draggingRef.current = false;
+  };
 
   // Scroll zoom
   const handleWheel = (e: React.WheelEvent) => {
     e.preventDefault();
     const minZ = getMinZoom();
     const maxZ = minZ * 4;
-    const newZoom = Math.max(minZ, Math.min(maxZ, zoom - e.deltaY * 0.001));
+    const newZoom = Math.max(minZ, Math.min(maxZ, zoomRef.current - e.deltaY * 0.002));
+    zoomRef.current = newZoom;
+    offsetRef.current = clampOffset(offsetRef.current.x, offsetRef.current.y, newZoom);
     setZoom(newZoom);
-    setOffset(clampOffset(offset.x, offset.y, newZoom));
+    scheduleDraw();
   };
 
   const handleZoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const newZoom = parseFloat(e.target.value);
+    zoomRef.current = newZoom;
+    offsetRef.current = clampOffset(offsetRef.current.x, offsetRef.current.y, newZoom);
     setZoom(newZoom);
-    setOffset(clampOffset(offset.x, offset.y, newZoom));
+    scheduleDraw();
   };
 
   const handleReset = () => {
     const minZ = getMinZoom();
+    zoomRef.current = minZ;
+    offsetRef.current = { x: 0, y: 0 };
     setZoom(minZ);
-    setOffset({ x: 0, y: 0 });
+    scheduleDraw();
   };
 
   const handleSave = () => {
@@ -170,10 +180,12 @@ export default function ImageCropModal({
     if (!ctx) return;
 
     const scale = OUTPUT_SIZE / CANVAS_SIZE;
-    const drawW = img.width * zoom * scale;
-    const drawH = img.height * zoom * scale;
-    const drawX = (OUTPUT_SIZE - drawW) / 2 + offset.x * scale;
-    const drawY = (OUTPUT_SIZE - drawH) / 2 + offset.y * scale;
+    const z = zoomRef.current;
+    const off = offsetRef.current;
+    const drawW = img.width * z * scale;
+    const drawH = img.height * z * scale;
+    const drawX = (OUTPUT_SIZE - drawW) / 2 + off.x * scale;
+    const drawY = (OUTPUT_SIZE - drawH) / 2 + off.y * scale;
 
     ctx.beginPath();
     ctx.arc(OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, 0, Math.PI * 2);
