@@ -37,7 +37,7 @@ export default function FilterItemDropdown({ list }: { list: ListItem[] }) {
   }, [pathname, list, searchParams]);
 
   return (
-    <div className="relative" ref={ref}>
+    <div className="relative flex-none" ref={ref}>
       <button
         type="button"
         onClick={() => {
@@ -45,16 +45,11 @@ export default function FilterItemDropdown({ list }: { list: ListItem[] }) {
         }}
         className="tap-target flex min-h-[40px] items-center gap-1.5 rounded-full border border-brand-dark-gold/30 px-3.5 py-2 text-left text-sm text-white"
       >
-        <div className="whitespace-nowrap">Sort</div>
-        <ChevronDownIcon className={`h-3.5 w-3.5 text-brand-gold transition-transform duration-200 ${openSelect ? "rotate-180" : ""}`} />
+        <div className="whitespace-nowrap">{active || "Relevance"}</div>
+        <ChevronDownIcon className={`h-3.5 w-3.5 flex-none text-brand-gold transition-transform duration-200 ${openSelect ? "rotate-180" : ""}`} />
       </button>
       {openSelect && (
         <div className="absolute right-0 z-40 mt-1 min-w-[200px] overflow-auto rounded-lg border border-brand-dark-gold/30 bg-brand-dark p-3 shadow-lg">
-          {active && (
-            <p className="mb-1.5 px-3 text-xs uppercase tracking-wider text-brand-dark-gold">
-              {active}
-            </p>
-          )}
           {list.map((item: ListItem) => (
             <FilterItem
               key={"path" in item ? item.path : item.slug || item.title}
