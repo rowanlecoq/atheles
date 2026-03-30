@@ -492,7 +492,7 @@ export default function ProfileContent() {
           <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/70 to-brand-dark" />
         </div>
       ) : profileBg !== "none" ? (
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="pointer-events-none fixed inset-0" style={{ overflow: "hidden", clipPath: "inset(0)" }}>
           {/* Flowing blob layers */}
           {(() => {
             const colors = {
