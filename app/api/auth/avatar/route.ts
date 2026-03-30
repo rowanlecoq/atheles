@@ -24,8 +24,9 @@ export async function GET() {
       "avatar",
     );
 
-    return NextResponse.json({ avatar });
-  } catch {
+    return NextResponse.json({ avatar: avatar || null });
+  } catch (err) {
+    console.error("[avatar] GET error:", err);
     return NextResponse.json({ avatar: null });
   }
 }

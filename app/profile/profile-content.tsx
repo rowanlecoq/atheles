@@ -184,9 +184,9 @@ export default function ProfileContent() {
 
       // Avatar: fetch from server (blob storage)
       fetch("/api/auth/avatar")
-        .then((r) => r.json())
+        .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
-          if (d.avatar) {
+          if (d?.avatar) {
             setAvatar(d.avatar);
           }
         })

@@ -28,9 +28,9 @@ export function AccountIcon() {
           );
           // Fetch avatar from server (blob storage)
           fetch("/api/auth/avatar")
-            .then((r) => r.json())
+            .then((r) => (r.ok ? r.json() : null))
             .then((d) => {
-              if (d.avatar) setAvatar(d.avatar);
+              if (d?.avatar) setAvatar(d.avatar);
             })
             .catch(() => {});
         } else {
@@ -54,9 +54,9 @@ export function AccountIcon() {
   useEffect(() => {
     const handleAvatarChange = () => {
       fetch("/api/auth/avatar")
-        .then((r) => r.json())
+        .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
-          if (d.avatar) setAvatar(d.avatar);
+          if (d?.avatar) setAvatar(d.avatar);
           else setAvatar(null);
         })
         .catch(() => {});
