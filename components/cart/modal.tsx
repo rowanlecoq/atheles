@@ -85,7 +85,7 @@ export default function CartModal() {
         const points = Math.floor(parseFloat(u.totalSpent || "0") * 50);
         const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
         setTierName(tier);
-        setFreeShipping(tier === "PLATINUM" || tier === "CHAMPION");
+        setFreeShipping(tier === "CHAMPION");
         return;
       }
     } catch {}
@@ -96,7 +96,7 @@ export default function CartModal() {
           const points = Math.floor(parseFloat(data.user.totalSpent || "0") * 50);
           const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
           setTierName(tier);
-          setFreeShipping(tier === "PLATINUM" || tier === "CHAMPION");
+          setFreeShipping(tier === "CHAMPION");
         }
       })
       .catch(() => {});
