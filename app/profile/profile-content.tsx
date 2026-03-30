@@ -38,7 +38,7 @@ const TIERS = [
     max: 15000,
     barGradient: "from-gray-500 via-gray-400 to-gray-300",
     titleGradient: "from-gray-300 via-gray-200 to-white",
-    perks: ["10% monthly discount code"],
+    perks: ["10% loyalty discount"],
     discountCode: null as string | null,
     discountPercent: 10,
   },
@@ -48,9 +48,9 @@ const TIERS = [
     max: 30000,
     barGradient: "from-yellow-700 via-yellow-500 to-amber-300",
     titleGradient: "from-yellow-400 via-yellow-300 to-amber-200",
-    perks: ["early access", "15% monthly discount code", "birthday rewards"],
+    perks: ["early access", "12% loyalty discount", "birthday rewards"],
     discountCode: null as string | null,
-    discountPercent: 15,
+    discountPercent: 12,
   },
   {
     name: "PLATINUM",
@@ -60,12 +60,12 @@ const TIERS = [
     titleGradient: "from-cyan-300 via-cyan-200 to-white",
     perks: [
       "early access",
-      "18% monthly discount code",
+      "15% loyalty discount",
       "birthday rewards",
       "free shipping",
     ],
     discountCode: null as string | null,
-    discountPercent: 18,
+    discountPercent: 15,
   },
   {
     name: "CHAMPION",
@@ -75,12 +75,12 @@ const TIERS = [
     titleGradient: "from-fuchsia-300 via-purple-300 to-amber-200",
     perks: [
       "exclusive access",
-      "20% monthly discount code",
+      "18% loyalty discount",
       "free shipping",
       "birthday rewards",
     ],
     discountCode: null as string | null,
-    discountPercent: 20,
+    discountPercent: 18,
   },
 ];
 
@@ -973,7 +973,7 @@ export default function ProfileContent() {
                 <line x1="7" y1="7" x2="7.01" y2="7" />
               </svg>
               <h2 className="font-heading text-lg text-brand-pale-gold">
-                your monthly discount
+                your loyalty discount
               </h2>
             </div>
             <p className="mb-4 text-sm text-brand-grey">
@@ -981,7 +981,7 @@ export default function ProfileContent() {
               <span className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text font-medium text-transparent`}>
                 {tier.name}
               </span>
-              {" "}member, you get {tier.discountPercent}% off your next order. use this code at checkout:
+              {" "}member, you get {tier.discountPercent}% off every order. use this code at checkout:
             </p>
 
             {discountRevealed ? (
@@ -1016,7 +1016,7 @@ export default function ProfileContent() {
             )}
 
             <p className="mt-3 text-xs text-brand-grey/50">
-              one use per customer &#183; valid on your entire order
+              valid on every order &#183; applies to your entire cart
             </p>
           </div>
         </div>
