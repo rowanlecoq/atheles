@@ -117,29 +117,29 @@ function ProductCard({ product }: { product: Product }) {
             className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-brand-dark via-brand-dark/95 to-transparent p-4 pt-10"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
           >
-            <div className="flex flex-wrap justify-center gap-2">
+            <div className="grid auto-cols-fr grid-flow-col gap-1.5">
               {product.variants.map((variant) => {
                 const rawSize = variant.selectedOptions.find(
                   (o) => o.name.toLowerCase() === "size",
                 )?.value || variant.title;
-                // Abbreviate long size names
-                const lower = rawSize.toLowerCase().trim();
-                const sizeMap: Record<string, string> = {
+                // Abbreviate size names for compact display
+                const abbrev: Record<string, string> = {
                   "extra small": "XS", "xs": "XS",
                   "small": "S", "s": "S",
                   "medium": "M", "m": "M",
                   "large": "L", "l": "L",
                   "extra large": "XL", "xl": "XL",
                   "xx-large": "XXL", "xxl": "XXL",
+                  "2xl": "2XL", "3xl": "3XL",
                 };
-                const size = sizeMap[lower] || rawSize;
+                const size = abbrev[rawSize.toLowerCase().trim()] || rawSize;
                 return (
                   <button
                     key={variant.id}
                     type="button"
                     disabled={!variant.availableForSale || adding}
                     onClick={() => variant.availableForSale && handleAdd(variant.id)}
-                    className={`min-h-[40px] min-w-[44px] flex-1 rounded-md py-2.5 text-xs font-medium transition-all ${
+                    className={`min-h-[40px] rounded-md py-2.5 text-xs font-medium transition-all ${
                       variant.availableForSale
                         ? "bg-white/10 text-white hover:bg-brand-gold hover:text-brand-dark active:bg-brand-gold active:text-brand-dark"
                         : "cursor-not-allowed text-white/20 line-through"
