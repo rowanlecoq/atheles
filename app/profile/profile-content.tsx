@@ -1009,9 +1009,36 @@ export default function ProfileContent() {
               <button
                 type="button"
                 onClick={() => setDiscountRevealed(true)}
-                className={`w-full rounded-lg bg-gradient-to-r ${tier.barGradient} px-4 py-3 font-heading text-sm uppercase tracking-wider text-white transition-opacity hover:opacity-90`}
+                className={`group/reveal relative w-full overflow-hidden rounded-lg bg-gradient-to-r ${tier.barGradient} px-4 py-3 font-heading text-sm uppercase tracking-wider text-white`}
               >
-                reveal your code
+                {/* Shimmer sweep */}
+                <div
+                  className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/reveal:opacity-100"
+                  style={{
+                    background: "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
+                    animation: "revealShimmer 2s ease-in-out infinite",
+                  }}
+                />
+                {/* Sparkles on hover */}
+                <span className="absolute left-[10%] top-[20%] text-[7px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/50" style={{ animation: "revealSpark 1.5s ease-in-out infinite" }}>&#10022;</span>
+                <span className="absolute left-[30%] top-[15%] text-[5px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/40" style={{ animation: "revealSpark 1.8s ease-in-out infinite 0.3s" }}>&#10022;</span>
+                <span className="absolute left-[55%] top-[70%] text-[6px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/50" style={{ animation: "revealSpark 1.6s ease-in-out infinite 0.6s" }}>&#10022;</span>
+                <span className="absolute left-[75%] top-[25%] text-[7px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/40" style={{ animation: "revealSpark 2s ease-in-out infinite 0.2s" }}>&#10022;</span>
+                <span className="absolute left-[90%] top-[60%] text-[5px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/50" style={{ animation: "revealSpark 1.7s ease-in-out infinite 0.8s" }}>&#10022;</span>
+                {/* Text with letter spacing on hover */}
+                <span className="relative z-10 transition-all duration-300 group-hover/reveal:tracking-[0.25em]">
+                  reveal your code
+                </span>
+                <style jsx>{`
+                  @keyframes revealShimmer {
+                    0% { transform: translateX(-100%); }
+                    100% { transform: translateX(100%); }
+                  }
+                  @keyframes revealSpark {
+                    0%, 100% { opacity: 0; transform: scale(0.5); }
+                    50% { opacity: 1; transform: scale(1.2); }
+                  }
+                `}</style>
               </button>
             )}
 
