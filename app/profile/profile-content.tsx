@@ -147,6 +147,7 @@ export default function ProfileContent() {
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [saveMessage, setSaveMessage] = useState("");
+  const [codeCopied, setCodeCopied] = useState(false);
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
   const [phone, setPhone] = useState("");
@@ -987,25 +988,36 @@ export default function ProfileContent() {
             </p>
 
             {discountRevealed ? (
-              <div className="flex items-center gap-3">
-                <div className="flex-1 rounded-lg border border-brand-dark-gold/30 bg-brand-dark-gold/10 px-4 py-3 text-center font-mono text-lg tracking-wider text-brand-gold">
-                  {user.discountCode}
+              <div>
+                <div className="flex items-center gap-3">
+                  <div className="flex-1 rounded-lg border border-brand-dark-gold/30 bg-brand-dark-gold/10 px-4 py-3 text-center font-mono text-lg tracking-wider text-brand-gold">
+                    {user.discountCode}
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => {
+                      navigator.clipboard.writeText(user.discountCode!).catch(() => {});
+                      setCodeCopied(true);
+                      setTimeout(() => setCodeCopied(false), 2000);
+                    }}
+                    className="flex h-12 w-12 flex-none items-center justify-center rounded-lg border border-brand-dark-gold/30 text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+                    title="Copy code"
+                  >
+                    {codeCopied ? (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4 text-green-400">
+                        <polyline points="20 6 9 17 4 12" />
+                      </svg>
+                    ) : (
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                        <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                        <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+                      </svg>
+                    )}
+                  </button>
                 </div>
-                <button
-                  type="button"
-                  onClick={() => {
-                    navigator.clipboard.writeText(user.discountCode!).catch(() => {});
-                    setSaveMessage("code copied!");
-                    setTimeout(() => setSaveMessage(""), 2000);
-                  }}
-                  className="flex h-12 w-12 flex-none items-center justify-center rounded-lg border border-brand-dark-gold/30 text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
-                  title="Copy code"
-                >
-                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
-                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
-                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
-                  </svg>
-                </button>
+                {codeCopied && (
+                  <p className="mt-2 text-center text-xs text-green-400">code copied!</p>
+                )}
               </div>
             ) : (
               <button
