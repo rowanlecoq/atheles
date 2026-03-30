@@ -1,19 +1,16 @@
-import { GridTileImage } from "components/grid/tile";
-import { GradualBlur, SplitText } from "components/animations";
+import { SplitText } from "components/animations";
+import { HomepageProductCard } from "components/homepage-product-card";
 import { getCollectionProducts } from "lib/shopify";
 import type { Product } from "lib/shopify/types";
-import Link from "next/link";
 
 function ThreeItemGridItem({
   item,
   size,
   priority,
-  delay = 0,
 }: {
   item: Product;
   size: "full" | "half";
   priority?: boolean;
-  delay?: number;
 }) {
   return (
     <div
@@ -23,31 +20,7 @@ function ThreeItemGridItem({
           : "md:col-span-2 md:row-span-1"
       }
     >
-      <GradualBlur delay={delay}>
-        <Link
-          className="relative block aspect-square h-full w-full"
-          href={`/product/${item.handle}`}
-          prefetch={true}
-        >
-          <GridTileImage
-            src={item.featuredImage.url}
-            fill
-            sizes={
-              size === "full"
-                ? "(min-width: 768px) 66vw, 100vw"
-                : "(min-width: 768px) 33vw, 100vw"
-            }
-            priority={priority}
-            alt={item.title}
-            label={{
-              position: size === "full" ? "center" : "bottom",
-              title: item.title as string,
-              amount: item.priceRange.maxVariantPrice.amount,
-              currencyCode: item.priceRange.maxVariantPrice.currencyCode,
-            }}
-          />
-        </Link>
-      </GradualBlur>
+      <HomepageProductCard product={item} size={size} priority={priority} />
     </div>
   );
 }
@@ -63,7 +36,6 @@ export async function ThreeItemGrid() {
 
   return (
     <section className="py-10 sm:py-12">
-      {/* Section heading */}
       <div className="mb-8 px-4 text-center">
         <SplitText
           as="h2"
@@ -74,19 +46,9 @@ export async function ThreeItemGrid() {
       </div>
 
       <div className="mx-auto grid max-w-(--breakpoint-2xl) gap-3 px-4 pb-4 sm:gap-4 md:grid-cols-6 md:grid-rows-2 lg:max-h-[500px]">
-        <ThreeItemGridItem
-          size="full"
-          item={firstProduct}
-          priority={true}
-          delay={0}
-        />
-        <ThreeItemGridItem
-          size="half"
-          item={secondProduct}
-          priority={true}
-          delay={0.06}
-        />
-        <ThreeItemGridItem size="half" item={thirdProduct} delay={0.12} />
+        <ThreeItemGridItem size="full" item={firstProduct} priority={true} />
+        <ThreeItemGridItem size="half" item={secondProduct} priority={true} />
+        <ThreeItemGridItem size="half" item={thirdProduct} />
       </div>
     </section>
   );

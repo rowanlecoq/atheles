@@ -1,5 +1,5 @@
 import { CarouselControls } from "components/carousel-controls";
-import { ProductCard } from "components/product-card";
+import { CarouselProductCard } from "components/carousel-product-card";
 import { getCollectionProducts, getProducts } from "lib/shopify";
 import type { Product } from "lib/shopify/types";
 
@@ -37,17 +37,7 @@ export async function Carousel() {
             data-card
             className="w-[72vw] max-w-[340px] flex-none sm:w-[45vw] sm:max-w-none md:w-auto md:max-w-none"
           >
-            <ProductCard
-              handle={product.handle}
-              title={product.title}
-              featuredImageUrl={product.featuredImage?.url}
-              price={product.priceRange.maxVariantPrice.amount}
-              currencyCode={product.priceRange.maxVariantPrice.currencyCode}
-              variants={
-                product.variants?.map((v) => ({ title: v.title })) ?? []
-              }
-              tags={product.tags ?? []}
-            />
+            <CarouselProductCard product={product} />
           </div>
         ))}
       </CarouselControls>
