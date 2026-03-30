@@ -14,4 +14,12 @@ export async function setAuthCookie(accessToken: string, expiresAt: string) {
     maxAge,
     path: "/",
   });
+  // Non-httpOnly indicator cookie so client JS can check login status
+  cookieStore.set("atheles-logged-in", "1", {
+    httpOnly: false,
+    secure: process.env.NODE_ENV === "production",
+    sameSite: "lax",
+    maxAge,
+    path: "/",
+  });
 }

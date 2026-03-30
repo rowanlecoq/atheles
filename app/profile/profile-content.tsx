@@ -190,7 +190,7 @@ export default function ProfileContent() {
     };
 
     // Check if auth cookie exists — if not, skip everything and redirect immediately
-    const hasAuthCookie = document.cookie.includes("atheles-auth-token");
+    const hasAuthCookie = document.cookie.includes("atheles-logged-in");
     if (!hasAuthCookie) {
       sessionStorage.removeItem("atheles-session");
       setLoading(false);
@@ -234,6 +234,7 @@ export default function ProfileContent() {
 
   const handleSignOut = async () => {
     sessionStorage.removeItem("atheles-session");
+    document.cookie = "atheles-logged-in=; max-age=0; path=/";
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
     router.refresh();
