@@ -49,7 +49,7 @@ function SubmitButton({
         animation: hovering && selectedVariantId ? "colorShift 3s ease infinite" : "none",
       }}
     >
-      <span className="relative z-10">
+      <span className={`relative z-10 transition-all duration-300 ${hovering && selectedVariantId ? "tracking-[0.2em]" : "tracking-wider"}`}>
         {selectedVariantId ? "Add To Cart" : "Select a Size"}
       </span>
 
