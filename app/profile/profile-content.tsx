@@ -1445,7 +1445,14 @@ export default function ProfileContent() {
                 setCustomBgImage(dataUrl);
                 setProfileBg("custom");
 
-                // Upload to Vercel Blob
+                // Save locally immediately so refresh works
+                try {
+                  localStorage.removeItem(`profile-bg-img-${user.id}`);
+                  localStorage.setItem(`profile-bg-img-${user.id}`, dataUrl);
+                  localStorage.setItem(`profile-bg-${user.id}`, "custom");
+                } catch {}
+
+                // Upload to Vercel Blob (replaces dataUrl with permanent URL)
                 fetch("/api/auth/background", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
@@ -1456,8 +1463,8 @@ export default function ProfileContent() {
                     if (d.success && d.url) {
                       setCustomBgImage(d.url);
                       try {
+                        localStorage.removeItem(`profile-bg-img-${user.id}`);
                         localStorage.setItem(`profile-bg-img-${user.id}`, d.url);
-                        localStorage.setItem(`profile-bg-${user.id}`, "custom");
                       } catch {}
                     }
                   })
