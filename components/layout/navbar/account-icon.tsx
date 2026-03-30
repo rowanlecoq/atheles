@@ -9,7 +9,6 @@ export function AccountIcon() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [initials, setInitials] = useState<string | null>(null);
   const [avatar, setAvatar] = useState<string | null>(null);
-  const [userId, setUserId] = useState<string | null>(null);
   const pathname = usePathname();
 
   const refreshSession = useCallback(() => {
@@ -18,7 +17,6 @@ export function AccountIcon() {
       .then((data) => {
         if (data?.user) {
           setLoggedIn(true);
-          setUserId(data.user.id);
           const name = data.user.name || data.user.email || "A";
           setInitials(
             name
@@ -28,29 +26,26 @@ export function AccountIcon() {
               .toUpperCase()
               .slice(0, 2),
           );
-          // Load avatar from localStorage
-          try {
-            const stored = localStorage.getItem(`avatar-${data.user.id}`);
-            setAvatar(stored);
-          } catch {
-            setAvatar(null);
-          }
+          // Fetch avatar from server (blob storage)
+          fetch("/api/auth/avatar")
+            .then((r) => r.json())
+            .then((d) => {
+              if (d.avatar) setAvatar(d.avatar);
+            })
+            .catch(() => {});
         } else {
           setLoggedIn(false);
           setInitials(null);
           setAvatar(null);
-          setUserId(null);
         }
       })
       .catch(() => {
         setLoggedIn(false);
         setInitials(null);
         setAvatar(null);
-        setUserId(null);
       });
   }, []);
 
-  // Re-fetch session on every route change
   useEffect(() => {
     refreshSession();
   }, [pathname, refreshSession]);
@@ -58,20 +53,19 @@ export function AccountIcon() {
   // Listen for avatar changes from the profile page
   useEffect(() => {
     const handleAvatarChange = () => {
-      if (userId) {
-        try {
-          const stored = localStorage.getItem(`avatar-${userId}`);
-          setAvatar(stored);
-        } catch {
-          setAvatar(null);
-        }
-      }
+      fetch("/api/auth/avatar")
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.avatar) setAvatar(d.avatar);
+          else setAvatar(null);
+        })
+        .catch(() => {});
     };
 
     window.addEventListener("avatar-changed", handleAvatarChange);
     return () =>
       window.removeEventListener("avatar-changed", handleAvatarChange);
-  }, [userId]);
+  }, []);
 
   return (
     <Link
