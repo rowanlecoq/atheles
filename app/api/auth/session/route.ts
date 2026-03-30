@@ -1,8 +1,20 @@
-import { getCustomerByToken } from "lib/auth/shopify-customer";
+import { getCustomerByToken, updateCustomerTier } from "lib/auth/shopify-customer";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
+
+const TIERS = [
+  { name: "bronze", min: 0, max: 5000 },
+  { name: "silver", min: 5000, max: 15000 },
+  { name: "gold", min: 15000, max: 30000 },
+  { name: "platinum", min: 30000, max: 50000 },
+  { name: "champion", min: 50000, max: Infinity },
+];
+
+function getTierName(points: number): string {
+  return (TIERS.find((t) => points >= t.min && points < t.max) || TIERS[0]!).name;
+}
 
 export async function GET() {
   try {
@@ -15,7 +27,6 @@ export async function GET() {
 
     const customer = await getCustomerByToken(token);
     if (!customer) {
-      // Token is invalid/expired — clear cookies so middleware redirects properly
       cookieStore.delete("atheles-auth-token");
       cookieStore.delete("atheles-logged-in");
       return NextResponse.json({ user: null });
@@ -26,6 +37,11 @@ export async function GET() {
     const totalSpent = adminEmails.includes(customer.email.toLowerCase())
       ? "1100.00"
       : customer.totalSpent;
+
+    // Auto-tag customer with their tier (non-blocking)
+    const points = Math.floor(parseFloat(totalSpent) * 50);
+    const tierName = getTierName(points);
+    updateCustomerTier(customer.email, tierName).catch(() => {});
 
     return NextResponse.json({
       user: {

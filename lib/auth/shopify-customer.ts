@@ -65,6 +65,58 @@ async function shopifyAdminFetch<T>(
   return json.data;
 }
 
+export async function updateCustomerTier(
+  customerEmail: string,
+  tier: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!adminEndpoint || !adminToken) {
+    return { success: false, error: "admin API not configured" };
+  }
+
+  const searchResult = await shopifyAdminFetch<{
+    customers: { edges: { node: { id: string; tags: string[] } }[] };
+  }>(
+    `query customers($query: String!) {
+      customers(first: 1, query: $query) {
+        edges { node { id tags } }
+      }
+    }`,
+    { query: `email:${customerEmail}` },
+  );
+
+  const adminCustomer = searchResult.customers.edges[0]?.node;
+  if (!adminCustomer) {
+    return { success: false, error: "customer not found" };
+  }
+
+  // Check if tier tag already correct — skip update if so
+  const currentTierTag = adminCustomer.tags.find((t) => t.startsWith("tier:"));
+  if (currentTierTag === `tier:${tier}`) {
+    return { success: true };
+  }
+
+  // Remove old tier tags and add new one
+  const filteredTags = adminCustomer.tags.filter((t) => !t.startsWith("tier:"));
+  const newTags = [...filteredTags, `tier:${tier}`];
+
+  await shopifyAdminFetch<{
+    customerUpdate: {
+      customer: { id: string } | null;
+      userErrors: { message: string }[];
+    };
+  }>(
+    `mutation customerUpdate($input: CustomerInput!) {
+      customerUpdate(input: $input) {
+        customer { id }
+        userErrors { message }
+      }
+    }`,
+    { input: { id: adminCustomer.id, tags: newTags } },
+  );
+
+  return { success: true };
+}
+
 export async function updateCustomerTag(
   customerEmail: string,
   prefix: string,
