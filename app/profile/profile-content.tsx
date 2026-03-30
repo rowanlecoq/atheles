@@ -1367,6 +1367,14 @@ export default function ProfileContent() {
                 // Has a saved custom image — apply it
                 setProfileBg("custom");
                 if (user) {
+                  try {
+                    const cached = sessionStorage.getItem("atheles-session");
+                    if (cached) {
+                      const u = JSON.parse(cached);
+                      u.theme = "custom";
+                      sessionStorage.setItem("atheles-session", JSON.stringify(u));
+                    }
+                  } catch {}
                   window.dispatchEvent(new Event("theme-changed"));
                   fetch("/api/auth/update-theme", {
                     method: "POST",

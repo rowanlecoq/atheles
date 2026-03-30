@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 // Lower opacity than profile page for subtle ambient effect
 const THEME_COLORS: Record<string, { a: string; b: string; c: string; d: string; particle: string }> = {
@@ -22,71 +22,76 @@ const SPARKLES = [
   { x: "90%", y: "72%", size: "7px", dur: "3.2s", delay: "2.5s" },
 ];
 
+function readCache(): { theme: string | null; globalTheme: boolean } {
+  try {
+    const cached = sessionStorage.getItem("atheles-session");
+    if (cached) {
+      const u = JSON.parse(cached);
+      return { theme: u.theme || null, globalTheme: !!u.globalTheme };
+    }
+  } catch {}
+  return { theme: null, globalTheme: false };
+}
+
 export function ThemeBackground() {
   const pathname = usePathname();
   const [theme, setTheme] = useState<string | null>(null);
   const [globalOn, setGlobalOn] = useState(false);
   const [customBg, setCustomBg] = useState<string | null>(null);
+  const initializedRef = useRef(false);
 
-  const loadTheme = () => {
-    const loggedIn = document.cookie.includes("atheles-logged-in=1");
-    if (!loggedIn) {
+  const applyFromCache = () => {
+    const { theme: t, globalTheme: g } = readCache();
+    if (g && t && t !== "none") {
+      setTheme(t);
+      setGlobalOn(true);
+      if (t === "custom") {
+        fetch("/api/auth/background")
+          .then((r) => (r.ok ? r.json() : null))
+          .then((d) => { if (d?.background) setCustomBg(d.background); })
+          .catch(() => {});
+      }
+    } else {
       setTheme(null);
       setGlobalOn(false);
-      return;
     }
-
-    // Try session cache first for instant render
-    try {
-      const cached = sessionStorage.getItem("atheles-session");
-      if (cached) {
-        const u = JSON.parse(cached);
-        if (u.globalTheme && u.theme && u.theme !== "none") {
-          setTheme(u.theme);
-          setGlobalOn(true);
-          if (u.theme === "custom") {
-            fetch("/api/auth/background")
-              .then((r) => (r.ok ? r.json() : null))
-              .then((d) => { if (d?.background) setCustomBg(d.background); })
-              .catch(() => {});
-          }
-          return;
-        }
-      }
-    } catch {}
-
-    // Fetch from server
-    fetch("/api/auth/session")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.user?.globalTheme && data.user.theme && data.user.theme !== "none") {
-          setTheme(data.user.theme);
-          setGlobalOn(true);
-          if (data.user.theme === "custom") {
-            fetch("/api/auth/background")
-              .then((r) => (r.ok ? r.json() : null))
-              .then((d) => { if (d?.background) setCustomBg(d.background); })
-              .catch(() => {});
-          }
-        } else {
-          setTheme(null);
-          setGlobalOn(false);
-        }
-      })
-      .catch(() => {});
   };
 
   useEffect(() => {
-    loadTheme();
+    const loggedIn = document.cookie.includes("atheles-logged-in=1");
+    if (!loggedIn) return;
 
-    const handleChange = () => loadTheme();
+    // Check cache first
+    const { theme: cachedTheme } = readCache();
+    if (cachedTheme !== null) {
+      // Cache exists — use it (it's the source of truth, written by profile page)
+      applyFromCache();
+      initializedRef.current = true;
+    } else {
+      // No cache — fetch session to populate it, then read
+      fetch("/api/auth/session")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data?.user) {
+            try {
+              sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+            } catch {}
+            applyFromCache();
+          }
+        })
+        .catch(() => {});
+      initializedRef.current = true;
+    }
+
+    // Listen for profile page theme changes (cache is already updated when this fires)
+    const handleChange = () => applyFromCache();
     window.addEventListener("theme-changed", handleChange);
     return () => window.removeEventListener("theme-changed", handleChange);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Don't render on profile page (has its own) or homepage (has hero)
-  if (pathname === "/" || pathname === "/profile") return null;
+  // Don't render on profile page — it has its own background
+  if (pathname === "/profile") return null;
 
   // Don't render if global theme is off or no theme set
   if (!globalOn || !theme || theme === "none") return null;
