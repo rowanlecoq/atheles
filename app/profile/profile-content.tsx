@@ -486,13 +486,13 @@ export default function ProfileContent() {
     <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16">
       {/* Background layer */}
       {profileBg === "custom" && customBgImage ? (
-        <div className="pointer-events-none fixed inset-0 overflow-hidden animate-[fadeInBg_0.8s_ease-out]">
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={customBgImage} alt="" className="h-full w-full object-cover opacity-10" />
           <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/70 to-brand-dark" />
         </div>
       ) : profileBg !== "none" ? (
-        <div className="pointer-events-none fixed inset-0 overflow-hidden animate-[fadeInBg_0.8s_ease-out]">
+        <div className="pointer-events-none fixed inset-0 overflow-hidden">
           {/* Flowing blob layers */}
           {(() => {
             const colors = {
@@ -510,7 +510,7 @@ export default function ProfileContent() {
                   style={{
                     background: `radial-gradient(ellipse 70% 60% at 25% 35%, ${colors.a}, transparent 65%)`,
                     filter: "blur(80px)",
-                    animation: "drift1 20s ease-in-out infinite",
+                    animation: "drift1 20s ease-in-out infinite -8s",
                   }}
                 />
                 {/* Layer 2 — counter flow */}
@@ -519,7 +519,7 @@ export default function ProfileContent() {
                   style={{
                     background: `radial-gradient(ellipse 55% 70% at 75% 65%, ${colors.b}, transparent 65%)`,
                     filter: "blur(90px)",
-                    animation: "drift2 25s ease-in-out infinite",
+                    animation: "drift2 25s ease-in-out infinite -12s",
                   }}
                 />
                 {/* Layer 3 — breathing center */}
@@ -528,7 +528,7 @@ export default function ProfileContent() {
                   style={{
                     background: `radial-gradient(ellipse 50% 50% at 50% 45%, ${colors.c}, transparent 60%)`,
                     filter: "blur(70px)",
-                    animation: "drift3 18s ease-in-out infinite",
+                    animation: "drift3 18s ease-in-out infinite -6s",
                   }}
                 />
                 {/* Layer 4 — subtle undertow */}
@@ -537,7 +537,7 @@ export default function ProfileContent() {
                   style={{
                     background: `radial-gradient(ellipse 45% 55% at 40% 70%, ${colors.d}, transparent 60%)`,
                     filter: "blur(100px)",
-                    animation: "drift4 22s ease-in-out infinite",
+                    animation: "drift4 22s ease-in-out infinite -10s",
                   }}
                 />
                 {/* Floating sparkles */}
@@ -567,10 +567,6 @@ export default function ProfileContent() {
             );
           })()}
           <style jsx>{`
-            @keyframes fadeInBg {
-              from { opacity: 0; }
-              to { opacity: 1; }
-            }
             @keyframes drift1 {
               0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
               20% { transform: translate(6%, -4%) scale(1.08) rotate(1deg); }
