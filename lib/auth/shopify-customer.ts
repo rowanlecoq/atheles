@@ -256,9 +256,6 @@ export async function createCustomerAccount(
 ): Promise<{ success: boolean; error?: string }> {
   if (!endpoint) return { success: false, error: "store not configured" };
 
-  const tags: string[] = [];
-  if (dob) tags.push(`dob:${dob}`);
-
   const data = await shopifyCustomerFetch<{
     customerCreate: {
       customer: { id: string } | null;
@@ -278,7 +275,6 @@ export async function createCustomerAccount(
         firstName: firstName || undefined,
         lastName: lastName || undefined,
         acceptsMarketing: acceptsMarketing || false,
-        ...(tags.length > 0 ? { tags } : {}),
       },
     },
   );
@@ -290,6 +286,12 @@ export async function createCustomerAccount(
       error: errors[0]?.message || "failed to create account",
     };
   }
+
+  // Set DOB via Admin API tags (Storefront API doesn't support tags)
+  if (dob) {
+    updateCustomerTag(email, "dob", dob).catch(() => {});
+  }
+
   return { success: true };
 }
 
