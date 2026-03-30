@@ -86,7 +86,29 @@ export function ThemeBackground() {
     // Listen for profile page theme changes (cache is already updated when this fires)
     const handleChange = () => applyFromCache();
     window.addEventListener("theme-changed", handleChange);
-    return () => window.removeEventListener("theme-changed", handleChange);
+
+    // Re-sync from server when tab regains focus (cross-device sync)
+    const handleVisibility = () => {
+      if (document.visibilityState !== "visible") return;
+      if (!document.cookie.includes("atheles-logged-in=1")) return;
+      fetch("/api/auth/session")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data?.user) {
+            try {
+              sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+            } catch {}
+            applyFromCache();
+          }
+        })
+        .catch(() => {});
+    };
+    document.addEventListener("visibilitychange", handleVisibility);
+
+    return () => {
+      window.removeEventListener("theme-changed", handleChange);
+      document.removeEventListener("visibilitychange", handleVisibility);
+    };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
