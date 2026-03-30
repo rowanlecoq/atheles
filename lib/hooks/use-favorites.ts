@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useRef } from "react";
 
 const STORAGE_KEY = "atheles-favorites";
 
@@ -16,15 +16,25 @@ function getStoredFavorites(): string[] {
 
 export function useFavorites() {
   const [favorites, setFavorites] = useState<string[]>([]);
+  const favoritesRef = useRef(favorites);
 
   useEffect(() => {
-    setFavorites(getStoredFavorites());
+    const stored = getStoredFavorites();
+    setFavorites(stored);
+    favoritesRef.current = stored;
   }, []);
 
+  // Keep ref in sync
+  useEffect(() => {
+    favoritesRef.current = favorites;
+  }, [favorites]);
+
   const persist = useCallback((next: string[]) => {
+    favoritesRef.current = next;
     setFavorites(next);
     try {
       localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
+      window.dispatchEvent(new Event("favorites-changed"));
     } catch {
       // storage full or unavailable
     }
@@ -32,33 +42,46 @@ export function useFavorites() {
 
   const addFavorite = useCallback(
     (handle: string) => {
-      persist([...new Set([...favorites, handle])]);
+      const current = favoritesRef.current;
+      if (current.includes(handle)) return;
+      persist([...current, handle]);
     },
-    [favorites, persist],
+    [persist],
   );
 
   const removeFavorite = useCallback(
     (handle: string) => {
-      persist(favorites.filter((h) => h !== handle));
+      persist(favoritesRef.current.filter((h) => h !== handle));
     },
-    [favorites, persist],
+    [persist],
   );
 
   const toggleFavorite = useCallback(
     (handle: string) => {
-      if (favorites.includes(handle)) {
+      if (favoritesRef.current.includes(handle)) {
         removeFavorite(handle);
       } else {
         addFavorite(handle);
       }
     },
-    [favorites, addFavorite, removeFavorite],
+    [addFavorite, removeFavorite],
   );
 
   const isFavorite = useCallback(
     (handle: string) => favorites.includes(handle),
     [favorites],
   );
+
+  // Listen for changes from other components
+  useEffect(() => {
+    const handleChange = () => {
+      const stored = getStoredFavorites();
+      setFavorites(stored);
+      favoritesRef.current = stored;
+    };
+    window.addEventListener("favorites-changed", handleChange);
+    return () => window.removeEventListener("favorites-changed", handleChange);
+  }, []);
 
   return {
     favorites,
