@@ -17,16 +17,27 @@ function PathFilterListItem({ item }: { item: PathFilterItemType }) {
   newParams.delete("q");
 
   return (
-    <li className="mt-1 flex text-white" key={item.title}>
+    <li key={item.title}>
       <DynamicTag
         href={createUrl(item.path, newParams)}
         className={clsx(
-          "tap-target inline-flex min-h-[44px] w-full items-center py-2 text-sm underline-offset-4 hover:text-brand-gold hover:underline",
-          {
-            "text-brand-gold underline underline-offset-4": active,
-          },
+          "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+          active
+            ? "bg-brand-gold/10 text-brand-gold"
+            : "text-white hover:bg-brand-dark-gold/10 hover:text-brand-gold",
         )}
       >
+        {/* Radio dot */}
+        <span
+          className={clsx(
+            "flex h-4 w-4 flex-none items-center justify-center rounded-full border",
+            active
+              ? "border-brand-gold"
+              : "border-brand-dark-gold/40",
+          )}
+        >
+          {active && <span className="h-2 w-2 rounded-full bg-brand-gold" />}
+        </span>
         {item.title}
       </DynamicTag>
     </li>
@@ -48,17 +59,28 @@ function SortFilterListItem({ item }: { item: SortFilterItemType }) {
   const DynamicTag = active ? "p" : Link;
 
   return (
-    <li className="mt-1 flex text-sm text-white" key={item.title}>
+    <li key={item.title}>
       <DynamicTag
         prefetch={!active ? false : undefined}
         href={href}
         className={clsx(
-          "tap-target inline-flex min-h-[44px] w-full items-center py-2 hover:text-brand-gold hover:underline hover:underline-offset-4",
-          {
-            "text-brand-gold underline underline-offset-4": active,
-          },
+          "flex w-full items-center gap-3 rounded-md px-3 py-2.5 text-sm transition-colors",
+          active
+            ? "bg-brand-gold/10 text-brand-gold"
+            : "text-white hover:bg-brand-dark-gold/10 hover:text-brand-gold",
         )}
       >
+        {/* Radio dot */}
+        <span
+          className={clsx(
+            "flex h-4 w-4 flex-none items-center justify-center rounded-full border",
+            active
+              ? "border-brand-gold"
+              : "border-brand-dark-gold/40",
+          )}
+        >
+          {active && <span className="h-2 w-2 rounded-full bg-brand-gold" />}
+        </span>
         {item.title}
       </DynamicTag>
     </li>

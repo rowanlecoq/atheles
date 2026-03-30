@@ -1,5 +1,8 @@
+"use client";
+
+import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { SortFilterItem } from "lib/constants";
-import { Suspense } from "react";
+import { Suspense, useState } from "react";
 import FilterItemDropdown from "./dropdown";
 import { FilterItem } from "./item";
 
@@ -16,6 +19,42 @@ function FilterItemList({ list }: { list: ListItem[] }) {
   );
 }
 
+function CollapsibleSection({
+  title,
+  children,
+  defaultOpen = true,
+}: {
+  title: string;
+  children: React.ReactNode;
+  defaultOpen?: boolean;
+}) {
+  const [open, setOpen] = useState(defaultOpen);
+
+  return (
+    <div className="border-b border-brand-dark-gold/15 pb-3">
+      <button
+        type="button"
+        onClick={() => setOpen(!open)}
+        className="flex w-full items-center justify-between py-3 text-left"
+      >
+        <span className="text-xs font-medium uppercase tracking-wider text-brand-pale-gold">
+          {title}
+        </span>
+        <ChevronDownIcon
+          className={`h-4 w-4 text-brand-grey transition-transform duration-200 ${
+            open ? "rotate-180" : ""
+          }`}
+        />
+      </button>
+      {open && (
+        <ul className="space-y-0.5 pb-1">
+          {children}
+        </ul>
+      )}
+    </div>
+  );
+}
+
 export default function FilterList({
   list,
   title,
@@ -24,24 +63,22 @@ export default function FilterList({
   title?: string;
 }) {
   return (
-    <>
-      <nav>
-        {title ? (
-          <h3 className="hidden text-xs text-brand-grey uppercase tracking-wider md:block">
-            {title}
-          </h3>
-        ) : null}
-        <ul className="hidden md:block">
+    <nav>
+      {/* Desktop: collapsible section */}
+      <div className="hidden md:block">
+        <CollapsibleSection title={title || "Filter"}>
           <Suspense fallback={null}>
             <FilterItemList list={list} />
           </Suspense>
-        </ul>
-        <ul className="md:hidden">
-          <Suspense fallback={null}>
-            <FilterItemDropdown list={list} />
-          </Suspense>
-        </ul>
-      </nav>
-    </>
+        </CollapsibleSection>
+      </div>
+
+      {/* Mobile: dropdown */}
+      <div className="md:hidden">
+        <Suspense fallback={null}>
+          <FilterItemDropdown list={list} />
+        </Suspense>
+      </div>
+    </nav>
   );
 }
