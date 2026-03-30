@@ -325,66 +325,93 @@ export default function CartModal() {
                         </p>
                       </div>
                       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        {favProducts.map((p) => (
+                        {favProducts.map((p) => {
+                          const canAdd = !!p.firstVariantId && !!p.availableForSale;
+                          return (
                           <div
                             key={p.handle}
                             className="group flex w-[130px] flex-none flex-col rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-2 transition-colors hover:border-brand-gold/30"
                           >
-                            <Link href={`/product/${p.handle}`} onClick={closeCart}>
-                              <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
-                                {p.featuredImage?.url ? (
-                                  <Image
-                                    src={p.featuredImage.url}
-                                    alt={p.title}
-                                    fill
-                                    className="object-cover"
-                                    sizes="130px"
-                                  />
-                                ) : (
-                                  <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
-                                    <span className="text-[8px] text-brand-grey">ATHELES</span>
+                            {/* Image: adds to cart if available, otherwise links to page */}
+                            {canAdd ? (
+                              <button
+                                type="button"
+                                disabled={addingFav === p.handle}
+                                onClick={async () => {
+                                  if (!p.firstVariantId) return;
+                                  setAddingFav(p.handle);
+                                  try {
+                                    const { addItem } = await import("components/cart/actions");
+                                    await addItem(null, p.firstVariantId);
+                                  } catch {}
+                                  setAddingFav(null);
+                                }}
+                                className="text-left"
+                              >
+                                <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
+                                  {p.featuredImage?.url ? (
+                                    <Image
+                                      src={p.featuredImage.url}
+                                      alt={p.title}
+                                      fill
+                                      className="object-cover"
+                                      sizes="130px"
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
+                                      <span className="text-[8px] text-brand-grey">ATHELES</span>
+                                    </div>
+                                  )}
+                                  {/* Add overlay */}
+                                  <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/0 transition-colors group-hover:bg-brand-dark/40">
+                                    <span className="text-xs font-medium uppercase tracking-wider text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                      {addingFav === p.handle ? "adding..." : "+ add"}
+                                    </span>
                                   </div>
-                                )}
-                              </div>
-                              <p className="truncate text-[10px] text-white group-hover:text-brand-gold">
-                                {p.title}
-                              </p>
-                            </Link>
+                                </div>
+                                <p className="truncate text-[10px] text-white group-hover:text-brand-gold">
+                                  {p.title}
+                                </p>
+                              </button>
+                            ) : (
+                              <Link href={`/product/${p.handle}`} onClick={closeCart}>
+                                <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
+                                  {p.featuredImage?.url ? (
+                                    <Image
+                                      src={p.featuredImage.url}
+                                      alt={p.title}
+                                      fill
+                                      className="object-cover"
+                                      sizes="130px"
+                                    />
+                                  ) : (
+                                    <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
+                                      <span className="text-[8px] text-brand-grey">ATHELES</span>
+                                    </div>
+                                  )}
+                                </div>
+                                <p className="truncate text-[10px] text-white group-hover:text-brand-gold">
+                                  {p.title}
+                                </p>
+                              </Link>
+                            )}
                             <div className="mt-1 flex items-center justify-between">
                               <Price
                                 className="text-[10px] text-brand-grey"
                                 amount={p.priceRange.maxVariantPrice.amount}
                                 currencyCode={p.priceRange.maxVariantPrice.currencyCode}
                               />
-                              {p.firstVariantId && p.availableForSale ? (
-                                <button
-                                  type="button"
-                                  disabled={addingFav === p.handle}
-                                  onClick={async () => {
-                                    if (!p.firstVariantId) return;
-                                    setAddingFav(p.handle);
-                                    try {
-                                      const { addItem } = await import("components/cart/actions");
-                                      await addItem(null, p.firstVariantId);
-                                    } catch {}
-                                    setAddingFav(null);
-                                  }}
-                                  className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold disabled:opacity-50"
-                                >
-                                  {addingFav === p.handle ? "adding..." : "+ add"}
-                                </button>
-                              ) : (
-                                <Link
-                                  href={`/product/${p.handle}`}
-                                  onClick={closeCart}
-                                  className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold"
-                                >
-                                  view
-                                </Link>
-                              )}
+                              <Link
+                                href={`/product/${p.handle}`}
+                                onClick={closeCart}
+                                className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold"
+                              >
+                                view
+                              </Link>
                             </div>
                           </div>
-                        ))}
+                          );
+                        })}
                       </div>
                     </div>
                   )}
