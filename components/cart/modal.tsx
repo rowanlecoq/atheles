@@ -362,7 +362,7 @@ export default function CartModal() {
                                 amount={p.priceRange.maxVariantPrice.amount}
                                 currencyCode={p.priceRange.maxVariantPrice.currencyCode}
                               />
-                              {p.firstVariantId && p.availableForSale && (
+                              {p.firstVariantId && p.availableForSale ? (
                                 <button
                                   type="button"
                                   disabled={addingFav === p.handle}
@@ -379,6 +379,14 @@ export default function CartModal() {
                                 >
                                   {addingFav === p.handle ? "adding..." : "+ add"}
                                 </button>
+                              ) : (
+                                <Link
+                                  href={`/product/${p.handle}`}
+                                  onClick={closeCart}
+                                  className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold"
+                                >
+                                  view
+                                </Link>
                               )}
                             </div>
                           </div>
@@ -484,11 +492,15 @@ export default function CartModal() {
                     </div>
                     <div className="mb-3 flex items-center justify-between border-t border-brand-dark-gold/15 pt-2">
                       <p className="font-medium text-white">Total</p>
-                      <Price
-                        className="text-right text-base font-medium text-brand-gold"
-                        amount={cart.cost.totalAmount.amount}
-                        currencyCode={cart.cost.totalAmount.currencyCode}
-                      />
+                      {discountApplied && discountPercent ? (
+                        <p className="text-right text-xs text-brand-grey">Calculated at checkout</p>
+                      ) : (
+                        <Price
+                          className="text-right text-base font-medium text-brand-gold"
+                          amount={cart.cost.totalAmount.amount}
+                          currencyCode={cart.cost.totalAmount.currencyCode}
+                        />
+                      )}
                     </div>
                   </div>
 
