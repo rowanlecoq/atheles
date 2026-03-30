@@ -18,6 +18,7 @@ type User = {
   totalSpent: string;
   dob: string | null;
   theme: string | null;
+  discountCode: string | null;
 };
 
 const TIERS = [
@@ -38,7 +39,7 @@ const TIERS = [
     barGradient: "from-gray-500 via-gray-400 to-gray-300",
     titleGradient: "from-gray-300 via-gray-200 to-white",
     perks: ["10% monthly discount code"],
-    discountCode: "monthlysilver10",
+    discountCode: null as string | null,
     discountPercent: 10,
   },
   {
@@ -48,7 +49,7 @@ const TIERS = [
     barGradient: "from-yellow-700 via-yellow-500 to-amber-300",
     titleGradient: "from-yellow-400 via-yellow-300 to-amber-200",
     perks: ["early access", "15% monthly discount code", "birthday rewards"],
-    discountCode: "monthlygoldOGseason",
+    discountCode: null as string | null,
     discountPercent: 15,
   },
   {
@@ -63,7 +64,7 @@ const TIERS = [
       "birthday rewards",
       "free shipping",
     ],
-    discountCode: "monthlyplatinumOGseason",
+    discountCode: null as string | null,
     discountPercent: 18,
   },
   {
@@ -78,7 +79,7 @@ const TIERS = [
       "free shipping",
       "birthday rewards",
     ],
-    discountCode: "monthlychampionOGseason",
+    discountCode: null as string | null,
     discountPercent: 20,
   },
 ];
@@ -963,7 +964,7 @@ export default function ProfileContent() {
       </div>
 
       {/* Monthly Discount Code */}
-      {tier.discountCode && (
+      {user.discountCode && tier.discountPercent && (
         <div className="mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
           <div className="p-5">
             <div className="mb-3 flex items-center gap-2">
@@ -986,12 +987,12 @@ export default function ProfileContent() {
             {discountRevealed ? (
               <div className="flex items-center gap-3">
                 <div className="flex-1 rounded-lg border border-brand-dark-gold/30 bg-brand-dark-gold/10 px-4 py-3 text-center font-mono text-lg tracking-wider text-brand-gold">
-                  {tier.discountCode}
+                  {user.discountCode}
                 </div>
                 <button
                   type="button"
                   onClick={() => {
-                    navigator.clipboard.writeText(tier.discountCode!).catch(() => {});
+                    navigator.clipboard.writeText(user.discountCode!).catch(() => {});
                     setSaveMessage("code copied!");
                     setTimeout(() => setSaveMessage(""), 2000);
                   }}

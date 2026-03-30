@@ -43,6 +43,14 @@ export async function GET() {
     const tierName = getTierName(points);
     updateCustomerTier(customer.email, tierName).catch(() => {});
 
+    // Get discount code for the customer's tier from env vars
+    const discountCodes: Record<string, string | undefined> = {
+      silver: process.env.DISCOUNT_SILVER,
+      gold: process.env.DISCOUNT_GOLD,
+      platinum: process.env.DISCOUNT_PLATINUM,
+      champion: process.env.DISCOUNT_CHAMPION,
+    };
+
     return NextResponse.json({
       user: {
         id: customer.id,
@@ -57,6 +65,7 @@ export async function GET() {
         totalSpent,
         dob: customer.dob,
         theme: customer.theme,
+        discountCode: discountCodes[tierName] || null,
       },
     });
   } catch {
