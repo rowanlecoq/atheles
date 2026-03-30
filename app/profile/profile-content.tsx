@@ -151,6 +151,8 @@ export default function ProfileContent() {
   const router = useRouter();
 
   useEffect(() => {
+    const prefsLoaded = { current: false };
+
     const applyUser = (u: User) => {
       setUser(u);
       setFirstName(u.firstName || "");
@@ -163,10 +165,14 @@ export default function ProfileContent() {
         setDobMonth(m ? String(parseInt(m)) : "");
         setDobDay(d ? String(parseInt(d)) : "");
       }
-      // Show local avatar instantly, then sync from server
+
+      // Only load preferences (avatar, theme) once
+      if (prefsLoaded.current) return;
+      prefsLoaded.current = true;
+
+      // Avatar: show local, sync from server
       const stored = localStorage.getItem(`avatar-${u.id}`);
       if (stored) setAvatar(stored);
-      // Always fetch latest from server to stay in sync across devices
       fetch("/api/auth/avatar")
         .then((r) => r.json())
         .then((d) => {
@@ -174,13 +180,13 @@ export default function ProfileContent() {
             setAvatar(d.avatar);
             try { localStorage.setItem(`avatar-${u.id}`, d.avatar); } catch {}
           } else if (!d.avatar && stored) {
-            // Server has no avatar but local does — was removed on another device
             setAvatar(null);
             localStorage.removeItem(`avatar-${u.id}`);
           }
         })
         .catch(() => {});
-      // Load theme: localStorage is source of truth, server is fallback for new devices
+
+      // Theme: localStorage is truth, server is fallback
       const localBg = localStorage.getItem(`profile-bg-${u.id}`);
       if (localBg) {
         setProfileBg(localBg);
@@ -1202,7 +1208,7 @@ export default function ProfileContent() {
                     body: JSON.stringify({ theme: theme.id }),
                   }).catch(() => {});
                 }
-              }}}
+              }}
               className={`flex flex-col items-center gap-1.5 rounded-lg p-2 transition-all ${
                 profileBg === theme.id
                   ? "ring-2 ring-brand-gold"
