@@ -1421,7 +1421,7 @@ export default function ProfileContent() {
             const reader = new FileReader();
             reader.onload = () => {
               const img = new window.Image();
-              img.onload = () => {
+              img.onload = async () => {
                 const canvas = document.createElement("canvas");
                 const maxSize = 1920;
                 let w = img.width;
@@ -1445,32 +1445,25 @@ export default function ProfileContent() {
                 setCustomBgImage(dataUrl);
                 setProfileBg("custom");
 
-                // Save locally immediately so refresh works
+                // Upload to Vercel Blob and wait for it to complete
                 try {
-                  localStorage.removeItem(`profile-bg-img-${user.id}`);
-                  localStorage.setItem(`profile-bg-img-${user.id}`, dataUrl);
-                  localStorage.setItem(`profile-bg-${user.id}`, "custom");
+                  const res = await fetch("/api/auth/background", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ background: dataUrl }),
+                  });
+                  const d = await res.json();
+                  if (d.success && d.url) {
+                    setCustomBgImage(d.url);
+                    try {
+                      localStorage.removeItem(`profile-bg-img-${user.id}`);
+                      localStorage.setItem(`profile-bg-img-${user.id}`, d.url);
+                      localStorage.setItem(`profile-bg-${user.id}`, "custom");
+                    } catch {}
+                  }
                 } catch {}
 
-                // Upload to Vercel Blob (replaces dataUrl with permanent URL)
-                fetch("/api/auth/background", {
-                  method: "POST",
-                  headers: { "Content-Type": "application/json" },
-                  body: JSON.stringify({ background: dataUrl }),
-                })
-                  .then((r) => r.json())
-                  .then((d) => {
-                    if (d.success && d.url) {
-                      setCustomBgImage(d.url);
-                      try {
-                        localStorage.removeItem(`profile-bg-img-${user.id}`);
-                        localStorage.setItem(`profile-bg-img-${user.id}`, d.url);
-                      } catch {}
-                    }
-                  })
-                  .catch(() => {})
-                  .finally(() => setUploadingBg(false));
-
+                // Update theme on server
                 try {
                   const cached = sessionStorage.getItem("atheles-session");
                   if (cached) {
@@ -1479,11 +1472,13 @@ export default function ProfileContent() {
                     sessionStorage.setItem("atheles-session", JSON.stringify(u));
                   }
                 } catch {}
-                fetch("/api/auth/update-theme", {
+                await fetch("/api/auth/update-theme", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
                   body: JSON.stringify({ theme: "custom" }),
                 }).catch(() => {});
+
+                setUploadingBg(false);
               };
               img.src = reader.result as string;
             };
