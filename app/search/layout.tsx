@@ -1,6 +1,7 @@
 import Footer from "components/layout/footer";
 import Collections from "components/layout/search/collections";
 import FilterList from "components/layout/search/filter";
+import { ClearFilters } from "components/layout/search/clear-filters";
 import SearchPageHeader from "components/layout/search/page-header";
 import { sorting } from "lib/constants";
 import ChildrenWrapper from "./children-wrapper";
@@ -31,11 +32,14 @@ export default function SearchLayout({
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[180px_1fr]">
           {/* Desktop sidebar: filter & sort */}
           <div className="hidden md:block">
-            <div className="sticky top-20">
-              <div className="mb-2 flex items-center justify-between border-b border-brand-dark-gold/20 pb-3">
+            <div className="sticky top-20 pr-4">
+              <div className="mb-2 flex items-center justify-between pb-3">
                 <h2 className="text-sm font-medium uppercase tracking-wider text-brand-pale-gold">
                   filter & sort
                 </h2>
+                <Suspense fallback={null}>
+                  <ClearFilters />
+                </Suspense>
               </div>
               <Collections />
               <FilterList list={sorting} title="Sort by" />
