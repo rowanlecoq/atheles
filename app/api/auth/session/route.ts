@@ -21,6 +21,12 @@ export async function GET() {
       return NextResponse.json({ user: null });
     }
 
+    // Admin points override
+    const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase());
+    const totalSpent = adminEmails.includes(customer.email.toLowerCase())
+      ? "1100.00"
+      : customer.totalSpent;
+
     return NextResponse.json({
       user: {
         id: customer.id,
@@ -32,9 +38,9 @@ export async function GET() {
         acceptsMarketing: customer.acceptsMarketing,
         createdAt: customer.createdAt,
         numberOfOrders: customer.numberOfOrders,
-        totalSpent: customer.totalSpent,
+        totalSpent,
         dob: customer.dob,
-            theme: customer.theme,
+        theme: customer.theme,
       },
     });
   } catch {
