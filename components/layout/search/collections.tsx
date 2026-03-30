@@ -1,33 +1,24 @@
-import clsx from "clsx";
 import { Suspense } from "react";
 
 import { getCollections } from "lib/shopify";
-import FilterList from "./filter";
+import { CollectionFilter } from "./filter";
 
 async function CollectionList() {
   const collections = await getCollections();
-  return <FilterList list={collections} title="Collections" />;
+  return <CollectionFilter list={collections} />;
 }
-
-const skeleton = "mb-3 h-4 w-5/6 animate-pulse rounded-sm";
-const activeAndTitles = "bg-brand-dark-gold/40";
-const items = "bg-brand-medium-grey/40";
 
 export default function Collections() {
   return (
     <Suspense
       fallback={
-        <div className="col-span-2 hidden h-[400px] w-full flex-none py-4 lg:block">
-          <div className={clsx(skeleton, activeAndTitles)} />
-          <div className={clsx(skeleton, activeAndTitles)} />
-          <div className={clsx(skeleton, items)} />
-          <div className={clsx(skeleton, items)} />
-          <div className={clsx(skeleton, items)} />
-          <div className={clsx(skeleton, items)} />
-          <div className={clsx(skeleton, items)} />
-          <div className={clsx(skeleton, items)} />
-          <div className={clsx(skeleton, items)} />
-          <div className={clsx(skeleton, items)} />
+        <div className="py-4">
+          <div className="mb-3 h-5 w-24 animate-pulse rounded bg-brand-dark-gold/30" />
+          <div className="space-y-2">
+            <div className="h-10 w-full animate-pulse rounded-lg bg-brand-dark-gold/15" />
+            <div className="h-10 w-full animate-pulse rounded-lg bg-brand-dark-gold/15" />
+            <div className="h-10 w-full animate-pulse rounded-lg bg-brand-dark-gold/15" />
+          </div>
         </div>
       }
     >

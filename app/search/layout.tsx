@@ -29,9 +29,14 @@ export default function SearchLayout({
       {/* Main content area */}
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-8 text-white">
         <div className="grid grid-cols-1 gap-6 md:grid-cols-[180px_1fr]">
-          {/* Desktop sidebar: collections + sort */}
+          {/* Desktop sidebar: filter & sort */}
           <div className="hidden md:block">
-            <div className="sticky top-20 space-y-1">
+            <div className="sticky top-20">
+              <div className="mb-2 flex items-center justify-between border-b border-brand-dark-gold/20 pb-3">
+                <h2 className="text-sm font-medium uppercase tracking-wider text-brand-pale-gold">
+                  filter & sort
+                </h2>
+              </div>
               <Collections />
               <FilterList list={sorting} title="Sort by" />
             </div>
