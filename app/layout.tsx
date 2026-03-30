@@ -6,6 +6,7 @@ import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ScrollProgress } from "components/scroll-progress";
+import { ThemeBackground } from "components/theme-background";
 import { getCart } from "lib/shopify";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
@@ -57,7 +58,8 @@ export default async function RootLayout({
             <ScrollProgress />
             <KonamiLightning />
             <Navbar />
-            <main className="w-full overflow-x-hidden">
+            <ThemeBackground />
+            <main className="relative z-[1] w-full overflow-x-hidden">
               <PageTransition>{children}</PageTransition>
               <Toaster closeButton />
             </main>

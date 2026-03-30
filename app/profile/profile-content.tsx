@@ -18,6 +18,7 @@ type User = {
   totalSpent: string;
   dob: string | null;
   theme: string | null;
+  globalTheme: boolean;
   discountCode: string | null;
 };
 
@@ -158,6 +159,7 @@ export default function ProfileContent() {
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
   const [discountRevealed, setDiscountRevealed] = useState(false);
   const [profileBg, setProfileBg] = useState("none");
+  const [globalThemeOn, setGlobalThemeOn] = useState(false);
   const [customBgImage, setCustomBgImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bgFileInputRef = useRef<HTMLInputElement>(null);
@@ -196,6 +198,7 @@ export default function ProfileContent() {
       // Theme: server is source of truth
       const serverTheme = u.theme || "none";
       setProfileBg(serverTheme);
+      setGlobalThemeOn(!!u.globalTheme);
 
       // Custom background: always fetch so it's ready if user switches to custom
       fetch("/api/auth/background")
@@ -1334,6 +1337,7 @@ export default function ProfileContent() {
                       sessionStorage.setItem("atheles-session", JSON.stringify(u));
                     }
                   } catch {}
+                  window.dispatchEvent(new Event("theme-changed"));
                   fetch("/api/auth/update-theme", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -1363,6 +1367,7 @@ export default function ProfileContent() {
                 // Has a saved custom image — apply it
                 setProfileBg("custom");
                 if (user) {
+                  window.dispatchEvent(new Event("theme-changed"));
                   fetch("/api/auth/update-theme", {
                     method: "POST",
                     headers: { "Content-Type": "application/json" },
@@ -1477,6 +1482,54 @@ export default function ProfileContent() {
           }}
           className="hidden"
         />
+
+        {/* Global theme toggle */}
+        {profileBg !== "none" && (
+          <div className="mt-4 flex items-center justify-between rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-4 py-3">
+            <div>
+              <p className="text-sm text-white">use across entire store</p>
+              <p className="text-xs text-brand-grey">
+                {globalThemeOn
+                  ? "theme is visible on all pages"
+                  : "theme is only on your profile"}
+              </p>
+            </div>
+            <button
+              type="button"
+              onClick={() => {
+                const next = !globalThemeOn;
+                setGlobalThemeOn(next);
+                // Update cached session
+                try {
+                  const cached = sessionStorage.getItem("atheles-session");
+                  if (cached) {
+                    const u = JSON.parse(cached);
+                    u.globalTheme = next;
+                    sessionStorage.setItem("atheles-session", JSON.stringify(u));
+                  }
+                } catch {}
+                // Notify other components
+                window.dispatchEvent(new Event("theme-changed"));
+                // Save to server
+                fetch("/api/auth/update-theme", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ globalTheme: next }),
+                }).catch(() => {});
+              }}
+              className={`relative h-6 w-11 flex-none rounded-full transition-colors ${
+                globalThemeOn ? "bg-brand-gold" : "bg-brand-dark-gold/30"
+              }`}
+              aria-label="Toggle global theme"
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                  globalThemeOn ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
+          </div>
+        )}
       </div>
 
       {/* Quick Links */}

@@ -519,6 +519,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   totalSpent: string;
   dob: string | null;
   theme: string | null;
+  globalTheme: boolean;
 } | null> {
   if (!endpoint) return null;
 
@@ -561,6 +562,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   // Fetch customer tags via Admin API (Storefront API doesn't expose tags)
   let dob: string | null = null;
   let theme: string | null = null;
+  let globalTheme = false;
   if (adminEndpoint && adminToken) {
     try {
       const adminCustomer = await shopifyAdminFetch<{
@@ -578,6 +580,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       dob = dobTag ? dobTag.replace("dob:", "") : null;
       const themeTag = tags.find((t) => t.startsWith("theme:"));
       theme = themeTag ? themeTag.replace("theme:", "") : null;
+      globalTheme = tags.includes("globaltheme:on");
     } catch {
       // Tags not available
     }
@@ -596,5 +599,6 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     totalSpent,
     dob,
     theme,
+    globalTheme,
   };
 }

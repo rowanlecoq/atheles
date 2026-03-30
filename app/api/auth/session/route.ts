@@ -65,6 +65,7 @@ export async function GET() {
         totalSpent,
         dob: customer.dob,
         theme: customer.theme,
+        globalTheme: customer.globalTheme,
         discountCode: discountCodes[tierName] || null,
       },
     });

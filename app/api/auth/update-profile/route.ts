@@ -109,6 +109,7 @@ export async function POST(request: Request) {
         totalSpent,
         dob: customer.dob,
         theme: customer.theme,
+        globalTheme: customer.globalTheme,
         discountCode: discountCodes[tierName] || null,
       },
     });

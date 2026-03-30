@@ -16,14 +16,7 @@ export async function POST(request: Request) {
       );
     }
 
-    const { theme } = await request.json();
-
-    if (!theme) {
-      return NextResponse.json(
-        { success: false, error: "theme is required" },
-        { status: 400 },
-      );
-    }
+    const { theme, globalTheme } = await request.json();
 
     const customer = await getCustomerByToken(token);
     if (!customer) {
@@ -33,7 +26,13 @@ export async function POST(request: Request) {
       );
     }
 
-    await updateCustomerTag(customer.email, "theme", theme);
+    if (theme) {
+      await updateCustomerTag(customer.email, "theme", theme);
+    }
+
+    if (globalTheme !== undefined) {
+      await updateCustomerTag(customer.email, "globaltheme", globalTheme ? "on" : "off");
+    }
 
     return NextResponse.json({ success: true });
   } catch {
