@@ -104,6 +104,14 @@ export async function POST(request: Request) {
       addRandomSuffix: false,
     });
 
+    // Save blob URL to customer metafield for cross-device sync
+    await updateCustomerMetafield(
+      customer.email,
+      "atheles",
+      "custom_bg",
+      blob.url,
+    );
+
     return NextResponse.json({ success: true, url: blob.url });
   } catch {
     return NextResponse.json(

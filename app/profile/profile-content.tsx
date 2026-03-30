@@ -182,42 +182,28 @@ export default function ProfileContent() {
       if (prefsLoaded.current) return;
       prefsLoaded.current = true;
 
-      // Avatar: show cached URL, sync from server
-      const stored = localStorage.getItem(`avatar-${u.id}`);
-      if (stored) setAvatar(stored);
+      // Avatar: fetch from server (blob storage)
       fetch("/api/auth/avatar")
         .then((r) => r.json())
         .then((d) => {
-          if (d.avatar && d.avatar !== stored) {
+          if (d.avatar) {
             setAvatar(d.avatar);
-            try { localStorage.setItem(`avatar-${u.id}`, d.avatar); } catch {}
-          } else if (!d.avatar && stored) {
-            setAvatar(null);
-            localStorage.removeItem(`avatar-${u.id}`);
           }
         })
         .catch(() => {});
 
-      // Theme: localStorage is truth, server is fallback
-      const localBg = localStorage.getItem(`profile-bg-${u.id}`);
-      if (localBg) {
-        setProfileBg(localBg);
-      } else if (u.theme) {
+      // Theme: server is source of truth
+      if (u.theme) {
         setProfileBg(u.theme);
-        localStorage.setItem(`profile-bg-${u.id}`, u.theme);
       }
-      // Custom background: show cached URL, sync from server
-      const customBg = localStorage.getItem(`profile-bg-img-${u.id}`);
-      if (customBg) setCustomBgImage(customBg);
+
+      // Custom background: fetch from server (blob storage)
       fetch("/api/auth/background")
         .then((r) => r.json())
         .then((d) => {
-          if (d.background && d.background !== customBg) {
+          if (d.background) {
             setCustomBgImage(d.background);
-            try { localStorage.setItem(`profile-bg-img-${u.id}`, d.background); } catch {}
-            if (!localBg && u.theme === "custom") {
-              setProfileBg("custom");
-            }
+            setProfileBg("custom");
           }
         })
         .catch(() => {});
@@ -289,40 +275,34 @@ export default function ProfileContent() {
     e.target.value = "";
   };
 
-  const handleCropSave = (croppedDataUrl: string) => {
+  const handleCropSave = async (croppedDataUrl: string) => {
     if (!user) return;
     setAvatar(croppedDataUrl);
     setCropSrc(null);
-    // Upload to Vercel Blob, then cache the returned URL
-    fetch("/api/auth/avatar", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ avatar: croppedDataUrl }),
-    })
-      .then((r) => r.json())
-      .then((d) => {
-        if (d.success && d.url) {
-          setAvatar(d.url);
-          try { localStorage.setItem(`avatar-${user.id}`, d.url); } catch {}
-          window.dispatchEvent(new Event("avatar-changed"));
-        }
-      })
-      .catch(() => {
-        try { localStorage.setItem(`avatar-${user.id}`, croppedDataUrl); } catch {}
-        window.dispatchEvent(new Event("avatar-changed"));
+    // Upload to Vercel Blob
+    try {
+      const res = await fetch("/api/auth/avatar", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ avatar: croppedDataUrl }),
       });
+      const d = await res.json();
+      if (d.success && d.url) {
+        setAvatar(d.url);
+      }
+    } catch {}
+    window.dispatchEvent(new Event("avatar-changed"));
   };
 
   const handleCropCancel = () => {
     setCropSrc(null);
   };
 
-  const handleRemoveAvatar = () => {
+  const handleRemoveAvatar = async () => {
     if (!user) return;
     setAvatar(null);
-    localStorage.removeItem(`avatar-${user.id}`);
     window.dispatchEvent(new Event("avatar-changed"));
-    fetch("/api/auth/avatar", {
+    await fetch("/api/auth/avatar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ avatar: null }),
