@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 import ImageCropModal from "components/image-crop-modal";
 
 type User = {
@@ -484,15 +485,19 @@ export default function ProfileContent() {
 
   return (
     <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16">
-      {/* Background layer */}
-      {profileBg === "custom" && customBgImage ? (
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={customBgImage} alt="" className="h-full w-full object-cover opacity-10" />
-          <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/70 to-brand-dark" />
-        </div>
+      {/* Background layer — portaled to body so it's outside PageTransition */}
+      {typeof document !== "undefined" && (profileBg === "custom" && customBgImage ? (
+        createPortal(
+          <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img src={customBgImage} alt="" className="h-full w-full object-cover opacity-10" />
+            <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/70 to-brand-dark" />
+          </div>,
+          document.body,
+        )
       ) : profileBg !== "none" ? (
-        <div className="pointer-events-none fixed inset-0" style={{ overflow: "hidden", clipPath: "inset(0)" }}>
+        createPortal(
+        <div className="pointer-events-none fixed inset-0 z-0" style={{ overflow: "hidden", clipPath: "inset(0)" }}>
           {/* Flowing blob layers */}
           {(() => {
             const colors = {
@@ -594,8 +599,10 @@ export default function ProfileContent() {
               75% { transform: translate(3%, -5%) scale(1.05) rotate(0.5deg); }
             }
           `}</style>
-        </div>
-      ) : null}
+        </div>,
+        document.body,
+        )
+      ) : null)}
 
       <div className="relative">
       {/* Crop Modal */}
