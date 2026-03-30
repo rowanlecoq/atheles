@@ -46,10 +46,10 @@ export default function ActivateForm({
       <div className="w-full">
         <div className="mb-8 text-center">
           <h1 className="mb-2 font-heading text-3xl text-brand-gold sm:text-4xl">
-            activate account
+            welcome to atheles
           </h1>
           <p className="text-sm text-brand-grey">
-            enter your password to activate your account and sign in.
+            choose a password to finish setting up your account.
           </p>
         </div>
         <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8">
@@ -59,7 +59,7 @@ export default function ActivateForm({
                 htmlFor="password"
                 className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold"
               >
-                password
+                set your password
               </label>
               <div className="relative">
                 <input
@@ -117,7 +117,7 @@ export default function ActivateForm({
               disabled={loading}
               className="w-full rounded bg-brand-gold px-6 py-3 font-heading text-sm uppercase tracking-wider text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50"
             >
-              {loading ? "activating..." : "activate & sign in"}
+              {loading ? "setting up..." : "continue"}
             </button>
           </form>
         </div>
