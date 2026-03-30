@@ -564,7 +564,7 @@ export default function ProfileContent() {
             </svg>
           </button>
           <div className="flex flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
-            <div className="overflow-hidden rounded-full border-4 border-brand-gold/50 shadow-[0_0_40px_rgba(193,163,104,0.2)]">
+            <div className="overflow-hidden rounded-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={avatar}
