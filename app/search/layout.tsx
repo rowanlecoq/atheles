@@ -28,7 +28,7 @@ export default function SearchLayout({
 
       {/* Main content area */}
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-8 text-white">
-        <div className="grid grid-cols-1 gap-8 md:grid-cols-[200px_1fr]">
+        <div className="grid grid-cols-1 gap-6 md:grid-cols-[180px_1fr]">
           {/* Desktop sidebar: collections + sort */}
           <div className="hidden md:block">
             <div className="sticky top-20 space-y-1">
