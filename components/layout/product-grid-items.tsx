@@ -117,11 +117,21 @@ function ProductCard({ product }: { product: Product }) {
             className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-brand-dark via-brand-dark/95 to-transparent p-4 pt-10"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
           >
-            <div className="grid grid-cols-4 gap-2">
+            <div className={`grid gap-2 ${product.variants.length <= 4 ? "grid-cols-4" : product.variants.length === 5 ? "grid-cols-5" : "grid-cols-4"}`}>
               {product.variants.map((variant) => {
-                const size = variant.selectedOptions.find(
+                const rawSize = variant.selectedOptions.find(
                   (o) => o.name.toLowerCase() === "size",
                 )?.value || variant.title;
+                // Abbreviate for mobile
+                const sizeMap: Record<string, string> = {
+                  "Extra Small": "XS", "extra small": "XS",
+                  "Small": "S", "small": "S",
+                  "Medium": "M", "medium": "M",
+                  "Large": "L", "large": "L",
+                  "Extra Large": "XL", "extra large": "XL",
+                  "XX-Large": "XXL", "xx-large": "XXL",
+                };
+                const size = sizeMap[rawSize] || rawSize;
                 return (
                   <button
                     key={variant.id}
