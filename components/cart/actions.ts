@@ -1,6 +1,7 @@
 "use server";
 
 import { TAGS } from "lib/constants";
+import { getCustomerByToken } from "lib/auth/shopify-customer";
 import {
   addToCart,
   createCart,
@@ -13,6 +14,31 @@ import { isShopifyConfigured } from "lib/shopify/is-configured";
 import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
+
+// Tier-locked discount codes — requires at least this tier to use
+const TIER_LOCKED_CODES: Record<string, string> = {
+  silverloyalty: "silver",
+  goldloyalty: "gold",
+  platinumloyalty: "platinum",
+  championloyalty: "champion",
+};
+
+const TIER_LEVELS: Record<string, number> = {
+  bronze: 0,
+  silver: 1,
+  gold: 2,
+  platinum: 3,
+  champion: 4,
+};
+
+function getUserTierLevel(totalSpent: string): { name: string; level: number } {
+  const points = Math.floor(parseFloat(totalSpent || "0") * 50);
+  if (points >= 50000) return { name: "champion", level: 4 };
+  if (points >= 30000) return { name: "platinum", level: 3 };
+  if (points >= 15000) return { name: "gold", level: 2 };
+  if (points >= 5000) return { name: "silver", level: 1 };
+  return { name: "bronze", level: 0 };
+}
 
 export async function addItem(
   prevState: unknown,
@@ -119,17 +145,55 @@ export async function redirectToCheckout() {
 export async function applyDiscountCode(code: string): Promise<{
   success: boolean;
   applicable: boolean;
+  error?: string;
   cart?: Awaited<ReturnType<typeof getCart>>;
 }> {
   if (!isShopifyConfigured) return { success: false, applicable: false };
 
   try {
+    // Check if this is a tier-locked code
+    const codeLower = code.toLowerCase().trim();
+    const requiredTier = TIER_LOCKED_CODES[codeLower];
+
+    if (requiredTier) {
+      // Tier-locked code — verify the user has sufficient tier
+      const cookieStore = await cookies();
+      const token = cookieStore.get("atheles-auth-token")?.value;
+
+      if (!token) {
+        return { success: false, applicable: false, error: "sign in to use loyalty codes." };
+      }
+
+      const customer = await getCustomerByToken(token);
+      if (!customer) {
+        return { success: false, applicable: false, error: "sign in to use loyalty codes." };
+      }
+
+      // Check admin override
+      const adminEmails = (process.env.ADMIN_EMAILS || "").split(",").map((e) => e.trim().toLowerCase());
+      const totalSpent = adminEmails.includes(customer.email.toLowerCase())
+        ? "1100.00"
+        : customer.totalSpent;
+
+      const userTier = getUserTierLevel(totalSpent);
+      const requiredLevel = TIER_LEVELS[requiredTier] ?? 0;
+
+      if (userTier.level < requiredLevel) {
+        return {
+          success: false,
+          applicable: false,
+          error: `this code requires ${requiredTier} tier or above.`,
+        };
+      }
+    }
+
+    // Apply to Shopify cart
     const cart = await updateCartDiscountCodes([code]);
     updateTag(TAGS.cart);
 
     // Check if the code was actually applicable
     const applied = cart.discountCodes?.find(
-      (dc) => dc.code.toLowerCase() === code.toLowerCase(),
+      (dc) => dc.code.toLowerCase() === codeLower,
     );
 
     return {

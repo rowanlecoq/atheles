@@ -451,10 +451,9 @@ export default function CartModal() {
                                   const { applyDiscountCode } = await import("components/cart/actions");
                                   const result = await applyDiscountCode(discountCode.trim());
                                   if (!result.success) {
-                                    setDiscountError("failed to apply code.");
+                                    setDiscountError(result.error || "failed to apply code.");
                                   } else if (!result.applicable) {
                                     setDiscountError("invalid or expired code.");
-                                    // Remove the invalid code from cart
                                     const { removeDiscountCode } = await import("components/cart/actions");
                                     await removeDiscountCode();
                                   }
