@@ -189,27 +189,29 @@ export default function ProfileContent() {
       if (customBg) setCustomBgImage(customBg);
     };
 
+    // Check if auth cookie exists — if not, skip everything and redirect immediately
+    const hasAuthCookie = document.cookie.includes("atheles-auth-token");
+    if (!hasAuthCookie) {
+      sessionStorage.removeItem("atheles-session");
+      setLoading(false);
+      setRedirecting(true);
+      window.location.replace("/login");
+      return;
+    }
+
     // Show cached session instantly while fetching fresh data
-    // But set a timeout — if the API doesn't confirm within 5s, clear and redirect
-    let redirectTimeout: ReturnType<typeof setTimeout> | null = null;
     try {
       const cached = sessionStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached) as User;
         applyUser(u);
         setLoading(false);
-        // Safety: if API doesn't respond in 5s, assume session is invalid
-        redirectTimeout = setTimeout(() => {
-          sessionStorage.removeItem("atheles-session");
-          window.location.href = "/login";
-        }, 5000);
       }
     } catch { /* ignore */ }
 
     fetch("/api/auth/session")
       .then((res) => res.json())
       .then((data) => {
-        if (redirectTimeout) clearTimeout(redirectTimeout);
         if (data.user) {
           applyUser(data.user);
           sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
@@ -223,7 +225,6 @@ export default function ProfileContent() {
         setLoading(false);
       })
       .catch(() => {
-        if (redirectTimeout) clearTimeout(redirectTimeout);
         sessionStorage.removeItem("atheles-session");
         setUser(null);
         setRedirecting(true);
