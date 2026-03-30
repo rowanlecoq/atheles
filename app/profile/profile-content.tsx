@@ -1277,21 +1277,56 @@ export default function ProfileContent() {
             }
             const reader = new FileReader();
             reader.onload = () => {
-              const dataUrl = reader.result as string;
-              setCustomBgImage(dataUrl);
-              setProfileBg("custom");
-              try {
-                localStorage.setItem(`profile-bg-img-${user.id}`, dataUrl);
-                localStorage.setItem(`profile-bg-${user.id}`, "custom");
-              } catch {
-                setSaveMessage("image saved for this session only (storage full).");
-              }
-              // Sync to server
-              fetch("/api/auth/update-theme", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ theme: "custom" }),
-              }).catch(() => {});
+              // Resize the background image to save localStorage space
+              const img = new window.Image();
+              img.onload = () => {
+                const canvas = document.createElement("canvas");
+                const maxSize = 800;
+                let w = img.width;
+                let h = img.height;
+                if (w > maxSize || h > maxSize) {
+                  if (w > h) {
+                    h = Math.round((h * maxSize) / w);
+                    w = maxSize;
+                  } else {
+                    w = Math.round((w * maxSize) / h);
+                    h = maxSize;
+                  }
+                }
+                canvas.width = w;
+                canvas.height = h;
+                const ctx = canvas.getContext("2d");
+                if (!ctx) return;
+                ctx.drawImage(img, 0, 0, w, h);
+                const dataUrl = canvas.toDataURL("image/jpeg", 0.5);
+
+                setCustomBgImage(dataUrl);
+                setProfileBg("custom");
+                try {
+                  // Clear old image first to free space
+                  localStorage.removeItem(`profile-bg-img-${user.id}`);
+                  localStorage.setItem(`profile-bg-img-${user.id}`, dataUrl);
+                  localStorage.setItem(`profile-bg-${user.id}`, "custom");
+                } catch {
+                  setSaveMessage("image saved for this session only (storage full).");
+                }
+                // Update session cache
+                try {
+                  const cached = sessionStorage.getItem("atheles-session");
+                  if (cached) {
+                    const u = JSON.parse(cached);
+                    u.theme = "custom";
+                    sessionStorage.setItem("atheles-session", JSON.stringify(u));
+                  }
+                } catch {}
+                // Sync to server
+                fetch("/api/auth/update-theme", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ theme: "custom" }),
+                }).catch(() => {});
+              };
+              img.src = reader.result as string;
             };
             reader.readAsDataURL(file);
             e.target.value = "";
