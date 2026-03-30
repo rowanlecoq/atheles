@@ -23,7 +23,7 @@ export default function SearchPageHeader() {
   const title = collection ? collectionTitles[collection] || collection : "store";
 
   return (
-    <div className="relative overflow-hidden border-b border-brand-dark-gold/10 bg-brand-dark">
+    <div className="relative overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
       {/* Hero background image */}
       <div className="absolute inset-0">
         <Image

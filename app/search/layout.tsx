@@ -24,7 +24,7 @@ export default function SearchLayout({
         <div className="mb-2">
           <MobileCollections />
         </div>
-        <div className="mb-4 flex items-center justify-end gap-3 border-b border-brand-dark-gold/10 pb-3">
+        <div className="mb-4 flex items-center justify-end gap-3 border-b border-brand-dark-gold/20 pb-3">
           <Suspense fallback={null}>
             <ClearFilters />
           </Suspense>

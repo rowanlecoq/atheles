@@ -492,7 +492,7 @@ export default function CartModal() {
                                   }
                                 }}
                                 enterKeyHint="go"
-                                className="flex-1 rounded-lg border border-brand-dark-gold/25 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                                className="flex-1 rounded-lg border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
                               />
                               <button
                                 type="button"
@@ -538,7 +538,7 @@ export default function CartModal() {
                         <p className="text-right text-xs">Calculated at checkout</p>
                       )}
                     </div>
-                    <div className="mb-3 flex items-center justify-between border-t border-brand-dark-gold/15 pt-2">
+                    <div className="mb-3 flex items-center justify-between border-t border-brand-dark-gold/20 pt-2">
                       <p className="font-medium text-white">Total</p>
                       <Price
                         className="text-right text-base font-medium text-brand-gold"

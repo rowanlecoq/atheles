@@ -891,7 +891,7 @@ export default function ProfileContent() {
               </p>
             )}
             {nextTier && nextTier.perks.length > 0 && (
-              <div className="mt-3.5 border-t border-brand-dark-gold/15 pt-3.5">
+              <div className="mt-3.5 border-t border-brand-dark-gold/20 pt-3.5">
                 <p
                   className="mb-2 text-xs font-medium tracking-[0.15em] text-brand-grey"
                   style={{ textTransform: "uppercase" }}

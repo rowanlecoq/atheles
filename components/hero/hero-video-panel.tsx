@@ -6,9 +6,9 @@ import Image from "next/image";
 export function HeroVideoPanel() {
   return (
     <FadeIn delay={0.3} direction="right" className="h-full">
-      <div className="flex h-full flex-col overflow-hidden rounded-sm border border-brand-dark-gold/25 bg-[#1e1e1e]">
+      <div className="flex h-full flex-col overflow-hidden rounded-sm border border-brand-dark-gold/20 bg-[#1e1e1e]">
         {/* Header */}
-        <div className="flex items-center justify-between border-b border-brand-dark-gold/15 px-4 py-2.5">
+        <div className="flex items-center justify-between border-b border-brand-dark-gold/20 px-4 py-2.5">
           <span className="text-xs uppercase tracking-[0.2em] text-brand-dark-gold">
             the brand
           </span>

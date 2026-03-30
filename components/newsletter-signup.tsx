@@ -39,7 +39,7 @@ export function NewsletterSignup() {
   };
 
   return (
-    <section className="relative overflow-hidden border-y border-brand-dark-gold/20 bg-brand-dark py-20">
+    <section className="relative overflow-hidden border-t border-brand-dark-gold/20 bg-brand-dark py-20">
       <Image
         src="/statues/hadrian-cuirassed.jpg"
         alt=""
