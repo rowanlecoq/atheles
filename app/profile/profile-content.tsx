@@ -164,7 +164,20 @@ export default function ProfileContent() {
         setDobDay(d ? String(parseInt(d)) : "");
       }
       const stored = localStorage.getItem(`avatar-${u.id}`);
-      if (stored) setAvatar(stored);
+      if (stored) {
+        setAvatar(stored);
+      } else {
+        // Try loading from server
+        fetch("/api/auth/avatar")
+          .then((r) => r.json())
+          .then((d) => {
+            if (d.avatar) {
+              setAvatar(d.avatar);
+              try { localStorage.setItem(`avatar-${u.id}`, d.avatar); } catch {}
+            }
+          })
+          .catch(() => {});
+      }
       // Load theme from server data, fallback to localStorage
       if (u.theme) {
         setProfileBg(u.theme);
@@ -242,6 +255,12 @@ export default function ProfileContent() {
     }
     setCropSrc(null);
     window.dispatchEvent(new Event("avatar-changed"));
+    // Sync to server for cross-device
+    fetch("/api/auth/avatar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ avatar: croppedDataUrl }),
+    }).catch(() => {});
   };
 
   const handleCropCancel = () => {
@@ -253,6 +272,11 @@ export default function ProfileContent() {
     setAvatar(null);
     localStorage.removeItem(`avatar-${user.id}`);
     window.dispatchEvent(new Event("avatar-changed"));
+    fetch("/api/auth/avatar", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ avatar: null }),
+    }).catch(() => {});
   };
 
   const handleSave = async () => {

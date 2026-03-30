@@ -180,7 +180,7 @@ export default function ImageCropModal({
     ctx.clip();
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-    onSave(out.toDataURL("image/jpeg", 0.85));
+    onSave(out.toDataURL("image/jpeg", 0.6));
   };
 
   const minZoom = getMinZoom();

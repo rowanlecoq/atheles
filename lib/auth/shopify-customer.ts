@@ -112,6 +112,93 @@ export async function updateCustomerTag(
   return { success: true };
 }
 
+export async function updateCustomerMetafield(
+  customerEmail: string,
+  namespace: string,
+  key: string,
+  value: string,
+  type: string = "single_line_text_field",
+): Promise<{ success: boolean; error?: string }> {
+  if (!adminEndpoint || !adminToken) {
+    return { success: false, error: "admin API not configured" };
+  }
+
+  const searchResult = await shopifyAdminFetch<{
+    customers: { edges: { node: { id: string } }[] };
+  }>(
+    `query customers($query: String!) {
+      customers(first: 1, query: $query) {
+        edges { node { id } }
+      }
+    }`,
+    { query: `email:${customerEmail}` },
+  );
+
+  const adminCustomer = searchResult.customers.edges[0]?.node;
+  if (!adminCustomer) {
+    return { success: false, error: "customer not found" };
+  }
+
+  await shopifyAdminFetch<{
+    customerUpdate: {
+      customer: { id: string } | null;
+      userErrors: { message: string }[];
+    };
+  }>(
+    `mutation customerUpdate($input: CustomerInput!) {
+      customerUpdate(input: $input) {
+        customer { id }
+        userErrors { message }
+      }
+    }`,
+    {
+      input: {
+        id: adminCustomer.id,
+        metafields: [{ namespace, key, value, type }],
+      },
+    },
+  );
+
+  return { success: true };
+}
+
+export async function getCustomerMetafield(
+  customerEmail: string,
+  namespace: string,
+  key: string,
+): Promise<string | null> {
+  if (!adminEndpoint || !adminToken) return null;
+
+  try {
+    const searchResult = await shopifyAdminFetch<{
+      customers: {
+        edges: {
+          node: {
+            metafield: { value: string } | null;
+          };
+        }[];
+      };
+    }>(
+      `query customers($query: String!, $namespace: String!, $key: String!) {
+        customers(first: 1, query: $query) {
+          edges {
+            node {
+              metafield(namespace: $namespace, key: $key) {
+                value
+              }
+            }
+          }
+        }
+      }`,
+      { query: `email:${customerEmail}`, namespace, key },
+    );
+
+    return searchResult.customers.edges[0]?.node?.metafield?.value || null;
+  } catch {
+    return null;
+  }
+}
+
 export async function updateCustomerDob(
   customerEmail: string,
   dob: string,
