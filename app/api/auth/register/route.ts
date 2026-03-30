@@ -94,9 +94,20 @@ export async function POST(request: Request) {
       message:
         "account created. please check your email to activate your account.",
     });
-  } catch {
+  } catch (err) {
+    console.error("[register] Error:", err);
+    const message = err instanceof Error ? err.message : "";
+    if (message.toLowerCase().includes("taken") || message.toLowerCase().includes("already")) {
+      return NextResponse.json(
+        {
+          success: false,
+          error: "an account with this email already exists. try signing in, or use forgot password to reset your password.",
+        },
+        { status: 400 },
+      );
+    }
     return NextResponse.json(
-      { success: false, error: "something went wrong" },
+      { success: false, error: "something went wrong. please try again." },
       { status: 500 },
     );
   }
