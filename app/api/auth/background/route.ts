@@ -13,20 +13,20 @@ export async function GET() {
   try {
     const cookieStore = await cookies();
     const token = cookieStore.get("atheles-auth-token")?.value;
-    if (!token) return NextResponse.json({ avatar: null });
+    if (!token) return NextResponse.json({ background: null });
 
     const customer = await getCustomerByToken(token);
-    if (!customer) return NextResponse.json({ avatar: null });
+    if (!customer) return NextResponse.json({ background: null });
 
-    const avatar = await getCustomerMetafield(
+    const background = await getCustomerMetafield(
       customer.email,
       "atheles",
-      "avatar",
+      "custom_bg",
     );
 
-    return NextResponse.json({ avatar });
+    return NextResponse.json({ background });
   } catch {
-    return NextResponse.json({ avatar: null });
+    return NextResponse.json({ background: null });
   }
 }
 
@@ -50,13 +50,13 @@ export async function POST(request: Request) {
       );
     }
 
-    const { avatar } = await request.json();
+    const { background } = await request.json();
 
     // Delete old blob if one exists
     const oldUrl = await getCustomerMetafield(
       customer.email,
       "atheles",
-      "avatar",
+      "custom_bg",
     );
     if (oldUrl?.includes("vercel-storage.com")) {
       try {
@@ -66,18 +66,17 @@ export async function POST(request: Request) {
       }
     }
 
-    if (avatar === null) {
+    if (background === null) {
       await updateCustomerMetafield(
         customer.email,
         "atheles",
-        "avatar",
+        "custom_bg",
         "",
       );
       return NextResponse.json({ success: true, url: null });
     }
 
-    // avatar is a base64 data URL — upload to Vercel Blob
-    const matches = avatar.match(/^data:(.+);base64,(.+)$/);
+    const matches = background.match(/^data:(.+);base64,(.+)$/);
     if (!matches) {
       return NextResponse.json(
         { success: false, error: "invalid image data" },
@@ -88,29 +87,22 @@ export async function POST(request: Request) {
     const contentType = matches[1] as string;
     const buffer = Buffer.from(matches[2] as string, "base64");
 
-    if (buffer.byteLength > 5 * 1024 * 1024) {
+    if (buffer.byteLength > 10 * 1024 * 1024) {
       return NextResponse.json(
-        { success: false, error: "image too large (max 5MB)" },
+        { success: false, error: "image too large (max 10MB)" },
         { status: 400 },
       );
     }
 
     const ext = contentType.split("/")[1] || "jpg";
     const customerId = customer.id.replace(/[^a-zA-Z0-9]/g, "");
-    const filename = `avatars/${customerId}-${Date.now()}.${ext}`;
+    const filename = `backgrounds/${customerId}-${Date.now()}.${ext}`;
 
     const blob = await put(filename, buffer, {
       access: "public",
       contentType,
       addRandomSuffix: false,
     });
-
-    await updateCustomerMetafield(
-      customer.email,
-      "atheles",
-      "avatar",
-      blob.url,
-    );
 
     return NextResponse.json({ success: true, url: blob.url });
   } catch {

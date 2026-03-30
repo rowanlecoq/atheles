@@ -170,7 +170,7 @@ export default function ProfileContent() {
       if (prefsLoaded.current) return;
       prefsLoaded.current = true;
 
-      // Avatar: show local, sync from server
+      // Avatar: show cached URL, sync from server
       const stored = localStorage.getItem(`avatar-${u.id}`);
       if (stored) setAvatar(stored);
       fetch("/api/auth/avatar")
@@ -194,8 +194,21 @@ export default function ProfileContent() {
         setProfileBg(u.theme);
         localStorage.setItem(`profile-bg-${u.id}`, u.theme);
       }
+      // Custom background: show cached URL, sync from server
       const customBg = localStorage.getItem(`profile-bg-img-${u.id}`);
       if (customBg) setCustomBgImage(customBg);
+      fetch("/api/auth/background")
+        .then((r) => r.json())
+        .then((d) => {
+          if (d.background && d.background !== customBg) {
+            setCustomBgImage(d.background);
+            try { localStorage.setItem(`profile-bg-img-${u.id}`, d.background); } catch {}
+            if (!localBg && u.theme === "custom") {
+              setProfileBg("custom");
+            }
+          }
+        })
+        .catch(() => {});
     };
 
     // Show cached session instantly while fetching fresh data
@@ -267,19 +280,25 @@ export default function ProfileContent() {
   const handleCropSave = (croppedDataUrl: string) => {
     if (!user) return;
     setAvatar(croppedDataUrl);
-    try {
-      localStorage.setItem(`avatar-${user.id}`, croppedDataUrl);
-    } catch {
-      setSaveMessage("photo saved for this session only (storage full).");
-    }
     setCropSrc(null);
-    window.dispatchEvent(new Event("avatar-changed"));
-    // Sync to server for cross-device
+    // Upload to Vercel Blob, then cache the returned URL
     fetch("/api/auth/avatar", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ avatar: croppedDataUrl }),
-    }).catch(() => {});
+    })
+      .then((r) => r.json())
+      .then((d) => {
+        if (d.success && d.url) {
+          setAvatar(d.url);
+          try { localStorage.setItem(`avatar-${user.id}`, d.url); } catch {}
+          window.dispatchEvent(new Event("avatar-changed"));
+        }
+      })
+      .catch(() => {
+        try { localStorage.setItem(`avatar-${user.id}`, croppedDataUrl); } catch {}
+        window.dispatchEvent(new Event("avatar-changed"));
+      });
   };
 
   const handleCropCancel = () => {
@@ -297,6 +316,8 @@ export default function ProfileContent() {
       body: JSON.stringify({ avatar: null }),
     }).catch(() => {});
   };
+
+  const [uploadingBg, setUploadingBg] = useState(false);
 
   const handleSave = async () => {
     if (!firstName.trim()) {
@@ -1261,7 +1282,9 @@ export default function ProfileContent() {
                 </svg>
               )}
             </div>
-            <span className="text-[10px] text-brand-grey">custom</span>
+            <span className="text-[10px] text-brand-grey">
+              {uploadingBg ? "uploading..." : "custom"}
+            </span>
           </button>
         </div>
         <input
@@ -1271,17 +1294,17 @@ export default function ProfileContent() {
           onChange={(e) => {
             const file = e.target.files?.[0];
             if (!file || !user) return;
-            if (file.size > 5 * 1024 * 1024) {
-              setSaveMessage("image must be under 5mb.");
+            if (file.size > 10 * 1024 * 1024) {
+              setSaveMessage("image must be under 10mb.");
               return;
             }
+            setUploadingBg(true);
             const reader = new FileReader();
             reader.onload = () => {
-              // Resize the background image to save localStorage space
               const img = new window.Image();
               img.onload = () => {
                 const canvas = document.createElement("canvas");
-                const maxSize = 800;
+                const maxSize = 1920;
                 let w = img.width;
                 let h = img.height;
                 if (w > maxSize || h > maxSize) {
@@ -1296,21 +1319,32 @@ export default function ProfileContent() {
                 canvas.width = w;
                 canvas.height = h;
                 const ctx = canvas.getContext("2d");
-                if (!ctx) return;
+                if (!ctx) { setUploadingBg(false); return; }
                 ctx.drawImage(img, 0, 0, w, h);
-                const dataUrl = canvas.toDataURL("image/jpeg", 0.5);
+                const dataUrl = canvas.toDataURL("image/jpeg", 0.8);
 
                 setCustomBgImage(dataUrl);
                 setProfileBg("custom");
-                try {
-                  // Clear old image first to free space
-                  localStorage.removeItem(`profile-bg-img-${user.id}`);
-                  localStorage.setItem(`profile-bg-img-${user.id}`, dataUrl);
-                  localStorage.setItem(`profile-bg-${user.id}`, "custom");
-                } catch {
-                  setSaveMessage("image saved for this session only (storage full).");
-                }
-                // Update session cache
+
+                // Upload to Vercel Blob
+                fetch("/api/auth/background", {
+                  method: "POST",
+                  headers: { "Content-Type": "application/json" },
+                  body: JSON.stringify({ background: dataUrl }),
+                })
+                  .then((r) => r.json())
+                  .then((d) => {
+                    if (d.success && d.url) {
+                      setCustomBgImage(d.url);
+                      try {
+                        localStorage.setItem(`profile-bg-img-${user.id}`, d.url);
+                        localStorage.setItem(`profile-bg-${user.id}`, "custom");
+                      } catch {}
+                    }
+                  })
+                  .catch(() => {})
+                  .finally(() => setUploadingBg(false));
+
                 try {
                   const cached = sessionStorage.getItem("atheles-session");
                   if (cached) {
@@ -1319,7 +1353,6 @@ export default function ProfileContent() {
                     sessionStorage.setItem("atheles-session", JSON.stringify(u));
                   }
                 } catch {}
-                // Sync to server
                 fetch("/api/auth/update-theme", {
                   method: "POST",
                   headers: { "Content-Type": "application/json" },
