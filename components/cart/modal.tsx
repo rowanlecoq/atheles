@@ -16,7 +16,12 @@ import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
-import { createCartAndSetCookie, redirectToCheckout } from "./actions";
+import {
+  applyDiscountCode,
+  createCartAndSetCookie,
+  redirectToCheckout,
+  removeDiscountCode,
+} from "./actions";
 import { useCart } from "./cart-context";
 import { DeleteItemButton } from "./delete-item-button";
 import { EditItemQuantityButton } from "./edit-item-quantity-button";
@@ -341,7 +346,7 @@ export default function CartModal() {
                                   if (!p.firstVariantId) return;
                                   setAddingFav(p.handle);
                                   try {
-                                    const { addItem } = await import("components/cart/actions");
+                                    const { addItem } = await import("./actions");
                                     await addItem(null, p.firstVariantId);
                                   } catch {}
                                   setAddingFav(null);
@@ -426,7 +431,7 @@ export default function CartModal() {
                     const hasDiscount = !!appliedCode && totalDiscount > 0;
 
                     return (
-                      <div className="border-t border-brand-dark-gold/20 pt-3">
+                      <div className="pt-2">
                         <div className="mb-2 flex items-center gap-1.5">
                           <TagIcon className="h-3.5 w-3.5 text-brand-gold" />
                           <p className="text-xs uppercase tracking-wider text-brand-grey">
@@ -446,7 +451,6 @@ export default function CartModal() {
                             <button
                               type="button"
                               onClick={async () => {
-                                const { removeDiscountCode } = await import("components/cart/actions");
                                 await removeDiscountCode();
                                 setDiscountCode("");
                                 setDiscountError("");
@@ -475,13 +479,11 @@ export default function CartModal() {
                                 onClick={async () => {
                                   setApplyingDiscount(true);
                                   setDiscountError("");
-                                  const { applyDiscountCode } = await import("components/cart/actions");
                                   const result = await applyDiscountCode(discountCode.trim());
                                   if (!result.success) {
                                     setDiscountError(result.error || "failed to apply code.");
                                   } else if (!result.applicable) {
                                     setDiscountError("invalid or expired code.");
-                                    const { removeDiscountCode } = await import("components/cart/actions");
                                     await removeDiscountCode();
                                   }
                                   setApplyingDiscount(false);
