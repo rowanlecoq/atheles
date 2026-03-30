@@ -967,7 +967,7 @@ export default function ProfileContent() {
                 onChange={(e) => setFirstName(e.target.value)}
                 required
                 className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                placeholder="rowan"
+                placeholder="first name"
               />
             ) : (
               <p className="px-3 py-2 text-sm text-white">
@@ -992,7 +992,7 @@ export default function ProfileContent() {
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
                 className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                placeholder="le coq"
+                placeholder="last name"
               />
             ) : (
               <p className="px-3 py-2 text-sm text-white">

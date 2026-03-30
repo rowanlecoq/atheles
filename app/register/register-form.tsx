@@ -117,7 +117,7 @@ export default function RegisterForm() {
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
                   className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                  placeholder="rowan"
+                  placeholder="first name"
                 />
               </div>
               <div>
@@ -134,7 +134,7 @@ export default function RegisterForm() {
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
                   className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                  placeholder="le coq"
+                  placeholder="last name"
                 />
               </div>
               <div>
