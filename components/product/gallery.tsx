@@ -13,6 +13,8 @@ export function Gallery({
   const [zoomed, setZoomed] = useState(false);
   const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
   const scrollRef = useRef<HTMLDivElement>(null);
+  const isProgScrollRef = useRef(false);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const nextImage = useCallback(() => {
     setImageIndex((prev) => (prev + 1 < images.length ? prev + 1 : 0));
@@ -32,28 +34,60 @@ export function Gallery({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [nextImage, prevImage]);
 
-  // Sync scroll to current image on mobile
-  useEffect(() => {
-    if (scrollRef.current) {
-      const el = scrollRef.current;
-      const child = el.children[imageIndex] as HTMLElement;
-      if (child) {
-        el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
-      }
-    }
-  }, [imageIndex]);
-
-  // Handle scroll snap on mobile to update index
-  const handleScroll = () => {
+  // Scroll to image when index changes from click/keyboard (not from swipe)
+  const scrollToIndex = useCallback((index: number) => {
     if (!scrollRef.current) return;
     const el = scrollRef.current;
-    const scrollLeft = el.scrollLeft;
-    const childWidth = el.children[0]?.clientWidth || 1;
-    const newIndex = Math.round(scrollLeft / childWidth);
-    if (newIndex !== imageIndex && newIndex >= 0 && newIndex < images.length) {
-      setImageIndex(newIndex);
+    const child = el.children[index] as HTMLElement;
+    if (child) {
+      isProgScrollRef.current = true;
+      el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
+      // Clear the flag after scroll animation finishes
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => {
+        isProgScrollRef.current = false;
+      }, 400);
     }
-  };
+  }, []);
+
+  // Handle dot/thumbnail click — scroll to that image
+  const goToImage = useCallback(
+    (index: number) => {
+      setImageIndex(index);
+      scrollToIndex(index);
+    },
+    [scrollToIndex],
+  );
+
+  // Handle scroll snap on mobile to update index (only from user swipe)
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+
+    let debounce: ReturnType<typeof setTimeout> | null = null;
+
+    const onScroll = () => {
+      // Ignore programmatic scrolls
+      if (isProgScrollRef.current) return;
+
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        if (!scrollRef.current || isProgScrollRef.current) return;
+        const scrollEl = scrollRef.current;
+        const childWidth = (scrollEl.children[0] as HTMLElement)?.offsetWidth || 1;
+        const newIndex = Math.round(scrollEl.scrollLeft / childWidth);
+        if (newIndex >= 0 && newIndex < images.length) {
+          setImageIndex(newIndex);
+        }
+      }, 60);
+    };
+
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      if (debounce) clearTimeout(debounce);
+    };
+  }, [images.length]);
 
   // Desktop zoom on hover
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
@@ -69,7 +103,6 @@ export function Gallery({
       {/* Mobile: horizontal scroll gallery */}
       <div
         ref={scrollRef}
-        onScroll={handleScroll}
         className="flex snap-x snap-mandatory overflow-x-auto scrollbar-hide lg:hidden"
         style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
@@ -130,7 +163,7 @@ export function Gallery({
             <button
               key={index}
               type="button"
-              onClick={() => setImageIndex(index)}
+              onClick={() => goToImage(index)}
               aria-label={`View image ${index + 1}`}
               className={`h-2 rounded-full transition-all duration-300 ${
                 index === imageIndex
@@ -154,7 +187,7 @@ export function Gallery({
               >
                 <button
                   type="button"
-                  onClick={() => setImageIndex(index)}
+                  onClick={() => goToImage(index)}
                   aria-label={`Select image ${index + 1}`}
                   className="h-full w-full"
                 >
