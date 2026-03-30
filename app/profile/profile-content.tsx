@@ -189,24 +189,15 @@ export default function ProfileContent() {
       if (customBg) setCustomBgImage(customBg);
     };
 
-    // If no login indicator cookie AND no cached session, redirect immediately
-    const hasIndicator = document.cookie.includes("atheles-logged-in");
-    const cached = sessionStorage.getItem("atheles-session");
-    if (!hasIndicator && !cached) {
-      setLoading(false);
-      setRedirecting(true);
-      window.location.replace("/login");
-      return;
-    }
-
     // Show cached session instantly while fetching fresh data
-    if (cached) {
-      try {
+    try {
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
         const u = JSON.parse(cached) as User;
         applyUser(u);
         setLoading(false);
-      } catch { /* ignore */ }
-    }
+      }
+    } catch { /* ignore */ }
 
     fetch("/api/auth/session")
       .then((res) => res.json())
@@ -214,20 +205,29 @@ export default function ProfileContent() {
         if (data.user) {
           applyUser(data.user);
           sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+          setLoading(false);
         } else {
+          // Session invalid — clean up and redirect once
           sessionStorage.removeItem("atheles-session");
+          document.cookie = "atheles-logged-in=; max-age=0; path=/";
           setUser(null);
+          setLoading(false);
           setRedirecting(true);
-          window.location.replace("/login");
-          return;
+          // Use setTimeout to ensure state updates render before redirect
+          setTimeout(() => {
+            window.location.replace("/login");
+          }, 100);
         }
-        setLoading(false);
       })
       .catch(() => {
         sessionStorage.removeItem("atheles-session");
+        document.cookie = "atheles-logged-in=; max-age=0; path=/";
         setUser(null);
+        setLoading(false);
         setRedirecting(true);
-        window.location.replace("/login");
+        setTimeout(() => {
+          window.location.replace("/login");
+        }, 100);
       });
   }, [router]);
 

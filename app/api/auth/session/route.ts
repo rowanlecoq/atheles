@@ -15,6 +15,9 @@ export async function GET() {
 
     const customer = await getCustomerByToken(token);
     if (!customer) {
+      // Token is invalid/expired — clear cookies so middleware redirects properly
+      cookieStore.delete("atheles-auth-token");
+      cookieStore.delete("atheles-logged-in");
       return NextResponse.json({ user: null });
     }
 
