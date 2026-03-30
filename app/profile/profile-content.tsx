@@ -583,7 +583,7 @@ export default function ProfileContent() {
       <div className="mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
           <div
-            className={`flex h-32 w-32 items-center justify-center overflow-hidden rounded-full border-2 border-brand-gold sm:h-36 sm:w-36 ${avatar ? "cursor-pointer" : ""} bg-brand-dark-gold/20`}
+            className={`flex h-32 w-32 items-center justify-center overflow-hidden rounded-full sm:h-36 sm:w-36 ${avatar ? "cursor-pointer" : ""} bg-brand-dark-gold/20`}
             onClick={() => avatar && setShowAvatarPreview(true)}
           >
             {avatar ? (
