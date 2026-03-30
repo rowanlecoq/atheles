@@ -3,6 +3,7 @@
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useCurrency, type RegionCode } from "components/currency-context";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 const regions = [
   {
@@ -96,33 +97,38 @@ export function CountrySelector() {
         />
       </button>
 
-      {/* Dropdown */}
-      <div
-        className={`absolute left-0 top-full z-[60] mt-2 min-w-[200px] rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-lg shadow-black/30 transition-all duration-200 ${
-          open
-            ? "pointer-events-auto visible translate-y-0 opacity-100"
-            : "pointer-events-none invisible -translate-y-1 opacity-0"
-        }`}
-      >
-        {regions.map((r) => (
-          <button
-            key={r.code}
-            type="button"
-            onClick={() => handleSelect(r.code)}
-            className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors first:rounded-t-md last:rounded-b-md ${
-              region === r.code
-                ? "bg-brand-dark-gold/10 text-brand-gold"
-                : "text-brand-grey hover:bg-brand-dark-gold/5 hover:text-brand-gold"
-            }`}
-          >
-            <span className="text-base leading-none">{r.flag}</span>
-            <span className="flex-1 uppercase tracking-wider">{r.label}</span>
-            <span className="text-xs tracking-wider text-brand-grey/60">
-              {r.language} / {r.currency}
-            </span>
-          </button>
-        ))}
-      </div>
+      {/* Dropdown — portaled to body to avoid z-index issues */}
+      {open && typeof document !== "undefined" && createPortal(
+        <div
+          style={{
+            position: "fixed",
+            top: ref.current ? ref.current.getBoundingClientRect().bottom + 8 : 0,
+            left: ref.current ? ref.current.getBoundingClientRect().left : 0,
+            zIndex: 9999,
+          }}
+          className="min-w-[200px] rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-lg shadow-black/30"
+        >
+          {regions.map((r) => (
+            <button
+              key={r.code}
+              type="button"
+              onClick={() => handleSelect(r.code)}
+              className={`flex w-full items-center gap-3 px-3 py-2.5 text-left text-sm transition-colors first:rounded-t-md last:rounded-b-md ${
+                region === r.code
+                  ? "bg-brand-dark-gold/10 text-brand-gold"
+                  : "text-brand-grey hover:bg-brand-dark-gold/5 hover:text-brand-gold"
+              }`}
+            >
+              <span className="text-base leading-none">{r.flag}</span>
+              <span className="flex-1 uppercase tracking-wider">{r.label}</span>
+              <span className="text-xs tracking-wider text-brand-grey/60">
+                {r.language} / {r.currency}
+              </span>
+            </button>
+          ))}
+        </div>,
+        document.body,
+      )}
     </div>
   );
 }
