@@ -471,6 +471,13 @@ export default function CartModal() {
                                   setDiscountError("");
                                 }}
                                 placeholder="Enter code"
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" && discountCode.trim() && !applyingDiscount) {
+                                    e.preventDefault();
+                                    (e.target as HTMLInputElement).closest("div")?.querySelector("button")?.click();
+                                  }
+                                }}
+                                enterKeyHint="go"
                                 className="flex-1 rounded-lg border border-brand-dark-gold/25 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
                               />
                               <button
