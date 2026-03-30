@@ -117,28 +117,29 @@ function ProductCard({ product }: { product: Product }) {
             className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-brand-dark via-brand-dark/95 to-transparent p-4 pt-10"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
           >
-            <div className={`grid gap-2 ${product.variants.length <= 4 ? "grid-cols-4" : product.variants.length === 5 ? "grid-cols-5" : "grid-cols-4"}`}>
+            <div className="flex flex-wrap justify-center gap-2">
               {product.variants.map((variant) => {
                 const rawSize = variant.selectedOptions.find(
                   (o) => o.name.toLowerCase() === "size",
                 )?.value || variant.title;
-                // Abbreviate for mobile
+                // Abbreviate long size names
+                const lower = rawSize.toLowerCase().trim();
                 const sizeMap: Record<string, string> = {
-                  "Extra Small": "XS", "extra small": "XS",
-                  "Small": "S", "small": "S",
-                  "Medium": "M", "medium": "M",
-                  "Large": "L", "large": "L",
-                  "Extra Large": "XL", "extra large": "XL",
-                  "XX-Large": "XXL", "xx-large": "XXL",
+                  "extra small": "XS", "xs": "XS",
+                  "small": "S", "s": "S",
+                  "medium": "M", "m": "M",
+                  "large": "L", "l": "L",
+                  "extra large": "XL", "xl": "XL",
+                  "xx-large": "XXL", "xxl": "XXL",
                 };
-                const size = sizeMap[rawSize] || rawSize;
+                const size = sizeMap[lower] || rawSize;
                 return (
                   <button
                     key={variant.id}
                     type="button"
                     disabled={!variant.availableForSale || adding}
                     onClick={() => variant.availableForSale && handleAdd(variant.id)}
-                    className={`min-h-[40px] rounded-md py-2.5 text-sm font-medium transition-all ${
+                    className={`min-h-[40px] min-w-[44px] flex-1 rounded-md py-2.5 text-xs font-medium transition-all ${
                       variant.availableForSale
                         ? "bg-white/10 text-white hover:bg-brand-gold hover:text-brand-dark active:bg-brand-gold active:text-brand-dark"
                         : "cursor-not-allowed text-white/20 line-through"
