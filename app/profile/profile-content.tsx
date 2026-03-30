@@ -148,6 +148,7 @@ export default function ProfileContent() {
   const [customBgImage, setCustomBgImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const bgFileInputRef = useRef<HTMLInputElement>(null);
+  const themeLoadedRef = useRef(false);
   const router = useRouter();
 
   useEffect(() => {
@@ -180,12 +181,16 @@ export default function ProfileContent() {
           }
         })
         .catch(() => {});
-      // Load theme from server data, fallback to localStorage
-      if (u.theme) {
-        setProfileBg(u.theme);
-      } else {
-        const bg = localStorage.getItem(`profile-bg-${u.id}`);
-        if (bg) setProfileBg(bg);
+      // Load theme from server data on first load only
+      if (!themeLoadedRef.current) {
+        themeLoadedRef.current = true;
+        if (u.theme) {
+          setProfileBg(u.theme);
+          localStorage.setItem(`profile-bg-${u.id}`, u.theme);
+        } else {
+          const bg = localStorage.getItem(`profile-bg-${u.id}`);
+          if (bg) setProfileBg(bg);
+        }
       }
       const customBg = localStorage.getItem(`profile-bg-img-${u.id}`);
       if (customBg) setCustomBgImage(customBg);
