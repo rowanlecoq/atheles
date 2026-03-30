@@ -113,7 +113,8 @@ export async function POST(request: Request) {
     );
 
     return NextResponse.json({ success: true, url: blob.url });
-  } catch {
+  } catch (err) {
+    console.error("[avatar] Upload error:", err);
     return NextResponse.json(
       { success: false, error: "something went wrong" },
       { status: 500 },
