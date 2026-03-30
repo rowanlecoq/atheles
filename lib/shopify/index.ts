@@ -17,6 +17,7 @@ import {
   createCartMutation,
   editCartItemsMutation,
   removeFromCartMutation,
+  updateCartDiscountCodesMutation,
 } from "./mutations/cart";
 import { getCartQuery } from "./queries/cart";
 import {
@@ -227,6 +228,8 @@ const EMPTY_CART: Cart = {
     totalAmount: { amount: "0", currencyCode: "USD" },
     totalTaxAmount: { amount: "0", currencyCode: "USD" },
   },
+  discountCodes: [],
+  discountAllocations: [],
 };
 
 export async function createCart(): Promise<Cart> {
@@ -285,6 +288,31 @@ export async function updateCart(
   });
 
   return reshapeCart(res.body.data.cartLinesUpdate.cart);
+}
+
+export async function updateCartDiscountCodes(
+  discountCodes: string[],
+): Promise<Cart> {
+  if (!endpoint) return { ...EMPTY_CART };
+
+  const cartId = (await cookies()).get("cartId")?.value!;
+  const res = await shopifyFetch<{
+    data: {
+      cartDiscountCodesUpdate: {
+        cart: ShopifyCart;
+        userErrors: { field: string; message: string }[];
+      };
+    };
+    variables: { cartId: string; discountCodes: string[] };
+  }>({
+    query: updateCartDiscountCodesMutation,
+    variables: {
+      cartId,
+      discountCodes,
+    },
+  });
+
+  return reshapeCart(res.body.data.cartDiscountCodesUpdate.cart);
 }
 
 export async function getCart(): Promise<Cart | undefined> {

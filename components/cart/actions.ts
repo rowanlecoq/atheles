@@ -7,6 +7,7 @@ import {
   getCart,
   removeFromCart,
   updateCart,
+  updateCartDiscountCodes,
 } from "lib/shopify";
 import { isShopifyConfigured } from "lib/shopify/is-configured";
 import { updateTag } from "next/cache";
@@ -113,6 +114,44 @@ export async function redirectToCheckout() {
   }
 
   redirect(cart.checkoutUrl);
+}
+
+export async function applyDiscountCode(code: string): Promise<{
+  success: boolean;
+  applicable: boolean;
+  cart?: Awaited<ReturnType<typeof getCart>>;
+}> {
+  if (!isShopifyConfigured) return { success: false, applicable: false };
+
+  try {
+    const cart = await updateCartDiscountCodes([code]);
+    updateTag(TAGS.cart);
+
+    // Check if the code was actually applicable
+    const applied = cart.discountCodes?.find(
+      (dc) => dc.code.toLowerCase() === code.toLowerCase(),
+    );
+
+    return {
+      success: true,
+      applicable: !!applied?.applicable,
+      cart,
+    };
+  } catch (e) {
+    console.error("applyDiscountCode error:", e);
+    return { success: false, applicable: false };
+  }
+}
+
+export async function removeDiscountCode(): Promise<void> {
+  if (!isShopifyConfigured) return;
+
+  try {
+    await updateCartDiscountCodes([]);
+    updateTag(TAGS.cart);
+  } catch (e) {
+    console.error("removeDiscountCode error:", e);
+  }
 }
 
 export async function createCartAndSetCookie() {

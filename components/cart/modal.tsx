@@ -41,8 +41,8 @@ export default function CartModal() {
   const quantityRef = useRef(cart?.totalQuantity);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
-  const [discountApplied, setDiscountApplied] = useState(false);
-  const [discountPercent, setDiscountPercent] = useState<number | null>(null);
+  const [discountError, setDiscountError] = useState("");
+  const [applyingDiscount, setApplyingDiscount] = useState(false);
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
   const [addingFav, setAddingFav] = useState<string | null>(null);
@@ -73,17 +73,12 @@ export default function CartModal() {
     return () => window.removeEventListener("open-cart", handleOpenCart);
   }, []);
 
-  // Check user tier for free shipping and discount
-  const TIER_DISCOUNTS: Record<string, number> = {
-    SILVER: 10, GOLD: 12, PLATINUM: 15, CHAMPION: 18,
-  };
-
+  // Check user tier for free shipping
   useEffect(() => {
     if (!isOpen) return;
     if (!document.cookie.includes("atheles-logged-in=1")) {
       setFreeShipping(false);
       setTierName(null);
-      setDiscountPercent(null);
       return;
     }
     const applyTier = (totalSpent: string) => {
@@ -91,7 +86,6 @@ export default function CartModal() {
       const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
       setTierName(tier);
       setFreeShipping(tier === "CHAMPION");
-      setDiscountPercent(TIER_DISCOUNTS[tier] || null);
     };
     // Try cache first
     try {
@@ -396,87 +390,92 @@ export default function CartModal() {
                   )}
 
                   {/* Discount code */}
-                  <div className="border-t border-brand-dark-gold/20 pt-3">
-                    <div className="mb-2 flex items-center gap-1.5">
-                      <TagIcon className="h-3.5 w-3.5 text-brand-gold" />
-                      <p className="text-xs uppercase tracking-wider text-brand-grey">
-                        discount code
-                      </p>
-                    </div>
-                    {discountApplied ? (
-                      <div>
-                        <div className="flex items-center justify-between rounded-lg border border-brand-gold/30 bg-brand-gold/5 px-3 py-2">
-                          <div className="flex items-center gap-2">
-                            <span className="text-sm text-brand-gold">{discountCode}</span>
-                            {discountPercent && (
-                              <span className="rounded bg-green-500/10 px-1.5 py-0.5 text-[10px] text-green-400">
-                                -{discountPercent}%
-                              </span>
-                            )}
-                          </div>
-                          <button
-                            type="button"
-                            onClick={() => {
-                              setDiscountCode("");
-                              setDiscountApplied(false);
-                            }}
-                            className="text-xs text-brand-grey hover:text-red-400"
-                          >
-                            remove
-                          </button>
+                  {(() => {
+                    const appliedCode = cart.discountCodes?.find((dc) => dc.applicable);
+                    const totalDiscount = cart.discountAllocations?.reduce(
+                      (sum, a) => sum + parseFloat(a.discountedAmount.amount || "0"), 0
+                    ) || 0;
+                    const subtotal = parseFloat(cart.cost.subtotalAmount.amount);
+                    const hasDiscount = !!appliedCode && totalDiscount > 0;
+
+                    return (
+                      <div className="border-t border-brand-dark-gold/20 pt-3">
+                        <div className="mb-2 flex items-center gap-1.5">
+                          <TagIcon className="h-3.5 w-3.5 text-brand-gold" />
+                          <p className="text-xs uppercase tracking-wider text-brand-grey">
+                            discount code
+                          </p>
                         </div>
-                        {discountPercent && cart && (
-                          <div className="mt-2 flex items-center justify-between px-1">
-                            <span className="text-xs text-brand-grey">with discount</span>
+                        {appliedCode ? (
+                          <div className="flex items-center justify-between rounded-lg border border-brand-gold/30 bg-brand-gold/5 px-3 py-2">
                             <div className="flex items-center gap-2">
-                              <span className="text-xs text-brand-grey line-through">
-                                <Price
-                                  className="inline text-xs"
-                                  amount={cart.cost.totalAmount.amount}
-                                  currencyCode={cart.cost.totalAmount.currencyCode}
-                                />
-                              </span>
-                              <Price
-                                className="text-sm font-medium text-green-400"
-                                amount={(parseFloat(cart.cost.totalAmount.amount) * (1 - discountPercent / 100)).toFixed(2)}
-                                currencyCode={cart.cost.totalAmount.currencyCode}
-                              />
+                              <span className="text-sm text-brand-gold">{appliedCode.code}</span>
+                              {totalDiscount > 0 && (
+                                <span className="rounded bg-green-500/10 px-1.5 py-0.5 text-[10px] text-green-400">
+                                  -{new Intl.NumberFormat(undefined, { style: "currency", currency: cart.cost.totalAmount.currencyCode, currencyDisplay: "narrowSymbol" }).format(totalDiscount)} off
+                                </span>
+                              )}
                             </div>
+                            <button
+                              type="button"
+                              onClick={async () => {
+                                const { removeDiscountCode } = await import("components/cart/actions");
+                                await removeDiscountCode();
+                                setDiscountCode("");
+                                setDiscountError("");
+                              }}
+                              className="text-xs text-brand-grey hover:text-red-400"
+                            >
+                              remove
+                            </button>
+                          </div>
+                        ) : (
+                          <div>
+                            <div className="flex gap-2">
+                              <input
+                                type="text"
+                                value={discountCode}
+                                onChange={(e) => {
+                                  setDiscountCode(e.target.value);
+                                  setDiscountError("");
+                                }}
+                                placeholder="Enter code"
+                                className="flex-1 rounded-lg border border-brand-dark-gold/25 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                              />
+                              <button
+                                type="button"
+                                disabled={!discountCode.trim() || applyingDiscount}
+                                onClick={async () => {
+                                  setApplyingDiscount(true);
+                                  setDiscountError("");
+                                  const { applyDiscountCode } = await import("components/cart/actions");
+                                  const result = await applyDiscountCode(discountCode.trim());
+                                  if (!result.success) {
+                                    setDiscountError("failed to apply code.");
+                                  } else if (!result.applicable) {
+                                    setDiscountError("invalid or expired code.");
+                                    // Remove the invalid code from cart
+                                    const { removeDiscountCode } = await import("components/cart/actions");
+                                    await removeDiscountCode();
+                                  }
+                                  setApplyingDiscount(false);
+                                }}
+                                className="rounded-lg border border-brand-gold/40 px-4 py-2 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:opacity-30"
+                              >
+                                {applyingDiscount ? "..." : "apply"}
+                              </button>
+                            </div>
+                            {discountError && (
+                              <p className="mt-1.5 text-xs text-red-400">{discountError}</p>
+                            )}
                           </div>
                         )}
                       </div>
-                    ) : (
-                      <div className="flex gap-2">
-                        <input
-                          type="text"
-                          value={discountCode}
-                          onChange={(e) => setDiscountCode(e.target.value)}
-                          placeholder="Enter code"
-                          className="flex-1 rounded-lg border border-brand-dark-gold/25 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                        />
-                        <button
-                          type="button"
-                          onClick={() => {
-                            if (discountCode.trim()) setDiscountApplied(true);
-                          }}
-                          disabled={!discountCode.trim()}
-                          className="rounded-lg border border-brand-gold/40 px-4 py-2 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:opacity-30"
-                        >
-                          apply
-                        </button>
-                      </div>
-                    )}
-                    <p className="mt-1.5 text-[10px] text-brand-grey/60">
-                      code will be applied at checkout
-                    </p>
-                  </div>
+                    );
+                  })()}
 
                   {/* Summary */}
                   <div className="border-t border-brand-dark-gold/20 pt-3 text-sm text-brand-grey">
-                    <div className="mb-2 flex items-center justify-between">
-                      <p>Taxes</p>
-                      <p className="text-right text-xs">Calculated at checkout</p>
-                    </div>
                     <div className="mb-2 flex items-center justify-between">
                       <p>Shipping</p>
                       {freeShipping ? (
@@ -492,15 +491,11 @@ export default function CartModal() {
                     </div>
                     <div className="mb-3 flex items-center justify-between border-t border-brand-dark-gold/15 pt-2">
                       <p className="font-medium text-white">Total</p>
-                      {discountApplied && discountPercent ? (
-                        <p className="text-right text-xs text-brand-grey">Calculated at checkout</p>
-                      ) : (
-                        <Price
-                          className="text-right text-base font-medium text-brand-gold"
-                          amount={cart.cost.totalAmount.amount}
-                          currencyCode={cart.cost.totalAmount.currencyCode}
-                        />
-                      )}
+                      <Price
+                        className="text-right text-base font-medium text-brand-gold"
+                        amount={cart.cost.totalAmount.amount}
+                        currencyCode={cart.cost.totalAmount.currencyCode}
+                      />
                     </div>
                   </div>
 
