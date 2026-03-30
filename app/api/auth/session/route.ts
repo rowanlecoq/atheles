@@ -31,6 +31,7 @@ export async function GET() {
         numberOfOrders: customer.numberOfOrders,
         totalSpent: customer.totalSpent,
         dob: customer.dob,
+            theme: customer.theme,
       },
     });
   } catch {

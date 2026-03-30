@@ -65,6 +65,53 @@ async function shopifyAdminFetch<T>(
   return json.data;
 }
 
+export async function updateCustomerTag(
+  customerEmail: string,
+  prefix: string,
+  value: string,
+): Promise<{ success: boolean; error?: string }> {
+  if (!adminEndpoint || !adminToken) {
+    return { success: false, error: "admin API not configured" };
+  }
+
+  const searchResult = await shopifyAdminFetch<{
+    customers: { edges: { node: { id: string; tags: string[] } }[] };
+  }>(
+    `query customers($query: String!) {
+      customers(first: 1, query: $query) {
+        edges { node { id tags } }
+      }
+    }`,
+    { query: `email:${customerEmail}` },
+  );
+
+  const adminCustomer = searchResult.customers.edges[0]?.node;
+  if (!adminCustomer) {
+    return { success: false, error: "customer not found in admin" };
+  }
+
+  const existingTags = adminCustomer.tags || [];
+  const filteredTags = existingTags.filter((t) => !t.startsWith(`${prefix}:`));
+  const newTags = [...filteredTags, `${prefix}:${value}`];
+
+  await shopifyAdminFetch<{
+    customerUpdate: {
+      customer: { id: string } | null;
+      userErrors: { message: string }[];
+    };
+  }>(
+    `mutation customerUpdate($input: CustomerInput!) {
+      customerUpdate(input: $input) {
+        customer { id }
+        userErrors { message }
+      }
+    }`,
+    { input: { id: adminCustomer.id, tags: newTags } },
+  );
+
+  return { success: true };
+}
+
 export async function updateCustomerDob(
   customerEmail: string,
   dob: string,
@@ -330,6 +377,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   numberOfOrders: number;
   totalSpent: string;
   dob: string | null;
+  theme: string | null;
 } | null> {
   if (!endpoint) return null;
 
@@ -369,8 +417,9 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     )
     .toFixed(2);
 
-  // Fetch customer tags via Admin API for DOB (Storefront API doesn't expose tags)
+  // Fetch customer tags via Admin API (Storefront API doesn't expose tags)
   let dob: string | null = null;
+  let theme: string | null = null;
   if (adminEndpoint && adminToken) {
     try {
       const adminCustomer = await shopifyAdminFetch<{
@@ -386,8 +435,10 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       const tags = adminCustomer.customers.edges[0]?.node?.tags || [];
       const dobTag = tags.find((t) => t.startsWith("dob:"));
       dob = dobTag ? dobTag.replace("dob:", "") : null;
+      const themeTag = tags.find((t) => t.startsWith("theme:"));
+      theme = themeTag ? themeTag.replace("theme:", "") : null;
     } catch {
-      // Tags not available — DOB will show as "not set"
+      // Tags not available
     }
   }
 
@@ -403,5 +454,6 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     numberOfOrders: orders.length,
     totalSpent,
     dob,
+    theme,
   };
 }

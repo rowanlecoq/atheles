@@ -76,6 +76,7 @@ export async function POST(request: Request) {
             numberOfOrders: customer.numberOfOrders,
             totalSpent: customer.totalSpent,
             dob: customer.dob,
+            theme: customer.theme,
           }
         : null,
     });

@@ -17,6 +17,7 @@ type User = {
   numberOfOrders: string;
   totalSpent: string;
   dob: string | null;
+  theme: string | null;
 };
 
 const TIERS = [
@@ -164,8 +165,13 @@ export default function ProfileContent() {
       }
       const stored = localStorage.getItem(`avatar-${u.id}`);
       if (stored) setAvatar(stored);
-      const bg = localStorage.getItem(`profile-bg-${u.id}`);
-      if (bg) setProfileBg(bg);
+      // Load theme from server data, fallback to localStorage
+      if (u.theme) {
+        setProfileBg(u.theme);
+      } else {
+        const bg = localStorage.getItem(`profile-bg-${u.id}`);
+        if (bg) setProfileBg(bg);
+      }
       const customBg = localStorage.getItem(`profile-bg-img-${u.id}`);
       if (customBg) setCustomBgImage(customBg);
     };
@@ -1142,7 +1148,14 @@ export default function ProfileContent() {
               type="button"
               onClick={() => {
                 setProfileBg(theme.id);
-                if (user) localStorage.setItem(`profile-bg-${user.id}`, theme.id);
+                if (user) {
+                  localStorage.setItem(`profile-bg-${user.id}`, theme.id);
+                  fetch("/api/auth/update-theme", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ theme: theme.id }),
+                  }).catch(() => {});
+                }
               }}
               className={`flex flex-col items-center gap-1.5 rounded-lg p-2 transition-all ${
                 profileBg === theme.id
@@ -1165,7 +1178,14 @@ export default function ProfileContent() {
               } else if (customBgImage) {
                 // Has a saved custom image — apply it
                 setProfileBg("custom");
-                if (user) localStorage.setItem(`profile-bg-${user.id}`, "custom");
+                if (user) {
+                  localStorage.setItem(`profile-bg-${user.id}`, "custom");
+                  fetch("/api/auth/update-theme", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ theme: "custom" }),
+                  }).catch(() => {});
+                }
               } else {
                 // No custom image yet — pick one
                 bgFileInputRef.current?.click();
