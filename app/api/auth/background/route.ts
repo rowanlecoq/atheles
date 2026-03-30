@@ -26,7 +26,9 @@ export async function GET() {
       "custom_bg",
     );
 
-    return NextResponse.json({ background: background || null });
+    const res = NextResponse.json({ background: background || null });
+    res.headers.set("Cache-Control", "private, max-age=60, stale-while-revalidate=300");
+    return res;
   } catch {
     return NextResponse.json({ background: null });
   }

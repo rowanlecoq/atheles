@@ -131,12 +131,18 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
         if (data?.user) {
           setLoggedIn(true);
           setUserName(data.user.name || data.user.firstName || "");
-          // Fetch avatar from server (blob storage)
+          // Show cached avatar instantly, refetch in background
+          try {
+            const cached = sessionStorage.getItem("atheles-avatar");
+            if (cached) setAvatar(cached);
+          } catch {}
           fetch("/api/auth/avatar")
             .then((r) => (r.ok ? r.json() : null))
             .then((d) => {
-              if (d?.avatar) setAvatar(d.avatar);
-              else setAvatar(null);
+              if (d?.avatar) {
+                setAvatar(d.avatar);
+                try { sessionStorage.setItem("atheles-avatar", d.avatar); } catch {}
+              } else setAvatar(null);
             })
             .catch(() => setAvatar(null));
         } else {

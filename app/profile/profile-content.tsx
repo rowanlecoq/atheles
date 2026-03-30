@@ -184,12 +184,19 @@ export default function ProfileContent() {
       if (prefsLoaded.current) return;
       prefsLoaded.current = true;
 
-      // Avatar: fetch from server (blob storage)
+      // Avatar: show cached instantly, refetch in background
+      try {
+        const cachedAvatar = sessionStorage.getItem("atheles-avatar");
+        if (cachedAvatar) setAvatar(cachedAvatar);
+      } catch {}
       fetch("/api/auth/avatar")
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
           if (d?.avatar) {
             setAvatar(d.avatar);
+            try { sessionStorage.setItem("atheles-avatar", d.avatar); } catch {}
+          } else {
+            try { sessionStorage.removeItem("atheles-avatar"); } catch {}
           }
         })
         .catch(() => {});
@@ -199,12 +206,19 @@ export default function ProfileContent() {
       setProfileBg(serverTheme);
       setGlobalThemeOn(!!u.globalTheme);
 
-      // Custom background: always fetch so it's ready if user switches to custom
+      // Custom background: show cached instantly, refetch in background
+      try {
+        const cachedBg = sessionStorage.getItem("atheles-custom-bg");
+        if (cachedBg) setCustomBgImage(cachedBg);
+      } catch {}
       fetch("/api/auth/background")
-        .then((r) => r.json())
+        .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
-          if (d.background) {
+          if (d?.background) {
             setCustomBgImage(d.background);
+            try { sessionStorage.setItem("atheles-custom-bg", d.background); } catch {}
+          } else {
+            try { sessionStorage.removeItem("atheles-custom-bg"); } catch {}
           }
         })
         .catch(() => {});
