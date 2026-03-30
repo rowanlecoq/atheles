@@ -614,10 +614,10 @@ export default function ProfileContent() {
         />
       )}
 
-      {/* Avatar Preview Modal */}
-      {showAvatarPreview && avatar && (
+      {/* Avatar Preview Modal — portaled to cover everything including navbar */}
+      {showAvatarPreview && avatar && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/90 p-4"
           onClick={() => setShowAvatarPreview(false)}
         >
           <button
@@ -643,7 +643,8 @@ export default function ProfileContent() {
             <p className="font-heading text-xl text-brand-gold">{user.name}</p>
             <p className="text-sm text-brand-grey">{user.email}</p>
           </div>
-        </div>
+        </div>,
+        document.body,
       )}
 
       {/* Avatar & Name */}
