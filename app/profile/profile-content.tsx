@@ -486,13 +486,13 @@ export default function ProfileContent() {
     <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16">
       {/* Background layer */}
       {profileBg === "custom" && customBgImage ? (
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="pointer-events-none fixed inset-0 overflow-hidden animate-[fadeInBg_0.8s_ease-out]">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={customBgImage} alt="" className="h-full w-full object-cover opacity-10" />
           <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/70 to-brand-dark" />
         </div>
       ) : profileBg !== "none" ? (
-        <div className="pointer-events-none fixed inset-0 overflow-hidden">
+        <div className="pointer-events-none fixed inset-0 overflow-hidden animate-[fadeInBg_0.8s_ease-out]">
           {/* Flowing blob layers */}
           {(() => {
             const colors = {
@@ -567,6 +567,10 @@ export default function ProfileContent() {
             );
           })()}
           <style jsx>{`
+            @keyframes fadeInBg {
+              from { opacity: 0; }
+              to { opacity: 1; }
+            }
             @keyframes drift1 {
               0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
               20% { transform: translate(6%, -4%) scale(1.08) rotate(1deg); }
