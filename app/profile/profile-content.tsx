@@ -497,7 +497,7 @@ export default function ProfileContent() {
         )
       ) : profileBg !== "none" ? (
         createPortal(
-        <div className="pointer-events-none fixed inset-0 z-0" style={{ overflow: "hidden", clipPath: "inset(0)" }}>
+        <div className="noise-overlay pointer-events-none fixed inset-0 z-0" style={{ overflow: "hidden", clipPath: "inset(0)" }}>
           {/* Flowing blob layers */}
           {(() => {
             const colors = {

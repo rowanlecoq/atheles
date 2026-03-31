@@ -123,7 +123,7 @@ export function ThemeBackground() {
   // Custom image background
   if (theme === "custom" && customBg) {
     return (
-      <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+      <div className="noise-overlay pointer-events-none fixed inset-0 z-0 overflow-hidden">
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img src={customBg} alt="" className="h-full w-full object-cover opacity-10" />
         <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-brand-dark/70 to-brand-dark" />
@@ -135,7 +135,7 @@ export function ThemeBackground() {
   if (!colors) return null;
 
   return (
-    <div className="pointer-events-none fixed inset-0 z-0 overflow-hidden">
+    <div className="noise-overlay pointer-events-none fixed inset-0 z-0 overflow-hidden">
       <div
         className="absolute -inset-[60%]"
         style={{
