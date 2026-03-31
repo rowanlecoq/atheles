@@ -27,7 +27,7 @@ export const metadata = {
     template: `%s | atheles 🔱`,
   },
   description:
-    "premium fitness and lifestyle clothing crafted for authentic superiority.",
+    "the new era of gymwear and streetwear. unlock your fullest potential 🔱 craft your aesthetic.",
   icons: {
     icon: "/logocircular.png",
     apple: "/logocircular.png",
