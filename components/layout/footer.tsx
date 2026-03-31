@@ -18,6 +18,7 @@ const quickLinks = [
 const helpLinks = [
   { title: "Contact Us", path: "/contact" },
   { title: "Sizing Guide", path: "/size-guide" },
+  { title: "Our Athletes", path: "/athletes" },
   { title: "Orders", path: "/account/order-help" },
   { title: "Returns", path: "/returns" },
   { title: "FAQ", path: "/faq" },
