@@ -340,8 +340,16 @@ export async function createCustomerAccount(
   }
 
   // Set DOB via Admin API tags (Storefront API doesn't support tags)
+  // Retry with delay since Shopify may not have indexed the new customer yet
   if (dob) {
-    updateCustomerTag(email, "dob", dob).catch(() => {});
+    const setDob = async () => {
+      for (let attempt = 0; attempt < 3; attempt++) {
+        if (attempt > 0) await new Promise((r) => setTimeout(r, 2000 * attempt));
+        const result = await updateCustomerTag(email, "dob", dob);
+        if (result.success) return;
+      }
+    };
+    setDob().catch(() => {});
   }
 
   return { success: true };
