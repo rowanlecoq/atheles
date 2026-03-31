@@ -2,10 +2,58 @@
 
 import { FadeIn, MagneticHover } from "components/animations";
 import Link from "next/link";
+import { useEffect, useState } from "react";
+
+const greetings = [
+  "welcome back",
+  "good to see you",
+  "hey",
+  "what's good",
+  "let's go",
+  "rise up",
+  "ready to ascend",
+];
 
 export function HeroCenter() {
+  const [userName, setUserName] = useState<string | null>(null);
+  const [greeting, setGreeting] = useState("");
+
+  useEffect(() => {
+    // Pick a random greeting
+    setGreeting(greetings[Math.floor(Math.random() * greetings.length)]!);
+
+    // Check if logged in
+    if (!document.cookie.includes("atheles-logged-in=1")) return;
+    try {
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        if (u.firstName || u.name) {
+          setUserName(u.firstName || u.name.split(" ")[0]);
+        }
+        return;
+      }
+    } catch {}
+    fetch("/api/auth/session")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.user) {
+          setUserName(data.user.firstName || data.user.name?.split(" ")[0] || null);
+        }
+      })
+      .catch(() => {});
+  }, []);
+
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-4 text-center">
+      {userName && greeting && (
+        <FadeIn direction="up" delay={0.15}>
+          <p className="mb-1 text-xs lowercase tracking-[0.08em] text-brand-dark-gold sm:text-sm">
+            {greeting}, {userName.toLowerCase()}.
+          </p>
+        </FadeIn>
+      )}
+
       <FadeIn direction="up" delay={0.3}>
         <p className="mb-2 text-sm lowercase tracking-[0.06em] text-brand-grey sm:text-base sm:tracking-[0.08em]">
           welcome to atheles.

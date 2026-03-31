@@ -87,10 +87,10 @@ export function AccountIcon() {
           alt="Profile"
           width={36}
           height={36}
-          className="h-9 w-9 rounded-full object-cover"
+          className="h-9 w-9 rounded-full object-cover transition-transform duration-200 hover:scale-110"
         />
       ) : loggedIn && initials ? (
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
+        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold transition-transform duration-200 hover:scale-110">
           {initials}
         </span>
       ) : (
