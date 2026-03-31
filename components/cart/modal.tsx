@@ -48,6 +48,7 @@ export default function CartModal() {
   const [discountCode, setDiscountCode] = useState("");
   const [discountError, setDiscountError] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
+  const [discountRemoved, setDiscountRemoved] = useState(false);
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
   const [addingFav, setAddingFav] = useState<string | null>(null);
@@ -186,7 +187,7 @@ export default function CartModal() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col border-l border-brand-dark-gold/30 bg-brand-dark p-4 text-white sm:p-6 md:w-[390px]">
+            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col overflow-y-auto border-l border-brand-dark-gold/30 bg-brand-dark p-4 text-white sm:p-6 md:w-[390px]">
               {/* Header */}
               <div className="flex items-center justify-between">
                 <p className="font-heading text-lg font-semibold text-brand-gold">
@@ -317,7 +318,7 @@ export default function CartModal() {
                   )}
                 </div>
               ) : (
-                <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden">
+                <div className="flex h-full flex-col">
                   {/* Urgency nudge */}
                   <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3.5 py-2.5">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 flex-none text-brand-gold">
@@ -329,7 +330,7 @@ export default function CartModal() {
                   </div>
 
                   {/* Cart items */}
-                  <ul className="mt-3 grow overflow-auto">
+                  <ul className="mt-3 grow">
                     {cart.lines
                       .sort((a, b) =>
                         a.merchandise.product.title.localeCompare(
@@ -537,7 +538,7 @@ export default function CartModal() {
 
                   {/* Discount code */}
                   {(() => {
-                    const appliedCode = cart.discountCodes?.find((dc) => dc.applicable);
+                    const appliedCode = discountRemoved ? null : cart.discountCodes?.find((dc) => dc.applicable);
                     const totalDiscount = cart.discountAllocations?.reduce(
                       (sum, a) => sum + parseFloat(a.discountedAmount.amount || "0"), 0
                     ) || 0;
@@ -565,9 +566,10 @@ export default function CartModal() {
                             <button
                               type="button"
                               onClick={async () => {
-                                await removeDiscountCode();
+                                setDiscountRemoved(true);
                                 setDiscountCode("");
                                 setDiscountError("");
+                                await removeDiscountCode();
                               }}
                               className="text-xs text-brand-grey hover:text-red-400"
                             >
@@ -616,6 +618,8 @@ export default function CartModal() {
                                   } else if (!result.applicable) {
                                     setDiscountError("invalid or expired code.");
                                     await removeDiscountCode();
+                                  } else {
+                                    setDiscountRemoved(false);
                                   }
                                   setApplyingDiscount(false);
                                 }}
