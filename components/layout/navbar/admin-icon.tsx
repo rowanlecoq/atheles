@@ -30,10 +30,10 @@ export function AdminIcon() {
 
   return (
     <Link
-      href="/admin/birthdays"
+      href="/admin"
       className="flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-red-400"
       aria-label="Admin"
-      title="Birthday Tracker"
+      title="Admin Dashboard"
     >
       <svg
         xmlns="http://www.w3.org/2000/svg"

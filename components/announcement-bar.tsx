@@ -3,24 +3,36 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-const announcements = [
+const defaultAnnouncements = [
   "to ascend.",
   "coming soon. this summer.",
-  "use code ROWAN for 10% off your order.",
   "authentic superiority.",
   "follow us at @atheles.co to share your aesthetic.",
 ];
 
 export function AnnouncementBar() {
+  const [announcements, setAnnouncements] = useState(defaultAnnouncements);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  // Fetch announcements from Shopify metafield
+  useEffect(() => {
+    fetch("/api/admin/announcements")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.announcements?.length > 0) {
+          setAnnouncements(d.announcements);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const startTimer = useCallback(() => {
     intervalRef.current = setInterval(() => {
       setIndex((prev) => (prev + 1) % announcements.length);
     }, 5000);
-  }, []);
+  }, [announcements.length]);
 
   const stopTimer = useCallback(() => {
     if (intervalRef.current) {
