@@ -165,6 +165,7 @@ export default function ProfileContent() {
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatarError, setAvatarError] = useState("");
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -300,9 +301,11 @@ export default function ProfileContent() {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     if (file.size > 5 * 1024 * 1024) {
-      setSaveMessage("image must be under 5mb.");
+      setAvatarError("image must be under 5mb.");
+      setTimeout(() => setAvatarError(""), 4000);
       return;
     }
+    setAvatarError("");
     const reader = new FileReader();
     reader.onload = () => {
       setCropSrc(reader.result as string);
@@ -326,10 +329,12 @@ export default function ProfileContent() {
       if (d.success && d.url) {
         setAvatar(d.url);
       } else if (d.error) {
-        setSaveMessage(d.error);
+        setAvatarError(d.error);
+        setTimeout(() => setAvatarError(""), 4000);
       }
     } catch {
-      setSaveMessage("failed to upload photo.");
+      setAvatarError("failed to upload photo.");
+      setTimeout(() => setAvatarError(""), 4000);
     }
     window.dispatchEvent(new Event("avatar-changed"));
   };
@@ -736,6 +741,9 @@ export default function ProfileContent() {
               remove
             </button>
           </div>
+        )}
+        {avatarError && (
+          <p className="mt-1 text-xs text-red-400">{avatarError}</p>
         )}
         <h1 className="font-heading text-2xl text-brand-gold sm:text-3xl">
           {user.name}
