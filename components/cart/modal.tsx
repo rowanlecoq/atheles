@@ -266,7 +266,7 @@ export default function CartModal() {
                                     if (!p.firstVariantId) return;
                                     setAddingFav(p.handle);
                                     try {
-                                      addItem(null, p.firstVariantId);
+                                      await addItem(null, p.firstVariantId);
                                     } catch {}
                                     setAddingFav(null);
                                   }}
