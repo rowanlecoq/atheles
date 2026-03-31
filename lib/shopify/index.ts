@@ -375,7 +375,7 @@ export async function getCollectionProducts({
 }): Promise<Product[]> {
   "use cache";
   cacheTag(TAGS.collections, TAGS.products);
-  cacheLife("days");
+  cacheLife("minutes");
 
   if (!endpoint) {
     console.log(
@@ -525,7 +525,7 @@ export async function getProductRecommendations(
 ): Promise<Product[]> {
   "use cache";
   cacheTag(TAGS.products);
-  cacheLife("days");
+  cacheLife("minutes");
 
   if (!endpoint) return [];
 
