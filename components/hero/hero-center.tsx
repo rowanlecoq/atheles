@@ -5,18 +5,17 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 
 const greetings = [
-  "welcome back",
-  "good to see you",
-  "hey",
-  "what's good",
-  "let's go",
-  "rise up",
-  "ready to ascend",
+  { text: "hey", suffix: "." },
+  { text: "welcome back,", suffix: "." },
+  { text: "what's good", suffix: "." },
+  { text: "what's up", suffix: "." },
+  { text: "hello,", suffix: "." },
+  { text: "ready to ascend,", suffix: "?" },
 ];
 
 export function HeroCenter() {
   const [userName, setUserName] = useState<string | null>(null);
-  const [greeting, setGreeting] = useState("");
+  const [greeting, setGreeting] = useState<{ text: string; suffix: string } | null>(null);
 
   useEffect(() => {
     // Pick a random greeting
@@ -49,7 +48,7 @@ export function HeroCenter() {
       {userName && greeting && (
         <FadeIn direction="up" delay={0.15}>
           <p className="mb-1 text-xs lowercase tracking-[0.08em] text-brand-dark-gold sm:text-sm">
-            {greeting}, {userName.toLowerCase()}.
+            {greeting.text} {userName.toLowerCase()}{greeting.suffix}
           </p>
         </FadeIn>
       )}

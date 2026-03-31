@@ -11,9 +11,7 @@ export const metadata: Metadata = {
 
 const accountNav = [
   { title: "orders", path: "/account" },
-  { title: "order help", path: "/account/order-help" },
-  { title: "profile", path: "/profile" },
-  { title: "favorites", path: "/favorites" },
+  { title: "help & faq", path: "/account/order-help" },
 ];
 
 export default function AccountLayout({
