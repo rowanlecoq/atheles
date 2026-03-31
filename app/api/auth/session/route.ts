@@ -70,7 +70,7 @@ export async function GET() {
         globalTheme: customer.globalTheme,
         isAthlete: customer.isAthlete,
         discountCode: customer.isAthlete
-          ? (process.env.DISCOUNT_ATHLETE || discountCodes["champion"] || null)
+          ? (process.env.DISCOUNT_ATHLETE || "athelesathlete")
           : (discountCodes[tierName] || null),
       },
     });
