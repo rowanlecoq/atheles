@@ -95,6 +95,11 @@ export async function updateCustomerTier(
     return { success: true };
   }
 
+  // Never overwrite admin or athlete tags — these are hand-assigned
+  if (currentTierTag === "tier:admin" || currentTierTag === "tier:athlete") {
+    return { success: true };
+  }
+
   // Remove old tier tags and add new one
   const filteredTags = adminCustomer.tags.filter((t) => !t.startsWith("tier:"));
   const newTags = [...filteredTags, `tier:${tier}`];
