@@ -1,5 +1,4 @@
 import Footer from "components/layout/footer";
-import Link from "next/link";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -33,7 +32,7 @@ const requirements = [
   "stay true to your aesthetic.",
   "focus on your journey.",
   "highlight what makes you unique.",
-  "tag @atheles.co in your posts with hashtags like #atheles #athelesathlete.",
+  "tag @atheles.co in your posts and hashtags like #atheles #athelesathlete to promote engagement.",
   "have an active platform.",
 ];
 
@@ -157,8 +156,10 @@ export default function AthletesPage() {
                       className="text-brand-grey transition-colors hover:text-brand-gold"
                       aria-label="LinkedIn"
                     >
-                      <svg viewBox="0 0 24 24" fill="currentColor" className="h-4 w-4">
-                        <path d="M20.45 20.45h-3.55v-5.57c0-1.33-.02-3.04-1.85-3.04-1.85 0-2.14 1.45-2.14 2.94v5.67H9.36V9h3.41v1.56h.05a3.74 3.74 0 013.37-1.85c3.6 0 4.27 2.37 4.27 5.46v6.28zM5.34 7.43a2.06 2.06 0 110-4.12 2.06 2.06 0 010 4.12zM7.12 20.45H3.56V9h3.56v11.45zM22.23 0H1.77A1.75 1.75 0 000 1.73v20.54A1.75 1.75 0 001.77 24h20.46A1.75 1.75 0 0024 22.27V1.73A1.75 1.75 0 0022.23 0z" />
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4">
+                        <path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" />
+                        <rect x="2" y="9" width="4" height="12" />
+                        <circle cx="4" cy="4" r="2" />
                       </svg>
                     </a>
                   )}
@@ -189,18 +190,6 @@ export default function AthletesPage() {
               </li>
             ))}
           </ul>
-
-          <div className="border-t border-brand-dark-gold/20 pt-6 text-center">
-            <p className="mb-4 text-sm text-brand-grey">
-              think you have what it takes? reach out and tell us about yourself.
-            </p>
-            <Link
-              href="/contact"
-              className="inline-block rounded-full bg-brand-gold px-8 py-3 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
-            >
-              apply now
-            </Link>
-          </div>
         </div>
       </div>
       <Footer />
