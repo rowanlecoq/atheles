@@ -18,7 +18,6 @@ const quickLinks = [
 const helpLinks = [
   { title: "Contact Us", path: "/contact" },
   { title: "Sizing Guide", path: "/size-guide" },
-  { title: "Our Athletes", path: "/athletes" },
   { title: "Orders", path: "/account/order-help" },
   { title: "Returns", path: "/returns" },
   { title: "FAQ", path: "/faq" },
@@ -50,14 +49,26 @@ export default async function Footer() {
             <h3 className="mb-4 font-heading text-sm uppercase tracking-wider text-brand-gold">
               Want to join the team?
             </h3>
-            <a
-              href="https://forms.gle/h9KqFyp67jmGL3KM6"
-              target="_blank"
-              rel="noopener noreferrer"
-              className="text-sm text-brand-grey underline-offset-4 transition-colors hover:text-brand-gold hover:underline"
-            >
-              apply here
-            </a>
+            <ul className="space-y-2">
+              <li>
+                <a
+                  href="https://forms.gle/h9KqFyp67jmGL3KM6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-brand-grey underline-offset-4 transition-colors hover:text-brand-gold hover:underline"
+                >
+                  apply here
+                </a>
+              </li>
+              <li>
+                <Link
+                  href="/athletes"
+                  className="text-sm text-brand-grey underline-offset-4 transition-colors hover:text-brand-gold hover:underline"
+                >
+                  our athletes
+                </Link>
+              </li>
+            </ul>
           </div>
 
           {/* Column 3: Help / Shopify Menu */}
