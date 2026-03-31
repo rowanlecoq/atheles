@@ -40,11 +40,10 @@ export default function AthletesPage() {
   return (
     <>
       <div className="mx-auto min-h-[calc(100vh-200px)] max-w-4xl px-4 py-16 sm:px-6">
-        <h1 className="mb-2 font-heading text-3xl uppercase tracking-wider text-brand-gold sm:text-4xl">
-          our athletes.
+        <h1 className="mb-2 text-center font-heading text-3xl tracking-wider text-brand-gold sm:text-4xl">
+          our athletes
         </h1>
-        <div className="mb-2 h-px w-24 bg-brand-dark-gold/40" />
-        <p className="mb-10 text-sm text-brand-grey">
+        <p className="mb-10 text-center text-sm text-brand-grey">
           atheles athletes are on the way. stay tuned.
         </p>
 
