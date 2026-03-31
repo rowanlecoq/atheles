@@ -15,14 +15,18 @@ import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
-// Tier-locked discount codes — requires at least this tier to use
+// Tier-locked discount codes — requires specific tier or above to use
 const TIER_LOCKED_CODES: Record<string, string> = {
   silverloyalty: "silver",
   goldloyalty: "gold",
   platinumloyalty: "platinum",
   championloyalty: "champion",
-  athleteloyalty: "athlete",
+  athelesathlete: "athlete", // athlete-only code
 };
+
+// Athletes can ONLY use athlete codes, not regular tier codes
+const ATHLETE_ONLY_CODES = new Set(["athelesathlete"]);
+const REGULAR_TIER_CODES = new Set(["silverloyalty", "goldloyalty", "platinumloyalty", "championloyalty"]);
 
 const TIER_LEVELS: Record<string, number> = {
   bronze: 0,
@@ -30,11 +34,9 @@ const TIER_LEVELS: Record<string, number> = {
   gold: 2,
   platinum: 3,
   champion: 4,
-  athlete: 5, // Athletes can use all codes
 };
 
-function getUserTierLevel(totalSpent: string, isAthlete?: boolean): { name: string; level: number } {
-  if (isAthlete) return { name: "athlete", level: 5 };
+function getUserTierLevel(totalSpent: string): { name: string; level: number } {
   const points = Math.floor(parseFloat(totalSpent || "0") * 50);
   if (points >= 50000) return { name: "champion", level: 4 };
   if (points >= 30000) return { name: "platinum", level: 3 };
@@ -159,7 +161,7 @@ export async function applyDiscountCode(code: string): Promise<{
     const requiredTier = TIER_LOCKED_CODES[codeLower];
 
     if (requiredTier) {
-      // Tier-locked code — verify the user has sufficient tier
+      // Tier-locked code — verify the user has the right rank
       const cookieStore = await cookies();
       const token = cookieStore.get("atheles-auth-token")?.value;
 
@@ -178,15 +180,38 @@ export async function applyDiscountCode(code: string): Promise<{
         ? "1100.00"
         : customer.totalSpent;
 
-      const userTier = getUserTierLevel(totalSpent, customer.isAthlete);
-      const requiredLevel = TIER_LEVELS[requiredTier] ?? 0;
+      const isAthlete = customer.isAthlete;
 
-      if (userTier.level < requiredLevel) {
+      // Athlete-only codes: only athletes can use them
+      if (ATHLETE_ONLY_CODES.has(codeLower) && !isAthlete) {
         return {
           success: false,
           applicable: false,
-          error: `this code requires ${requiredTier} tier or above.`,
+          error: "this code is reserved for atheles athletes.",
         };
+      }
+
+      // Regular tier codes: athletes CANNOT use them (they have their own)
+      if (REGULAR_TIER_CODES.has(codeLower) && isAthlete) {
+        return {
+          success: false,
+          applicable: false,
+          error: "athletes have their own exclusive discount.",
+        };
+      }
+
+      // Regular tier codes: check tier level
+      if (!isAthlete) {
+        const userTier = getUserTierLevel(totalSpent);
+        const requiredLevel = TIER_LEVELS[requiredTier] ?? 0;
+
+        if (userTier.level < requiredLevel) {
+          return {
+            success: false,
+            applicable: false,
+            error: `this code requires ${requiredTier} tier or above.`,
+          };
+        }
       }
     }
 
