@@ -10,8 +10,7 @@ type Member = {
   tier: string;
   dob: string | null;
   createdAt: string;
-  ordersCount: string;
-  totalSpent: string;
+  orders: string;
 };
 
 const tierColors: Record<string, string> = {

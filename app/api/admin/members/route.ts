@@ -49,13 +49,17 @@ export async function GET() {
             lastName
             tags
             createdAt
-            ordersCount
-            totalSpent
+            numberOfOrders
           }
         }
       }
     }
   `);
+
+  if (data.errors) {
+    console.error("[admin/members] GraphQL errors:", JSON.stringify(data.errors));
+    return NextResponse.json({ error: "failed to fetch customers", details: data.errors }, { status: 500 });
+  }
 
   const customers = (data.data?.customers?.edges || []).map(
     (e: { node: Record<string, unknown> }) => {
@@ -66,8 +70,7 @@ export async function GET() {
         lastName: string;
         tags: string[];
         createdAt: string;
-        ordersCount: string;
-        totalSpent: string;
+        numberOfOrders: string;
       };
       const tierTag = c.tags?.find((t) => t.startsWith("tier:"));
       const dobTag = c.tags?.find((t) => t.startsWith("dob:"));
@@ -78,8 +81,7 @@ export async function GET() {
         tier: tierTag ? tierTag.replace("tier:", "") : "none",
         dob: dobTag ? dobTag.replace("dob:", "") : null,
         createdAt: c.createdAt,
-        ordersCount: c.ordersCount,
-        totalSpent: c.totalSpent,
+        orders: c.numberOfOrders || "0",
         tags: c.tags,
       };
     },
