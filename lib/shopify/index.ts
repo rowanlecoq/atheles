@@ -503,7 +503,7 @@ export async function getPages(): Promise<Page[]> {
 export async function getProduct(handle: string): Promise<Product | undefined> {
   "use cache";
   cacheTag(TAGS.products);
-  cacheLife("days");
+  cacheLife("minutes");
 
   if (!endpoint) {
     console.log(`Skipping getProduct for '${handle}' - Shopify not configured`);
@@ -550,7 +550,7 @@ export async function getProducts({
 }): Promise<Product[]> {
   "use cache";
   cacheTag(TAGS.products);
-  cacheLife("days");
+  cacheLife("minutes");
 
   if (!endpoint) return [];
 

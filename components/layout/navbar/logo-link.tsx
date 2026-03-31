@@ -16,7 +16,7 @@ export function LogoLink() {
         href="/"
         prefetch={true}
         onClick={handleClick}
-        className="group flex items-center justify-center"
+        className="group flex items-center justify-center outline-none [-webkit-tap-highlight-color:transparent]"
       >
         <LogoSquare />
       </Link>
