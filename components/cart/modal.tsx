@@ -116,11 +116,16 @@ export default function CartModal() {
       .catch(() => {});
   }, [isOpen]);
 
-  const favCacheRef = useRef<{ handles: string; products: FavProduct[] } | null>(null);
+  const favCacheRef = useRef<{ products: FavProduct[] } | null>(null);
 
-  // Load favorited products (excluding items already in cart), cached
+  // Load favorited products once when cart opens
   useEffect(() => {
     if (!isOpen) return;
+    // Use cache if already loaded this session
+    if (favCacheRef.current) {
+      setFavProducts(favCacheRef.current.products);
+      return;
+    }
     try {
       const stored = localStorage.getItem("atheles-favorites");
       const favHandles: string[] = stored ? JSON.parse(stored) : [];
@@ -128,34 +133,24 @@ export default function CartModal() {
         setFavProducts([]);
         return;
       }
-      const cartHandles = cart?.lines.map((l) => l.merchandise.product.handle) || [];
-      const missing = favHandles.filter((h) => !cartHandles.includes(h)).slice(0, 6);
-      if (missing.length === 0) {
-        setFavProducts([]);
-        return;
-      }
-      const key = missing.sort().join(",");
-      // Use cache if same set
-      if (favCacheRef.current?.handles === key) {
-        setFavProducts(favCacheRef.current.products);
-        return;
-      }
+      const limited = favHandles.slice(0, 6);
       fetch("/api/products/by-handles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ handles: missing }),
+        body: JSON.stringify({ handles: limited }),
       })
         .then((r) => (r.ok ? r.json() : { products: [] }))
         .then((d) => {
           const products = d.products || [];
-          favCacheRef.current = { handles: key, products };
+          favCacheRef.current = { products };
           setFavProducts(products);
         })
         .catch(() => {});
     } catch {
       setFavProducts([]);
     }
-  }, [isOpen, cart?.lines]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
 
   const hasItems = cart && cart.lines.length > 0;
 

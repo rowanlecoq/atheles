@@ -59,7 +59,7 @@ export default async function RootLayout({
             <KonamiLightning />
             <Navbar />
             <ThemeBackground />
-            <main className="relative z-[1] w-full overflow-x-hidden">
+            <main className="w-full">
               <PageTransition>{children}</PageTransition>
               <Toaster closeButton />
             </main>
