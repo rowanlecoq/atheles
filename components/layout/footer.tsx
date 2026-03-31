@@ -98,7 +98,7 @@ export default async function Footer() {
               Follow Our Socials
             </h3>
             <p className="mb-4 text-xs text-brand-grey">
-              Follow the brand journey.
+              be part of the new era.
             </p>
             <div className="flex gap-4">
               <a
