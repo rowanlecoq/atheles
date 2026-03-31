@@ -13,7 +13,6 @@ import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
-import Link from "next/link";
 import { Fragment, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
@@ -224,20 +223,20 @@ export default function CartModal() {
 
                     {/* Quick shop links */}
                     <div className="mt-6 flex w-full flex-col gap-2.5">
-                      <Link
+                      <a
                         href="/search/mens"
                         onClick={closeCart}
                         className="flex min-h-[44px] items-center justify-center rounded-full bg-brand-gold px-6 py-3 text-center text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
                       >
                         shop mens
-                      </Link>
-                      <Link
+                      </a>
+                      <a
                         href="/search"
                         onClick={closeCart}
                         className="flex min-h-[44px] items-center justify-center rounded-full border border-brand-dark-gold/30 px-6 py-3 text-center text-sm uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
                       >
                         browse all
-                      </Link>
+                      </a>
                     </div>
                   </div>
 
@@ -311,9 +310,9 @@ export default function CartModal() {
                                   amount={p.priceRange.maxVariantPrice.amount}
                                   currencyCode={p.priceRange.maxVariantPrice.currencyCode}
                                 />
-                                <Link href={`/product/${p.handle}`} onClick={closeCart} className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold">
+                                <a href={`/product/${p.handle}`} onClick={closeCart} className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold">
                                   view
-                                </Link>
+                                </a>
                               </div>
                             </div>
                           );
@@ -323,7 +322,7 @@ export default function CartModal() {
                   )}
                 </div>
               ) : (
-                <div className="flex h-full flex-col overflow-hidden">
+                <div className="flex h-full flex-col overflow-y-auto overflow-x-hidden">
                   {/* Urgency nudge */}
                   <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3.5 py-2.5">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 flex-none text-brand-gold">
@@ -388,7 +387,7 @@ export default function CartModal() {
                                     }
                                   />
                                 </div>
-                                <Link
+                                <a
                                   href={merchandiseUrl}
                                   onClick={closeCart}
                                   className="z-30 ml-3 flex min-w-0 flex-row"
@@ -404,7 +403,7 @@ export default function CartModal() {
                                       </p>
                                     ) : null}
                                   </div>
-                                </Link>
+                                </a>
                               </div>
                               <div className="flex h-16 flex-col justify-between">
                                 <Price
@@ -464,7 +463,6 @@ export default function CartModal() {
                                   if (!p.firstVariantId) return;
                                   setAddingFav(p.handle);
                                   try {
-                                    const { addItem } = await import("./actions");
                                     await addItem(null, p.firstVariantId);
                                   } catch {}
                                   setAddingFav(null);
@@ -527,13 +525,13 @@ export default function CartModal() {
                                 amount={p.priceRange.maxVariantPrice.amount}
                                 currencyCode={p.priceRange.maxVariantPrice.currencyCode}
                               />
-                              <Link
+                              <a
                                 href={`/product/${p.handle}`}
                                 onClick={closeCart}
                                 className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold"
                               >
                                 view
-                              </Link>
+                              </a>
                             </div>
                           </div>
                           );
