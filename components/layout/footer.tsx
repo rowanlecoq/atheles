@@ -47,7 +47,7 @@ export default async function Footer() {
           {/* Column 2: The Team */}
           <div>
             <h3 className="mb-4 font-heading text-sm uppercase tracking-wider text-brand-gold">
-              The Team
+              Atheles Team
             </h3>
             <ul className="space-y-2">
               <li>
