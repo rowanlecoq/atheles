@@ -100,12 +100,15 @@ export function ContactForm() {
           required
           className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white focus:border-brand-gold focus:outline-none"
         >
-          <option value="">Select a subject</option>
-          <option value="Order Inquiry">Order Inquiry</option>
-          <option value="Sizing Help">Sizing Help</option>
-          <option value="Returns & Exchanges">Returns & Exchanges</option>
-          <option value="Collaboration">Collaboration</option>
-          <option value="Other">Other</option>
+          <option value="">select a subject</option>
+          <option value="order inquiry">order inquiry</option>
+          <option value="sizing help">sizing help</option>
+          <option value="returns & exchanges">returns & exchanges</option>
+          <option value="collaboration">collaboration</option>
+          <option value="sponsorship">sponsorship</option>
+          <option value="wholesale inquiry">wholesale inquiry</option>
+          <option value="feedback">feedback</option>
+          <option value="other">other</option>
         </select>
       </div>
       <div>
