@@ -1,48 +1,101 @@
+import Link from "next/link";
+
 export default function AccountDashboard() {
   return (
     <div>
       <h2 className="mb-6 font-heading text-2xl text-brand-light-gold">
-        Dashboard
+        orders
       </h2>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
-          <h3 className="mb-2 text-xs uppercase tracking-wider text-brand-gold">
-            Recent Orders
-          </h3>
-          <p className="text-sm text-brand-grey">
-            No orders yet. Start shopping to see your order history here.
-          </p>
+
+      {/* Empty orders state */}
+      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8 text-center">
+        <div className="mb-4 flex justify-center">
+          <div className="flex h-16 w-16 items-center justify-center rounded-full bg-brand-dark-gold/10">
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-7 w-7 text-brand-grey/60">
+              <path d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4" />
+            </svg>
+          </div>
         </div>
-        <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
-          <h3 className="mb-2 text-xs uppercase tracking-wider text-brand-gold">
-            Wishlist
-          </h3>
-          <p className="text-sm text-brand-grey">
-            Your wishlist is empty. Browse our collection and save items you
-            love.
-          </p>
+        <p className="mb-1 text-sm text-brand-pale-gold">no orders yet.</p>
+        <p className="mb-5 text-xs text-brand-grey">
+          your order history will appear here once you make a purchase.
+        </p>
+        <Link
+          href="/search"
+          className="inline-block rounded-full bg-brand-gold px-6 py-2.5 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
+        >
+          start shopping
+        </Link>
+      </div>
+
+      {/* Delivery info */}
+      <div className="mb-6">
+        <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
+          delivery information
+        </h3>
+        <div className="space-y-3">
+          <InfoCard
+            title="expected delivery"
+            description="standard shipping takes 5–10 business days. express options available at checkout depending on your region."
+          />
+          <InfoCard
+            title="how do i track my order?"
+            description="once your order ships, you'll receive a confirmation email with a tracking link. you can also check your order status here."
+          />
+          <InfoCard
+            title="i want to change my order or address"
+            description="contact us as soon as possible at athelesbrand@gmail.com. we can only make changes before the order has been dispatched."
+          />
+          <InfoCard
+            title="customs and import fees"
+            description="international orders may be subject to customs duties and taxes. these are determined by your local customs office and are the responsibility of the recipient."
+          />
         </div>
       </div>
 
-      <div className="mt-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
-        <h3 className="mb-4 text-xs uppercase tracking-wider text-brand-gold">
-          Account Details
+      {/* Problem section */}
+      <div>
+        <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
+          need help with an order?
         </h3>
-        <div className="space-y-3 text-sm">
-          <div className="flex justify-between border-b border-brand-dark-gold/10 pb-3">
-            <span className="text-brand-grey">Name</span>
-            <span className="text-white">—</span>
-          </div>
-          <div className="flex justify-between border-b border-brand-dark-gold/10 pb-3">
-            <span className="text-brand-grey">Email</span>
-            <span className="text-white">—</span>
-          </div>
-          <div className="flex justify-between">
-            <span className="text-brand-grey">Member Since</span>
-            <span className="text-white">—</span>
-          </div>
+        <div className="space-y-3">
+          <InfoCard
+            title="problem with your order?"
+            description="if something arrived damaged, incorrect, or didn't show up — reach out to us and we'll sort it out."
+            link={{ href: "/contact", label: "contact us" }}
+          />
+          <InfoCard
+            title="returns & exchanges"
+            description="check our returns policy for details on how to return or exchange an item."
+            link={{ href: "/returns", label: "view policy" }}
+          />
         </div>
       </div>
+    </div>
+  );
+}
+
+function InfoCard({
+  title,
+  description,
+  link,
+}: {
+  title: string;
+  description: string;
+  link?: { href: string; label: string };
+}) {
+  return (
+    <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-5 py-4">
+      <h4 className="mb-1.5 text-sm font-medium text-white">{title}</h4>
+      <p className="text-xs leading-relaxed text-brand-grey">{description}</p>
+      {link && (
+        <Link
+          href={link.href}
+          className="mt-2 inline-block text-xs uppercase tracking-wider text-brand-gold transition-colors hover:text-brand-pale-gold"
+        >
+          {link.label} →
+        </Link>
+      )}
     </div>
   );
 }

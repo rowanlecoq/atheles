@@ -4,15 +4,16 @@ import type { Metadata } from "next";
 
 export const metadata: Metadata = {
   title: {
-    template: "%s | My Account",
-    default: "My Account",
+    template: "%s | my account",
+    default: "my account",
   },
 };
 
 const accountNav = [
-  { title: "Dashboard", path: "/account" },
-  { title: "Orders", path: "/account/orders" },
-  { title: "Wishlist", path: "/account/wishlist" },
+  { title: "orders", path: "/account" },
+  { title: "order help", path: "/account/order-help" },
+  { title: "profile", path: "/profile" },
+  { title: "favorites", path: "/favorites" },
 ];
 
 export default function AccountLayout({
@@ -22,9 +23,9 @@ export default function AccountLayout({
 }) {
   return (
     <>
-      <div className="mx-auto max-w-5xl px-4 py-10 sm:py-12">
+      <div className="mx-auto min-h-[calc(100vh-200px)] max-w-5xl px-4 py-10 sm:py-12">
         <h1 className="mb-8 font-heading text-3xl text-brand-gold sm:text-4xl">
-          My Account
+          my account
         </h1>
         <div className="flex flex-col gap-8 md:flex-row">
           {/* Sidebar */}
@@ -34,17 +35,12 @@ export default function AccountLayout({
                 <li key={item.path}>
                   <Link
                     href={item.path}
-                    className="block rounded px-4 py-2 text-sm text-brand-grey transition-colors hover:bg-brand-medium-grey/10 hover:text-brand-gold"
+                    className="block rounded px-4 py-2.5 text-sm text-brand-grey transition-colors hover:bg-brand-medium-grey/10 hover:text-brand-gold"
                   >
                     {item.title}
                   </Link>
                 </li>
               ))}
-              <li>
-                <button className="block w-full rounded px-4 py-2 text-left text-sm text-brand-grey transition-colors hover:bg-brand-medium-grey/10 hover:text-red-400">
-                  Sign Out
-                </button>
-              </li>
             </ul>
           </nav>
 
