@@ -3,6 +3,7 @@ import { getMenu } from "lib/shopify";
 import type { Menu } from "lib/shopify/types";
 import { Suspense } from "react";
 import { AccountIcon } from "./account-icon";
+import { AdminIcon } from "./admin-icon";
 import { CategoryNav } from "./category-nav";
 import { CountrySelector } from "./country-selector";
 import { FavoritesIcon } from "./favorites-icon";
@@ -44,6 +45,7 @@ export async function Navbar() {
           {/* Right: Search + Account + Cart */}
           <div className="flex w-1/3 items-center justify-end gap-3">
             <SearchToggle />
+            <AdminIcon />
             <AccountIcon />
             <CartModal />
           </div>
