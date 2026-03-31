@@ -4,7 +4,7 @@ export default function AccountDashboard() {
   return (
     <div>
       <h2 className="mb-6 font-heading text-2xl text-brand-light-gold">
-        orders
+        my orders
       </h2>
 
       {/* Empty orders state */}
