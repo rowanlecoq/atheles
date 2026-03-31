@@ -30,6 +30,8 @@ export function AddToCart({ product }: { product: Product }) {
     setAdding(true);
     // Optimistic update — shows in cart immediately
     addCartItem(finalVariant, product);
+    // Open cart drawer immediately
+    window.dispatchEvent(new Event("open-cart"));
     // Server action — runs in background
     addItem(null, selectedVariantId).catch(() => {});
     setAdding(false);

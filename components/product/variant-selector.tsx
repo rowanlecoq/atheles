@@ -2,7 +2,8 @@
 
 import clsx from "clsx";
 import { ProductOption, ProductVariant } from "lib/shopify/types";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useSearchParams } from "next/navigation";
+import { useCallback, useTransition } from "react";
 
 type Combination = {
   id: string;
@@ -17,8 +18,9 @@ export function VariantSelector({
   options: ProductOption[];
   variants: ProductVariant[];
 }) {
-  const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
+  const [, startTransition] = useTransition();
   const hasNoOptionsOrJustOneOption =
     !options.length ||
     (options.length === 1 && options[0]?.values.length === 1);
@@ -42,11 +44,15 @@ export function VariantSelector({
   const updateOption = (name: string, value: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set(name, value);
-    router.replace(`?${params.toString()}`, { scroll: false });
+    // Instant URL update — no server round-trip
+    const newUrl = `${pathname}?${params.toString()}`;
+    window.history.replaceState(null, "", newUrl);
+    // Trigger React re-render to pick up new search params
+    startTransition(() => {});
   };
 
   return options.map((option) => (
-    <form key={option.id}>
+    <div key={option.id}>
       <div className="mb-6">
         <div className="flex flex-wrap gap-2 rounded-lg border border-brand-dark-gold/20 p-2">
           {option.values.map((value) => {
@@ -75,7 +81,8 @@ export function VariantSelector({
 
             return (
               <button
-                formAction={() => updateOption(optionNameLowerCase, value)}
+                type="button"
+                onClick={() => updateOption(optionNameLowerCase, value)}
                 key={value}
                 aria-disabled={!isAvailableForSale}
                 disabled={!isAvailableForSale}
@@ -97,6 +104,6 @@ export function VariantSelector({
           })}
         </div>
       </div>
-    </form>
+    </div>
   ));
 }
