@@ -10,6 +10,7 @@ const { SITE_NAME } = process.env;
 const quickLinks = [
   { title: "Store", path: "/search" },
   { title: "About", path: "/about" },
+  { title: "Our Athletes", path: "/athletes" },
   { title: "Size Guide", path: "/size-guide" },
   { title: "FAQ", path: "/faq" },
 ];
