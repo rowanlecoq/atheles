@@ -90,8 +90,8 @@ const ATHLETE_TIER = {
   name: "ATHLETE",
   min: 0,
   max: Infinity,
-  barGradient: "from-rose-500 via-amber-400 to-yellow-200",
-  titleGradient: "from-rose-300 via-amber-200 to-yellow-100",
+  barGradient: "from-sky-400 via-teal-300 to-amber-300",
+  titleGradient: "from-sky-300 via-teal-200 to-amber-200",
   perks: [
     "exclusive access",
     "20% athlete discount",
