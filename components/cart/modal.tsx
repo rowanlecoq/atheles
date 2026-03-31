@@ -585,14 +585,24 @@ export default function CartModal() {
                                   setDiscountError("");
                                 }}
                                 placeholder="Enter code"
-                                onKeyDown={(e) => {
+                                onKeyDown={async (e) => {
                                   if (e.key === "Enter" && discountCode.trim() && !applyingDiscount) {
                                     e.preventDefault();
-                                    (e.target as HTMLInputElement).closest("div")?.querySelector("button")?.click();
+                                    (e.target as HTMLInputElement).blur();
+                                    setApplyingDiscount(true);
+                                    setDiscountError("");
+                                    const result = await applyDiscountCode(discountCode.trim());
+                                    if (!result.success) {
+                                      setDiscountError(result.error || "failed to apply code.");
+                                    } else if (!result.applicable) {
+                                      setDiscountError("invalid or expired code.");
+                                      await removeDiscountCode();
+                                    }
+                                    setApplyingDiscount(false);
                                   }
                                 }}
-                                enterKeyHint="go"
-                                className="flex-1 rounded-lg border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                                enterKeyHint="done"
+                                className="flex-1 rounded-lg border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-base text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
                               />
                               <button
                                 type="button"
