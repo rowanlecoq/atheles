@@ -20,12 +20,12 @@ export default function AccountDashboard() {
         <p className="mb-5 text-xs text-brand-grey">
           your order history will appear here once you make a purchase.
         </p>
-        <Link
+        <a
           href="/search"
           className="inline-block rounded-full bg-brand-gold px-6 py-2.5 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
         >
           start shopping
-        </Link>
+        </a>
       </div>
 
       {/* Delivery info */}
