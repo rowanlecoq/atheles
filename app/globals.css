@@ -62,6 +62,8 @@ html {
   text-size-adjust: 100%;
   width: 100%;
   overflow-x: hidden;
+  scroll-padding-top: 120px;
+  -webkit-tap-highlight-color: transparent;
   /* scrollbar-color prevents a gray flash on non-overlay scrollbar systems */
   scrollbar-color: var(--color-brand-medium-grey) var(--color-brand-dark);
 }

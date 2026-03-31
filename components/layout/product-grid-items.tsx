@@ -20,6 +20,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
 import { useState } from "react";
+import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
 function ProductCard({ product }: { product: Product }) {
@@ -37,10 +38,7 @@ function ProductCard({ product }: { product: Product }) {
     if (!variant) return;
     setAdding(true);
     addCartItem(variant, product);
-    try {
-      const { addItem } = await import("components/cart/actions");
-      await addItem(null, variantId);
-    } catch {}
+    addItem(null, variantId).catch(() => {});
     window.dispatchEvent(new Event("open-cart"));
     setAdding(false);
     setShowSizes(false);
