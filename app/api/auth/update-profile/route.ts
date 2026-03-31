@@ -82,7 +82,7 @@ export async function POST(request: Request) {
 
     const points = Math.floor(parseFloat(totalSpent) * 50);
     const tierName = getTierName(points);
-    if (!customer.isAthlete) {
+    if (!customer.isAthlete && !customer.isAdmin) {
       updateCustomerTier(customer.email, tierName).catch(() => {});
     }
 

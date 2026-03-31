@@ -41,7 +41,7 @@ export async function GET() {
     // Auto-tag customer with their tier (non-blocking) — skip if athlete
     const points = Math.floor(parseFloat(totalSpent) * 50);
     const tierName = getTierName(points);
-    if (!customer.isAthlete) {
+    if (!customer.isAthlete && !customer.isAdmin) {
       updateCustomerTier(customer.email, tierName).catch(() => {});
     }
 
@@ -69,6 +69,7 @@ export async function GET() {
         theme: customer.theme,
         globalTheme: customer.globalTheme,
         isAthlete: customer.isAthlete,
+        isAdmin: customer.isAdmin,
         discountCode: customer.isAthlete
           ? (process.env.DISCOUNT_ATHLETE || "athelesathlete")
           : (discountCodes[tierName] || null),
