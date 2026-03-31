@@ -44,22 +44,12 @@ export default async function Footer() {
             </p>
           </div>
 
-          {/* Column 2: Join the Team */}
+          {/* Column 2: The Team */}
           <div>
             <h3 className="mb-4 font-heading text-sm uppercase tracking-wider text-brand-gold">
-              Want to join the team?
+              The Team
             </h3>
             <ul className="space-y-2">
-              <li>
-                <a
-                  href="https://forms.gle/h9KqFyp67jmGL3KM6"
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-sm text-brand-grey underline-offset-4 transition-colors hover:text-brand-gold hover:underline"
-                >
-                  apply here
-                </a>
-              </li>
               <li>
                 <Link
                   href="/athletes"
@@ -67,6 +57,16 @@ export default async function Footer() {
                 >
                   our athletes
                 </Link>
+              </li>
+              <li>
+                <a
+                  href="https://forms.gle/h9KqFyp67jmGL3KM6"
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-sm text-brand-grey underline-offset-4 transition-colors hover:text-brand-gold hover:underline"
+                >
+                  careers
+                </a>
               </li>
             </ul>
           </div>

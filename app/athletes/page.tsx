@@ -182,7 +182,7 @@ export default function AthletesPage() {
           <h3 className="mb-3 text-xs uppercase tracking-wider text-brand-pale-gold">
             requirements
           </h3>
-          <ul className="mb-8 space-y-2.5">
+          <ul className="space-y-2.5">
             {requirements.map((req) => (
               <li key={req} className="flex items-start gap-2.5 text-sm text-brand-grey">
                 <span className="mt-0.5 text-xs text-brand-gold">🔱</span>
