@@ -33,7 +33,7 @@ const requirements = [
   "stay true to your aesthetic.",
   "focus on your journey.",
   "highlight what makes you unique.",
-  "tag @atheles.co in your posts and hashtags like #atheles #athelesathlete to promote engagement.",
+  "tag @atheles.co in your posts with hashtags like #atheles #athelesathlete.",
   "have an active platform.",
 ];
 
