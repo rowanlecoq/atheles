@@ -202,18 +202,120 @@ export default function CartModal() {
               </div>
 
               {!hasItems ? (
-                <div className="flex flex-1 flex-col items-center justify-center">
-                  <ShoppingCartIcon className="h-16 text-brand-grey" />
-                  <p className="mt-6 text-center text-2xl font-bold text-brand-grey">
-                    Your cart is empty.
-                  </p>
-                  <Link
-                    href="/search"
-                    onClick={closeCart}
-                    className="mt-4 text-sm uppercase tracking-wider text-brand-gold transition-colors hover:text-brand-pale-gold"
-                  >
-                    continue shopping
-                  </Link>
+                <div className="flex h-full flex-col">
+                  {/* Empty state */}
+                  <div className="flex flex-1 flex-col items-center justify-center px-4">
+                    {/* Shopping bag icon */}
+                    <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-brand-dark-gold/10">
+                      <ShoppingCartIcon className="h-12 w-12 text-brand-grey/60" />
+                    </div>
+                    <p className="font-heading text-lg uppercase tracking-wider text-brand-pale-gold">
+                      your cart is currently empty.
+                    </p>
+                    <p className="mt-2 text-sm text-brand-grey">
+                      explore our collection and find something you love.
+                    </p>
+
+                    {/* Quick shop links */}
+                    <div className="mt-6 flex w-full flex-col gap-2.5">
+                      <Link
+                        href="/search/mens"
+                        onClick={closeCart}
+                        className="flex min-h-[44px] items-center justify-center rounded-full bg-brand-gold px-6 py-3 text-center text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
+                      >
+                        shop mens
+                      </Link>
+                      <Link
+                        href="/search"
+                        onClick={closeCart}
+                        className="flex min-h-[44px] items-center justify-center rounded-full border border-brand-dark-gold/30 px-6 py-3 text-center text-sm uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+                      >
+                        browse all
+                      </Link>
+                    </div>
+                  </div>
+
+                  {/* Favorites section in empty cart too */}
+                  {favProducts.length > 0 && (
+                    <div className="border-t border-brand-dark-gold/20 px-1 pb-4 pt-3">
+                      <div className="mb-2 flex items-center gap-1.5">
+                        <HeartIcon className="h-3.5 w-3.5 text-brand-gold" />
+                        <p className="text-xs uppercase tracking-wider text-brand-grey">
+                          from your favorites
+                        </p>
+                      </div>
+                      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+                        {favProducts.map((p) => {
+                          const canAdd = !!p.firstVariantId && !!p.availableForSale;
+                          return (
+                            <div
+                              key={p.handle}
+                              className="group flex w-[130px] flex-none flex-col rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-2 transition-colors hover:border-brand-gold/30"
+                            >
+                              {canAdd ? (
+                                <button
+                                  type="button"
+                                  disabled={addingFav === p.handle}
+                                  onClick={async () => {
+                                    if (!p.firstVariantId) return;
+                                    setAddingFav(p.handle);
+                                    try {
+                                      const { addItem } = await import("./actions");
+                                      await addItem(null, p.firstVariantId);
+                                    } catch {}
+                                    setAddingFav(null);
+                                  }}
+                                  className="text-left"
+                                >
+                                  <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
+                                    {p.featuredImage?.url ? (
+                                      <Image src={p.featuredImage.url} alt={p.title} fill className="object-cover" sizes="130px" />
+                                    ) : (
+                                      <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
+                                        <span className="text-[8px] text-brand-grey">ATHELES</span>
+                                      </div>
+                                    )}
+                                    <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/0 transition-colors group-hover:bg-brand-dark/40">
+                                      <span className="text-xs font-medium uppercase tracking-wider text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                        {addingFav === p.handle ? "adding..." : "+ add"}
+                                      </span>
+                                    </div>
+                                  </div>
+                                  <p className="truncate text-[10px] text-white group-hover:text-brand-gold">{p.title}</p>
+                                </button>
+                              ) : (
+                                <div>
+                                  <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
+                                    {p.featuredImage?.url ? (
+                                      <Image src={p.featuredImage.url} alt={p.title} fill className="object-cover opacity-50" sizes="130px" />
+                                    ) : (
+                                      <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
+                                        <span className="text-[8px] text-brand-grey">ATHELES</span>
+                                      </div>
+                                    )}
+                                    <div className="absolute inset-0 flex items-center justify-center">
+                                      <span className="text-[10px] uppercase tracking-wider text-red-400">sold out</span>
+                                    </div>
+                                  </div>
+                                  <p className="truncate text-[10px] text-white/50">{p.title}</p>
+                                </div>
+                              )}
+                              <div className="mt-1 flex items-center justify-between">
+                                <Price
+                                  className="text-[10px] text-brand-grey"
+                                  amount={p.priceRange.maxVariantPrice.amount}
+                                  currencyCode={p.priceRange.maxVariantPrice.currencyCode}
+                                />
+                                <Link href={`/product/${p.handle}`} onClick={closeCart} className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold">
+                                  view
+                                </Link>
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="flex h-full flex-col overflow-hidden">
