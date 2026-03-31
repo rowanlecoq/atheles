@@ -21,6 +21,7 @@ const TIER_LOCKED_CODES: Record<string, string> = {
   goldloyalty: "gold",
   platinumloyalty: "platinum",
   championloyalty: "champion",
+  athleteloyalty: "athlete",
 };
 
 const TIER_LEVELS: Record<string, number> = {
@@ -29,9 +30,11 @@ const TIER_LEVELS: Record<string, number> = {
   gold: 2,
   platinum: 3,
   champion: 4,
+  athlete: 5, // Athletes can use all codes
 };
 
-function getUserTierLevel(totalSpent: string): { name: string; level: number } {
+function getUserTierLevel(totalSpent: string, isAthlete?: boolean): { name: string; level: number } {
+  if (isAthlete) return { name: "athlete", level: 5 };
   const points = Math.floor(parseFloat(totalSpent || "0") * 50);
   if (points >= 50000) return { name: "champion", level: 4 };
   if (points >= 30000) return { name: "platinum", level: 3 };
@@ -175,7 +178,7 @@ export async function applyDiscountCode(code: string): Promise<{
         ? "1100.00"
         : customer.totalSpent;
 
-      const userTier = getUserTierLevel(totalSpent);
+      const userTier = getUserTierLevel(totalSpent, customer.isAthlete);
       const requiredLevel = TIER_LEVELS[requiredTier] ?? 0;
 
       if (userTier.level < requiredLevel) {

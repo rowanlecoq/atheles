@@ -66,7 +66,10 @@ export async function GET() {
         dob: customer.dob,
         theme: customer.theme,
         globalTheme: customer.globalTheme,
-        discountCode: discountCodes[tierName] || null,
+        isAthlete: customer.isAthlete,
+        discountCode: customer.isAthlete
+          ? (process.env.DISCOUNT_ATHLETE || discountCodes["champion"] || null)
+          : (discountCodes[tierName] || null),
       },
     });
   } catch {

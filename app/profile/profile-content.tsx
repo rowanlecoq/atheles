@@ -20,6 +20,7 @@ type User = {
   dob: string | null;
   theme: string | null;
   globalTheme: boolean;
+  isAthlete: boolean;
   discountCode: string | null;
 };
 
@@ -85,11 +86,31 @@ const TIERS = [
   },
 ];
 
-function getTier(points: number) {
+const ATHLETE_TIER = {
+  name: "ATHLETE",
+  min: 0,
+  max: Infinity,
+  barGradient: "from-brand-gold via-amber-400 to-yellow-200",
+  titleGradient: "from-brand-gold via-amber-300 to-yellow-100",
+  perks: [
+    "exclusive athlete access",
+    "20% loyalty discount",
+    "free shipping",
+    "birthday rewards",
+    "early product drops",
+    "event invitations",
+  ],
+  discountCode: null as string | null,
+  discountPercent: 20,
+};
+
+function getTier(points: number, isAthlete?: boolean) {
+  if (isAthlete) return ATHLETE_TIER;
   return TIERS.find((t) => points >= t.min && points < t.max) || TIERS[0]!;
 }
 
-function getNextTier(points: number) {
+function getNextTier(points: number, isAthlete?: boolean) {
+  if (isAthlete) return null; // Athletes are max tier
   const idx = TIERS.findIndex((t) => points >= t.min && points < t.max);
   return idx < TIERS.length - 1 ? TIERS[idx + 1] : null;
 }
@@ -476,8 +497,8 @@ export default function ProfileContent() {
   const totalSpentNum = parseFloat(user.totalSpent || "0");
   const points = Math.floor(totalSpentNum * 50);
   const orders = parseInt(user.numberOfOrders || "0", 10);
-  const tier = getTier(points);
-  const nextTier = getNextTier(points);
+  const tier = getTier(points, user.isAthlete);
+  const nextTier = getNextTier(points, user.isAthlete);
   const progressInTier =
     tier.max === Infinity
       ? 100

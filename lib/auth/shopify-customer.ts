@@ -520,6 +520,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   dob: string | null;
   theme: string | null;
   globalTheme: boolean;
+  isAthlete: boolean;
 } | null> {
   if (!endpoint) return null;
 
@@ -563,6 +564,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   let dob: string | null = null;
   let theme: string | null = null;
   let globalTheme = false;
+  let isAthlete = false;
   if (adminEndpoint && adminToken) {
     try {
       const adminCustomer = await shopifyAdminFetch<{
@@ -581,6 +583,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       const themeTag = tags.find((t) => t.startsWith("theme:"));
       theme = themeTag ? themeTag.replace("theme:", "") : null;
       globalTheme = tags.includes("globaltheme:on");
+      isAthlete = tags.includes("tier:athlete");
     } catch {
       // Tags not available
     }
@@ -600,5 +603,6 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     dob,
     theme,
     globalTheme,
+    isAthlete,
   };
 }

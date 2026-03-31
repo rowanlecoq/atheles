@@ -87,7 +87,12 @@ export default function CartModal() {
       setTierName(null);
       return;
     }
-    const applyTier = (totalSpent: string) => {
+    const applyTier = (totalSpent: string, isAthlete?: boolean) => {
+      if (isAthlete) {
+        setTierName("ATHLETE");
+        setFreeShipping(true);
+        return;
+      }
       const points = Math.floor(parseFloat(totalSpent || "0") * 50);
       const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
       setTierName(tier);
@@ -98,7 +103,7 @@ export default function CartModal() {
       const cached = sessionStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
-        applyTier(u.totalSpent);
+        applyTier(u.totalSpent, u.isAthlete);
         return;
       }
     } catch {}
@@ -106,7 +111,7 @@ export default function CartModal() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.user) {
-          applyTier(data.user.totalSpent);
+          applyTier(data.user.totalSpent, data.user.isAthlete);
         }
       })
       .catch(() => {});
