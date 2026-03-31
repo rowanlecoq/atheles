@@ -97,7 +97,7 @@ export default async function ProductPage(props: {
           currencyCode: product.priceRange.maxVariantPrice.currencyCode,
         }}
       />
-      <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-6 pt-6 md:pb-0">
+      <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-6 pt-6 md:pb-2">
         <div className="flex flex-col rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 sm:p-6 md:p-10 lg:flex-row lg:gap-8 lg:p-12">
           <div className="h-full w-full basis-full lg:basis-4/6">
             <Suspense
