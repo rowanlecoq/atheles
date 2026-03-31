@@ -260,10 +260,8 @@ export default function CartModal() {
                                   onClick={async () => {
                                     if (!p.firstVariantId) return;
                                     setAddingFav(p.handle);
-                                    try {
-                                      await addItem(null, p.firstVariantId);
-                                    } catch {}
-                                    setAddingFav(null);
+                                    addItem(null, p.firstVariantId).catch(() => {});
+                                    setTimeout(() => setAddingFav(null), 500);
                                   }}
                                   className="text-left"
                                 >
@@ -565,11 +563,11 @@ export default function CartModal() {
                             </div>
                             <button
                               type="button"
-                              onClick={async () => {
+                              onClick={() => {
                                 setDiscountRemoved(true);
                                 setDiscountCode("");
                                 setDiscountError("");
-                                await removeDiscountCode();
+                                removeDiscountCode().catch(() => {});
                               }}
                               className="text-xs text-brand-grey hover:text-red-400"
                             >
