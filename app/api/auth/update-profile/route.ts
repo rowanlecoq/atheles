@@ -82,7 +82,9 @@ export async function POST(request: Request) {
 
     const points = Math.floor(parseFloat(totalSpent) * 50);
     const tierName = getTierName(points);
-    updateCustomerTier(customer.email, tierName).catch(() => {});
+    if (!customer.isAthlete) {
+      updateCustomerTier(customer.email, tierName).catch(() => {});
+    }
 
     const discountCodes: Record<string, string | undefined> = {
       silver: process.env.DISCOUNT_SILVER,

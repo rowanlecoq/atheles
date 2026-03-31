@@ -38,10 +38,12 @@ export async function GET() {
       ? "1100.00"
       : customer.totalSpent;
 
-    // Auto-tag customer with their tier (non-blocking)
+    // Auto-tag customer with their tier (non-blocking) — skip if athlete
     const points = Math.floor(parseFloat(totalSpent) * 50);
     const tierName = getTierName(points);
-    updateCustomerTier(customer.email, tierName).catch(() => {});
+    if (!customer.isAthlete) {
+      updateCustomerTier(customer.email, tierName).catch(() => {});
+    }
 
     // Get discount code for the customer's tier from env vars
     const discountCodes: Record<string, string | undefined> = {
