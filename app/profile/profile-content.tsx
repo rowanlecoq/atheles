@@ -1352,7 +1352,7 @@ export default function ProfileContent() {
                 : "hover:ring-1 hover:ring-brand-dark-gold/50"
             }`}
           >
-            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-dashed border-brand-dark-gold/40 bg-brand-dark-gold/10 overflow-hidden">
+            <div className="flex h-10 w-10 items-center justify-center rounded-full border border-white/10 bg-brand-dark-gold/10 overflow-hidden">
               {customBgImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={customBgImage} alt="" className="h-full w-full object-cover opacity-70" />
