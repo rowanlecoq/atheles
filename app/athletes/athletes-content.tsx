@@ -7,7 +7,7 @@ type Athlete = {
   age: number;
   role: string;
   image: string | null;
-  socials: { tiktok: string; instagram: string; linkedin: string; youtube: string };
+  socials: { tiktok: string; instagram: string; linkedin: string; youtube: string; snapchat?: string; email?: string };
   hobbies: string[];
 };
 
@@ -22,6 +22,8 @@ const defaultAthletes: Athlete[] = [
       instagram: "https://www.instagram.com/rowanlecoq",
       linkedin: "https://www.linkedin.com/in/rowanlecoq",
       youtube: "https://www.youtube.com/@rowanlecoq",
+      snapchat: "",
+      email: "",
     },
     hobbies: ["baking brownies or chocolate chip banana bread", "working out on the daily", "playing hockey"],
   },
@@ -102,6 +104,16 @@ export function AthletesContent() {
                 {athlete.socials.linkedin && (
                   <a href={athlete.socials.linkedin} target="_blank" rel="noopener noreferrer" className="text-brand-grey transition-colors hover:text-brand-gold" aria-label="LinkedIn">
                     <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>
+                  </a>
+                )}
+                {athlete.socials.snapchat && (
+                  <a href={`https://www.snapchat.com/add/${athlete.socials.snapchat}`} target="_blank" rel="noopener noreferrer" className="text-brand-grey transition-colors hover:text-brand-gold" aria-label="Snapchat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M12 2C8 2 5.5 4.5 5.5 8v2.5c0 .5-.5 1-1.5 1.2-.5.1-1 .5-1 1s.5.9 1 1c1 .2 1.5.5 1.5 1 0 .3-.2.6-.5.9-.8.8-1 1.3-1 1.8 0 .8.8 1.2 1.5 1.4 1 .3 1.5.5 1.5 1.2 0 1 2 2 5 2s5-1 5-2c0-.7.5-.9 1.5-1.2.7-.2 1.5-.6 1.5-1.4 0-.5-.2-1-1-1.8-.3-.3-.5-.6-.5-.9 0-.5.5-.8 1.5-1 .5-.1 1-.5 1-1s-.5-.9-1-1c-1-.2-1.5-.7-1.5-1.2V8c0-3.5-2.5-6-6.5-6z" /></svg>
+                  </a>
+                )}
+                {athlete.socials.email && (
+                  <a href={`mailto:${athlete.socials.email}`} className="text-brand-grey transition-colors hover:text-brand-gold" aria-label="Email">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M22 4L12 13 2 4" /></svg>
                   </a>
                 )}
               </div>

@@ -1,0 +1,50 @@
+import { put } from "@vercel/blob";
+import { getCustomerByToken } from "lib/auth/shopify-customer";
+import { cookies } from "next/headers";
+import { NextResponse } from "next/server";
+
+export const dynamic = "force-dynamic";
+
+async function verifyAdmin() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get("atheles-auth-token")?.value;
+  if (!token) return false;
+  const customer = await getCustomerByToken(token);
+  return customer?.isAdmin ?? false;
+}
+
+export async function POST(request: Request) {
+  if (!(await verifyAdmin())) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  try {
+    const { image } = await request.json();
+
+    const matches = image.match(/^data:(.+);base64,(.+)$/);
+    if (!matches) {
+      return NextResponse.json({ error: "invalid image data" }, { status: 400 });
+    }
+
+    const contentType = matches[1] as string;
+    const buffer = Buffer.from(matches[2] as string, "base64");
+
+    if (buffer.byteLength > 5 * 1024 * 1024) {
+      return NextResponse.json({ error: "image too large (max 5MB)" }, { status: 400 });
+    }
+
+    const ext = contentType.split("/")[1] || "jpg";
+    const filename = `athletes/athlete-${Date.now()}.${ext}`;
+
+    const blob = await put(filename, buffer, {
+      access: "public",
+      contentType,
+      addRandomSuffix: false,
+    });
+
+    return NextResponse.json({ success: true, url: blob.url });
+  } catch (err) {
+    console.error("[athletes/upload] Error:", err);
+    return NextResponse.json({ error: "upload failed" }, { status: 500 });
+  }
+}

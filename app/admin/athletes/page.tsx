@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Athlete = {
@@ -13,9 +13,13 @@ type Athlete = {
     instagram: string;
     linkedin: string;
     youtube: string;
+    snapchat: string;
+    email: string;
   };
   hobbies: string[];
 };
+
+const emptySocials = { tiktok: "", instagram: "", linkedin: "", youtube: "", snapchat: "", email: "" };
 
 export default function AdminAthletesPage() {
   const router = useRouter();
@@ -24,6 +28,8 @@ export default function AdminAthletesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploading, setUploading] = useState<number | null>(null);
+  const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -33,7 +39,15 @@ export default function AdminAthletesPage() {
           setAuthorized(true);
           fetch("/api/admin/athletes")
             .then((r) => (r.ok ? r.json() : null))
-            .then((d) => { if (d?.athletes) setAthletes(d.athletes); })
+            .then((d) => {
+              if (d?.athletes) {
+                // Backfill missing social fields for old data
+                setAthletes(d.athletes.map((a: Athlete) => ({
+                  ...a,
+                  socials: { ...emptySocials, ...a.socials },
+                })));
+              }
+            })
             .catch(() => {})
             .finally(() => setLoading(false));
         } else {
@@ -78,9 +92,52 @@ export default function AdminAthletesPage() {
       age: 18,
       role: "athlete",
       image: null,
-      socials: { tiktok: "", instagram: "", linkedin: "", youtube: "" },
+      socials: { ...emptySocials },
       hobbies: [],
     }]);
+  };
+
+  const handleImageUpload = async (index: number, file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      alert("image must be under 5mb.");
+      return;
+    }
+    setUploading(index);
+
+    // Resize image
+    const reader = new FileReader();
+    reader.onload = () => {
+      const img = new window.Image();
+      img.onload = async () => {
+        const canvas = document.createElement("canvas");
+        const maxSize = 800;
+        let w = img.width;
+        let h = img.height;
+        if (w > maxSize || h > maxSize) {
+          if (w > h) { h = Math.round((h * maxSize) / w); w = maxSize; }
+          else { w = Math.round((w * maxSize) / h); h = maxSize; }
+        }
+        canvas.width = w;
+        canvas.height = h;
+        canvas.getContext("2d")?.drawImage(img, 0, 0, w, h);
+        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+
+        try {
+          const res = await fetch("/api/admin/athletes/upload", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ image: dataUrl }),
+          });
+          const d = await res.json();
+          if (d.url) {
+            updateAt(index, "image", d.url);
+          }
+        } catch {}
+        setUploading(null);
+      };
+      img.src = reader.result as string;
+    };
+    reader.readAsDataURL(file);
   };
 
   if (!authorized) {
@@ -107,6 +164,51 @@ export default function AdminAthletesPage() {
                   <button type="button" onClick={() => removeAt(i)} className="text-xs text-brand-grey hover:text-red-400">remove</button>
                 </div>
 
+                {/* Image upload */}
+                <div className="mb-4">
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">photo</label>
+                  <div className="flex items-center gap-3">
+                    {a.image ? (
+                      <div className="relative h-16 w-16 overflow-hidden rounded-lg">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={a.image} alt="" className="h-full w-full object-cover" />
+                      </div>
+                    ) : (
+                      <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-brand-medium-grey/10 text-xl">🔱</div>
+                    )}
+                    <div className="flex flex-col gap-1">
+                      <button
+                        type="button"
+                        disabled={uploading === i}
+                        onClick={() => fileRefs.current[i]?.click()}
+                        className="text-xs text-brand-gold hover:text-brand-pale-gold disabled:opacity-50"
+                      >
+                        {uploading === i ? "uploading..." : a.image ? "change photo" : "upload photo"}
+                      </button>
+                      {a.image && (
+                        <button
+                          type="button"
+                          onClick={() => updateAt(i, "image", null)}
+                          className="text-xs text-brand-grey hover:text-red-400"
+                        >
+                          remove photo
+                        </button>
+                      )}
+                    </div>
+                    <input
+                      ref={(el) => { fileRefs.current[i] = el; }}
+                      type="file"
+                      accept="image/png,image/jpeg,image/webp"
+                      onChange={(e) => {
+                        const file = e.target.files?.[0];
+                        if (file) handleImageUpload(i, file);
+                        e.target.value = "";
+                      }}
+                      className="hidden"
+                    />
+                  </div>
+                </div>
+
                 <div className="grid gap-3 sm:grid-cols-2">
                   <div>
                     <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">name</label>
@@ -119,10 +221,6 @@ export default function AdminAthletesPage() {
                   <div>
                     <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">age</label>
                     <input type="number" value={a.age} onChange={(e) => updateAt(i, "age", parseInt(e.target.value) || 0)} className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">image url (optional)</label>
-                    <input type="text" value={a.image || ""} onChange={(e) => updateAt(i, "image", e.target.value || null)} placeholder="https://..." className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
                   </div>
                 </div>
 
@@ -144,6 +242,8 @@ export default function AdminAthletesPage() {
                     <input type="text" value={a.socials.instagram} onChange={(e) => updateSocial(i, "instagram", e.target.value)} placeholder="instagram url" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
                     <input type="text" value={a.socials.youtube} onChange={(e) => updateSocial(i, "youtube", e.target.value)} placeholder="youtube url" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
                     <input type="text" value={a.socials.linkedin} onChange={(e) => updateSocial(i, "linkedin", e.target.value)} placeholder="linkedin url" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
+                    <input type="text" value={a.socials.snapchat} onChange={(e) => updateSocial(i, "snapchat", e.target.value)} placeholder="snapchat username" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
+                    <input type="text" value={a.socials.email} onChange={(e) => updateSocial(i, "email", e.target.value)} placeholder="email address" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
                   </div>
                 </div>
               </div>
