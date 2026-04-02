@@ -26,6 +26,9 @@
           <tr>
             <td style="background-color:#222222;border:1px solid #3a3428;border-radius:8px;padding:40px 30px;">
               <h2 style="margin:0 0 8px;font-size:22px;color:#ccb173;font-weight:400;letter-spacing:2px;text-transform:lowercase;">you're invited.</h2>
+              {% if custom_message != blank %}
+              <div style="margin:0 0 20px;font-size:14px;color:#999;line-height:1.6;">{{ custom_message }}</div>
+              {% endif %}
               <p style="margin:0 0 24px;font-size:14px;color:#999;line-height:1.6;">
                 {{ customer.first_name | default: "hey" }}, you've been invited to create an account at atheles. set up your profile to access exclusive drops, loyalty rewards, and more.
               </p>
