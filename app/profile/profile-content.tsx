@@ -242,11 +242,7 @@ export default function ProfileContent() {
       setProfileBg(serverTheme);
       setGlobalThemeOn(!!u.globalTheme);
 
-      // Custom background: show cached instantly, refetch in background
-      try {
-        const cachedBg = sessionStorage.getItem("atheles-custom-bg");
-        if (cachedBg) setCustomBgImage(cachedBg);
-      } catch {}
+      // Custom background: always fetch fresh (don't use cache to avoid account switch leaks)
       fetch("/api/auth/background")
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
@@ -254,6 +250,7 @@ export default function ProfileContent() {
             setCustomBgImage(d.background);
             try { sessionStorage.setItem("atheles-custom-bg", d.background); } catch {}
           } else {
+            setCustomBgImage(null);
             try { sessionStorage.removeItem("atheles-custom-bg"); } catch {}
           }
         })
