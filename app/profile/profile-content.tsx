@@ -309,9 +309,10 @@ export default function ProfileContent() {
     sessionStorage.removeItem("atheles-avatar");
     sessionStorage.removeItem("atheles-custom-bg");
     document.cookie = "atheles-logged-in=; max-age=0; path=/";
+    // Notify all components to clear cached user data
+    window.dispatchEvent(new Event("user-logout"));
     await fetch("/api/auth/logout", { method: "POST" });
-    router.push("/");
-    router.refresh();
+    window.location.href = "/";
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {

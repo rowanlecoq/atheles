@@ -72,8 +72,16 @@ export function AccountIcon() {
     };
 
     window.addEventListener("avatar-changed", handleAvatarChange);
-    return () =>
+    const handleLogout = () => {
+      setLoggedIn(false);
+      setInitials(null);
+      setAvatar(null);
+    };
+    window.addEventListener("user-logout", handleLogout);
+    return () => {
       window.removeEventListener("avatar-changed", handleAvatarChange);
+      window.removeEventListener("user-logout", handleLogout);
+    };
   }, []);
 
   return (

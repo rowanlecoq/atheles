@@ -110,9 +110,17 @@ export function ThemeBackground() {
     };
     document.addEventListener("visibilitychange", handleVisibility);
 
+    const handleLogout = () => {
+      setTheme(null);
+      setGlobalOn(false);
+      setCustomBg(null);
+    };
+    window.addEventListener("user-logout", handleLogout);
+
     return () => {
       window.removeEventListener("theme-changed", handleChange);
       document.removeEventListener("visibilitychange", handleVisibility);
+      window.removeEventListener("user-logout", handleLogout);
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);

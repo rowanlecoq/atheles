@@ -603,23 +603,27 @@ export default function CartModal() {
                                   setDiscountError("");
                                 }}
                                 placeholder="Enter code"
-                                onKeyDown={async (e) => {
-                                  if (e.key === "Enter" && discountCode.trim() && !applyingDiscount) {
+                                onKeyDown={(e) => {
+                                  if (e.key === "Enter" && discountCode.trim()) {
                                     e.preventDefault();
                                     (e.target as HTMLInputElement).blur();
-                                    setApplyingDiscount(true);
+                                    const code = discountCode.trim();
                                     setDiscountError("");
-                                    const result = await applyDiscountCode(discountCode.trim());
-                                    if (!result.success) {
-                                      setDiscountError(result.error || "failed to apply code.");
-                                    } else if (!result.applicable) {
-                                      setDiscountError("invalid or expired code.");
-                                      await removeDiscountCode();
-                                    } else {
-                                      setAppliedCodeLocal(discountCode.trim());
-                                      setDiscountCode("");
-                                    }
-                                    setApplyingDiscount(false);
+                                    setAppliedCodeLocal(code);
+                                    setDiscountCode("");
+                                    applyDiscountCode(code).then((result) => {
+                                      if (!result.success) {
+                                        setAppliedCodeLocal(null);
+                                        setDiscountError(result.error || "failed to apply code.");
+                                      } else if (!result.applicable) {
+                                        setAppliedCodeLocal(null);
+                                        setDiscountError("invalid or expired code.");
+                                        removeDiscountCode().catch(() => {});
+                                      }
+                                    }).catch(() => {
+                                      setAppliedCodeLocal(null);
+                                      setDiscountError("failed to apply code.");
+                                    });
                                   }
                                 }}
                                 enterKeyHint="done"
@@ -628,24 +632,30 @@ export default function CartModal() {
                               <button
                                 type="button"
                                 disabled={!discountCode.trim() || applyingDiscount}
-                                onClick={async () => {
-                                  setApplyingDiscount(true);
+                                onClick={() => {
+                                  const code = discountCode.trim();
+                                  if (!code) return;
                                   setDiscountError("");
-                                  const result = await applyDiscountCode(discountCode.trim());
-                                  if (!result.success) {
-                                    setDiscountError(result.error || "failed to apply code.");
-                                  } else if (!result.applicable) {
-                                    setDiscountError("invalid or expired code.");
-                                    await removeDiscountCode();
-                                  } else {
-                                    setAppliedCodeLocal(discountCode.trim());
-                                    setDiscountCode("");
-                                  }
-                                  setApplyingDiscount(false);
+                                  setAppliedCodeLocal(code);
+                                  setDiscountCode("");
+                                  // Validate in background
+                                  applyDiscountCode(code).then((result) => {
+                                    if (!result.success) {
+                                      setAppliedCodeLocal(null);
+                                      setDiscountError(result.error || "failed to apply code.");
+                                    } else if (!result.applicable) {
+                                      setAppliedCodeLocal(null);
+                                      setDiscountError("invalid or expired code.");
+                                      removeDiscountCode().catch(() => {});
+                                    }
+                                  }).catch(() => {
+                                    setAppliedCodeLocal(null);
+                                    setDiscountError("failed to apply code.");
+                                  });
                                 }}
                                 className="rounded-lg border border-brand-gold/40 px-4 py-2 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:opacity-30"
                               >
-                                {applyingDiscount ? "..." : "apply"}
+                                apply
                               </button>
                             </div>
                             {discountError && (
