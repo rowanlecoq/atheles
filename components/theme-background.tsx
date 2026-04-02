@@ -34,9 +34,9 @@ export function ThemeBackground() {
 
   const applyFromCache = () => {
     const { theme: t, globalTheme: g } = readCache();
-    if (g && t && t !== "none") {
+    if (t && t !== "none") {
       setTheme(t);
-      setGlobalOn(true);
+      setGlobalOn(!!g);
       if (t === "custom") {
         fetch("/api/auth/background")
           .then((r) => (r.ok ? r.json() : null))
