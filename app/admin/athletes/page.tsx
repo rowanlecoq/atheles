@@ -5,6 +5,18 @@ import { useRouter } from "next/navigation";
 
 type Social = { platform: string; url: string };
 
+const SOCIAL_PLATFORMS = [
+  "tiktok",
+  "instagram",
+  "youtube",
+  "linkedin",
+  "snapchat",
+  "email",
+  "twitter",
+  "facebook",
+  "website",
+];
+
 type Athlete = {
   name: string;
   age: number;
@@ -251,13 +263,16 @@ export default function AdminAthletesPage() {
                   <div className="space-y-2">
                     {a.socials.map((s, j) => (
                       <div key={j} className="flex gap-2">
-                        <input
-                          type="text"
+                        <select
                           value={s.platform}
                           onChange={(e) => updateSocial(i, j, "platform", e.target.value)}
-                          placeholder="platform (e.g. instagram)"
-                          className="w-1/3 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
-                        />
+                          className="w-1/3 rounded border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-xs text-white focus:border-brand-gold focus:outline-none"
+                        >
+                          <option value="">select</option>
+                          {SOCIAL_PLATFORMS.map((p) => (
+                            <option key={p} value={p}>{p}</option>
+                          ))}
+                        </select>
                         <input
                           type="text"
                           value={s.url}

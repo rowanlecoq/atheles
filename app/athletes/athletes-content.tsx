@@ -46,9 +46,34 @@ function normalizeSocials(socials: Social[] | Record<string, string>): Social[] 
 }
 
 function socialUrl(s: Social): string {
-  if (s.url.includes("@") && !s.url.startsWith("http")) return `mailto:${s.url}`;
+  if (s.platform === "email" || (s.url.includes("@") && !s.url.startsWith("http"))) return `mailto:${s.url}`;
+  if (s.platform === "snapchat" && !s.url.startsWith("http")) return `https://www.snapchat.com/add/${s.url}`;
   if (s.url.startsWith("http")) return s.url;
   return `https://${s.url}`;
+}
+
+function SocialIcon({ platform }: { platform: string }) {
+  const cls = "h-4 w-4";
+  switch (platform.toLowerCase()) {
+    case "tiktok":
+      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>;
+    case "instagram":
+      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="5" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>;
+    case "youtube":
+      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><rect x="2" y="4" width="20" height="16" rx="4" /><polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none" /></svg>;
+    case "linkedin":
+      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>;
+    case "snapchat":
+      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><path d="M12 2C8 2 5.5 4.5 5.5 8v2.5c0 .5-.5 1-1.5 1.2-.5.1-1 .5-1 1s.5.9 1 1c1 .2 1.5.5 1.5 1 0 .3-.2.6-.5.9-.8.8-1 1.3-1 1.8 0 .8.8 1.2 1.5 1.4 1 .3 1.5.5 1.5 1.2 0 1 2 2 5 2s5-1 5-2c0-.7.5-.9 1.5-1.2.7-.2 1.5-.6 1.5-1.4 0-.5-.2-1-1-1.8-.3-.3-.5-.6-.5-.9 0-.5.5-.8 1.5-1 .5-.1 1-.5 1-1s-.5-.9-1-1c-1-.2-1.5-.7-1.5-1.2V8c0-3.5-2.5-6-6.5-6z" /></svg>;
+    case "email":
+      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M22 4L12 13 2 4" /></svg>;
+    case "twitter":
+      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><path d="M4 4l11.7 16h4.3L8.3 4H4z" /><path d="M4 20l6.8-8" /><path d="M20 4l-6.8 8" /></svg>;
+    case "facebook":
+      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><path d="M18 2h-3a5 5 0 00-5 5v3H7v4h3v8h4v-8h3l1-4h-4V7a1 1 0 011-1h3z" /></svg>;
+    default:
+      return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><circle cx="12" cy="12" r="10" /><path d="M2 12h20" /><path d="M12 2a15.3 15.3 0 014 10 15.3 15.3 0 01-4 10 15.3 15.3 0 01-4-10 15.3 15.3 0 014-10z" /></svg>;
+  }
 }
 
 export function AthletesContent() {
@@ -117,9 +142,11 @@ export function AthletesContent() {
                       href={socialUrl(s)}
                       target={socialUrl(s).startsWith("mailto:") ? undefined : "_blank"}
                       rel="noopener noreferrer"
-                      className="text-xs text-brand-grey transition-colors hover:text-brand-gold"
+                      className="text-brand-grey transition-colors hover:text-brand-gold"
+                      aria-label={s.platform}
+                      title={s.platform}
                     >
-                      {s.platform}
+                      <SocialIcon platform={s.platform} />
                     </a>
                   ))}
                 </div>

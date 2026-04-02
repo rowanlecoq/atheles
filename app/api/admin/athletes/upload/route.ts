@@ -19,6 +19,10 @@ export async function POST(request: Request) {
   }
 
   try {
+    if (!process.env.BLOB_READ_WRITE_TOKEN) {
+      return NextResponse.json({ error: "blob storage not configured. add BLOB_READ_WRITE_TOKEN to Vercel env vars." }, { status: 500 });
+    }
+
     const { image } = await request.json();
 
     const matches = image.match(/^data:(.+);base64,(.+)$/);
