@@ -125,8 +125,7 @@ export function ThemeBackground() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Don't render on profile page — it has its own background
-  if (pathname === "/profile") return null;
+  // Render on all pages including profile
 
   // Don't render if global theme is off or no theme set
   if (!globalOn || !theme || theme === "none") return null;
