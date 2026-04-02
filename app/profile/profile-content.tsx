@@ -572,17 +572,18 @@ export default function ProfileContent() {
               <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(6,80,140,0.28) 0%, rgba(20,120,180,0.22) 30%, rgba(30,180,220,0.2) 60%, rgba(6,100,160,0.25) 100%)" }} />
               <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 80% 50% at 30% 40%, rgba(34,211,238,0.16), transparent 60%)", filter: "blur(60px)", animation: "oceanGlow1 14s ease-in-out infinite -4s" }} />
               <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 60% 70% at 70% 60%, rgba(14,165,233,0.13), transparent 55%)", filter: "blur(70px)", animation: "oceanGlow2 18s ease-in-out infinite -9s" }} />
-              <svg className="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%]" preserveAspectRatio="none" viewBox="0 0 1000 1000">
-                {Array.from({ length: 18 }).map((_, i) => {
-                  const y = 50 + i * 55;
-                  const amp = 20 + (i % 4) * 8;
+              <svg className="absolute inset-0 h-[130%] w-[140%] -left-[20%] -top-[15%]" preserveAspectRatio="none" viewBox="0 0 200 200">
+                {Array.from({ length: 16 }).map((_, i) => {
+                  const y = 10 + i * 12;
+                  const a = 8 + (i % 5) * 4;
+                  const dir = i % 2 === 0 ? 1 : -1;
                   return (
                     <path key={i}
-                      d={`M-50,${y} C150,${y - amp} 300,${y + amp} 500,${y} S750,${y - amp} 1050,${y}`}
+                      d={`M-20,${y} C10,${y + a * dir} 30,${y - a * dir} 50,${y} C70,${y + a * dir} 90,${y - a * dir} 110,${y} C130,${y + a * dir} 150,${y - a * dir} 170,${y} C190,${y + a * dir} 210,${y - a * dir} 230,${y}`}
                       fill="none"
-                      stroke={`rgba(34,211,238,${0.08 + (i % 4) * 0.04})`}
-                      strokeWidth={1 + (i % 3) * 0.5}
-                      style={{ animation: `waveFlow ${8 + i * 0.6}s ease-in-out infinite ${-i * 0.5}s` }}
+                      stroke={`rgba(34,211,238,${0.07 + (i % 4) * 0.04})`}
+                      strokeWidth={0.3 + (i % 3) * 0.15}
+                      style={{ animation: `waveFlow ${7 + i * 0.5}s ease-in-out infinite ${-i * 0.4}s` }}
                     />
                   );
                 })}
