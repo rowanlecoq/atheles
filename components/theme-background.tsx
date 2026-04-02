@@ -9,7 +9,7 @@ const THEME_COLORS: Record<string, { a: string; b: string; c: string; d: string;
   ocean: { a: "rgba(30,180,220,0.16)", b: "rgba(20,100,200,0.14)", c: "rgba(40,210,240,0.10)", d: "rgba(15,60,160,0.08)", particle: "#22d3ee" },
   tropical: { a: "rgba(16,185,129,0.16)", b: "rgba(245,158,11,0.12)", c: "rgba(20,200,160,0.10)", d: "rgba(250,180,50,0.07)", particle: "#10b981" },
   midnight: { a: "rgba(30,30,80,0.22)", b: "rgba(60,60,160,0.14)", c: "rgba(90,50,200,0.10)", d: "rgba(20,20,60,0.12)", particle: "#6366f1" },
-  aurora: { a: "rgba(120,60,220,0.16)", b: "rgba(40,200,140,0.14)", c: "rgba(220,60,180,0.10)", d: "rgba(80,180,255,0.08)", particle: "#a855f7" },
+  sunset: { a: "rgba(249,115,22,0.16)", b: "rgba(239,68,68,0.14)", c: "rgba(251,191,36,0.10)", d: "rgba(249,115,22,0.08)", particle: "#f97316" },
 };
 
 const SPARKLES = [

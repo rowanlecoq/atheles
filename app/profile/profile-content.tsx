@@ -546,105 +546,64 @@ export default function ProfileContent() {
       ) : profileBg !== "none" ? (
         createPortal(
         <div className="noise-overlay pointer-events-none fixed inset-0 z-0" style={{ overflow: "hidden", clipPath: "inset(0)" }}>
-          {/* Flowing blob layers */}
           {(() => {
-            const colors = {
-              gold: { a: "rgba(193,163,104,0.18)", b: "rgba(180,140,60,0.14)", c: "rgba(220,200,140,0.10)", d: "rgba(160,120,40,0.08)", particle: "#c1a368" },
-              ocean: { a: "rgba(30,180,220,0.16)", b: "rgba(20,100,200,0.14)", c: "rgba(40,210,240,0.10)", d: "rgba(15,60,160,0.08)", particle: "#22d3ee" },
-              tropical: { a: "rgba(16,185,129,0.16)", b: "rgba(245,158,11,0.12)", c: "rgba(20,200,160,0.10)", d: "rgba(250,180,50,0.07)", particle: "#10b981" },
-              midnight: { a: "rgba(30,30,80,0.22)", b: "rgba(60,60,160,0.14)", c: "rgba(90,50,200,0.10)", d: "rgba(20,20,60,0.12)", particle: "#6366f1" },
-              aurora: { a: "rgba(120,60,220,0.16)", b: "rgba(40,200,140,0.14)", c: "rgba(220,60,180,0.10)", d: "rgba(80,180,255,0.08)", particle: "#a855f7" },
-            }[profileBg] || { a: "transparent", b: "transparent", c: "transparent", d: "transparent", particle: "#888" };
+            const themes: Record<string, { lines: string[]; glow: string; particle: string }> = {
+              gold: { lines: ["#c1a368", "#b09050", "#d4b878"], glow: "rgba(193,163,104,0.12)", particle: "#c1a368" },
+              ocean: { lines: ["#22d3ee", "#0ea5e9", "#06b6d4"], glow: "rgba(30,180,220,0.12)", particle: "#22d3ee" },
+              tropical: { lines: ["#10b981", "#f59e0b", "#34d399"], glow: "rgba(16,185,129,0.12)", particle: "#10b981" },
+              midnight: { lines: ["#6366f1", "#4f46e5", "#818cf8"], glow: "rgba(60,60,160,0.15)", particle: "#6366f1" },
+              sunset: { lines: ["#f97316", "#ef4444", "#fbbf24"], glow: "rgba(249,115,22,0.12)", particle: "#f97316" },
+            };
+            const t = themes[profileBg] || themes.gold!;
             return (
               <>
-                {/* Layer 1 — slow wide drift */}
-                <div
-                  className="absolute -inset-[60%]"
-                  style={{
-                    background: `radial-gradient(ellipse 70% 60% at 25% 35%, ${colors.a}, transparent 65%)`,
-                    filter: "blur(80px)",
-                    animation: "drift1 20s ease-in-out infinite -8s",
-                  }}
-                />
-                {/* Layer 2 — counter flow */}
-                <div
-                  className="absolute -inset-[60%]"
-                  style={{
-                    background: `radial-gradient(ellipse 55% 70% at 75% 65%, ${colors.b}, transparent 65%)`,
-                    filter: "blur(90px)",
-                    animation: "drift2 25s ease-in-out infinite -12s",
-                  }}
-                />
-                {/* Layer 3 — breathing center */}
-                <div
-                  className="absolute -inset-[40%]"
-                  style={{
-                    background: `radial-gradient(ellipse 50% 50% at 50% 45%, ${colors.c}, transparent 60%)`,
-                    filter: "blur(70px)",
-                    animation: "drift3 18s ease-in-out infinite -6s",
-                  }}
-                />
-                {/* Layer 4 — subtle undertow */}
-                <div
-                  className="absolute -inset-[50%]"
-                  style={{
-                    background: `radial-gradient(ellipse 45% 55% at 40% 70%, ${colors.d}, transparent 60%)`,
-                    filter: "blur(100px)",
-                    animation: "drift4 22s ease-in-out infinite -10s",
-                  }}
-                />
-                {/* Floating sparkles */}
+                {/* Ambient glow */}
+                <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 60% at 50% 40%, ${t.glow}, transparent 70%)` }} />
+                {/* Animated flowing lines */}
+                <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 1200 800">
+                  {[
+                    { d: "M-100,400 Q200,200 400,350 T800,300 T1300,400", dur: "12s", delay: "-3s", opacity: 0.15 },
+                    { d: "M-100,500 Q300,300 500,450 T900,350 T1300,500", dur: "15s", delay: "-7s", opacity: 0.1 },
+                    { d: "M-100,300 Q150,450 350,280 T750,400 T1300,300", dur: "18s", delay: "-5s", opacity: 0.12 },
+                    { d: "M-100,600 Q250,400 450,550 T850,450 T1300,600", dur: "14s", delay: "-9s", opacity: 0.08 },
+                    { d: "M-100,200 Q300,350 500,200 T900,300 T1300,200", dur: "20s", delay: "-2s", opacity: 0.1 },
+                    { d: "M-100,700 Q200,500 400,650 T800,550 T1300,700", dur: "16s", delay: "-11s", opacity: 0.07 },
+                  ].map((line, i) => (
+                    <path
+                      key={i}
+                      d={line.d}
+                      fill="none"
+                      stroke={t.lines[i % t.lines.length]}
+                      strokeWidth="1.5"
+                      opacity={line.opacity}
+                      style={{ animation: `flowLine ${line.dur} ease-in-out infinite ${line.delay}` }}
+                    />
+                  ))}
+                </svg>
+                {/* Floating particles */}
                 {[
-                  { x: "12%", y: "18%", size: "6px", dur: "3s", delay: "0s" },
-                  { x: "68%", y: "12%", size: "8px", dur: "4s", delay: "1s" },
-                  { x: "35%", y: "55%", size: "5px", dur: "3.5s", delay: "2s" },
-                  { x: "82%", y: "42%", size: "7px", dur: "4.5s", delay: "0.5s" },
-                  { x: "22%", y: "78%", size: "6px", dur: "3.8s", delay: "1.5s" },
-                  { x: "55%", y: "88%", size: "5px", dur: "4.2s", delay: "0.8s" },
-                  { x: "90%", y: "72%", size: "7px", dur: "3.2s", delay: "2.5s" },
+                  { x: "15%", y: "20%", dur: "3s", delay: "0s" },
+                  { x: "70%", y: "15%", dur: "4s", delay: "1s" },
+                  { x: "40%", y: "60%", dur: "3.5s", delay: "2s" },
+                  { x: "85%", y: "45%", dur: "4.5s", delay: "0.5s" },
+                  { x: "25%", y: "80%", dur: "3.8s", delay: "1.5s" },
                 ].map((p, i) => (
                   <span
                     key={i}
                     className="absolute animate-pulse"
-                    style={{
-                      left: p.x, top: p.y,
-                      fontSize: p.size,
-                      animationDuration: p.dur,
-                      animationDelay: p.delay,
-                      color: colors.particle,
-                      opacity: 0.25,
-                    }}
+                    style={{ left: p.x, top: p.y, fontSize: "5px", animationDuration: p.dur, animationDelay: p.delay, color: t.particle, opacity: 0.2 }}
                   >&#10022;</span>
                 ))}
               </>
             );
           })()}
           <style jsx>{`
-            @keyframes drift1 {
-              0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-              20% { transform: translate(6%, -4%) scale(1.08) rotate(1deg); }
-              40% { transform: translate(-3%, 7%) scale(0.96) rotate(-0.5deg); }
-              60% { transform: translate(-7%, -2%) scale(1.04) rotate(0.5deg); }
-              80% { transform: translate(4%, 5%) scale(0.98) rotate(-1deg); }
-            }
-            @keyframes drift2 {
-              0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-              20% { transform: translate(-8%, 5%) scale(1.06) rotate(-1deg); }
-              40% { transform: translate(5%, -6%) scale(0.94) rotate(0.5deg); }
-              60% { transform: translate(7%, 8%) scale(1.02) rotate(-0.5deg); }
-              80% { transform: translate(-4%, -5%) scale(1.07) rotate(1deg); }
-            }
-            @keyframes drift3 {
-              0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.7; }
-              25% { transform: translate(4%, -3%) scale(1.12); opacity: 0.9; }
-              50% { transform: translate(-3%, 4%) scale(0.92); opacity: 1; }
-              75% { transform: translate(-5%, -4%) scale(1.06); opacity: 0.8; }
-            }
-            @keyframes drift4 {
-              0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-              25% { transform: translate(-5%, -6%) scale(1.1) rotate(1.5deg); }
-              50% { transform: translate(6%, 3%) scale(0.95) rotate(-1deg); }
-              75% { transform: translate(3%, -5%) scale(1.05) rotate(0.5deg); }
+            @keyframes flowLine {
+              0% { transform: translateX(-5%) translateY(0); }
+              25% { transform: translateX(2%) translateY(-8px); }
+              50% { transform: translateX(5%) translateY(0); }
+              75% { transform: translateX(2%) translateY(8px); }
+              100% { transform: translateX(-5%) translateY(0); }
             }
           `}</style>
         </div>,
@@ -1392,7 +1351,7 @@ export default function ProfileContent() {
             { id: "ocean", label: "ocean", colors: "from-cyan-700/70 to-blue-900/70" },
             { id: "tropical", label: "tropical", colors: "from-emerald-700/70 to-amber-700/70" },
             { id: "midnight", label: "midnight", colors: "from-indigo-900/80 to-slate-900/80" },
-            { id: "aurora", label: "aurora", colors: "from-purple-700/70 to-teal-700/70" },
+            { id: "sunset", label: "sunset", colors: "from-orange-500/70 to-red-600/70" },
           ].map((theme) => (
             <button
               key={theme.id}
