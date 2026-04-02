@@ -49,6 +49,7 @@ export default function CartModal() {
   const [discountError, setDiscountError] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
   const [appliedCodeLocal, setAppliedCodeLocal] = useState<string | null>(null);
+  const discountSyncedRef = useRef(false);
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
   const [addingFav, setAddingFav] = useState<string | null>(null);
@@ -79,17 +80,22 @@ export default function CartModal() {
     return () => window.removeEventListener("open-cart", handleOpenCart);
   }, []);
 
-  // Sync applied discount code from cart on open
+  // Sync applied discount code from cart on first open only
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      discountSyncedRef.current = false;
+      return;
+    }
+    if (discountSyncedRef.current) return;
+    discountSyncedRef.current = true;
     const fromCart = cart?.discountCodes?.find((dc) => dc.applicable);
     const hasDiscount = (cart?.discountAllocations?.reduce(
       (sum, a) => sum + parseFloat(a.discountedAmount?.amount || "0"), 0
     ) || 0) > 0;
-    if (fromCart && hasDiscount && !appliedCodeLocal) {
+    if (fromCart && hasDiscount) {
       setAppliedCodeLocal(fromCart.code);
     }
-  }, [isOpen, cart?.discountCodes, cart?.discountAllocations, appliedCodeLocal]);
+  }, [isOpen, cart?.discountCodes, cart?.discountAllocations]);
 
   // Check user tier for free shipping
   useEffect(() => {
