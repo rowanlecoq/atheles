@@ -117,10 +117,11 @@ export function ThemeBackground() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Render on all pages including profile
-
-  // Don't render if global theme is off or no theme set
-  if (!globalOn || !theme || theme === "none") return null;
+  // Always render on profile page (theme is profile-only by default)
+  // Only render on other pages if "use across entire store" is ON
+  const isProfile = pathname === "/profile";
+  if (!isProfile && !globalOn) return null;
+  if (!theme || theme === "none") return null;
 
   const colors = THEME_COLORS[theme];
 
