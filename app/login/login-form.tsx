@@ -26,12 +26,22 @@ export default function LoginForm() {
       const data = await res.json();
 
       if (data.success) {
-        // Pre-cache basic session so profile loads instantly
+        // Clear ALL old session data from any previous account
+        const keysToRemove: string[] = [];
+        for (let i = 0; i < sessionStorage.length; i++) {
+          const key = sessionStorage.key(i);
+          if (key && (key.startsWith("atheles-avatar-") || key.startsWith("atheles-bg-") || key === "atheles-session")) {
+            keysToRemove.push(key);
+          }
+        }
+        keysToRemove.forEach((k) => sessionStorage.removeItem(k));
+
+        // Cache new session
         if (data.user) {
           sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
         }
-        router.push("/profile");
-        router.refresh();
+        // Full reload to clear all React state from previous account
+        window.location.href = "/profile";
       } else {
         setError(data.error || "failed to sign in.");
       }

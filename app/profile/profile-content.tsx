@@ -309,9 +309,13 @@ export default function ProfileContent() {
   }, [router]);
 
   const handleSignOut = async () => {
-    sessionStorage.removeItem("atheles-session");
-    sessionStorage.removeItem("atheles-avatar");
-    sessionStorage.removeItem("atheles-custom-bg");
+    // Clear ALL atheles keys from sessionStorage
+    const keysToRemove: string[] = [];
+    for (let i = 0; i < sessionStorage.length; i++) {
+      const key = sessionStorage.key(i);
+      if (key && key.startsWith("atheles-")) keysToRemove.push(key);
+    }
+    keysToRemove.forEach((k) => sessionStorage.removeItem(k));
     document.cookie = "atheles-logged-in=; max-age=0; path=/";
     // Notify all components to clear cached user data
     window.dispatchEvent(new Event("user-logout"));
