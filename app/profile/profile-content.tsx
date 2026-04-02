@@ -569,26 +569,24 @@ export default function ProfileContent() {
           )}
           {profileBg === "ocean" && (
             <>
+              {/* Deep ocean base */}
               <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(6,80,140,0.28) 0%, rgba(20,120,180,0.22) 30%, rgba(30,180,220,0.2) 60%, rgba(6,100,160,0.25) 100%)" }} />
+              {/* Drifting deep glow */}
               <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 80% 50% at 30% 40%, rgba(34,211,238,0.16), transparent 60%)", filter: "blur(60px)", animation: "oceanGlow1 14s ease-in-out infinite -4s" }} />
               <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 60% 70% at 70% 60%, rgba(14,165,233,0.13), transparent 55%)", filter: "blur(70px)", animation: "oceanGlow2 18s ease-in-out infinite -9s" }} />
-              <svg className="absolute inset-0 h-[130%] w-[140%] -left-[20%] -top-[15%]" preserveAspectRatio="none" viewBox="0 0 200 200">
-                {Array.from({ length: 16 }).map((_, i) => {
-                  const y = 10 + i * 12;
-                  const a = 8 + (i % 5) * 4;
-                  const dir = i % 2 === 0 ? 1 : -1;
-                  return (
-                    <path key={i}
-                      d={`M-20,${y} C10,${y + a * dir} 30,${y - a * dir} 50,${y} C70,${y + a * dir} 90,${y - a * dir} 110,${y} C130,${y + a * dir} 150,${y - a * dir} 170,${y} C190,${y + a * dir} 210,${y - a * dir} 230,${y}`}
-                      fill="none"
-                      stroke={`rgba(34,211,238,${0.07 + (i % 4) * 0.04})`}
-                      strokeWidth={0.3 + (i % 3) * 0.15}
-                      style={{ animation: `waveFlow ${7 + i * 0.5}s ease-in-out infinite ${-i * 0.4}s` }}
-                    />
-                  );
-                })}
-              </svg>
-              {Array.from({ length: 35 }).map((_, i) => (
+              {/* Water caustic light bands — soft wide glowing streaks */}
+              {Array.from({ length: 10 }).map((_, i) => (
+                <div key={`c${i}`} className="absolute" style={{
+                  width: "300%", height: `${30 + (i % 4) * 15}px`,
+                  background: `linear-gradient(90deg, transparent 5%, rgba(34,211,238,${0.03 + (i % 3) * 0.02}) 25%, rgba(6,182,212,${0.05 + (i % 2) * 0.02}) 50%, rgba(34,211,238,${0.03 + (i % 3) * 0.02}) 75%, transparent 95%)`,
+                  top: `${5 + i * 10}%`, left: "-100%",
+                  transform: `rotate(${-12 + i * 4}deg)`,
+                  filter: "blur(15px)",
+                  animation: `caustic${i % 3} ${9 + i * 1.5}s ease-in-out infinite ${-i * 1.2}s`,
+                }} />
+              ))}
+              {/* Bubbles */}
+              {Array.from({ length: 30 }).map((_, i) => (
                 <span key={i} className="absolute rounded-full" style={{
                   left: `${(i * 29 + 11) % 98}%`, bottom: `${-5 - (i % 15) * 3}%`,
                   width: `${2 + (i % 5)}px`, height: `${2 + (i % 5)}px`,
@@ -596,6 +594,7 @@ export default function ProfileContent() {
                   animation: `bubbleRise ${6 + (i % 8) * 2}s ease-in infinite ${(i * 0.4) % 12}s`,
                 }} />
               ))}
+              {/* Sparkles */}
               {Array.from({ length: 25 }).map((_, i) => (
                 <span key={`s${i}`} className="absolute" style={{
                   left: `${(i * 37 + 5) % 96}%`, top: `${(i * 53 + 9) % 96}%`,
@@ -606,7 +605,9 @@ export default function ProfileContent() {
               <style jsx>{`
                 @keyframes oceanGlow1 { 0%, 100% { transform: translate(0,0); } 33% { transform: translate(8%,-5%); } 66% { transform: translate(-6%,4%); } }
                 @keyframes oceanGlow2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-8%,-4%); } }
-                @keyframes waveFlow { 0%, 100% { transform: translateX(-3%) translateY(0); } 25% { transform: translateX(1%) translateY(-8px); } 50% { transform: translateX(3%) translateY(0); } 75% { transform: translateX(1%) translateY(8px); } }
+                @keyframes caustic0 { 0%, 100% { transform: rotate(-12deg) translateX(-15%) translateY(0); opacity: 0.4; } 50% { transform: rotate(-8deg) translateX(15%) translateY(-20px); opacity: 0.9; } }
+                @keyframes caustic1 { 0%, 100% { transform: rotate(-8deg) translateX(10%) translateY(10px); opacity: 0.5; } 50% { transform: rotate(-12deg) translateX(-10%) translateY(-15px); opacity: 0.8; } }
+                @keyframes caustic2 { 0%, 100% { transform: rotate(-4deg) translateX(-10%) translateY(-5px); opacity: 0.3; } 33% { transform: rotate(-6deg) translateX(8%) translateY(15px); opacity: 0.7; } 66% { transform: rotate(-10deg) translateX(-5%) translateY(-10px); opacity: 0.6; } }
                 @keyframes bubbleRise { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 0.4; } 80% { opacity: 0.15; } 100% { transform: translateY(-120vh) scale(0.3); opacity: 0; } }
                 @keyframes sparkle { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.1; } 50% { transform: translateY(-8px) scale(1.4); opacity: 0.5; } }
               `}</style>
