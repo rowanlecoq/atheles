@@ -191,13 +191,14 @@ export function ThemeBackground() {
           animation: `gcaustic${i % 3} ${10 + i * 1.5}s ease-in-out infinite ${-i * 1.3}s`,
         }} />
       ))}
-      {/* Midnight-specific: twinkling stars */}
-      {theme === "midnight" && Array.from({ length: 40 }).map((_, i) => (
-        <span key={`ms${i}`} className="absolute rounded-full" style={{
-          left: `${(i * 23 + 7) % 99}%`, top: `${(i * 41 + 3) % 99}%`,
-          width: `${1 + (i % 3)}px`, height: `${1 + (i % 3)}px`,
-          background: i % 4 === 0 ? "#c4b5fd" : i % 3 === 0 ? "#818cf8" : "#e0e7ff",
-          animation: `gtwinkle ${1.5 + (i % 5) * 0.6}s ease-in-out infinite ${(i * 0.12) % 5}s`,
+      {/* Floating drift particles for all themes */}
+      {Array.from({ length: 15 }).map((_, i) => (
+        <span key={`fp${i}`} className="absolute rounded-full" style={{
+          left: `${(i * 29 + 5) % 96}%`, top: `${(i * 43 + 8) % 96}%`,
+          width: `${2 + (i % 3)}px`, height: `${2 + (i % 3)}px`,
+          background: colors.particle,
+          opacity: 0.12 + (i % 3) * 0.06,
+          animation: `gfloat${i % 3} ${15 + (i % 5) * 4}s ease-in-out infinite ${-i * 1.5}s`,
         }} />
       ))}
       {/* Sparkles for all themes */}
@@ -245,7 +246,9 @@ export function ThemeBackground() {
         @keyframes gcaustic0 { 0%, 100% { transform: rotate(-10deg) translateX(-15%) translateY(0); opacity: 0.3; } 50% { transform: rotate(-6deg) translateX(15%) translateY(-25px); opacity: 0.8; } }
         @keyframes gcaustic1 { 0%, 100% { transform: rotate(-6deg) translateX(10%) translateY(10px); opacity: 0.4; } 50% { transform: rotate(-10deg) translateX(-10%) translateY(-20px); opacity: 0.7; } }
         @keyframes gcaustic2 { 0%, 100% { transform: rotate(-3deg) translateX(-8%) translateY(-5px); opacity: 0.25; } 33% { transform: rotate(-7deg) translateX(8%) translateY(18px); opacity: 0.6; } 66% { transform: rotate(-9deg) translateX(-5%) translateY(-12px); opacity: 0.5; } }
-        @keyframes gtwinkle { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.3); } }
+        @keyframes gfloat0 { 0% { transform: translate(0,0); } 25% { transform: translate(30px,-20px); } 50% { transform: translate(-15px,25px); } 75% { transform: translate(20px,10px); } 100% { transform: translate(0,0); } }
+        @keyframes gfloat1 { 0% { transform: translate(0,0); } 33% { transform: translate(-25px,15px); } 66% { transform: translate(20px,-18px); } 100% { transform: translate(0,0); } }
+        @keyframes gfloat2 { 0% { transform: translate(0,0); } 20% { transform: translate(18px,22px); } 50% { transform: translate(-22px,-10px); } 80% { transform: translate(10px,-20px); } 100% { transform: translate(0,0); } }
       `}</style>
     </div>
   );
