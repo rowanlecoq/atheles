@@ -27,7 +27,7 @@ export async function GET() {
     );
 
     const res = NextResponse.json({ background: background || null });
-    res.headers.set("Cache-Control", "private, no-store, no-cache, must-revalidate");
+    res.headers.set("Cache-Control", "private, max-age=30");
     return res;
   } catch {
     return NextResponse.json({ background: null });
