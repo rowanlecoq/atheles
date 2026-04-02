@@ -547,63 +547,117 @@ export default function ProfileContent() {
         createPortal(
         <div className="noise-overlay pointer-events-none fixed inset-0 z-0" style={{ overflow: "hidden", clipPath: "inset(0)" }}>
           {(() => {
-            const themes: Record<string, { lines: string[]; glow: string; particle: string }> = {
-              gold: { lines: ["#c1a368", "#b09050", "#d4b878"], glow: "rgba(193,163,104,0.12)", particle: "#c1a368" },
-              ocean: { lines: ["#22d3ee", "#0ea5e9", "#06b6d4"], glow: "rgba(30,180,220,0.12)", particle: "#22d3ee" },
-              tropical: { lines: ["#10b981", "#f59e0b", "#34d399"], glow: "rgba(16,185,129,0.12)", particle: "#10b981" },
-              midnight: { lines: ["#6366f1", "#4f46e5", "#818cf8"], glow: "rgba(60,60,160,0.15)", particle: "#6366f1" },
-              sunset: { lines: ["#f97316", "#ef4444", "#fbbf24"], glow: "rgba(249,115,22,0.12)", particle: "#f97316" },
+            const themes: Record<string, {
+              bg: string; layers: { color: string; size: string; pos: string; blur: string; anim: string }[];
+              sparkleColor: string; sparkleCount: number;
+            }> = {
+              gold: {
+                bg: "radial-gradient(ellipse 120% 80% at 50% 30%, rgba(193,163,104,0.15), transparent 60%), radial-gradient(ellipse 100% 90% at 80% 70%, rgba(160,120,40,0.1), transparent 50%)",
+                layers: [
+                  { color: "rgba(193,163,104,0.2)", size: "-inset-[40%]", pos: "ellipse 80% 60% at 30% 30%", blur: "blur(80px)", anim: "themeDrift1 18s ease-in-out infinite -5s" },
+                  { color: "rgba(180,140,60,0.15)", size: "-inset-[50%]", pos: "ellipse 70% 70% at 70% 60%", blur: "blur(90px)", anim: "themeDrift2 22s ease-in-out infinite -10s" },
+                  { color: "rgba(220,200,140,0.1)", size: "-inset-[30%]", pos: "ellipse 60% 50% at 50% 50%", blur: "blur(70px)", anim: "themeDrift3 15s ease-in-out infinite -3s" },
+                ],
+                sparkleColor: "#c1a368", sparkleCount: 20,
+              },
+              ocean: {
+                bg: "radial-gradient(ellipse 130% 90% at 40% 20%, rgba(6,182,212,0.12), transparent 55%), radial-gradient(ellipse 100% 100% at 70% 80%, rgba(14,165,233,0.1), transparent 50%)",
+                layers: [
+                  { color: "rgba(30,180,220,0.18)", size: "-inset-[50%]", pos: "ellipse 90% 50% at 20% 40%", blur: "blur(85px)", anim: "themeDrift1 20s ease-in-out infinite -7s" },
+                  { color: "rgba(20,100,200,0.14)", size: "-inset-[40%]", pos: "ellipse 60% 80% at 80% 50%", blur: "blur(100px)", anim: "themeDrift2 25s ease-in-out infinite -12s" },
+                  { color: "rgba(40,210,240,0.1)", size: "-inset-[35%]", pos: "ellipse 70% 60% at 50% 70%", blur: "blur(75px)", anim: "themeDrift3 17s ease-in-out infinite -4s" },
+                ],
+                sparkleColor: "#22d3ee", sparkleCount: 18,
+              },
+              tropical: {
+                bg: "radial-gradient(ellipse 110% 80% at 30% 40%, rgba(16,185,129,0.14), transparent 55%), radial-gradient(ellipse 90% 90% at 75% 60%, rgba(245,158,11,0.1), transparent 50%)",
+                layers: [
+                  { color: "rgba(16,185,129,0.18)", size: "-inset-[45%]", pos: "ellipse 75% 65% at 25% 35%", blur: "blur(80px)", anim: "themeDrift1 19s ease-in-out infinite -6s" },
+                  { color: "rgba(245,158,11,0.13)", size: "-inset-[50%]", pos: "ellipse 65% 75% at 75% 65%", blur: "blur(95px)", anim: "themeDrift2 23s ease-in-out infinite -11s" },
+                  { color: "rgba(52,211,153,0.1)", size: "-inset-[35%]", pos: "ellipse 80% 50% at 50% 50%", blur: "blur(70px)", anim: "themeDrift3 16s ease-in-out infinite -2s" },
+                ],
+                sparkleColor: "#10b981", sparkleCount: 22,
+              },
+              midnight: {
+                bg: "radial-gradient(ellipse 120% 100% at 50% 30%, rgba(30,30,80,0.25), transparent 60%), radial-gradient(ellipse 80% 80% at 80% 70%, rgba(99,102,241,0.08), transparent 50%)",
+                layers: [
+                  { color: "rgba(60,60,160,0.2)", size: "-inset-[55%]", pos: "ellipse 85% 70% at 35% 25%", blur: "blur(90px)", anim: "themeDrift1 22s ease-in-out infinite -8s" },
+                  { color: "rgba(90,50,200,0.12)", size: "-inset-[40%]", pos: "ellipse 70% 60% at 65% 70%", blur: "blur(80px)", anim: "themeDrift2 18s ease-in-out infinite -4s" },
+                  { color: "rgba(20,20,80,0.15)", size: "-inset-[50%]", pos: "ellipse 90% 80% at 50% 50%", blur: "blur(100px)", anim: "themeDrift3 26s ease-in-out infinite -13s" },
+                ],
+                sparkleColor: "#818cf8", sparkleCount: 25,
+              },
+              sunset: {
+                bg: "radial-gradient(ellipse 120% 70% at 50% 60%, rgba(249,115,22,0.14), transparent 55%), radial-gradient(ellipse 100% 90% at 30% 30%, rgba(239,68,68,0.1), transparent 50%)",
+                layers: [
+                  { color: "rgba(249,115,22,0.18)", size: "-inset-[45%]", pos: "ellipse 80% 55% at 40% 60%", blur: "blur(85px)", anim: "themeDrift1 17s ease-in-out infinite -5s" },
+                  { color: "rgba(239,68,68,0.13)", size: "-inset-[50%]", pos: "ellipse 70% 70% at 70% 35%", blur: "blur(90px)", anim: "themeDrift2 21s ease-in-out infinite -9s" },
+                  { color: "rgba(251,191,36,0.1)", size: "-inset-[35%]", pos: "ellipse 60% 60% at 50% 50%", blur: "blur(75px)", anim: "themeDrift3 14s ease-in-out infinite -2s" },
+                ],
+                sparkleColor: "#fbbf24", sparkleCount: 20,
+              },
             };
             const t = themes[profileBg] || themes.gold!;
+            // Generate sparkle positions
+            const sparkles = Array.from({ length: t.sparkleCount }, (_, i) => ({
+              x: `${5 + Math.floor((i * 37 + 13) % 90)}%`,
+              y: `${5 + Math.floor((i * 53 + 7) % 90)}%`,
+              size: `${4 + (i % 4)}px`,
+              dur: `${2.5 + (i % 5) * 0.5}s`,
+              delay: `${(i * 0.3) % 4}s`,
+            }));
             return (
               <>
-                {/* Ambient glow */}
-                <div className="absolute inset-0" style={{ background: `radial-gradient(ellipse 80% 60% at 50% 40%, ${t.glow}, transparent 70%)` }} />
-                {/* Animated flowing lines */}
-                <svg className="absolute inset-0 h-full w-full" preserveAspectRatio="none" viewBox="0 0 1200 800">
-                  {[
-                    { d: "M-100,400 Q200,200 400,350 T800,300 T1300,400", dur: "12s", delay: "-3s", opacity: 0.15 },
-                    { d: "M-100,500 Q300,300 500,450 T900,350 T1300,500", dur: "15s", delay: "-7s", opacity: 0.1 },
-                    { d: "M-100,300 Q150,450 350,280 T750,400 T1300,300", dur: "18s", delay: "-5s", opacity: 0.12 },
-                    { d: "M-100,600 Q250,400 450,550 T850,450 T1300,600", dur: "14s", delay: "-9s", opacity: 0.08 },
-                    { d: "M-100,200 Q300,350 500,200 T900,300 T1300,200", dur: "20s", delay: "-2s", opacity: 0.1 },
-                    { d: "M-100,700 Q200,500 400,650 T800,550 T1300,700", dur: "16s", delay: "-11s", opacity: 0.07 },
-                  ].map((line, i) => (
-                    <path
-                      key={i}
-                      d={line.d}
-                      fill="none"
-                      stroke={t.lines[i % t.lines.length]}
-                      strokeWidth="1.5"
-                      opacity={line.opacity}
-                      style={{ animation: `flowLine ${line.dur} ease-in-out infinite ${line.delay}` }}
-                    />
-                  ))}
-                </svg>
-                {/* Floating particles */}
-                {[
-                  { x: "15%", y: "20%", dur: "3s", delay: "0s" },
-                  { x: "70%", y: "15%", dur: "4s", delay: "1s" },
-                  { x: "40%", y: "60%", dur: "3.5s", delay: "2s" },
-                  { x: "85%", y: "45%", dur: "4.5s", delay: "0.5s" },
-                  { x: "25%", y: "80%", dur: "3.8s", delay: "1.5s" },
-                ].map((p, i) => (
+                {/* Full background gradient */}
+                <div className="absolute inset-0" style={{ background: t.bg }} />
+                {/* Animated glow layers */}
+                {t.layers.map((layer, i) => (
+                  <div
+                    key={i}
+                    className={`absolute ${layer.size}`}
+                    style={{
+                      background: `radial-gradient(${layer.pos}, ${layer.color}, transparent 65%)`,
+                      filter: layer.blur,
+                      animation: layer.anim,
+                    }}
+                  />
+                ))}
+                {/* Sparkles / glitter */}
+                {sparkles.map((p, i) => (
                   <span
                     key={i}
                     className="absolute animate-pulse"
-                    style={{ left: p.x, top: p.y, fontSize: "5px", animationDuration: p.dur, animationDelay: p.delay, color: t.particle, opacity: 0.2 }}
+                    style={{
+                      left: p.x, top: p.y,
+                      fontSize: p.size,
+                      animationDuration: p.dur,
+                      animationDelay: p.delay,
+                      color: t.sparkleColor,
+                      opacity: 0.15 + (i % 3) * 0.08,
+                    }}
                   >&#10022;</span>
                 ))}
               </>
             );
           })()}
           <style jsx>{`
-            @keyframes flowLine {
-              0% { transform: translateX(-5%) translateY(0); }
-              25% { transform: translateX(2%) translateY(-8px); }
-              50% { transform: translateX(5%) translateY(0); }
-              75% { transform: translateX(2%) translateY(8px); }
-              100% { transform: translateX(-5%) translateY(0); }
+            @keyframes themeDrift1 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); }
+              20% { transform: translate(8%, -5%) scale(1.1); }
+              40% { transform: translate(-4%, 8%) scale(0.95); }
+              60% { transform: translate(-8%, -3%) scale(1.05); }
+              80% { transform: translate(5%, 6%) scale(0.97); }
+            }
+            @keyframes themeDrift2 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); }
+              25% { transform: translate(-9%, 6%) scale(1.08); }
+              50% { transform: translate(6%, -7%) scale(0.93); }
+              75% { transform: translate(8%, 9%) scale(1.03); }
+            }
+            @keyframes themeDrift3 {
+              0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.7; }
+              33% { transform: translate(5%, -4%) scale(1.15); opacity: 1; }
+              66% { transform: translate(-6%, 5%) scale(0.9); opacity: 0.8; }
             }
           `}</style>
         </div>,
