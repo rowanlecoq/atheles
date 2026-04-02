@@ -1271,11 +1271,11 @@ export default function ProfileContent() {
         <div className="grid grid-cols-4 gap-3 sm:grid-cols-7">
           {[
             { id: "none", label: "default", colors: "from-[#1a1a1a] to-[#222]" },
-            { id: "gold", label: "gold", colors: "from-yellow-700/70 to-amber-900/70" },
-            { id: "ocean", label: "ocean", colors: "from-cyan-700/70 to-blue-900/70" },
-            { id: "tropical", label: "tropical", colors: "from-emerald-700/70 to-amber-700/70" },
-            { id: "midnight", label: "midnight", colors: "from-indigo-900/80 to-slate-900/80" },
-            { id: "sunset", label: "sunset", colors: "from-orange-500/70 to-red-600/70" },
+            { id: "gold", label: "gold", colors: "from-amber-500/60 to-yellow-700/60" },
+            { id: "ocean", label: "ocean", colors: "from-cyan-500/60 to-blue-600/60" },
+            { id: "tropical", label: "tropical", colors: "from-emerald-500/60 to-amber-500/60" },
+            { id: "midnight", label: "midnight", colors: "from-indigo-600/70 to-violet-800/70" },
+            { id: "sunset", label: "sunset", colors: "from-orange-500/60 via-pink-500/60 to-purple-600/60" },
           ].map((theme) => (
             <button
               key={theme.id}
@@ -1351,7 +1351,7 @@ export default function ProfileContent() {
             <div className="flex h-10 w-10 items-center justify-center rounded-full border border-dashed border-brand-dark-gold/40 bg-brand-dark-gold/10 overflow-hidden">
               {customBgImage ? (
                 // eslint-disable-next-line @next/next/no-img-element
-                <img src={customBgImage} alt="" className="h-full w-full object-cover" />
+                <img src={customBgImage} alt="" className="h-full w-full object-cover opacity-70" />
               ) : (
                 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4 text-brand-grey">
                   <rect x="3" y="3" width="18" height="18" rx="2" />
