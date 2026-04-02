@@ -220,16 +220,21 @@ export default function ProfileContent() {
       if (prefsLoaded.current) return;
       prefsLoaded.current = true;
 
-      // Avatar: always fetch fresh (don't use cache to avoid account switch leaks)
+      // Avatar: use per-user cache key so account switch shows correct data
+      const cacheKey = `atheles-avatar-${u.email}`;
+      try {
+        const cached = sessionStorage.getItem(cacheKey);
+        if (cached) setAvatar(cached);
+      } catch {}
       fetch("/api/auth/avatar")
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
           if (d?.avatar) {
             setAvatar(d.avatar);
-            try { sessionStorage.setItem("atheles-avatar", d.avatar); } catch {}
+            try { sessionStorage.setItem(cacheKey, d.avatar); } catch {}
           } else {
             setAvatar(null);
-            try { sessionStorage.removeItem("atheles-avatar"); } catch {}
+            try { sessionStorage.removeItem(cacheKey); } catch {}
           }
         })
         .catch(() => {});
@@ -239,16 +244,21 @@ export default function ProfileContent() {
       setProfileBg(serverTheme);
       setGlobalThemeOn(!!u.globalTheme);
 
-      // Custom background: always fetch fresh (don't use cache to avoid account switch leaks)
+      // Custom background: per-user cache key
+      const bgCacheKey = `atheles-bg-${u.email}`;
+      try {
+        const cachedBg = sessionStorage.getItem(bgCacheKey);
+        if (cachedBg) setCustomBgImage(cachedBg);
+      } catch {}
       fetch("/api/auth/background")
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
           if (d?.background) {
             setCustomBgImage(d.background);
-            try { sessionStorage.setItem("atheles-custom-bg", d.background); } catch {}
+            try { sessionStorage.setItem(bgCacheKey, d.background); } catch {}
           } else {
             setCustomBgImage(null);
-            try { sessionStorage.removeItem("atheles-custom-bg"); } catch {}
+            try { sessionStorage.removeItem(bgCacheKey); } catch {}
           }
         })
         .catch(() => {});
