@@ -247,20 +247,20 @@ export default function CartModal() {
 
                     {/* Quick shop links */}
                     <div className="mt-6 flex w-full flex-col gap-2.5">
-                      <a
-                        href="/search/mens"
-                        onClick={closeCart}
+                      <button
+                        type="button"
+                        onClick={() => { closeCart(); setTimeout(() => { window.location.href = "/search/mens"; }, 200); }}
                         className="flex min-h-[44px] items-center justify-center rounded-full bg-brand-gold px-6 py-3 text-center text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
                       >
                         shop mens
-                      </a>
-                      <a
-                        href="/search"
-                        onClick={closeCart}
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => { closeCart(); setTimeout(() => { window.location.href = "/search"; }, 200); }}
                         className="flex min-h-[44px] items-center justify-center rounded-full border border-brand-dark-gold/30 px-6 py-3 text-center text-sm uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
                       >
                         browse all
-                      </a>
+                      </button>
                     </div>
                   </div>
 
