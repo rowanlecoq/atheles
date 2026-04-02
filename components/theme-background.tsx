@@ -59,7 +59,12 @@ export function ThemeBackground() {
 
   useEffect(() => {
     const loggedIn = document.cookie.includes("atheles-logged-in=1");
-    if (!loggedIn) return;
+    if (!loggedIn) {
+      setTheme(null);
+      setGlobalOn(false);
+      setCustomBg(null);
+      return;
+    }
 
     // Check cache first
     const { theme: cachedTheme } = readCache();

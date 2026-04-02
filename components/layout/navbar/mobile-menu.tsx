@@ -149,6 +149,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           setLoggedIn(false);
           setUserName("");
           setAvatar(null);
+          try { sessionStorage.removeItem("atheles-avatar"); sessionStorage.removeItem("atheles-custom-bg"); } catch {}
         }
       })
       .catch(() => {});

@@ -44,12 +44,14 @@ export function AccountIcon() {
           setLoggedIn(false);
           setInitials(null);
           setAvatar(null);
+          try { sessionStorage.removeItem("atheles-avatar"); } catch {}
         }
       })
       .catch(() => {
         setLoggedIn(false);
         setInitials(null);
         setAvatar(null);
+        try { sessionStorage.removeItem("atheles-avatar"); } catch {}
       });
   }, []);
 

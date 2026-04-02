@@ -48,7 +48,7 @@ export default function CartModal() {
   const [discountCode, setDiscountCode] = useState("");
   const [discountError, setDiscountError] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
-  const [discountRemoved, setDiscountRemoved] = useState(false);
+  const [appliedCodeLocal, setAppliedCodeLocal] = useState<string | null>(null);
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
   const [addingFav, setAddingFav] = useState<string | null>(null);
@@ -78,6 +78,15 @@ export default function CartModal() {
     window.addEventListener("open-cart", handleOpenCart);
     return () => window.removeEventListener("open-cart", handleOpenCart);
   }, []);
+
+  // Sync applied discount code from cart on open
+  useEffect(() => {
+    if (!isOpen) return;
+    const fromCart = cart?.discountCodes?.find((dc) => dc.applicable);
+    if (fromCart && !appliedCodeLocal) {
+      setAppliedCodeLocal(fromCart.code);
+    }
+  }, [isOpen, cart?.discountCodes, appliedCodeLocal]);
 
   // Check user tier for free shipping
   useEffect(() => {
@@ -536,7 +545,7 @@ export default function CartModal() {
 
                   {/* Discount code */}
                   {(() => {
-                    const appliedCode = discountRemoved ? null : (cart.discountCodes?.find((dc) => dc.applicable) || cart.discountCodes?.[0] || null);
+                    const appliedCode = appliedCodeLocal ? { code: appliedCodeLocal, applicable: true } : null;
                     const totalDiscount = cart.discountAllocations?.reduce(
                       (sum, a) => sum + parseFloat(a.discountedAmount.amount || "0"), 0
                     ) || 0;
@@ -564,7 +573,7 @@ export default function CartModal() {
                             <button
                               type="button"
                               onClick={() => {
-                                setDiscountRemoved(true);
+                                setAppliedCodeLocal(null);
                                 setDiscountCode("");
                                 setDiscountError("");
                                 removeDiscountCode().catch(() => {});
@@ -617,7 +626,8 @@ export default function CartModal() {
                                     setDiscountError("invalid or expired code.");
                                     await removeDiscountCode();
                                   } else {
-                                    setDiscountRemoved(false);
+                                    setAppliedCodeLocal(discountCode.trim());
+                                    setDiscountCode("");
                                   }
                                   setApplyingDiscount(false);
                                 }}
