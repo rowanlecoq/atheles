@@ -9,7 +9,7 @@ const THEME_COLORS: Record<string, { a: string; b: string; c: string; d: string;
   ocean: { a: "rgba(30,180,220,0.16)", b: "rgba(20,100,200,0.14)", c: "rgba(40,210,240,0.10)", d: "rgba(15,60,160,0.08)", particle: "#22d3ee" },
   tropical: { a: "rgba(16,185,129,0.16)", b: "rgba(245,158,11,0.12)", c: "rgba(20,200,160,0.10)", d: "rgba(250,180,50,0.07)", particle: "#10b981" },
   midnight: { a: "rgba(30,30,80,0.22)", b: "rgba(60,60,160,0.14)", c: "rgba(90,50,200,0.10)", d: "rgba(20,20,60,0.12)", particle: "#6366f1" },
-  sunset: { a: "rgba(249,115,22,0.16)", b: "rgba(239,68,68,0.14)", c: "rgba(251,191,36,0.10)", d: "rgba(249,115,22,0.08)", particle: "#f97316" },
+  sunset: { a: "rgba(249,115,22,0.2)", b: "rgba(219,39,119,0.16)", c: "rgba(147,51,234,0.12)", d: "rgba(251,146,60,0.1)", particle: "#fb923c" },
 };
 
 // Sparkles and particles are now generated inline per theme
@@ -190,9 +190,12 @@ export function ThemeBackground() {
         ))}
       </>}
 
-      {/* === SUNSET: warm horizon pulse === */}
+      {/* === SUNSET: orange/pink/purple atmosphere === */}
       {theme === "sunset" && <>
-        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 200% 40% at 50% 55%, rgba(249,115,22,0.1), transparent 55%)", animation: "gsp 8s ease-in-out infinite" }} />
+        <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(147,51,234,0.12) 0%, rgba(219,39,119,0.1) 30%, rgba(249,115,22,0.14) 60%, rgba(251,146,60,0.1) 100%)" }} />
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 200% 50% at 50% 55%, rgba(249,115,22,0.12), transparent 55%)", animation: "gsp 8s ease-in-out infinite" }} />
+        <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 50% 50% at 20% 30%, rgba(147,51,234,0.1), transparent 55%)", filter: "blur(60px)", animation: "gd2 16s ease-in-out infinite -6s" }} />
+        <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 50% 50% at 80% 70%, rgba(219,39,119,0.1), transparent 55%)", filter: "blur(60px)", animation: "gd1 14s ease-in-out infinite -8s" }} />
       </>}
 
       {/* Floating drift particles — all themes (like homepage gold particles) */}
