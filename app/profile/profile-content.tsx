@@ -220,11 +220,7 @@ export default function ProfileContent() {
       if (prefsLoaded.current) return;
       prefsLoaded.current = true;
 
-      // Avatar: show cached instantly, refetch in background
-      try {
-        const cachedAvatar = sessionStorage.getItem("atheles-avatar");
-        if (cachedAvatar) setAvatar(cachedAvatar);
-      } catch {}
+      // Avatar: always fetch fresh (don't use cache to avoid account switch leaks)
       fetch("/api/auth/avatar")
         .then((r) => (r.ok ? r.json() : null))
         .then((d) => {
@@ -232,6 +228,7 @@ export default function ProfileContent() {
             setAvatar(d.avatar);
             try { sessionStorage.setItem("atheles-avatar", d.avatar); } catch {}
           } else {
+            setAvatar(null);
             try { sessionStorage.removeItem("atheles-avatar"); } catch {}
           }
         })
