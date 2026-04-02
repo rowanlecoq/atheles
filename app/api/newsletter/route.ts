@@ -1,5 +1,7 @@
 import { customerCreateMutation } from "lib/shopify/mutations/customer";
+import { updateCustomer } from "lib/auth/shopify-customer";
 import { NextResponse } from "next/server";
+import { cookies } from "next/headers";
 
 export const dynamic = "force-dynamic";
 
@@ -29,6 +31,17 @@ export async function POST(request: Request) {
       );
     }
 
+    // Check if the user is logged in — if so, update their acceptsMarketing
+    const cookieStore = await cookies();
+    const authToken = cookieStore.get("atheles-auth-token")?.value;
+
+    if (authToken) {
+      // Logged-in user — update their marketing preference
+      await updateCustomer(authToken, { acceptsMarketing: true });
+      return NextResponse.json({ success: true, updated: true });
+    }
+
+    // Guest — create customer with acceptsMarketing
     const randomPassword = crypto.randomUUID().replace(/-/g, "").slice(0, 16);
 
     const res = await fetch(endpoint, {

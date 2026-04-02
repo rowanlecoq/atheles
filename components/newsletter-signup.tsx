@@ -47,7 +47,17 @@ export function NewsletterSignup() {
 
       if (data.success) {
         setSubmitted(true);
+        setAlreadySubscribed(true);
         setEmail("");
+        // Update session cache so it persists
+        try {
+          const cached = sessionStorage.getItem("atheles-session");
+          if (cached) {
+            const u = JSON.parse(cached);
+            u.acceptsMarketing = true;
+            sessionStorage.setItem("atheles-session", JSON.stringify(u));
+          }
+        } catch {}
       } else {
         setError(data.error || "failed to subscribe. please try again.");
       }
