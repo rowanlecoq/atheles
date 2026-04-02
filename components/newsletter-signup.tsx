@@ -9,6 +9,8 @@ export function NewsletterSignup() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [alreadySubscribed, setAlreadySubscribed] = useState(false);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userEmail, setUserEmail] = useState("");
 
   // Check if user is already subscribed (acceptsMarketing)
   useEffect(() => {
@@ -17,6 +19,8 @@ export function NewsletterSignup() {
       const cached = sessionStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
+        setLoggedIn(true);
+        setUserEmail(u.email || "");
         if (u.acceptsMarketing) setAlreadySubscribed(true);
         return;
       }
@@ -24,15 +28,17 @@ export function NewsletterSignup() {
     fetch("/api/auth/session")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (d?.user?.acceptsMarketing) setAlreadySubscribed(true);
+        if (d?.user) {
+          setLoggedIn(true);
+          setUserEmail(d.user.email || "");
+          if (d.user.acceptsMarketing) setAlreadySubscribed(true);
+        }
       })
       .catch(() => {});
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email) return;
-
+  const handleSubscribe = async (subscribeEmail: string) => {
+    if (!subscribeEmail) return;
     setLoading(true);
     setError("");
 
@@ -40,7 +46,7 @@ export function NewsletterSignup() {
       const res = await fetch("/api/newsletter", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ email }),
+        body: JSON.stringify({ email: subscribeEmail }),
       });
 
       const data = await res.json();
@@ -108,9 +114,18 @@ export function NewsletterSignup() {
                     welcome to the club.
                   </p>
                 </div>
+              ) : loggedIn ? (
+                <button
+                  type="button"
+                  disabled={loading}
+                  onClick={() => handleSubscribe(userEmail)}
+                  className="border border-brand-gold bg-transparent px-10 py-3 text-sm uppercase tracking-[0.2em] text-brand-gold transition-all duration-300 hover:bg-brand-gold hover:text-brand-dark disabled:opacity-50"
+                >
+                  {loading ? "..." : "join now"}
+                </button>
               ) : (
                 <form
-                  onSubmit={handleSubmit}
+                  onSubmit={(e) => { e.preventDefault(); handleSubscribe(email); }}
                   className="flex flex-col gap-3 bg-brand-dark/40 p-3 backdrop-blur-sm sm:flex-row"
                 >
                   <input
