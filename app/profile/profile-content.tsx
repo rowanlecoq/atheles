@@ -545,174 +545,151 @@ export default function ProfileContent() {
         )
       ) : profileBg !== "none" ? (
         createPortal(
-        <div className="noise-overlay pointer-events-none fixed inset-0 z-0" style={{ overflow: "hidden", clipPath: "inset(0)" }}>
-          {/* Theme-specific unique backgrounds */}
+        <div className="noise-overlay pointer-events-none fixed inset-0 z-0" style={{ overflow: "hidden" }}>
           {profileBg === "gold" && (
             <>
-              {/* Full-screen gold ambient */}
-              <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 150% 100% at 50% 30%, rgba(193,163,104,0.2), transparent 60%), radial-gradient(ellipse 120% 80% at 20% 80%, rgba(160,120,40,0.15), transparent 50%), radial-gradient(ellipse 100% 100% at 90% 20%, rgba(220,200,140,0.1), transparent 50%)" }} />
-              {/* Animated glow orbs */}
-              <div className="absolute -inset-[40%]" style={{ background: "radial-gradient(ellipse 60% 50% at 30% 30%, rgba(193,163,104,0.2), transparent 60%)", filter: "blur(60px)", animation: "goldOrb1 16s ease-in-out infinite -4s" }} />
-              <div className="absolute -inset-[40%]" style={{ background: "radial-gradient(ellipse 50% 60% at 70% 70%, rgba(180,140,60,0.15), transparent 60%)", filter: "blur(70px)", animation: "goldOrb2 20s ease-in-out infinite -10s" }} />
-              {/* Shimmer streaks — full width */}
-              {Array.from({ length: 12 }).map((_, i) => (
-                <div key={i} className="absolute" style={{
-                  width: "400%", height: `${1 + (i % 2)}px`,
-                  background: `linear-gradient(90deg, transparent 10%, rgba(193,163,104,${0.06 + (i % 3) * 0.04}) 30%, rgba(220,200,140,${0.08 + (i % 2) * 0.04}) 50%, rgba(193,163,104,${0.06 + (i % 3) * 0.04}) 70%, transparent 90%)`,
-                  top: `${5 + i * 8}%`, left: "-150%",
-                  transform: `rotate(${-20 + i * 3}deg)`,
-                  animation: `goldShimmer ${10 + i * 1.5}s linear infinite ${-i * 1.2}s`,
-                }} />
-              ))}
-              {/* Gold dust particles */}
-              {Array.from({ length: 40 }).map((_, i) => (
+              <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 150% 100% at 50% 30%, rgba(193,163,104,0.22), transparent 60%), radial-gradient(ellipse 120% 80% at 20% 80%, rgba(160,120,40,0.16), transparent 50%), radial-gradient(ellipse 100% 100% at 90% 20%, rgba(220,200,140,0.12), transparent 50%)" }} />
+              <div className="absolute -inset-[40%]" style={{ background: "radial-gradient(ellipse 70% 60% at 25% 35%, rgba(193,163,104,0.2), transparent 60%)", filter: "blur(70px)", animation: "goldOrb1 16s ease-in-out infinite -4s" }} />
+              <div className="absolute -inset-[40%]" style={{ background: "radial-gradient(ellipse 55% 70% at 75% 65%, rgba(180,140,60,0.16), transparent 60%)", filter: "blur(80px)", animation: "goldOrb2 20s ease-in-out infinite -10s" }} />
+              <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 50% 50% at 50% 50%, rgba(220,200,140,0.12), transparent 55%)", filter: "blur(60px)", animation: "goldOrb3 13s ease-in-out infinite -7s" }} />
+              {Array.from({ length: 45 }).map((_, i) => (
                 <span key={i} className="absolute" style={{
-                  left: `${(i * 31 + 7) % 98}%`, top: `${(i * 47 + 13) % 98}%`,
-                  fontSize: `${3 + (i % 5)}px`, color: i % 3 === 0 ? "#d4b878" : "#c1a368",
-                  animation: `sparkleFloat ${2.5 + (i % 4)}s ease-in-out infinite ${(i * 0.2) % 5}s`,
+                  left: `${(i * 23 + 7) % 98}%`, top: `${(i * 41 + 3) % 98}%`,
+                  fontSize: `${3 + (i % 6)}px`, color: i % 3 === 0 ? "#d4b878" : i % 3 === 1 ? "#c1a368" : "#e5d5a0",
+                  animation: `sparkle ${2 + (i % 5)}s ease-in-out infinite ${(i * 0.15) % 5}s`,
                 }}>&#10022;</span>
               ))}
               <style jsx>{`
-                @keyframes goldOrb1 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(10%,-8%) scale(1.1); } 66% { transform: translate(-8%,6%) scale(0.95); } }
-                @keyframes goldOrb2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-10%,-5%) scale(1.08); } }
-                @keyframes goldShimmer { 0% { transform: rotate(-20deg) translateX(-30%); } 100% { transform: rotate(-20deg) translateX(30%); } }
-                @keyframes sparkleFloat { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.12; } 50% { transform: translateY(-10px) scale(1.5); opacity: 0.5; } }
+                @keyframes goldOrb1 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(10%,-8%) scale(1.12); } 66% { transform: translate(-8%,6%) scale(0.93); } }
+                @keyframes goldOrb2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-12%,-6%) scale(1.1); } }
+                @keyframes goldOrb3 { 0%, 100% { transform: translate(0,0) scale(1); opacity: 0.6; } 50% { transform: translate(6%,8%) scale(1.15); opacity: 1; } }
+                @keyframes sparkle { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.1; } 50% { transform: translateY(-10px) scale(1.5); opacity: 0.55; } }
               `}</style>
             </>
           )}
           {profileBg === "ocean" && (
             <>
-              {/* Deep ocean gradient — full screen */}
-              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(6,80,140,0.25) 0%, rgba(20,120,180,0.2) 30%, rgba(30,180,220,0.18) 60%, rgba(6,100,160,0.22) 100%)" }} />
-              {/* Animated glow layers */}
-              <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 80% 50% at 30% 40%, rgba(34,211,238,0.15), transparent 60%)", filter: "blur(60px)", animation: "oceanGlow1 14s ease-in-out infinite -4s" }} />
-              <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 60% 70% at 70% 60%, rgba(14,165,233,0.12), transparent 55%)", filter: "blur(70px)", animation: "oceanGlow2 18s ease-in-out infinite -9s" }} />
-              {/* Flowing water wave lines */}
-              {Array.from({ length: 15 }).map((_, i) => (
-                <div key={i} className="absolute" style={{
-                  top: `${5 + i * 6}%`, left: "-20%", width: "140%", height: "2px",
-                  background: `linear-gradient(90deg, transparent, rgba(34,211,238,${0.06 + (i % 4) * 0.04}), rgba(6,182,212,${0.08 + (i % 3) * 0.03}), rgba(34,211,238,${0.06 + (i % 4) * 0.04}), transparent)`,
-                  borderRadius: "50%",
-                  animation: `waterFlow${i % 3} ${6 + i * 0.8}s ease-in-out infinite ${-i * 0.5}s`,
-                }} />
-              ))}
-              {/* Bubbles rising from everywhere */}
+              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(6,80,140,0.28) 0%, rgba(20,120,180,0.22) 30%, rgba(30,180,220,0.2) 60%, rgba(6,100,160,0.25) 100%)" }} />
+              <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 80% 50% at 30% 40%, rgba(34,211,238,0.16), transparent 60%)", filter: "blur(60px)", animation: "oceanGlow1 14s ease-in-out infinite -4s" }} />
+              <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 60% 70% at 70% 60%, rgba(14,165,233,0.13), transparent 55%)", filter: "blur(70px)", animation: "oceanGlow2 18s ease-in-out infinite -9s" }} />
+              <svg className="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%]" preserveAspectRatio="none" viewBox="0 0 1000 1000">
+                {Array.from({ length: 18 }).map((_, i) => {
+                  const y = 50 + i * 55;
+                  const amp = 20 + (i % 4) * 8;
+                  return (
+                    <path key={i}
+                      d={`M-50,${y} C150,${y - amp} 300,${y + amp} 500,${y} S750,${y - amp} 1050,${y}`}
+                      fill="none"
+                      stroke={`rgba(34,211,238,${0.08 + (i % 4) * 0.04})`}
+                      strokeWidth={1 + (i % 3) * 0.5}
+                      style={{ animation: `waveFlow ${8 + i * 0.6}s ease-in-out infinite ${-i * 0.5}s` }}
+                    />
+                  );
+                })}
+              </svg>
               {Array.from({ length: 35 }).map((_, i) => (
                 <span key={i} className="absolute rounded-full" style={{
                   left: `${(i * 29 + 11) % 98}%`, bottom: `${-5 - (i % 15) * 3}%`,
                   width: `${2 + (i % 5)}px`, height: `${2 + (i % 5)}px`,
-                  background: `rgba(34,211,238,${0.12 + (i % 3) * 0.1})`,
+                  background: `rgba(34,211,238,${0.15 + (i % 3) * 0.1})`,
                   animation: `bubbleRise ${6 + (i % 8) * 2}s ease-in infinite ${(i * 0.4) % 12}s`,
                 }} />
               ))}
-              {/* Ocean sparkles */}
-              {Array.from({ length: 20 }).map((_, i) => (
+              {Array.from({ length: 25 }).map((_, i) => (
                 <span key={`s${i}`} className="absolute" style={{
                   left: `${(i * 37 + 5) % 96}%`, top: `${(i * 53 + 9) % 96}%`,
                   fontSize: `${3 + (i % 4)}px`, color: "#22d3ee",
-                  animation: `sparkleFloat ${2.5 + (i % 4)}s ease-in-out infinite ${(i * 0.3) % 4}s`,
+                  animation: `sparkle ${2.5 + (i % 4)}s ease-in-out infinite ${(i * 0.3) % 4}s`,
                 }}>&#10022;</span>
               ))}
               <style jsx>{`
                 @keyframes oceanGlow1 { 0%, 100% { transform: translate(0,0); } 33% { transform: translate(8%,-5%); } 66% { transform: translate(-6%,4%); } }
                 @keyframes oceanGlow2 { 0%, 100% { transform: translate(0,0); } 50% { transform: translate(-8%,-4%); } }
-                @keyframes waterFlow0 { 0% { transform: translateX(-5%) translateY(0) scaleY(1); } 25% { transform: translateX(3%) translateY(-8px) scaleY(1.5); } 50% { transform: translateX(8%) translateY(0) scaleY(0.8); } 75% { transform: translateX(3%) translateY(6px) scaleY(1.3); } 100% { transform: translateX(-5%) translateY(0) scaleY(1); } }
-                @keyframes waterFlow1 { 0% { transform: translateX(5%) translateY(0) scaleY(1); } 25% { transform: translateX(-2%) translateY(6px) scaleY(1.4); } 50% { transform: translateX(-7%) translateY(0) scaleY(0.7); } 75% { transform: translateX(-2%) translateY(-8px) scaleY(1.2); } 100% { transform: translateX(5%) translateY(0) scaleY(1); } }
-                @keyframes waterFlow2 { 0% { transform: translateX(0) translateY(4px) scaleY(1.2); } 25% { transform: translateX(5%) translateY(-4px) scaleY(0.8); } 50% { transform: translateX(2%) translateY(6px) scaleY(1.5); } 75% { transform: translateX(-4%) translateY(-2px) scaleY(1); } 100% { transform: translateX(0) translateY(4px) scaleY(1.2); } }
+                @keyframes waveFlow { 0%, 100% { transform: translateX(-3%) translateY(0); } 25% { transform: translateX(1%) translateY(-8px); } 50% { transform: translateX(3%) translateY(0); } 75% { transform: translateX(1%) translateY(8px); } }
                 @keyframes bubbleRise { 0% { transform: translateY(0) scale(1); opacity: 0; } 10% { opacity: 0.4; } 80% { opacity: 0.15; } 100% { transform: translateY(-120vh) scale(0.3); opacity: 0; } }
-                @keyframes sparkleFloat { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.1; } 50% { transform: translateY(-8px) scale(1.4); opacity: 0.45; } }
+                @keyframes sparkle { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.1; } 50% { transform: translateY(-8px) scale(1.4); opacity: 0.5; } }
               `}</style>
             </>
           )}
           {profileBg === "tropical" && (
             <>
               <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 130% 100% at 30% 20%, rgba(16,185,129,0.22), transparent 55%), radial-gradient(ellipse 120% 80% at 80% 80%, rgba(245,158,11,0.18), transparent 50%), linear-gradient(135deg, rgba(16,185,129,0.1), transparent 50%, rgba(245,158,11,0.1))" }} />
-              {/* Diagonal light rays */}
+              <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 60% 50% at 35% 30%, rgba(16,185,129,0.18), transparent 55%)", filter: "blur(60px)", animation: "tropGlow1 15s ease-in-out infinite -5s" }} />
+              <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 50% 60% at 65% 70%, rgba(245,158,11,0.15), transparent 55%)", filter: "blur(70px)", animation: "tropGlow2 19s ease-in-out infinite -10s" }} />
               {Array.from({ length: 6 }).map((_, i) => (
                 <div key={i} className="absolute" style={{
-                  width: "300%", height: `${20 + i * 8}px`,
-                  background: `linear-gradient(90deg, transparent, rgba(${i % 2 ? "245,158,11" : "16,185,129"},${0.04 + i * 0.01}), transparent)`,
+                  width: "300%", height: `${25 + i * 10}px`,
+                  background: `linear-gradient(90deg, transparent, rgba(${i % 2 ? "245,158,11" : "16,185,129"},${0.05 + i * 0.012}), transparent)`,
                   top: `${5 + i * 16}%`, left: "-100%",
                   transform: `rotate(${25 + i * 3}deg)`,
-                  filter: "blur(10px)",
-                  animation: `tropicalRay ${12 + i * 3}s ease-in-out infinite ${-i * 2}s`,
+                  filter: "blur(12px)",
+                  animation: `tropRay ${10 + i * 2}s ease-in-out infinite ${-i * 1.5}s`,
                 }} />
               ))}
-              {/* Firefly sparkles */}
-              {Array.from({ length: 30 }).map((_, i) => (
+              {Array.from({ length: 35 }).map((_, i) => (
                 <span key={i} className="absolute" style={{
                   left: `${(i * 37 + 5) % 96}%`, top: `${(i * 53 + 9) % 96}%`,
                   fontSize: `${3 + (i % 5)}px`, color: i % 2 ? "#f59e0b" : "#10b981",
-                  animation: `fireflyGlow ${2 + (i % 4)}s ease-in-out infinite ${(i * 0.3) % 4}s`,
+                  animation: `firefly ${2 + (i % 4)}s ease-in-out infinite ${(i * 0.3) % 4}s`,
                 }}>&#10022;</span>
               ))}
               <style jsx>{`
-                @keyframes tropicalRay { 0%, 100% { opacity: 0.3; transform: rotate(25deg) translateX(-10%); } 50% { opacity: 0.8; transform: rotate(25deg) translateX(10%); } }
-                @keyframes fireflyGlow { 0%, 100% { opacity: 0; transform: scale(0.5); } 50% { opacity: 0.5; transform: scale(1.5); } }
+                @keyframes tropGlow1 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(8%,-6%) scale(1.1); } 66% { transform: translate(-6%,5%) scale(0.95); } }
+                @keyframes tropGlow2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-8%,-5%) scale(1.08); } }
+                @keyframes tropRay { 0%, 100% { opacity: 0.3; transform: rotate(25deg) translateX(-8%) translateY(0); } 50% { opacity: 0.8; transform: rotate(27deg) translateX(8%) translateY(-3%); } }
+                @keyframes firefly { 0%, 100% { opacity: 0; transform: scale(0.5) translateY(0); } 50% { opacity: 0.55; transform: scale(1.5) translateY(-6px); } }
               `}</style>
             </>
           )}
           {profileBg === "midnight" && (
             <>
               <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 150% 120% at 50% 30%, rgba(30,30,90,0.3), transparent 65%), radial-gradient(ellipse 80% 80% at 80% 70%, rgba(99,102,241,0.15), transparent 50%), radial-gradient(ellipse 60% 60% at 20% 80%, rgba(139,92,246,0.12), transparent 50%)" }} />
-              {/* Stars — tiny fixed dots */}
-              {Array.from({ length: 60 }).map((_, i) => (
+              <div className="absolute inset-0" style={{ animation: "midnightPulse 12s ease-in-out infinite" }} />
+              {Array.from({ length: 70 }).map((_, i) => (
                 <span key={i} className="absolute rounded-full" style={{
-                  left: `${(i * 23 + 7) % 98}%`, top: `${(i * 41 + 3) % 98}%`,
+                  left: `${(i * 23 + 7) % 99}%`, top: `${(i * 41 + 3) % 99}%`,
                   width: `${1 + (i % 3)}px`, height: `${1 + (i % 3)}px`,
                   background: i % 5 === 0 ? "#c4b5fd" : i % 3 === 0 ? "#818cf8" : "#e0e7ff",
-                  animation: `starTwinkle ${2 + (i % 5)}s ease-in-out infinite ${(i * 0.15) % 5}s`,
+                  animation: `twinkle ${1.5 + (i % 5) * 0.6}s ease-in-out infinite ${(i * 0.12) % 5}s`,
                 }} />
               ))}
-              {/* Shooting star */}
-              <div className="absolute" style={{
-                width: "80px", height: "1px",
-                background: "linear-gradient(90deg, transparent, #818cf8, transparent)",
-                animation: "shootingStar 8s ease-in infinite -2s",
-              }} />
-              <div className="absolute" style={{
-                width: "60px", height: "1px",
-                background: "linear-gradient(90deg, transparent, #c4b5fd, transparent)",
-                animation: "shootingStar 12s ease-in infinite -7s",
-              }} />
+              {Array.from({ length: 20 }).map((_, i) => (
+                <span key={`g${i}`} className="absolute" style={{
+                  left: `${(i * 37 + 11) % 96}%`, top: `${(i * 51 + 7) % 96}%`,
+                  fontSize: `${3 + (i % 4)}px`, color: i % 2 ? "#818cf8" : "#c4b5fd",
+                  animation: `sparkle ${2 + (i % 4)}s ease-in-out infinite ${(i * 0.25) % 4}s`,
+                }}>&#10022;</span>
+              ))}
               <style jsx>{`
-                @keyframes starTwinkle { 0%, 100% { opacity: 0.2; } 50% { opacity: 0.8; } }
-                @keyframes shootingStar { 0% { top: 10%; left: -10%; opacity: 0; transform: rotate(-35deg); } 5% { opacity: 1; } 15% { top: 40%; left: 110%; opacity: 0; } 100% { opacity: 0; top: 40%; left: 110%; } }
+                @keyframes midnightPulse { 0%, 100% { background: radial-gradient(ellipse 100% 80% at 50% 50%, rgba(79,70,229,0.06), transparent 60%); } 33% { background: radial-gradient(ellipse 100% 80% at 40% 40%, rgba(99,102,241,0.1), transparent 60%); } 66% { background: radial-gradient(ellipse 100% 80% at 60% 60%, rgba(139,92,246,0.08), transparent 60%); } }
+                @keyframes twinkle { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.9; transform: scale(1.3); } }
+                @keyframes sparkle { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.1; } 50% { transform: translateY(-8px) scale(1.4); opacity: 0.5; } }
               `}</style>
             </>
           )}
           {profileBg === "sunset" && (
             <>
-              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(60,15,50,0.2) 0%, rgba(180,50,60,0.15) 25%, rgba(249,115,22,0.2) 50%, rgba(251,191,36,0.15) 75%, rgba(60,15,50,0.15) 100%)" }} />
-              {/* Horizon glow layers */}
+              <div className="absolute inset-0" style={{ background: "linear-gradient(180deg, rgba(60,15,50,0.2) 0%, rgba(180,50,60,0.15) 25%, rgba(249,115,22,0.22) 50%, rgba(251,191,36,0.16) 75%, rgba(60,15,50,0.15) 100%)" }} />
               <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 200% 50% at 50% 55%, rgba(249,115,22,0.22), transparent 60%)" }} />
-              <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 150% 40% at 50% 50%, rgba(239,68,68,0.08), transparent 55%)", animation: "sunsetPulse 8s ease-in-out infinite" }} />
-              {/* Sun rays */}
-              {Array.from({ length: 10 }).map((_, i) => (
-                <div key={i} className="absolute" style={{
-                  width: "200%", height: "1px",
-                  background: `linear-gradient(90deg, transparent 20%, rgba(251,191,36,${0.03 + (i % 3) * 0.02}), transparent 80%)`,
-                  top: "50%", left: "-50%",
-                  transformOrigin: "50% 50%",
-                  transform: `rotate(${i * 18}deg)`,
-                  animation: `sunRay ${6 + i}s ease-in-out infinite ${-i * 0.6}s`,
-                }} />
-              ))}
-              {/* Warm sparkles */}
-              {Array.from({ length: 25 }).map((_, i) => (
+              <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 70% 50% at 40% 55%, rgba(239,68,68,0.14), transparent 55%)", filter: "blur(60px)", animation: "sunGlow1 14s ease-in-out infinite -4s" }} />
+              <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 50% 60% at 60% 45%, rgba(251,191,36,0.12), transparent 55%)", filter: "blur(70px)", animation: "sunGlow2 18s ease-in-out infinite -9s" }} />
+              <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 150% 40% at 50% 50%, rgba(239,68,68,0.1), transparent 55%)", animation: "sunsetPulse 8s ease-in-out infinite" }} />
+              {Array.from({ length: 30 }).map((_, i) => (
                 <span key={i} className="absolute" style={{
                   left: `${(i * 31 + 9) % 96}%`, top: `${(i * 47 + 11) % 96}%`,
-                  fontSize: `${3 + (i % 4)}px`, color: i % 3 === 0 ? "#fbbf24" : i % 3 === 1 ? "#f97316" : "#ef4444",
-                  animation: `sparkleFloat ${2.5 + (i % 4)}s ease-in-out infinite ${(i * 0.25) % 4}s`,
+                  fontSize: `${3 + (i % 5)}px`, color: i % 3 === 0 ? "#fbbf24" : i % 3 === 1 ? "#f97316" : "#ef4444",
+                  animation: `sparkle ${2 + (i % 4)}s ease-in-out infinite ${(i * 0.25) % 4}s`,
                 }}>&#10022;</span>
               ))}
               <style jsx>{`
-                @keyframes sunsetPulse { 0%, 100% { opacity: 0.6; } 50% { opacity: 1; } }
-                @keyframes sunRay { 0%, 100% { opacity: 0.3; } 50% { opacity: 0.7; } }
-                @keyframes sparkleFloat { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.1; } 50% { transform: translateY(-6px) scale(1.4); opacity: 0.45; } }
+                @keyframes sunGlow1 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(6%,-4%) scale(1.08); } 66% { transform: translate(-5%,3%) scale(0.95); } }
+                @keyframes sunGlow2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-7%,-3%) scale(1.06); } }
+                @keyframes sunsetPulse { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+                @keyframes sparkle { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.1; } 50% { transform: translateY(-8px) scale(1.5); opacity: 0.5; } }
               `}</style>
             </>
           )}
+
         </div>,
         document.body,
         )
