@@ -88,6 +88,35 @@ export function AthletesContent() {
 
   return (
     <div className="mx-auto min-h-[calc(100vh-200px)] max-w-4xl px-4 py-16 sm:px-6">
+      {/* Structured data for search engines — invisible to users */}
+      {athletes.map((athlete) => {
+        const socials = normalizeSocials(athlete.socials);
+        const jsonLd = {
+          "@context": "https://schema.org",
+          "@type": "Person",
+          name: athlete.name,
+          jobTitle: athlete.role,
+          description: athlete.description || undefined,
+          image: athlete.image || undefined,
+          url: "https://atheles.co/athletes",
+          affiliation: {
+            "@type": "Organization",
+            name: "Atheles",
+            url: "https://atheles.co",
+          },
+          sameAs: socials
+            .filter((s) => s.url.startsWith("http"))
+            .map((s) => s.url),
+        };
+        return (
+          <script
+            key={athlete.name}
+            type="application/ld+json"
+            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+          />
+        );
+      })}
+
       <h1 className="mb-2 text-center font-heading text-3xl tracking-wider text-brand-gold sm:text-4xl">
         our athletes
       </h1>
