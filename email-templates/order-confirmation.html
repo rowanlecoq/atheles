@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Order Confirmed | Atheles</title>
+</head>
+<body style="margin:0;padding:0;background-color:#1a1a1a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#1a1a1a;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+          <tr>
+            <td align="center" style="padding:30px 0 20px;">
+              <h1 style="margin:0;font-size:28px;letter-spacing:8px;color:#ccb173;font-weight:300;text-transform:uppercase;">ATHELES</h1>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding-bottom:30px;">
+              <div style="width:60px;height:1px;background-color:#7f6f4c;"></div>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="background-color:#222222;border:1px solid #3a3428;border-radius:8px;padding:40px 30px;">
+              <h2 style="margin:0 0 8px;font-size:22px;color:#ccb173;font-weight:400;letter-spacing:2px;text-transform:lowercase;">order confirmed.</h2>
+              <p style="margin:0 0 24px;font-size:14px;color:#999;line-height:1.6;">
+                {{ customer.first_name | default: "hey" }}, thanks for your order. we're getting it ready for you.
+              </p>
+
+              <!-- Order details -->
+              <table width="100%" cellpadding="0" cellspacing="0" style="margin:0 0 24px;border-top:1px solid #3a3428;">
+                <tr>
+                  <td style="padding:16px 0 8px;">
+                    <p style="margin:0;font-size:11px;letter-spacing:2px;color:#7f6f4c;text-transform:uppercase;">order {{ order_name }}</p>
+                  </td>
+                </tr>
+                {% for line in line_items %}
+                <tr>
+                  <td style="padding:8px 0;border-bottom:1px solid #2a2a2a;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:14px;color:#fff;">{{ line.title }}</td>
+                        <td align="right" style="font-size:14px;color:#999;">x{{ line.quantity }}</td>
+                        <td align="right" style="font-size:14px;color:#ccb173;width:100px;">{{ line.price | money }}</td>
+                      </tr>
+                      {% if line.variant_title != blank %}
+                      <tr>
+                        <td colspan="3" style="font-size:12px;color:#666;padding-top:2px;">{{ line.variant_title }}</td>
+                      </tr>
+                      {% endif %}
+                    </table>
+                  </td>
+                </tr>
+                {% endfor %}
+                <tr>
+                  <td style="padding:16px 0 0;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td style="font-size:13px;color:#999;padding:4px 0;">subtotal</td>
+                        <td align="right" style="font-size:13px;color:#999;">{{ subtotal_price | money }}</td>
+                      </tr>
+                      {% if shipping_price and shipping_price != "0.00" %}
+                      <tr>
+                        <td style="font-size:13px;color:#999;padding:4px 0;">shipping</td>
+                        <td align="right" style="font-size:13px;color:#999;">{{ shipping_price | money }}</td>
+                      </tr>
+                      {% endif %}
+                      {% if discounts_amount and discounts_amount != "0.00" %}
+                      <tr>
+                        <td style="font-size:13px;color:#4ade80;padding:4px 0;">discount</td>
+                        <td align="right" style="font-size:13px;color:#4ade80;">-{{ discounts_amount | money }}</td>
+                      </tr>
+                      {% endif %}
+                      <tr>
+                        <td style="font-size:16px;color:#ccb173;padding:12px 0 0;font-weight:600;border-top:1px solid #3a3428;">total</td>
+                        <td align="right" style="font-size:16px;color:#ccb173;padding:12px 0 0;font-weight:600;border-top:1px solid #3a3428;">{{ total_price | money }}</td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+              </table>
+
+              <!-- CTA -->
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                <tr>
+                  <td align="center" style="background-color:#ccb173;border-radius:50px;padding:14px 40px;">
+                    <a href="{{ order_status_url }}" style="color:#1a1a1a;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;">Track Order</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding:30px 0 10px;">
+              <p style="margin:0;font-size:11px;letter-spacing:4px;color:#7f6f4c;text-transform:uppercase;">authentic superiority.</p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:10px 0;">
+              <a href="https://atheles.co" style="color:#666;font-size:11px;text-decoration:none;">atheles.co</a>
+              <span style="color:#444;margin:0 8px;">|</span>
+              <a href="https://www.instagram.com/atheles.co/" style="color:#666;font-size:11px;text-decoration:none;">@atheles.co</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>
