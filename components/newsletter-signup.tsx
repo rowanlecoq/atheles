@@ -76,8 +76,8 @@ export function NewsletterSignup() {
             </h2>
             <div className="mx-auto mb-6 h-px w-24 bg-brand-dark-gold/40" />
             <p className="animate-fade-in text-sm text-brand-grey [animation-delay:200ms]">
-              thanks for being part of the movement. you&apos;ll be the first to
-              know about new drops, exclusive offers, and what&apos;s next.
+              thank you so much for joining. you will be the first to know about
+              new drops, exclusive offers, and upcoming releases.
             </p>
           </>
         ) : (
