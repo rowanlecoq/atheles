@@ -21,7 +21,6 @@ const tierColors: Record<string, string> = {
   champion: "text-fuchsia-300",
   athlete: "text-sky-300",
   admin: "text-red-400",
-  none: "text-brand-grey",
 };
 
 const validTiers = ["bronze", "silver", "gold", "platinum", "champion", "athlete", "admin"];
@@ -33,6 +32,8 @@ export default function AdminMembersPage() {
   const [loading, setLoading] = useState(true);
   const [updating, setUpdating] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
+  const [search, setSearch] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -76,6 +77,12 @@ export default function AdminMembersPage() {
     setUpdating(null);
   };
 
+  const copyEmail = (email: string) => {
+    navigator.clipboard.writeText(email).catch(() => {});
+    setCopied(email);
+    setTimeout(() => setCopied(null), 1500);
+  };
+
   if (!authorized) {
     return (
       <div className="flex min-h-[60vh] items-center justify-center">
@@ -84,7 +91,12 @@ export default function AdminMembersPage() {
     );
   }
 
-  const filtered = filter === "all" ? members : members.filter((m) => m.tier === filter);
+  const searchLower = search.toLowerCase();
+  const filtered = members.filter((m) => {
+    const matchesFilter = filter === "all" || m.tier === filter;
+    const matchesSearch = !search || m.name.toLowerCase().includes(searchLower) || m.email.toLowerCase().includes(searchLower);
+    return matchesFilter && matchesSearch;
+  });
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
@@ -100,9 +112,20 @@ export default function AdminMembersPage() {
         </p>
       </div>
 
+      {/* Search */}
+      <div className="mb-4">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="search by name or email..."
+          className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+        />
+      </div>
+
       {/* Filter */}
       <div className="mb-6 flex flex-wrap gap-2">
-        {["all", ...validTiers, "none"].map((t) => (
+        {["all", ...validTiers].map((t) => (
           <button
             key={t}
             type="button"
@@ -113,13 +136,15 @@ export default function AdminMembersPage() {
                 : "border border-brand-dark-gold/20 text-brand-grey hover:text-brand-gold"
             }`}
           >
-            {t}
+            {t} {t !== "all" && `(${members.filter((m) => m.tier === t).length})`}
           </button>
         ))}
       </div>
 
       {loading ? (
         <p className="text-sm text-brand-grey">loading members...</p>
+      ) : filtered.length === 0 ? (
+        <p className="text-sm text-brand-grey">no members found.</p>
       ) : (
         <div className="space-y-2">
           {filtered.map((m) => (
@@ -130,7 +155,17 @@ export default function AdminMembersPage() {
               <div className="flex items-start justify-between gap-4">
                 <div className="min-w-0 flex-1">
                   <p className="text-sm font-medium text-white">{m.name}</p>
-                  <p className="truncate text-xs text-brand-grey">{m.email}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="truncate text-xs text-brand-grey">{m.email}</p>
+                    <button
+                      type="button"
+                      onClick={() => copyEmail(m.email)}
+                      className="flex-none text-[10px] text-brand-dark-gold hover:text-brand-gold"
+                      title="Copy email"
+                    >
+                      {copied === m.email ? "✓" : "copy"}
+                    </button>
+                  </div>
                   <div className="mt-1.5 flex flex-wrap gap-3 text-[10px] text-brand-grey">
                     <span>joined {new Date(m.createdAt).toLocaleDateString()}</span>
                     {m.dob && <span>dob: {m.dob}</span>}

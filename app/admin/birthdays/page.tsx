@@ -33,16 +33,15 @@ export default function AdminBirthdaysPage() {
   const [data, setData] = useState<BirthdayData | null>(null);
   const [loading, setLoading] = useState(true);
   const [authorized, setAuthorized] = useState(false);
+  const [search, setSearch] = useState("");
+  const [copied, setCopied] = useState<string | null>(null);
 
   useEffect(() => {
-    // Check if user is admin
     fetch("/api/auth/session")
       .then((r) => r.json())
       .then((d) => {
         if (d?.user?.isAdmin) {
           setAuthorized(true);
-          // Fetch birthday data using admin secret from cookie/session
-          // We'll use the session-based approach instead
           fetchBirthdays();
         } else {
           router.replace("/");
@@ -60,6 +59,12 @@ export default function AdminBirthdaysPage() {
       }
     } catch {}
     setLoading(false);
+  };
+
+  const copyEmail = (email: string) => {
+    navigator.clipboard.writeText(email).catch(() => {});
+    setCopied(email);
+    setTimeout(() => setCopied(null), 1500);
   };
 
   if (!authorized) {
@@ -86,24 +91,44 @@ export default function AdminBirthdaysPage() {
     );
   }
 
+  const searchLower = search.toLowerCase();
+  const filterMembers = (list: BirthdayMember[]) =>
+    search ? list.filter((m) => m.name.toLowerCase().includes(searchLower) || m.email.toLowerCase().includes(searchLower)) : list;
+
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <h1 className="mb-1 font-heading text-2xl text-brand-gold">
-        birthday rewards tracker
-      </h1>
-      <p className="mb-8 text-sm text-brand-grey">
-        members with birthday rewards perk (platinum, champion, athlete)
-      </p>
+      <div className="mb-6">
+        <a href="/admin" className="text-xs text-brand-grey hover:text-brand-gold">
+          ← back to dashboard
+        </a>
+        <h1 className="mt-2 font-heading text-2xl text-brand-gold">
+          birthday rewards tracker
+        </h1>
+        <p className="mt-1 text-sm text-brand-grey">
+          members with birthday rewards perk (platinum, champion, athlete)
+        </p>
+      </div>
+
+      {/* Search */}
+      <div className="mb-6">
+        <input
+          type="text"
+          value={search}
+          onChange={(e) => setSearch(e.target.value)}
+          placeholder="search by name or email..."
+          className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+        />
+      </div>
 
       {/* Upcoming in 30 days */}
-      {data.upcomingIn30Days.length > 0 && (
+      {filterMembers(data.upcomingIn30Days).length > 0 && (
         <div className="mb-8">
           <h2 className="mb-3 text-xs uppercase tracking-wider text-brand-pale-gold">
-            upcoming in 30 days ({data.upcoming})
+            upcoming in 30 days ({filterMembers(data.upcomingIn30Days).length})
           </h2>
           <div className="space-y-2">
-            {data.upcomingIn30Days.map((m) => (
-              <MemberCard key={m.email} member={m} urgent />
+            {filterMembers(data.upcomingIn30Days).map((m) => (
+              <MemberCard key={m.email} member={m} urgent onCopy={copyEmail} copied={copied} />
             ))}
           </div>
         </div>
@@ -112,11 +137,11 @@ export default function AdminBirthdaysPage() {
       {/* All members */}
       <div>
         <h2 className="mb-3 text-xs uppercase tracking-wider text-brand-grey">
-          all birthday members ({data.total})
+          all birthday members ({filterMembers(data.allBirthdayMembers).length})
         </h2>
         <div className="space-y-2">
-          {data.allBirthdayMembers.map((m) => (
-            <MemberCard key={m.email} member={m} />
+          {filterMembers(data.allBirthdayMembers).map((m) => (
+            <MemberCard key={m.email} member={m} onCopy={copyEmail} copied={copied} />
           ))}
         </div>
       </div>
@@ -124,7 +149,7 @@ export default function AdminBirthdaysPage() {
   );
 }
 
-function MemberCard({ member, urgent }: { member: BirthdayMember; urgent?: boolean }) {
+function MemberCard({ member, urgent, onCopy, copied }: { member: BirthdayMember; urgent?: boolean; onCopy: (email: string) => void; copied: string | null }) {
   const color = tierColors[member.tier] || "text-brand-grey";
 
   return (
@@ -132,7 +157,16 @@ function MemberCard({ member, urgent }: { member: BirthdayMember; urgent?: boole
       <div className="flex items-start justify-between">
         <div>
           <p className="text-sm font-medium text-white">{member.name}</p>
-          <p className="text-xs text-brand-grey">{member.email}</p>
+          <div className="flex items-center gap-2">
+            <p className="text-xs text-brand-grey">{member.email}</p>
+            <button
+              type="button"
+              onClick={() => onCopy(member.email)}
+              className="flex-none text-[10px] text-brand-dark-gold hover:text-brand-gold"
+            >
+              {copied === member.email ? "✓" : "copy"}
+            </button>
+          </div>
         </div>
         <span className={`text-xs uppercase tracking-wider ${color}`}>
           {member.tier}

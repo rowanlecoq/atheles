@@ -61,6 +61,18 @@ export default function AdminDashboard() {
           icon="📢"
         />
         <AdminCard
+          title="athlete profiles"
+          description="edit athlete bios, photos, and social links on the athletes page."
+          href="/admin/athletes"
+          icon="🏋️"
+        />
+        <AdminCard
+          title="manage quotes"
+          description="edit the rotating greek quotes shown across the site."
+          href="/admin/quotes"
+          icon="💬"
+        />
+        <AdminCard
           title="shopify admin"
           description="go to your shopify dashboard for orders, products, and more."
           href={`https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || "admin.shopify.com"}/admin`}
