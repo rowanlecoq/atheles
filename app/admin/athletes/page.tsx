@@ -1,25 +1,19 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+
+type Social = { platform: string; url: string };
 
 type Athlete = {
   name: string;
   age: number;
   role: string;
+  description: string;
   image: string | null;
-  socials: {
-    tiktok: string;
-    instagram: string;
-    linkedin: string;
-    youtube: string;
-    snapchat: string;
-    email: string;
-  };
+  socials: Social[];
   hobbies: string[];
 };
-
-const emptySocials = { tiktok: "", instagram: "", linkedin: "", youtube: "", snapchat: "", email: "" };
 
 export default function AdminAthletesPage() {
   const router = useRouter();
@@ -29,7 +23,7 @@ export default function AdminAthletesPage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploading, setUploading] = useState<number | null>(null);
-  const fileRefs = useRef<(HTMLInputElement | null)[]>([]);
+  const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -41,10 +35,15 @@ export default function AdminAthletesPage() {
             .then((r) => (r.ok ? r.json() : null))
             .then((d) => {
               if (d?.athletes) {
-                // Backfill missing social fields for old data
-                setAthletes(d.athletes.map((a: Athlete) => ({
+                // Normalize old format (object socials) to new format (array)
+                setAthletes(d.athletes.map((a: Record<string, unknown>) => ({
                   ...a,
-                  socials: { ...emptySocials, ...a.socials },
+                  description: a.description || "",
+                  socials: Array.isArray(a.socials)
+                    ? a.socials
+                    : Object.entries(a.socials || {})
+                        .filter(([, v]) => v)
+                        .map(([k, v]) => ({ platform: k, url: v as string })),
                 })));
               }
             })
@@ -78,66 +77,72 @@ export default function AdminAthletesPage() {
     setAthletes((prev) => prev.map((a, i) => (i === index ? { ...a, [field]: value } : a)));
   };
 
-  const updateSocial = (index: number, platform: string, value: string) => {
-    setAthletes((prev) => prev.map((a, i) => (i === index ? { ...a, socials: { ...a.socials, [platform]: value } } : a)));
-  };
-
   const removeAt = (index: number) => {
     setAthletes((prev) => prev.filter((_, i) => i !== index));
   };
 
   const addNew = () => {
     setAthletes((prev) => [...prev, {
-      name: "",
-      age: 18,
-      role: "athlete",
-      image: null,
-      socials: { ...emptySocials },
-      hobbies: [],
+      name: "", age: 18, role: "athlete", description: "", image: null, socials: [], hobbies: [],
     }]);
+  };
+
+  const addSocial = (athleteIdx: number) => {
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? { ...a, socials: [...a.socials, { platform: "", url: "" }] } : a
+    ));
+  };
+
+  const updateSocial = (athleteIdx: number, socialIdx: number, field: "platform" | "url", value: string) => {
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? {
+        ...a,
+        socials: a.socials.map((s, j) => j === socialIdx ? { ...s, [field]: value } : s),
+      } : a
+    ));
+  };
+
+  const removeSocial = (athleteIdx: number, socialIdx: number) => {
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? { ...a, socials: a.socials.filter((_, j) => j !== socialIdx) } : a
+    ));
   };
 
   const handleImageUpload = async (index: number, file: File) => {
     if (file.size > 5 * 1024 * 1024) {
-      alert("image must be under 5mb.");
+      setUploadError("image must be under 5mb.");
+      setTimeout(() => setUploadError(""), 3000);
       return;
     }
     setUploading(index);
+    setUploadError("");
 
-    // Resize image
-    const reader = new FileReader();
-    reader.onload = () => {
-      const img = new window.Image();
-      img.onload = async () => {
-        const canvas = document.createElement("canvas");
-        const maxSize = 800;
-        let w = img.width;
-        let h = img.height;
-        if (w > maxSize || h > maxSize) {
-          if (w > h) { h = Math.round((h * maxSize) / w); w = maxSize; }
-          else { w = Math.round((w * maxSize) / h); h = maxSize; }
-        }
-        canvas.width = w;
-        canvas.height = h;
-        canvas.getContext("2d")?.drawImage(img, 0, 0, w, h);
-        const dataUrl = canvas.toDataURL("image/jpeg", 0.85);
+    try {
+      // Convert to base64 directly (simpler, avoid canvas issues)
+      const reader = new FileReader();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
 
-        try {
-          const res = await fetch("/api/admin/athletes/upload", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ image: dataUrl }),
-          });
-          const d = await res.json();
-          if (d.url) {
-            updateAt(index, "image", d.url);
-          }
-        } catch {}
-        setUploading(null);
-      };
-      img.src = reader.result as string;
-    };
-    reader.readAsDataURL(file);
+      const res = await fetch("/api/admin/athletes/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl }),
+      });
+      const d = await res.json();
+      if (d.url) {
+        updateAt(index, "image", d.url);
+      } else {
+        setUploadError(d.error || "upload failed.");
+        setTimeout(() => setUploadError(""), 3000);
+      }
+    } catch {
+      setUploadError("upload failed.");
+      setTimeout(() => setUploadError(""), 3000);
+    }
+    setUploading(null);
   };
 
   if (!authorized) {
@@ -152,6 +157,8 @@ export default function AdminAthletesPage() {
         <p className="mt-1 text-sm text-brand-grey">edit the athletes shown on the /athletes page.</p>
       </div>
 
+      {uploadError && <p className="mb-4 text-xs text-red-400">{uploadError}</p>}
+
       {loading ? (
         <p className="text-sm text-brand-grey">loading...</p>
       ) : (
@@ -159,12 +166,12 @@ export default function AdminAthletesPage() {
           <div className="space-y-6">
             {athletes.map((a, i) => (
               <div key={i} className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
-                <div className="mb-3 flex items-center justify-between">
+                <div className="mb-4 flex items-center justify-between">
                   <span className="text-xs text-brand-gold">athlete {i + 1}</span>
                   <button type="button" onClick={() => removeAt(i)} className="text-xs text-brand-grey hover:text-red-400">remove</button>
                 </div>
 
-                {/* Image upload */}
+                {/* Photo */}
                 <div className="mb-4">
                   <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">photo</label>
                   <div className="flex items-center gap-3">
@@ -177,39 +184,29 @@ export default function AdminAthletesPage() {
                       <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-brand-medium-grey/10 text-xl">🔱</div>
                     )}
                     <div className="flex flex-col gap-1">
-                      <button
-                        type="button"
-                        disabled={uploading === i}
-                        onClick={() => fileRefs.current[i]?.click()}
-                        className="text-xs text-brand-gold hover:text-brand-pale-gold disabled:opacity-50"
-                      >
+                      <label className="cursor-pointer text-xs text-brand-gold hover:text-brand-pale-gold">
                         {uploading === i ? "uploading..." : a.image ? "change photo" : "upload photo"}
-                      </button>
+                        <input
+                          type="file"
+                          accept="image/png,image/jpeg,image/webp"
+                          disabled={uploading === i}
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) handleImageUpload(i, file);
+                            e.target.value = "";
+                          }}
+                          className="hidden"
+                        />
+                      </label>
                       {a.image && (
-                        <button
-                          type="button"
-                          onClick={() => updateAt(i, "image", null)}
-                          className="text-xs text-brand-grey hover:text-red-400"
-                        >
-                          remove photo
-                        </button>
+                        <button type="button" onClick={() => updateAt(i, "image", null)} className="text-left text-xs text-brand-grey hover:text-red-400">remove photo</button>
                       )}
                     </div>
-                    <input
-                      ref={(el) => { fileRefs.current[i] = el; }}
-                      type="file"
-                      accept="image/png,image/jpeg,image/webp"
-                      onChange={(e) => {
-                        const file = e.target.files?.[0];
-                        if (file) handleImageUpload(i, file);
-                        e.target.value = "";
-                      }}
-                      className="hidden"
-                    />
                   </div>
                 </div>
 
-                <div className="grid gap-3 sm:grid-cols-2">
+                {/* Name, Role, Age */}
+                <div className="grid gap-3 sm:grid-cols-3">
                   <div>
                     <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">name</label>
                     <input type="text" value={a.name} onChange={(e) => updateAt(i, "name", e.target.value)} className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none" />
@@ -224,6 +221,19 @@ export default function AdminAthletesPage() {
                   </div>
                 </div>
 
+                {/* Description */}
+                <div className="mt-3">
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">description</label>
+                  <textarea
+                    value={a.description}
+                    onChange={(e) => updateAt(i, "description", e.target.value)}
+                    placeholder="a short bio about this athlete..."
+                    rows={3}
+                    className="w-full resize-none rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                  />
+                </div>
+
+                {/* Hobbies */}
                 <div className="mt-3">
                   <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">hobbies (comma separated)</label>
                   <input
@@ -235,16 +245,31 @@ export default function AdminAthletesPage() {
                   />
                 </div>
 
+                {/* Dynamic Socials */}
                 <div className="mt-3">
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">socials</label>
-                  <div className="grid gap-2 sm:grid-cols-2">
-                    <input type="text" value={a.socials.tiktok} onChange={(e) => updateSocial(i, "tiktok", e.target.value)} placeholder="tiktok url" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
-                    <input type="text" value={a.socials.instagram} onChange={(e) => updateSocial(i, "instagram", e.target.value)} placeholder="instagram url" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
-                    <input type="text" value={a.socials.youtube} onChange={(e) => updateSocial(i, "youtube", e.target.value)} placeholder="youtube url" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
-                    <input type="text" value={a.socials.linkedin} onChange={(e) => updateSocial(i, "linkedin", e.target.value)} placeholder="linkedin url" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
-                    <input type="text" value={a.socials.snapchat} onChange={(e) => updateSocial(i, "snapchat", e.target.value)} placeholder="snapchat username" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
-                    <input type="text" value={a.socials.email} onChange={(e) => updateSocial(i, "email", e.target.value)} placeholder="email address" className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
+                  <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">socials</label>
+                  <div className="space-y-2">
+                    {a.socials.map((s, j) => (
+                      <div key={j} className="flex gap-2">
+                        <input
+                          type="text"
+                          value={s.platform}
+                          onChange={(e) => updateSocial(i, j, "platform", e.target.value)}
+                          placeholder="platform (e.g. instagram)"
+                          className="w-1/3 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                        />
+                        <input
+                          type="text"
+                          value={s.url}
+                          onChange={(e) => updateSocial(i, j, "url", e.target.value)}
+                          placeholder="url or username"
+                          className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                        />
+                        <button type="button" onClick={() => removeSocial(i, j)} className="flex-none text-xs text-brand-grey hover:text-red-400">×</button>
+                      </div>
+                    ))}
                   </div>
+                  <button type="button" onClick={() => addSocial(i)} className="mt-2 text-xs text-brand-gold hover:text-brand-pale-gold">+ add social</button>
                 </div>
               </div>
             ))}
@@ -253,12 +278,7 @@ export default function AdminAthletesPage() {
           <button type="button" onClick={addNew} className="mt-4 text-xs text-brand-gold hover:text-brand-pale-gold">+ add athlete</button>
 
           <div className="mt-6 flex items-center gap-3">
-            <button
-              type="button"
-              onClick={save}
-              disabled={saving}
-              className="rounded-full bg-brand-gold px-6 py-2.5 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50"
-            >
+            <button type="button" onClick={save} disabled={saving} className="rounded-full bg-brand-gold px-6 py-2.5 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50">
               {saving ? "saving..." : "save changes"}
             </button>
             {saved && <span className="text-xs text-green-400">saved!</span>}

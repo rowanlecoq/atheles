@@ -2,12 +2,15 @@
 
 import { useEffect, useState } from "react";
 
+type Social = { platform: string; url: string };
+
 type Athlete = {
   name: string;
   age: number;
   role: string;
+  description?: string;
   image: string | null;
-  socials: { tiktok: string; instagram: string; linkedin: string; youtube: string; snapchat?: string; email?: string };
+  socials: Social[] | Record<string, string>;
   hobbies: string[];
 };
 
@@ -16,15 +19,14 @@ const defaultAthletes: Athlete[] = [
     name: "rowan le coq",
     age: 18,
     role: "founder & athlete",
+    description: "",
     image: null,
-    socials: {
-      tiktok: "https://www.tiktok.com/@rowanlecoq",
-      instagram: "https://www.instagram.com/rowanlecoq",
-      linkedin: "https://www.linkedin.com/in/rowanlecoq",
-      youtube: "https://www.youtube.com/@rowanlecoq",
-      snapchat: "",
-      email: "",
-    },
+    socials: [
+      { platform: "tiktok", url: "https://www.tiktok.com/@rowanlecoq" },
+      { platform: "instagram", url: "https://www.instagram.com/rowanlecoq" },
+      { platform: "linkedin", url: "https://www.linkedin.com/in/rowanlecoq" },
+      { platform: "youtube", url: "https://www.youtube.com/@rowanlecoq" },
+    ],
     hobbies: ["baking brownies or chocolate chip banana bread", "working out on the daily", "playing hockey"],
   },
 ];
@@ -37,6 +39,17 @@ const requirements = [
   "tag @atheles.co in your posts and hashtags like #atheles #athelesathlete to promote engagement.",
   "have an active platform.",
 ];
+
+function normalizeSocials(socials: Social[] | Record<string, string>): Social[] {
+  if (Array.isArray(socials)) return socials.filter((s) => s.url);
+  return Object.entries(socials).filter(([, v]) => v).map(([k, v]) => ({ platform: k, url: v }));
+}
+
+function socialUrl(s: Social): string {
+  if (s.url.includes("@") && !s.url.startsWith("http")) return `mailto:${s.url}`;
+  if (s.url.startsWith("http")) return s.url;
+  return `https://${s.url}`;
+}
 
 export function AthletesContent() {
   const [athletes, setAthletes] = useState<Athlete[]>(defaultAthletes);
@@ -76,47 +89,41 @@ export function AthletesContent() {
                 <h2 className="font-heading text-lg text-brand-gold">{athlete.name}</h2>
                 <span className="text-xs text-brand-grey">age {athlete.age}</span>
               </div>
-              <p className="mb-4 text-xs uppercase tracking-wider text-brand-dark-gold">{athlete.role}</p>
-              <div className="mb-4">
-                <p className="mb-2 text-[10px] uppercase tracking-wider text-brand-grey">interests</p>
-                <div className="flex flex-wrap gap-1.5">
-                  {athlete.hobbies.map((hobby) => (
-                    <span key={hobby} className="rounded-full border border-brand-dark-gold/20 px-2.5 py-1 text-[11px] text-brand-grey">{hobby}</span>
+              <p className="mb-3 text-xs uppercase tracking-wider text-brand-dark-gold">{athlete.role}</p>
+
+              {/* Description */}
+              {athlete.description && (
+                <p className="mb-4 text-xs leading-relaxed text-brand-grey">{athlete.description}</p>
+              )}
+
+              {/* Hobbies */}
+              {athlete.hobbies.length > 0 && (
+                <div className="mb-4">
+                  <p className="mb-2 text-[10px] uppercase tracking-wider text-brand-grey">interests</p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {athlete.hobbies.map((hobby) => (
+                      <span key={hobby} className="rounded-full border border-brand-dark-gold/20 px-2.5 py-1 text-[11px] text-brand-grey">{hobby}</span>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {/* Socials */}
+              {normalizeSocials(athlete.socials).length > 0 && (
+                <div className="flex flex-wrap gap-3">
+                  {normalizeSocials(athlete.socials).map((s) => (
+                    <a
+                      key={s.platform + s.url}
+                      href={socialUrl(s)}
+                      target={socialUrl(s).startsWith("mailto:") ? undefined : "_blank"}
+                      rel="noopener noreferrer"
+                      className="text-xs text-brand-grey transition-colors hover:text-brand-gold"
+                    >
+                      {s.platform}
+                    </a>
                   ))}
                 </div>
-              </div>
-              <div className="flex gap-3">
-                {athlete.socials.tiktok && (
-                  <a href={athlete.socials.tiktok} target="_blank" rel="noopener noreferrer" className="text-brand-grey transition-colors hover:text-brand-gold" aria-label="TikTok">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>
-                  </a>
-                )}
-                {athlete.socials.instagram && (
-                  <a href={athlete.socials.instagram} target="_blank" rel="noopener noreferrer" className="text-brand-grey transition-colors hover:text-brand-gold" aria-label="Instagram">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><rect x="2" y="2" width="20" height="20" rx="5" /><circle cx="12" cy="12" r="5" /><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" /></svg>
-                  </a>
-                )}
-                {athlete.socials.youtube && (
-                  <a href={athlete.socials.youtube} target="_blank" rel="noopener noreferrer" className="text-brand-grey transition-colors hover:text-brand-gold" aria-label="YouTube">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><rect x="2" y="4" width="20" height="16" rx="4" /><polygon points="10,8 16,12 10,16" fill="currentColor" stroke="none" /></svg>
-                  </a>
-                )}
-                {athlete.socials.linkedin && (
-                  <a href={athlete.socials.linkedin} target="_blank" rel="noopener noreferrer" className="text-brand-grey transition-colors hover:text-brand-gold" aria-label="LinkedIn">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M16 8a6 6 0 0 1 6 6v7h-4v-7a2 2 0 0 0-2-2 2 2 0 0 0-2 2v7h-4v-7a6 6 0 0 1 6-6z" /><rect x="2" y="9" width="4" height="12" /><circle cx="4" cy="4" r="2" /></svg>
-                  </a>
-                )}
-                {athlete.socials.snapchat && (
-                  <a href={`https://www.snapchat.com/add/${athlete.socials.snapchat}`} target="_blank" rel="noopener noreferrer" className="text-brand-grey transition-colors hover:text-brand-gold" aria-label="Snapchat">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><path d="M12 2C8 2 5.5 4.5 5.5 8v2.5c0 .5-.5 1-1.5 1.2-.5.1-1 .5-1 1s.5.9 1 1c1 .2 1.5.5 1.5 1 0 .3-.2.6-.5.9-.8.8-1 1.3-1 1.8 0 .8.8 1.2 1.5 1.4 1 .3 1.5.5 1.5 1.2 0 1 2 2 5 2s5-1 5-2c0-.7.5-.9 1.5-1.2.7-.2 1.5-.6 1.5-1.4 0-.5-.2-1-1-1.8-.3-.3-.5-.6-.5-.9 0-.5.5-.8 1.5-1 .5-.1 1-.5 1-1s-.5-.9-1-1c-1-.2-1.5-.7-1.5-1.2V8c0-3.5-2.5-6-6.5-6z" /></svg>
-                  </a>
-                )}
-                {athlete.socials.email && (
-                  <a href={`mailto:${athlete.socials.email}`} className="text-brand-grey transition-colors hover:text-brand-gold" aria-label="Email">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-4 w-4"><rect x="2" y="4" width="20" height="16" rx="2" /><path d="M22 4L12 13 2 4" /></svg>
-                  </a>
-                )}
-              </div>
+              )}
             </div>
           </div>
         ))}
