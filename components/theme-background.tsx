@@ -12,15 +12,7 @@ const THEME_COLORS: Record<string, { a: string; b: string; c: string; d: string;
   sunset: { a: "rgba(249,115,22,0.16)", b: "rgba(239,68,68,0.14)", c: "rgba(251,191,36,0.10)", d: "rgba(249,115,22,0.08)", particle: "#f97316" },
 };
 
-const SPARKLES = [
-  { x: "12%", y: "18%", size: "6px", dur: "3s", delay: "0s" },
-  { x: "68%", y: "12%", size: "8px", dur: "4s", delay: "1s" },
-  { x: "35%", y: "55%", size: "5px", dur: "3.5s", delay: "2s" },
-  { x: "82%", y: "42%", size: "7px", dur: "4.5s", delay: "0.5s" },
-  { x: "22%", y: "78%", size: "6px", dur: "3.8s", delay: "1.5s" },
-  { x: "55%", y: "88%", size: "5px", dur: "4.2s", delay: "0.8s" },
-  { x: "90%", y: "72%", size: "7px", dur: "3.2s", delay: "2.5s" },
-];
+// Sparkles and particles are now generated inline per theme
 
 function readCache(): { theme: string | null; globalTheme: boolean } {
   try {
@@ -143,112 +135,100 @@ export function ThemeBackground() {
     );
   }
 
-  // Animated gradient background
   if (!colors) return null;
 
   return (
     <div className="noise-overlay pointer-events-none fixed inset-0 z-0 overflow-hidden">
-      <div
-        className="absolute -inset-[60%]"
-        style={{
-          background: `radial-gradient(ellipse 70% 60% at 25% 35%, ${colors.a}, transparent 65%)`,
-          filter: "blur(80px)",
-          animation: "gdrift1 20s ease-in-out infinite",
-        }}
-      />
-      <div
-        className="absolute -inset-[60%]"
-        style={{
-          background: `radial-gradient(ellipse 55% 70% at 75% 65%, ${colors.b}, transparent 65%)`,
-          filter: "blur(90px)",
-          animation: "gdrift2 25s ease-in-out infinite",
-        }}
-      />
-      <div
-        className="absolute -inset-[40%]"
-        style={{
-          background: `radial-gradient(ellipse 50% 50% at 50% 45%, ${colors.c}, transparent 60%)`,
-          filter: "blur(70px)",
-          animation: "gdrift3 18s ease-in-out infinite",
-        }}
-      />
-      <div
-        className="absolute -inset-[50%]"
-        style={{
-          background: `radial-gradient(ellipse 45% 55% at 40% 70%, ${colors.d}, transparent 60%)`,
-          filter: "blur(100px)",
-          animation: "gdrift4 22s ease-in-out infinite",
-        }}
-      />
-      {/* Ocean-specific: caustic light bands */}
-      {theme === "ocean" && Array.from({ length: 8 }).map((_, i) => (
-        <div key={`oc${i}`} className="absolute" style={{
-          width: "300%", height: `${25 + (i % 4) * 12}px`,
-          background: `linear-gradient(90deg, transparent 5%, rgba(34,211,238,${0.025 + (i % 3) * 0.015}) 30%, rgba(6,182,212,${0.035 + (i % 2) * 0.015}) 50%, transparent 95%)`,
-          top: `${5 + i * 12}%`, left: "-100%",
-          transform: `rotate(${-10 + i * 3}deg)`,
-          filter: "blur(18px)",
-          animation: `gcaustic${i % 3} ${10 + i * 1.5}s ease-in-out infinite ${-i * 1.3}s`,
-        }} />
-      ))}
-      {/* Floating drift particles for all themes */}
-      {Array.from({ length: 15 }).map((_, i) => (
+      {/* Base ambient glow — all themes */}
+      <div className="absolute -inset-[40%]" style={{ background: `radial-gradient(ellipse 70% 60% at 30% 35%, ${colors.a}, transparent 60%)`, filter: "blur(70px)", animation: "gd1 18s ease-in-out infinite -5s" }} />
+      <div className="absolute -inset-[40%]" style={{ background: `radial-gradient(ellipse 55% 70% at 70% 65%, ${colors.b}, transparent 60%)`, filter: "blur(80px)", animation: "gd2 22s ease-in-out infinite -10s" }} />
+      <div className="absolute -inset-[30%]" style={{ background: `radial-gradient(ellipse 50% 50% at 50% 50%, ${colors.c}, transparent 55%)`, filter: "blur(60px)", animation: "gd3 15s ease-in-out infinite -3s" }} />
+
+      {/* === GOLD: warm shimmer glow === */}
+      {theme === "gold" && <>
+        <div className="absolute -inset-[30%]" style={{ background: "radial-gradient(ellipse 60% 40% at 60% 30%, rgba(220,200,140,0.1), transparent 55%)", filter: "blur(50px)", animation: "gd2 13s ease-in-out infinite -7s" }} />
+      </>}
+
+      {/* === OCEAN: caustic water light === */}
+      {theme === "ocean" && <>
+        {Array.from({ length: 8 }).map((_, i) => (
+          <div key={`oc${i}`} className="absolute" style={{
+            width: "300%", height: `${30 + (i % 4) * 15}px`,
+            background: `linear-gradient(90deg, transparent 5%, rgba(34,211,238,${0.03 + (i % 3) * 0.02}) 30%, rgba(6,182,212,${0.04 + (i % 2) * 0.02}) 50%, transparent 95%)`,
+            top: `${5 + i * 12}%`, left: "-100%",
+            transform: `rotate(${-10 + i * 3}deg)`,
+            filter: "blur(18px)",
+            animation: `gc${i % 3} ${10 + i * 1.5}s ease-in-out infinite ${-i * 1.3}s`,
+          }} />
+        ))}
+      </>}
+
+      {/* === TROPICAL: warm light rays === */}
+      {theme === "tropical" && <>
+        {Array.from({ length: 5 }).map((_, i) => (
+          <div key={`tr${i}`} className="absolute" style={{
+            width: "300%", height: `${25 + i * 10}px`,
+            background: `linear-gradient(90deg, transparent, rgba(${i % 2 ? "245,158,11" : "16,185,129"},${0.04 + i * 0.01}), transparent)`,
+            top: `${8 + i * 18}%`, left: "-100%",
+            transform: `rotate(${25 + i * 3}deg)`,
+            filter: "blur(12px)",
+            animation: `gt ${10 + i * 2}s ease-in-out infinite ${-i * 1.5}s`,
+          }} />
+        ))}
+      </>}
+
+      {/* === MIDNIGHT: stars === */}
+      {theme === "midnight" && <>
+        {Array.from({ length: 50 }).map((_, i) => (
+          <span key={`ms${i}`} className="absolute rounded-full" style={{
+            left: `${(i * 23 + 7) % 99}%`, top: `${(i * 41 + 3) % 99}%`,
+            width: `${1 + (i % 3)}px`, height: `${1 + (i % 3)}px`,
+            background: i % 4 === 0 ? "#c4b5fd" : i % 3 === 0 ? "#818cf8" : "#e0e7ff",
+            opacity: 0.15 + (i % 4) * 0.12,
+            animation: `gtw ${2 + (i % 5) * 0.5}s ease-in-out infinite ${(i * 0.1) % 5}s`,
+          }} />
+        ))}
+      </>}
+
+      {/* === SUNSET: warm horizon pulse === */}
+      {theme === "sunset" && <>
+        <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 200% 40% at 50% 55%, rgba(249,115,22,0.1), transparent 55%)", animation: "gsp 8s ease-in-out infinite" }} />
+      </>}
+
+      {/* Floating drift particles — all themes (like homepage gold particles) */}
+      {Array.from({ length: 20 }).map((_, i) => (
         <span key={`fp${i}`} className="absolute rounded-full" style={{
-          left: `${(i * 29 + 5) % 96}%`, top: `${(i * 43 + 8) % 96}%`,
+          left: `${(i * 23 + 5) % 96}%`, top: `${(i * 37 + 8) % 96}%`,
           width: `${2 + (i % 3)}px`, height: `${2 + (i % 3)}px`,
           background: colors.particle,
-          opacity: 0.12 + (i % 3) * 0.06,
-          animation: `gfloat${i % 3} ${15 + (i % 5) * 4}s ease-in-out infinite ${-i * 1.5}s`,
+          opacity: 0.1 + (i % 4) * 0.06,
+          animation: `gf${i % 3} ${12 + (i % 5) * 4}s ease-in-out infinite ${-i * 1.2}s`,
         }} />
       ))}
-      {/* Sparkles for all themes */}
-      {SPARKLES.map((p, i) => (
-        <span
-          key={i}
-          className="absolute animate-pulse"
-          style={{
-            left: p.x, top: p.y,
-            fontSize: p.size,
-            animationDuration: p.dur,
-            animationDelay: p.delay,
-            color: colors.particle,
-            opacity: 0.25,
-          }}
-        >&#10022;</span>
+
+      {/* Sparkle glitter — all themes */}
+      {Array.from({ length: 15 }).map((_, i) => (
+        <span key={`sp${i}`} className="absolute" style={{
+          left: `${(i * 31 + 9) % 96}%`, top: `${(i * 47 + 11) % 96}%`,
+          fontSize: `${3 + (i % 4)}px`, color: colors.particle,
+          animation: `gsk ${2.5 + (i % 4)}s ease-in-out infinite ${(i * 0.3) % 4}s`,
+        }}>&#10022;</span>
       ))}
+
       <style jsx>{`
-        @keyframes gdrift1 {
-          0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-          20% { transform: translate(6%, -4%) scale(1.08) rotate(1deg); }
-          40% { transform: translate(-3%, 7%) scale(0.96) rotate(-0.5deg); }
-          60% { transform: translate(-7%, -2%) scale(1.04) rotate(0.5deg); }
-          80% { transform: translate(4%, 5%) scale(0.98) rotate(-1deg); }
-        }
-        @keyframes gdrift2 {
-          0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-          20% { transform: translate(-8%, 5%) scale(1.06) rotate(-1deg); }
-          40% { transform: translate(5%, -6%) scale(0.94) rotate(0.5deg); }
-          60% { transform: translate(7%, 8%) scale(1.02) rotate(-0.5deg); }
-          80% { transform: translate(-4%, -5%) scale(1.07) rotate(1deg); }
-        }
-        @keyframes gdrift3 {
-          0%, 100% { transform: translate(0%, 0%) scale(1); opacity: 0.7; }
-          25% { transform: translate(4%, -3%) scale(1.12); opacity: 0.9; }
-          50% { transform: translate(-3%, 4%) scale(0.92); opacity: 1; }
-          75% { transform: translate(-5%, -4%) scale(1.06); opacity: 0.8; }
-        }
-        @keyframes gdrift4 {
-          0%, 100% { transform: translate(0%, 0%) scale(1) rotate(0deg); }
-          25% { transform: translate(-5%, -6%) scale(1.1) rotate(1.5deg); }
-          50% { transform: translate(6%, 3%) scale(0.95) rotate(-1deg); }
-          75% { transform: translate(3%, -5%) scale(1.05) rotate(0.5deg); }
-        }
-        @keyframes gcaustic0 { 0%, 100% { transform: rotate(-10deg) translateX(-15%) translateY(0); opacity: 0.3; } 50% { transform: rotate(-6deg) translateX(15%) translateY(-25px); opacity: 0.8; } }
-        @keyframes gcaustic1 { 0%, 100% { transform: rotate(-6deg) translateX(10%) translateY(10px); opacity: 0.4; } 50% { transform: rotate(-10deg) translateX(-10%) translateY(-20px); opacity: 0.7; } }
-        @keyframes gcaustic2 { 0%, 100% { transform: rotate(-3deg) translateX(-8%) translateY(-5px); opacity: 0.25; } 33% { transform: rotate(-7deg) translateX(8%) translateY(18px); opacity: 0.6; } 66% { transform: rotate(-9deg) translateX(-5%) translateY(-12px); opacity: 0.5; } }
-        @keyframes gfloat0 { 0% { transform: translate(0,0); } 25% { transform: translate(30px,-20px); } 50% { transform: translate(-15px,25px); } 75% { transform: translate(20px,10px); } 100% { transform: translate(0,0); } }
-        @keyframes gfloat1 { 0% { transform: translate(0,0); } 33% { transform: translate(-25px,15px); } 66% { transform: translate(20px,-18px); } 100% { transform: translate(0,0); } }
-        @keyframes gfloat2 { 0% { transform: translate(0,0); } 20% { transform: translate(18px,22px); } 50% { transform: translate(-22px,-10px); } 80% { transform: translate(10px,-20px); } 100% { transform: translate(0,0); } }
+        @keyframes gd1 { 0%, 100% { transform: translate(0,0) scale(1); } 33% { transform: translate(8%,-6%) scale(1.1); } 66% { transform: translate(-7%,5%) scale(0.95); } }
+        @keyframes gd2 { 0%, 100% { transform: translate(0,0) scale(1); } 50% { transform: translate(-10%,-5%) scale(1.08); } }
+        @keyframes gd3 { 0%, 100% { transform: translate(0,0) scale(1); opacity: 0.7; } 50% { transform: translate(5%,6%) scale(1.12); opacity: 1; } }
+        @keyframes gc0 { 0%, 100% { transform: rotate(-10deg) translateX(-15%) translateY(0); opacity: 0.3; } 50% { transform: rotate(-6deg) translateX(15%) translateY(-25px); opacity: 0.8; } }
+        @keyframes gc1 { 0%, 100% { transform: rotate(-6deg) translateX(10%) translateY(10px); opacity: 0.4; } 50% { transform: rotate(-10deg) translateX(-10%) translateY(-20px); opacity: 0.7; } }
+        @keyframes gc2 { 0%, 100% { transform: rotate(-3deg) translateX(-8%) translateY(-5px); opacity: 0.25; } 33% { transform: rotate(-7deg) translateX(8%) translateY(18px); opacity: 0.6; } 66% { transform: rotate(-9deg) translateX(-5%) translateY(-12px); opacity: 0.5; } }
+        @keyframes gt { 0%, 100% { opacity: 0.3; transform: rotate(25deg) translateX(-8%) translateY(0); } 50% { opacity: 0.7; transform: rotate(27deg) translateX(8%) translateY(-3%); } }
+        @keyframes gtw { 0%, 100% { opacity: 0.15; } 50% { opacity: 0.8; } }
+        @keyframes gsp { 0%, 100% { opacity: 0.5; } 50% { opacity: 1; } }
+        @keyframes gf0 { 0% { transform: translate(0,0); } 25% { transform: translate(35px,-25px); } 50% { transform: translate(-20px,30px); } 75% { transform: translate(25px,12px); } 100% { transform: translate(0,0); } }
+        @keyframes gf1 { 0% { transform: translate(0,0); } 33% { transform: translate(-30px,20px); } 66% { transform: translate(25px,-22px); } 100% { transform: translate(0,0); } }
+        @keyframes gf2 { 0% { transform: translate(0,0); } 20% { transform: translate(22px,28px); } 50% { transform: translate(-28px,-15px); } 80% { transform: translate(15px,-25px); } 100% { transform: translate(0,0); } }
+        @keyframes gsk { 0%, 100% { transform: translateY(0) scale(1); opacity: 0.08; } 50% { transform: translateY(-8px) scale(1.4); opacity: 0.45; } }
       `}</style>
     </div>
   );
