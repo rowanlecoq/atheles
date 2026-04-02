@@ -180,6 +180,27 @@ export function ThemeBackground() {
           animation: "gdrift4 22s ease-in-out infinite",
         }}
       />
+      {/* Ocean-specific: caustic light bands */}
+      {theme === "ocean" && Array.from({ length: 8 }).map((_, i) => (
+        <div key={`oc${i}`} className="absolute" style={{
+          width: "300%", height: `${25 + (i % 4) * 12}px`,
+          background: `linear-gradient(90deg, transparent 5%, rgba(34,211,238,${0.025 + (i % 3) * 0.015}) 30%, rgba(6,182,212,${0.035 + (i % 2) * 0.015}) 50%, transparent 95%)`,
+          top: `${5 + i * 12}%`, left: "-100%",
+          transform: `rotate(${-10 + i * 3}deg)`,
+          filter: "blur(18px)",
+          animation: `gcaustic${i % 3} ${10 + i * 1.5}s ease-in-out infinite ${-i * 1.3}s`,
+        }} />
+      ))}
+      {/* Midnight-specific: twinkling stars */}
+      {theme === "midnight" && Array.from({ length: 40 }).map((_, i) => (
+        <span key={`ms${i}`} className="absolute rounded-full" style={{
+          left: `${(i * 23 + 7) % 99}%`, top: `${(i * 41 + 3) % 99}%`,
+          width: `${1 + (i % 3)}px`, height: `${1 + (i % 3)}px`,
+          background: i % 4 === 0 ? "#c4b5fd" : i % 3 === 0 ? "#818cf8" : "#e0e7ff",
+          animation: `gtwinkle ${1.5 + (i % 5) * 0.6}s ease-in-out infinite ${(i * 0.12) % 5}s`,
+        }} />
+      ))}
+      {/* Sparkles for all themes */}
       {SPARKLES.map((p, i) => (
         <span
           key={i}
@@ -221,6 +242,10 @@ export function ThemeBackground() {
           50% { transform: translate(6%, 3%) scale(0.95) rotate(-1deg); }
           75% { transform: translate(3%, -5%) scale(1.05) rotate(0.5deg); }
         }
+        @keyframes gcaustic0 { 0%, 100% { transform: rotate(-10deg) translateX(-15%) translateY(0); opacity: 0.3; } 50% { transform: rotate(-6deg) translateX(15%) translateY(-25px); opacity: 0.8; } }
+        @keyframes gcaustic1 { 0%, 100% { transform: rotate(-6deg) translateX(10%) translateY(10px); opacity: 0.4; } 50% { transform: rotate(-10deg) translateX(-10%) translateY(-20px); opacity: 0.7; } }
+        @keyframes gcaustic2 { 0%, 100% { transform: rotate(-3deg) translateX(-8%) translateY(-5px); opacity: 0.25; } 33% { transform: rotate(-7deg) translateX(8%) translateY(18px); opacity: 0.6; } 66% { transform: rotate(-9deg) translateX(-5%) translateY(-12px); opacity: 0.5; } }
+        @keyframes gtwinkle { 0%, 100% { opacity: 0.15; transform: scale(1); } 50% { opacity: 0.85; transform: scale(1.3); } }
       `}</style>
     </div>
   );
