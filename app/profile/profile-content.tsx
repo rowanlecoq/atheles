@@ -545,7 +545,7 @@ export default function ProfileContent() {
         )
       ) : profileBg !== "none" ? (
         createPortal(
-        <div className="noise-overlay pointer-events-none fixed inset-0 z-0" style={{ overflow: "hidden" }}>
+        <div className="noise-overlay pointer-events-none fixed inset-0 z-0" style={{ overflow: "hidden", opacity: 0.7 }}>
           {profileBg === "gold" && (
             <>
               <div className="absolute inset-0" style={{ background: "radial-gradient(ellipse 150% 100% at 50% 30%, rgba(193,163,104,0.22), transparent 60%), radial-gradient(ellipse 120% 80% at 20% 80%, rgba(160,120,40,0.16), transparent 50%), radial-gradient(ellipse 100% 100% at 90% 20%, rgba(220,200,140,0.12), transparent 50%)" }} />
