@@ -83,10 +83,13 @@ export default function CartModal() {
   useEffect(() => {
     if (!isOpen) return;
     const fromCart = cart?.discountCodes?.find((dc) => dc.applicable);
-    if (fromCart && !appliedCodeLocal) {
+    const hasDiscount = (cart?.discountAllocations?.reduce(
+      (sum, a) => sum + parseFloat(a.discountedAmount?.amount || "0"), 0
+    ) || 0) > 0;
+    if (fromCart && hasDiscount && !appliedCodeLocal) {
       setAppliedCodeLocal(fromCart.code);
     }
-  }, [isOpen, cart?.discountCodes, appliedCodeLocal]);
+  }, [isOpen, cart?.discountCodes, cart?.discountAllocations, appliedCodeLocal]);
 
   // Check user tier for free shipping
   useEffect(() => {
@@ -606,6 +609,9 @@ export default function CartModal() {
                                     } else if (!result.applicable) {
                                       setDiscountError("invalid or expired code.");
                                       await removeDiscountCode();
+                                    } else {
+                                      setAppliedCodeLocal(discountCode.trim());
+                                      setDiscountCode("");
                                     }
                                     setApplyingDiscount(false);
                                   }

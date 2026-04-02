@@ -3,63 +3,119 @@
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
+type Quote = { text: string; author: string };
+
 export default function AdminQuotesPage() {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
+  const [quotes, setQuotes] = useState<Quote[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
+  const [saved, setSaved] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/session")
       .then((r) => r.json())
       .then((d) => {
-        if (d?.user?.isAdmin) setAuthorized(true);
-        else router.replace("/");
+        if (d?.user?.isAdmin) {
+          setAuthorized(true);
+          fetch("/api/admin/quotes")
+            .then((r) => (r.ok ? r.json() : null))
+            .then((d) => { if (d?.quotes) setQuotes(d.quotes); })
+            .catch(() => {})
+            .finally(() => setLoading(false));
+        } else {
+          router.replace("/");
+        }
       })
       .catch(() => router.replace("/"));
   }, [router]);
 
+  const save = async () => {
+    setSaving(true);
+    setSaved(false);
+    try {
+      const res = await fetch("/api/admin/quotes", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quotes }),
+      });
+      if (res.ok) {
+        setSaved(true);
+        setTimeout(() => setSaved(false), 3000);
+      }
+    } catch {}
+    setSaving(false);
+  };
+
+  const updateAt = (index: number, field: "text" | "author", value: string) => {
+    setQuotes((prev) => prev.map((q, i) => (i === index ? { ...q, [field]: value } : q)));
+  };
+
+  const removeAt = (index: number) => {
+    setQuotes((prev) => prev.filter((_, i) => i !== index));
+  };
+
+  const addNew = () => {
+    setQuotes((prev) => [...prev, { text: "", author: "" }]);
+  };
+
   if (!authorized) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-brand-grey">checking access...</p>
-      </div>
-    );
+    return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-brand-grey">checking access...</p></div>;
   }
 
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
       <div className="mb-6">
-        <a href="/admin" className="text-xs text-brand-grey hover:text-brand-gold">
-          ← back to dashboard
-        </a>
-        <h1 className="mt-2 font-heading text-2xl text-brand-gold">
-          manage quotes
-        </h1>
-        <p className="mt-1 text-sm text-brand-grey">
-          edit the rotating quotes shown on the homepage. a random quote is picked on each visit.
-        </p>
+        <a href="/admin" className="text-xs text-brand-grey hover:text-brand-gold">← back to dashboard</a>
+        <h1 className="mt-2 font-heading text-2xl text-brand-gold">manage quotes</h1>
+        <p className="mt-1 text-sm text-brand-grey">edit the rotating quotes shown on the homepage.</p>
       </div>
 
-      <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6 text-center">
-        <p className="mb-2 text-sm text-brand-pale-gold">quotes are managed in code.</p>
-        <p className="text-xs text-brand-grey">
-          to add, edit, or remove quotes, update the quotes array in<br />
-          <code className="text-brand-gold">components/greek-quote.tsx</code>
-        </p>
-      </div>
+      {loading ? (
+        <p className="text-sm text-brand-grey">loading...</p>
+      ) : (
+        <>
+          <div className="space-y-4">
+            {quotes.map((q, i) => (
+              <div key={i} className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4">
+                <div className="mb-2 flex items-center justify-between">
+                  <span className="text-[10px] text-brand-grey">quote {i + 1}</span>
+                  <button type="button" onClick={() => removeAt(i)} className="text-xs text-brand-grey hover:text-red-400">remove</button>
+                </div>
+                <textarea
+                  value={q.text}
+                  onChange={(e) => updateAt(i, "text", e.target.value)}
+                  placeholder="quote text..."
+                  rows={2}
+                  className="mb-2 w-full resize-none rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                />
+                <input
+                  type="text"
+                  value={q.author}
+                  onChange={(e) => updateAt(i, "author", e.target.value)}
+                  placeholder="author..."
+                  className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                />
+              </div>
+            ))}
+          </div>
 
-      <div className="mt-6 rounded-lg border border-brand-dark-gold/20 bg-brand-dark-gold/5 p-4">
-        <p className="mb-2 text-xs text-brand-pale-gold font-medium">current quotes:</p>
-        <ul className="space-y-2">
-          <li className="text-xs text-brand-grey">&quot;Excellence is not a gift. It is a skill that takes practice.&quot; — Plato</li>
-          <li className="text-xs text-brand-grey">&quot;No man is free who is not master of himself.&quot; — Epictetus</li>
-          <li className="text-xs text-brand-grey">&quot;We are what we repeatedly do.&quot; — Aristotle</li>
-          <li className="text-xs text-brand-grey">&quot;The soul that is within me no man can degrade.&quot; — Frederick Douglass</li>
-          <li className="text-xs text-brand-grey">&quot;He who is not a good servant will not be a good master.&quot; — Plato</li>
-          <li className="text-xs text-brand-grey">&quot;Strength does not come from physical capacity.&quot; — Ancient proverb</li>
-          <li className="text-xs text-brand-grey">&quot;The mind is everything. What you think, you become.&quot; — Greek philosophy</li>
-        </ul>
-        <p className="mt-3 text-[10px] text-brand-grey/60">to update these, edit the code file directly or ask your developer.</p>
-      </div>
+          <button type="button" onClick={addNew} className="mt-3 text-xs text-brand-gold hover:text-brand-pale-gold">+ add quote</button>
+
+          <div className="mt-6 flex items-center gap-3">
+            <button
+              type="button"
+              onClick={save}
+              disabled={saving}
+              className="rounded-full bg-brand-gold px-6 py-2.5 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50"
+            >
+              {saving ? "saving..." : "save changes"}
+            </button>
+            {saved && <span className="text-xs text-green-400">saved!</span>}
+          </div>
+        </>
+      )}
     </div>
   );
 }
