@@ -17,10 +17,17 @@ export function PageTransition({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Scroll to top on route change
+  // Scroll to top on route change AND on initial page load/refresh
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [pathname]);
+
+  useEffect(() => {
+    // Also scroll to top on first mount (handles refresh)
+    if (typeof window !== "undefined") {
+      window.scrollTo(0, 0);
+    }
+  }, []);
 
   if (isMobile) return <>{children}</>;
 

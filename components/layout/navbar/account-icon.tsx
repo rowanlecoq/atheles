@@ -11,6 +11,23 @@ export function AccountIcon() {
   const [avatar, setAvatar] = useState<string | null>(null);
   const pathname = usePathname();
 
+  // Show cached avatar instantly before session loads
+  useEffect(() => {
+    if (!document.cookie.includes("atheles-logged-in=1")) return;
+    try {
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        const key = `atheles-avatar-${u.email}`;
+        const av = sessionStorage.getItem(key);
+        if (av) setAvatar(av);
+        setLoggedIn(true);
+        const n = u.name || u.email || "A";
+        setInitials(n.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2));
+      }
+    } catch {}
+  }, []);
+
   const refreshSession = useCallback(() => {
     fetch("/api/auth/session")
       .then((res) => res.json())
