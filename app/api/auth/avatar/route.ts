@@ -27,7 +27,7 @@ export async function GET() {
     );
 
     const res = NextResponse.json({ avatar: avatar || null });
-    res.headers.set("Cache-Control", "private, max-age=60, stale-while-revalidate=300");
+    res.headers.set("Cache-Control", "private, no-store, no-cache, must-revalidate");
     return res;
   } catch {
     return NextResponse.json({ avatar: null });
