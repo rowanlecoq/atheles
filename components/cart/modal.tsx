@@ -47,7 +47,6 @@ export default function CartModal() {
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
   const [discountError, setDiscountError] = useState("");
-  const [applyingDiscount, setApplyingDiscount] = useState(false);
   const [appliedCodeLocal, setAppliedCodeLocal] = useState<string | null>(null);
   const [discountConfirmed, setDiscountConfirmed] = useState(false);
   const discountSyncedRef = useRef(false);
@@ -647,7 +646,7 @@ export default function CartModal() {
                               />
                               <button
                                 type="button"
-                                disabled={!discountCode.trim() || applyingDiscount}
+                                disabled={!discountCode.trim()}
                                 onClick={() => {
                                   const code = discountCode.trim();
                                   if (!code) return;

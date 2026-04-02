@@ -150,7 +150,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           setLoggedIn(false);
           setUserName("");
           setAvatar(null);
-          try { sessionStorage.removeItem("atheles-avatar"); sessionStorage.removeItem("atheles-custom-bg"); } catch {}
+          // Session cache keys are cleared by the logout flow
         }
       })
       .catch(() => {});
@@ -170,9 +170,17 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
         })
         .catch(() => {});
     };
+    const handleLogout = () => {
+      setLoggedIn(false);
+      setUserName("");
+      setAvatar(null);
+    };
     window.addEventListener("avatar-changed", handleAvatarChange);
-    return () =>
+    window.addEventListener("user-logout", handleLogout);
+    return () => {
       window.removeEventListener("avatar-changed", handleAvatarChange);
+      window.removeEventListener("user-logout", handleLogout);
+    };
   }, []);
 
   useEffect(() => {
