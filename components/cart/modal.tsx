@@ -49,6 +49,7 @@ export default function CartModal() {
   const [discountError, setDiscountError] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
   const [appliedCodeLocal, setAppliedCodeLocal] = useState<string | null>(null);
+  const [discountConfirmed, setDiscountConfirmed] = useState(false);
   const discountSyncedRef = useRef(false);
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
@@ -94,8 +95,18 @@ export default function CartModal() {
     ) || 0) > 0;
     if (fromCart && hasDiscount) {
       setAppliedCodeLocal(fromCart.code);
+      setDiscountConfirmed(true);
     }
   }, [isOpen, cart?.discountCodes, cart?.discountAllocations]);
+
+  // Watch for cart discount to confirm after optimistic apply
+  useEffect(() => {
+    if (!appliedCodeLocal || discountConfirmed) return;
+    const hasDiscount = (cart?.discountAllocations?.reduce(
+      (sum, a) => sum + parseFloat(a.discountedAmount?.amount || "0"), 0
+    ) || 0) > 0;
+    if (hasDiscount) setDiscountConfirmed(true);
+  }, [appliedCodeLocal, discountConfirmed, cart?.discountAllocations]);
 
   // Check user tier for free shipping
   useEffect(() => {
@@ -554,7 +565,8 @@ export default function CartModal() {
 
                   {/* Discount code */}
                   {(() => {
-                    const appliedCode = appliedCodeLocal ? { code: appliedCodeLocal, applicable: true } : null;
+                    const appliedCode = appliedCodeLocal && discountConfirmed ? { code: appliedCodeLocal, applicable: true } : null;
+                    const pendingCode = appliedCodeLocal && !discountConfirmed;
                     const totalDiscount = cart.discountAllocations?.reduce(
                       (sum, a) => sum + parseFloat(a.discountedAmount.amount || "0"), 0
                     ) || 0;
@@ -569,7 +581,11 @@ export default function CartModal() {
                             discount code
                           </p>
                         </div>
-                        {appliedCode ? (
+                        {pendingCode ? (
+                          <div className="flex items-center justify-center rounded-lg border border-brand-dark-gold/20 px-3 py-3">
+                            <span className="text-xs text-brand-grey">applying {appliedCodeLocal}...</span>
+                          </div>
+                        ) : appliedCode ? (
                           <div className="flex items-center justify-between rounded-lg border border-brand-gold/30 bg-brand-gold/5 px-3 py-2">
                             <div className="flex items-center gap-2">
                               <span className="text-sm text-brand-gold">{appliedCode.code}</span>
@@ -582,7 +598,7 @@ export default function CartModal() {
                             <button
                               type="button"
                               onClick={() => {
-                                setAppliedCodeLocal(null);
+                                setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                 setDiscountCode("");
                                 setDiscountError("");
                                 removeDiscountCode().catch(() => {});
@@ -613,15 +629,15 @@ export default function CartModal() {
                                     setDiscountCode("");
                                     applyDiscountCode(code).then((result) => {
                                       if (!result.success) {
-                                        setAppliedCodeLocal(null);
+                                        setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                         setDiscountError(result.error || "failed to apply code.");
                                       } else if (!result.applicable) {
-                                        setAppliedCodeLocal(null);
+                                        setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                         setDiscountError("invalid or expired code.");
                                         removeDiscountCode().catch(() => {});
                                       }
                                     }).catch(() => {
-                                      setAppliedCodeLocal(null);
+                                      setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                       setDiscountError("failed to apply code.");
                                     });
                                   }
@@ -641,15 +657,15 @@ export default function CartModal() {
                                   // Validate in background
                                   applyDiscountCode(code).then((result) => {
                                     if (!result.success) {
-                                      setAppliedCodeLocal(null);
+                                      setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                       setDiscountError(result.error || "failed to apply code.");
                                     } else if (!result.applicable) {
-                                      setAppliedCodeLocal(null);
+                                      setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                       setDiscountError("invalid or expired code.");
                                       removeDiscountCode().catch(() => {});
                                     }
                                   }).catch(() => {
-                                    setAppliedCodeLocal(null);
+                                    setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                     setDiscountError("failed to apply code.");
                                   });
                                 }}
