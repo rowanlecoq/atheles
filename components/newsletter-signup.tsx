@@ -1,13 +1,33 @@
 "use client";
 
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 export function NewsletterSignup() {
   const [email, setEmail] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [alreadySubscribed, setAlreadySubscribed] = useState(false);
+
+  // Check if user is already subscribed (acceptsMarketing)
+  useEffect(() => {
+    if (!document.cookie.includes("atheles-logged-in=1")) return;
+    try {
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        if (u.acceptsMarketing) setAlreadySubscribed(true);
+        return;
+      }
+    } catch {}
+    fetch("/api/auth/session")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.user?.acceptsMarketing) setAlreadySubscribed(true);
+      })
+      .catch(() => {});
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -38,6 +58,9 @@ export function NewsletterSignup() {
     setLoading(false);
   };
 
+  // Don't show for existing subscribers
+  if (alreadySubscribed) return null;
+
   return (
     <section className="relative overflow-hidden border-t border-brand-dark-gold/20 bg-brand-dark py-20">
       <Image
@@ -49,7 +72,6 @@ export function NewsletterSignup() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-transparent to-brand-dark/60" />
       <div className="relative z-10 mx-auto max-w-2xl px-4 text-center">
-        {/* Heading */}
         <h2 className="mb-4 animate-fade-in font-heading text-2xl font-bold tracking-[0.06em] text-brand-gold sm:text-3xl sm:tracking-wider md:text-4xl">
           join the club 🔱 for free.
         </h2>
@@ -59,7 +81,6 @@ export function NewsletterSignup() {
           releases.
         </p>
 
-        {/* Form */}
         <div className="animate-fade-in [animation-delay:400ms]">
           {submitted ? (
             <div className="border border-brand-dark-gold/40 bg-brand-dark/40 px-8 py-4 backdrop-blur-sm">
@@ -78,7 +99,7 @@ export function NewsletterSignup() {
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder="Enter your email"
                 required
-                className="flex-1 border border-brand-dark-gold/40 bg-transparent px-4 py-3 text-sm text-white placeholder:text-brand-grey"
+                className="flex-1 border border-brand-dark-gold/40 bg-transparent px-4 py-3 text-base text-white placeholder:text-brand-grey"
               />
               <button
                 type="submit"

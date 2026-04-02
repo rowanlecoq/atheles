@@ -536,7 +536,7 @@ export default function CartModal() {
 
                   {/* Discount code */}
                   {(() => {
-                    const appliedCode = discountRemoved ? null : cart.discountCodes?.find((dc) => dc.applicable);
+                    const appliedCode = discountRemoved ? null : (cart.discountCodes?.find((dc) => dc.applicable) || cart.discountCodes?.[0] || null);
                     const totalDiscount = cart.discountAllocations?.reduce(
                       (sum, a) => sum + parseFloat(a.discountedAmount.amount || "0"), 0
                     ) || 0;

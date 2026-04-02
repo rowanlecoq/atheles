@@ -74,6 +74,7 @@ html {
   width: 100%;
   overflow-x: hidden;
   scroll-padding-top: 120px;
+  scroll-behavior: auto;
   -webkit-tap-highlight-color: transparent;
   /* scrollbar-color prevents a gray flash on non-overlay scrollbar systems */
   scrollbar-color: var(--color-brand-medium-grey) var(--color-brand-dark);

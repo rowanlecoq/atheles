@@ -78,7 +78,7 @@ export async function GET() {
         id: c.id,
         email: c.email,
         name: `${c.firstName || ""} ${c.lastName || ""}`.trim() || c.email,
-        tier: tierTag ? tierTag.replace("tier:", "") : "none",
+        tier: tierTag ? tierTag.replace("tier:", "") : "bronze",
         dob: dobTag ? dobTag.replace("dob:", "") : null,
         createdAt: c.createdAt,
         orders: c.numberOfOrders || "0",

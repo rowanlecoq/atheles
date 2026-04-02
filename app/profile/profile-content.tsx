@@ -280,6 +280,8 @@ export default function ProfileContent() {
         } else {
           // Session invalid — clean up and redirect once
           sessionStorage.removeItem("atheles-session");
+          sessionStorage.removeItem("atheles-avatar");
+          sessionStorage.removeItem("atheles-custom-bg");
           document.cookie = "atheles-logged-in=; max-age=0; path=/";
           setUser(null);
           setLoading(false);
@@ -304,6 +306,8 @@ export default function ProfileContent() {
 
   const handleSignOut = async () => {
     sessionStorage.removeItem("atheles-session");
+    sessionStorage.removeItem("atheles-avatar");
+    sessionStorage.removeItem("atheles-custom-bg");
     document.cookie = "atheles-logged-in=; max-age=0; path=/";
     await fetch("/api/auth/logout", { method: "POST" });
     router.push("/");
