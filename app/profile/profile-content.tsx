@@ -1,7 +1,5 @@
 "use client";
 
-import { fetchSession } from "lib/fetch-session";
-import { updateSessionCache } from "lib/session-cache";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -276,40 +274,37 @@ export default function ProfileContent() {
       }
     } catch { /* ignore */ }
 
-    fetchSession()
-      .then((user) => {
-        if (user) {
-          applyUser(user as User);
-          updateSessionCache(user as Record<string, unknown>);
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.user) {
+          applyUser(data.user);
+          sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
           setLoading(false);
         } else {
-          // Session returned null — could be transient Shopify API failure
-          // Don't wipe session/cookies client-side; server handles that if truly invalid
-          // Just use cached data if available
-          try {
-            const cached = sessionStorage.getItem("atheles-session");
-            if (cached) {
-              applyUser(JSON.parse(cached));
-              setLoading(false);
-              return;
-            }
-          } catch {}
-          // No cache at all — redirect to login
+          // Session invalid — clean up and redirect once
+          sessionStorage.removeItem("atheles-session");
+          sessionStorage.removeItem("atheles-avatar");
+          sessionStorage.removeItem("atheles-custom-bg");
+          document.cookie = "atheles-logged-in=; max-age=0; path=/";
           setUser(null);
           setLoading(false);
           setRedirecting(true);
-          setTimeout(() => { window.location.replace("/login"); }, 100);
+          // Use setTimeout to ensure state updates render before redirect
+          setTimeout(() => {
+            window.location.replace("/login");
+          }, 100);
         }
       })
       .catch(() => {
-        // Network error — use cached data, don't wipe anything
-        try {
-          const cached = sessionStorage.getItem("atheles-session");
-          if (cached) {
-            applyUser(JSON.parse(cached));
-          }
-        } catch {}
+        sessionStorage.removeItem("atheles-session");
+        document.cookie = "atheles-logged-in=; max-age=0; path=/";
+        setUser(null);
         setLoading(false);
+        setRedirecting(true);
+        setTimeout(() => {
+          window.location.replace("/login");
+        }, 100);
       });
   }, [router]);
 
@@ -421,7 +416,7 @@ export default function ProfileContent() {
           setDobMonth(m ? String(parseInt(m)) : "");
           setDobDay(d ? String(parseInt(d)) : "");
         }
-        updateSessionCache(data.user as Record<string, unknown>);
+        sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
         setEditing(false);
         setSaveMessage("profile updated.");
         setTimeout(() => setSaveMessage(""), 3000);
@@ -1298,7 +1293,7 @@ export default function ProfileContent() {
                     if (cached) {
                       const u = JSON.parse(cached);
                       u.theme = theme.id;
-                      updateSessionCache(u as Record<string, unknown>);
+                      sessionStorage.setItem("atheles-session", JSON.stringify(u));
                     }
                   } catch {}
                   window.dispatchEvent(new Event("theme-changed"));
@@ -1336,7 +1331,7 @@ export default function ProfileContent() {
                     if (cached) {
                       const u = JSON.parse(cached);
                       u.theme = "custom";
-                      updateSessionCache(u as Record<string, unknown>);
+                      sessionStorage.setItem("atheles-session", JSON.stringify(u));
                     }
                   } catch {}
                   window.dispatchEvent(new Event("theme-changed"));
@@ -1436,7 +1431,7 @@ export default function ProfileContent() {
                   if (cached) {
                     const u = JSON.parse(cached);
                     u.theme = "custom";
-                    updateSessionCache(u as Record<string, unknown>);
+                    sessionStorage.setItem("atheles-session", JSON.stringify(u));
                   }
                 } catch {}
                 await fetch("/api/auth/update-theme", {
@@ -1477,7 +1472,7 @@ export default function ProfileContent() {
                   if (cached) {
                     const u = JSON.parse(cached);
                     u.globalTheme = next;
-                    updateSessionCache(u as Record<string, unknown>);
+                    sessionStorage.setItem("atheles-session", JSON.stringify(u));
                   }
                 } catch {}
                 // Notify other components

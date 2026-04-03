@@ -1,40 +1,40 @@
 "use client";
 
 import { UserIcon } from "@heroicons/react/24/outline";
-import { fetchSession } from "lib/fetch-session";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
-
-// Read cached state synchronously on module load (client only)
-function getInitialState() {
-  if (typeof window === "undefined") return { loggedIn: false, initials: null as string | null, avatar: null as string | null };
-  try {
-    if (!document.cookie.includes("atheles-logged-in=1")) return { loggedIn: false, initials: null, avatar: null };
-    const cached = sessionStorage.getItem("atheles-session");
-    if (!cached) return { loggedIn: false, initials: null, avatar: null };
-    const u = JSON.parse(cached);
-    const n = u.name || u.email || "A";
-    const initials = n.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
-    const key = `atheles-avatar-${u.email}`;
-    const avatar = sessionStorage.getItem(key) || null;
-    return { loggedIn: true, initials, avatar };
-  } catch { return { loggedIn: false, initials: null, avatar: null }; }
-}
+import { useCallback, useEffect, useState } from "react";
 
 export function AccountIcon() {
-  const initial = useRef(getInitialState());
-  const [loggedIn, setLoggedIn] = useState(initial.current.loggedIn);
-  const [initials, setInitials] = useState(initial.current.initials);
-  const [avatar, setAvatar] = useState(initial.current.avatar);
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [initials, setInitials] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(null);
   const pathname = usePathname();
 
+  // Show cached avatar instantly before session loads
+  useEffect(() => {
+    if (!document.cookie.includes("atheles-logged-in=1")) return;
+    try {
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        const key = `atheles-avatar-${u.email}`;
+        const av = sessionStorage.getItem(key);
+        if (av) setAvatar(av);
+        setLoggedIn(true);
+        const n = u.name || u.email || "A";
+        setInitials(n.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2));
+      }
+    } catch {}
+  }, []);
+
   const refreshSession = useCallback(() => {
-    fetchSession()
-      .then((user) => {
-        if (user) {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user) {
           setLoggedIn(true);
-          const name = (user.name || user.email || "A") as string;
+          const name = data.user.name || data.user.email || "A";
           setInitials(
             name
               .split(" ")
@@ -43,7 +43,8 @@ export function AccountIcon() {
               .toUpperCase()
               .slice(0, 2),
           );
-          const avatarKey = `atheles-avatar-${user.email}`;
+          // Per-user avatar cache for instant display
+          const avatarKey = `atheles-avatar-${data.user.email}`;
           try {
             const cached = sessionStorage.getItem(avatarKey);
             if (cached) setAvatar(cached);
@@ -70,6 +71,7 @@ export function AccountIcon() {
         setLoggedIn(false);
         setInitials(null);
         setAvatar(null);
+        try { sessionStorage.removeItem("atheles-avatar"); } catch {}
       });
   }, []);
 
@@ -77,6 +79,7 @@ export function AccountIcon() {
     refreshSession();
   }, [pathname, refreshSession]);
 
+  // Listen for avatar changes from the profile page
   useEffect(() => {
     const handleAvatarChange = () => {
       fetch("/api/auth/avatar")
@@ -106,7 +109,6 @@ export function AccountIcon() {
       href={loggedIn ? "/profile" : "/login"}
       className="hidden h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold md:flex"
       aria-label="Account"
-      suppressHydrationWarning
     >
       {loggedIn && avatar ? (
         // eslint-disable-next-line @next/next/no-img-element

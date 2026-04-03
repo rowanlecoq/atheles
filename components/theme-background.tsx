@@ -1,8 +1,6 @@
 "use client";
 
-import { fetchSession } from "lib/fetch-session";
 import { usePathname } from "next/navigation";
-import { updateSessionCache } from "lib/session-cache";
 import { useEffect, useRef, useState } from "react";
 
 // Same intensity as profile page
@@ -97,10 +95,13 @@ export function ThemeBackground() {
     }
 
     // Always fetch fresh session in background to ensure full data
-    fetchSession()
-      .then((user) => {
-        if (user) {
-          updateSessionCache(user as Record<string, unknown>);
+    fetch("/api/auth/session")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.user) {
+          try {
+            sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+          } catch {}
           applyFromCache();
         }
       })
@@ -115,10 +116,13 @@ export function ThemeBackground() {
     const handleVisibility = () => {
       if (document.visibilityState !== "visible") return;
       if (!document.cookie.includes("atheles-logged-in=1")) return;
-      fetchSession()
-        .then((user) => {
-          if (user) {
-            updateSessionCache(user as Record<string, unknown>);
+      fetch("/api/auth/session")
+        .then((r) => (r.ok ? r.json() : null))
+        .then((data) => {
+          if (data?.user) {
+            try {
+              sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+            } catch {}
             applyFromCache();
           }
         })

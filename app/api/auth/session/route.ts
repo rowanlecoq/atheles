@@ -25,13 +25,10 @@ export async function GET() {
       return NextResponse.json({ user: null });
     }
 
-    let customer = await getCustomerByToken(token);
+    const customer = await getCustomerByToken(token);
     if (!customer) {
-      customer = await getCustomerByToken(token);
-    }
-    if (!customer) {
-      // Don't delete cookies — could be transient Shopify API failure
-      // If token is truly expired, client will handle redirect naturally
+      cookieStore.delete("atheles-auth-token");
+      cookieStore.delete("atheles-logged-in");
       return NextResponse.json({ user: null });
     }
 

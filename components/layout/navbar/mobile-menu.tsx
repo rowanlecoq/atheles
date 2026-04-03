@@ -1,7 +1,6 @@
 "use client";
 
 import { Dialog, Transition } from "@headlessui/react";
-import { fetchSession } from "lib/fetch-session";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Fragment, Suspense, useCallback, useEffect, useState } from "react";
@@ -118,33 +117,22 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const searchParams = useSearchParams();
   const routeKey = `${pathname}?${searchParams?.toString() ?? ""}`;
   const [isOpen, setIsOpen] = useState(false);
-  // Read cached auth state synchronously to avoid flash
-  const [loggedIn, setLoggedIn] = useState(() => {
-    if (typeof window === "undefined") return false;
-    return document.cookie.includes("atheles-logged-in=1");
-  });
-  const [userName, setUserName] = useState(() => {
-    if (typeof window === "undefined") return "";
-    try { const c = sessionStorage.getItem("atheles-session"); if (c) { const u = JSON.parse(c); return u.name || u.firstName || ""; } } catch {}
-    return "";
-  });
-  const [avatar, setAvatar] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    try { const c = sessionStorage.getItem("atheles-session"); if (c) { const u = JSON.parse(c); return sessionStorage.getItem(`atheles-avatar-${u.email}`) || null; } } catch {}
-    return null;
-  });
+  const [loggedIn, setLoggedIn] = useState(false);
+  const [userName, setUserName] = useState("");
+  const [avatar, setAvatar] = useState<string | null>(null);
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
 
   const refreshSession = useCallback(() => {
-    fetchSession()
-      .then((user) => {
-        if (user) {
+    fetch("/api/auth/session")
+      .then((res) => res.json())
+      .then((data) => {
+        if (data?.user) {
           setLoggedIn(true);
-          setUserName((user.name || user.firstName || "") as string);
+          setUserName(data.user.name || data.user.firstName || "");
           // Per-user avatar cache
-          const avatarKey = `atheles-avatar-${(user as Record<string, unknown>).email}`;
+          const avatarKey = `atheles-avatar-${data.user.email}`;
           try {
             const cached = sessionStorage.getItem(avatarKey);
             if (cached) setAvatar(cached);
@@ -280,14 +268,14 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                         alt="Profile"
                         width={36}
                         height={36}
-                        className="h-11 w-11 rounded-full object-cover"
+                        className="h-9 w-9 rounded-full border border-brand-gold object-cover"
                       />
                     ) : loggedIn && initials ? (
-                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-dark-gold/20 text-sm font-bold text-brand-gold">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-gold bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
                         {initials}
                       </span>
                     ) : (
-                      <span className="flex h-11 w-11 items-center justify-center rounded-full bg-brand-dark-gold/10">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark-gold/10">
                         <UserIcon className="h-5 w-5 text-brand-grey" />
                       </span>
                     )}
