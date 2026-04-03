@@ -100,6 +100,15 @@ export function ThemeBackground() {
       .then((data) => {
         if (data?.user) {
           try {
+            // Preserve cached theme/globalTheme if API returned null (tag fetch may have failed)
+            const existing = sessionStorage.getItem("atheles-session");
+            if (existing && (!data.user.theme || data.user.theme === "none")) {
+              const cached = JSON.parse(existing);
+              if (cached.theme && cached.theme !== "none") {
+                data.user.theme = cached.theme;
+                data.user.globalTheme = cached.globalTheme ?? data.user.globalTheme;
+              }
+            }
             sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
           } catch {}
           applyFromCache();
@@ -121,6 +130,14 @@ export function ThemeBackground() {
         .then((data) => {
           if (data?.user) {
             try {
+              const existing = sessionStorage.getItem("atheles-session");
+              if (existing && (!data.user.theme || data.user.theme === "none")) {
+                const cached = JSON.parse(existing);
+                if (cached.theme && cached.theme !== "none") {
+                  data.user.theme = cached.theme;
+                  data.user.globalTheme = cached.globalTheme ?? data.user.globalTheme;
+                }
+              }
               sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
             } catch {}
             applyFromCache();
