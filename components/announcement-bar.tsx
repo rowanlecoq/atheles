@@ -1,6 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 
 const defaultAnnouncements = [
   "to ascend.",
@@ -13,7 +14,6 @@ export function AnnouncementBar() {
   const [announcements, setAnnouncements] = useState(defaultAnnouncements);
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
-  const [transitioning, setTransitioning] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   // Fetch announcements from Shopify metafield
@@ -28,37 +28,47 @@ export function AnnouncementBar() {
       .catch(() => {});
   }, []);
 
-  const advance = useCallback(() => {
-    setTransitioning(true);
-    setTimeout(() => {
+  const startTimer = useCallback(() => {
+    intervalRef.current = setInterval(() => {
       setIndex((prev) => (prev + 1) % announcements.length);
-      setTransitioning(false);
-    }, 400);
+    }, 5000);
   }, [announcements.length]);
 
+  const stopTimer = useCallback(() => {
+    if (intervalRef.current) {
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+  }, []);
+
   useEffect(() => {
-    if (paused) return;
-    intervalRef.current = setInterval(advance, 5000);
-    return () => { if (intervalRef.current) clearInterval(intervalRef.current); };
-  }, [paused, advance]);
+    if (!paused) startTimer();
+    return () => stopTimer();
+  }, [paused, startTimer, stopTimer]);
+
+  const togglePause = () => {
+    setPaused((p) => !p);
+  };
 
   return (
     <div className="relative flex h-8 items-center justify-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
-      {/* Pure CSS transition — no framer-motion, no hydration flash */}
-      <p
-        className="px-8 text-xs uppercase tracking-[0.18em] text-brand-dark-gold transition-all duration-[400ms] ease-in-out sm:text-[11px] sm:tracking-[0.25em]"
-        style={{
-          opacity: transitioning ? 0 : 1,
-          filter: transitioning ? "blur(4px)" : "blur(0px)",
-        }}
-      >
-        {announcements[index]}
-      </p>
+      <AnimatePresence mode="wait">
+        <motion.p
+          key={index}
+          initial={{ opacity: 0, filter: "blur(4px)" }}
+          animate={{ opacity: 1, filter: "blur(0px)" }}
+          exit={{ opacity: 0, filter: "blur(4px)" }}
+          transition={{ duration: 0.4, ease: "easeInOut" }}
+          className="px-8 text-xs uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em]"
+        >
+          {announcements[index]}
+        </motion.p>
+      </AnimatePresence>
 
       {/* Pause / Play */}
       <button
         type="button"
-        onClick={() => setPaused((p) => !p)}
+        onClick={togglePause}
         aria-label={paused ? "Play announcements" : "Pause announcements"}
         className="absolute right-3 flex h-5 w-5 items-center justify-center text-brand-dark-gold/40 transition-colors hover:text-brand-dark-gold sm:right-4"
       >

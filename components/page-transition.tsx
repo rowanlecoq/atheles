@@ -1,39 +1,45 @@
 "use client";
 
 import { animationEasing } from "lib/animation-config";
-import { AnimatePresence, motion } from "motion/react";
+import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const navCount = useRef(0);
+  const [isMobile, setIsMobile] = useState(false);
 
-  // Scroll to top on every navigation
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Disable browser scroll restoration and always scroll to top
   useEffect(() => {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
+    window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // Count navigations — skip animation for the first one (initial page load)
-    navCount.current++;
   }, [pathname]);
 
-  // No animation wrapper at all on initial load — pure SSR HTML, no hydration mismatch
-  if (navCount.current === 0) {
-    return <>{children}</>;
-  }
+  if (isMobile) return <>{children}</>;
 
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: animationEasing }}
+      transition={{
+        duration: 0.3,
+        ease: animationEasing,
+      }}
     >
       {children}
     </motion.div>

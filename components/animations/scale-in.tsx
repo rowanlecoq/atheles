@@ -7,7 +7,6 @@ import {
   animationViewportMargins,
   animationViewportMarginsMobile,
 } from "lib/animation-config";
-import { useAboveFold } from "lib/hooks/use-above-fold";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion, useInView } from "motion/react";
@@ -25,7 +24,6 @@ export function ScaleIn({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { wasAboveFold } = useAboveFold(ref);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
   const isInView = useInView(ref, {
@@ -41,14 +39,18 @@ export function ScaleIn({
       ? Math.min(duration, animationDurationsMobile.normal)
       : duration;
 
-  const skip = wasAboveFold.current;
-
   return (
     <motion.div
       ref={ref}
-      initial={skip ? false : { opacity: 0, scale: hiddenScale }}
-      animate={isInView || skip ? { opacity: 1, scale: 1 } : { opacity: 0, scale: hiddenScale }}
-      transition={skip ? { duration: 0 } : { duration: transitionDuration, delay, ease: animationEasing }}
+      initial={{ opacity: 0, scale: hiddenScale }}
+      animate={
+        isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: hiddenScale }
+      }
+      transition={{
+        duration: transitionDuration,
+        delay,
+        ease: animationEasing,
+      }}
       className={className}
     >
       {children}

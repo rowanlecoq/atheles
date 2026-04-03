@@ -19,7 +19,7 @@ import type { Product } from "lib/shopify/types";
 import Image from "next/image";
 import Link from "next/link";
 import { motion } from "motion/react";
-import { useEffect, useRef, useState } from "react";
+import { useState } from "react";
 import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
@@ -206,19 +206,8 @@ export default function ProductGridItems({
 }: {
   products: Product[];
 }) {
-  const listRef = useRef<HTMLDivElement>(null);
-  const aboveFold = useRef(false);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
-
-  useEffect(() => {
-    if (listRef.current) {
-      const rect = listRef.current.getBoundingClientRect();
-      aboveFold.current = rect.top < window.innerHeight;
-    }
-  }, []);
-
-  const skip = aboveFold.current;
   const hiddenY = prefersReducedMotion ? 0 : isMobileViewport ? 14 : 22;
   const hiddenScale = prefersReducedMotion ? 1 : isMobileViewport ? 0.985 : 0.97;
   const hiddenBlur = prefersReducedMotion ? "blur(0px)" : isMobileViewport ? "blur(3px)" : "blur(6px)";
@@ -227,19 +216,19 @@ export default function ProductGridItems({
   const viewportMargin = isMobileViewport ? animationViewportMarginsMobile.early : animationViewportMargins.early;
 
   return (
-    <div ref={listRef} style={{ display: "contents" }}>
+    <>
       {products.map((product, index) => (
         <motion.li
           key={product.handle}
-          initial={skip ? false : { opacity: 0, y: hiddenY, scale: hiddenScale, filter: hiddenBlur }}
-          whileInView={skip ? undefined : { opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={skip ? undefined : { once: true, margin: viewportMargin }}
-          transition={skip ? { duration: 0 } : { duration: transitionDuration, delay: index * staggerDelay, ease: animationEasing }}
+          initial={{ opacity: 0, y: hiddenY, scale: hiddenScale, filter: hiddenBlur }}
+          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
+          viewport={{ once: true, margin: viewportMargin }}
+          transition={{ duration: transitionDuration, delay: index * staggerDelay, ease: animationEasing }}
           className="transition-opacity"
         >
           <ProductCard product={product} />
         </motion.li>
       ))}
-    </div>
+    </>
   );
 }

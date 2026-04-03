@@ -192,8 +192,8 @@ textarea {
 
 @keyframes nav-enter {
   0% {
-    opacity: 0.7;
-    transform: translateY(-4px);
+    opacity: 0;
+    transform: translateY(-12px);
   }
   100% {
     opacity: 1;
@@ -202,13 +202,13 @@ textarea {
 }
 
 .animate-nav-enter {
-  animation: nav-enter 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  animation: nav-enter 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) both;
 }
 
 @keyframes category-nav-enter {
   0% {
-    opacity: 0.7;
-    transform: translateY(-3px);
+    opacity: 0;
+    transform: translateY(-8px);
   }
   100% {
     opacity: 1;
@@ -217,7 +217,7 @@ textarea {
 }
 
 .animate-category-nav-enter {
-  animation: category-nav-enter 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) 0.15s both;
+  animation: category-nav-enter 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) 0.3s both;
 }
 
 @keyframes footer-enter {

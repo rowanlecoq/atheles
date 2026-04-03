@@ -9,7 +9,6 @@ import {
   animationViewportMargins,
   animationViewportMarginsMobile,
 } from "lib/animation-config";
-import { useAboveFold } from "lib/hooks/use-above-fold";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion, useInView } from "motion/react";
@@ -39,7 +38,6 @@ export function SplitText({
   mode = "chars",
 }: SplitTextProps) {
   const ref = useRef<HTMLSpanElement>(null);
-  const { wasAboveFold } = useAboveFold(ref);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
   const isInView = useInView(ref, {
@@ -49,7 +47,11 @@ export function SplitText({
       : animationViewportMargins.normal,
   });
   const hiddenY = prefersReducedMotion ? 0 : isMobileViewport ? 18 : 28;
-  const hiddenBlur = prefersReducedMotion ? "blur(0px)" : isMobileViewport ? "blur(6px)" : "blur(12px)";
+  const hiddenBlur = prefersReducedMotion
+    ? "blur(0px)"
+    : isMobileViewport
+      ? "blur(6px)"
+      : "blur(12px)";
   const transitionDuration = prefersReducedMotion
     ? Math.min(duration, animationDurations.fast)
     : isMobileViewport
@@ -61,8 +63,6 @@ export function SplitText({
       ? Math.min(stagger, animationStaggersMobile.tight)
       : stagger;
 
-  const skip = wasAboveFold.current;
-
   const tokenCounts = new Map<string, number>();
   const rawTokens =
     mode === "chars"
@@ -72,7 +72,12 @@ export function SplitText({
   const tokens = rawTokens.map((token) => {
     const count = (tokenCounts.get(token) ?? 0) + 1;
     tokenCounts.set(token, count);
-    return { token, key: `${token}-${count}`, isWhitespace: /^\s+$/.test(token) };
+
+    return {
+      token,
+      key: `${token}-${count}`,
+      isWhitespace: /^\s+$/.test(token),
+    };
   });
 
   return (
@@ -83,12 +88,12 @@ export function SplitText({
         aria-hidden
         className="inline"
         style={{ overflow: "visible" }}
-        initial={skip ? "visible" : "hidden"}
-        animate={isInView || skip ? "visible" : "hidden"}
+        initial="hidden"
+        animate={isInView ? "visible" : "hidden"}
         variants={{
           hidden: {},
           visible: {
-            transition: skip ? { duration: 0 } : {
+            transition: {
               staggerChildren: resolvedStagger,
               delayChildren: delay,
             },
@@ -97,18 +102,27 @@ export function SplitText({
       >
         {tokens.map(({ token, key, isWhitespace }) =>
           mode === "words" && isWhitespace ? (
-            <span key={key} className="whitespace-pre">{token}</span>
+            <span key={key} className="whitespace-pre">
+              {token}
+            </span>
           ) : (
             <motion.span
               key={key}
-              className={mode === "chars" ? "inline-block whitespace-pre" : "inline-block"}
+              className={
+                mode === "chars"
+                  ? "inline-block whitespace-pre"
+                  : "inline-block"
+              }
               variants={{
                 hidden: { opacity: 0, y: hiddenY, filter: hiddenBlur },
                 visible: {
                   opacity: 1,
                   y: 0,
                   filter: "blur(0px)",
-                  transition: skip ? { duration: 0 } : { duration: transitionDuration, ease: animationEasing },
+                  transition: {
+                    duration: transitionDuration,
+                    ease: animationEasing,
+                  },
                 },
               }}
             >

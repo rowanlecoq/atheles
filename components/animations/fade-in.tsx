@@ -7,7 +7,6 @@ import {
   animationViewportMargins,
   animationViewportMarginsMobile,
 } from "lib/animation-config";
-import { useAboveFold } from "lib/hooks/use-above-fold";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion, useInView } from "motion/react";
@@ -39,7 +38,6 @@ export function FadeIn({
   once?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
-  const { wasAboveFold } = useAboveFold(ref);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
   const isInView = useInView(ref, {
@@ -58,18 +56,16 @@ export function FadeIn({
       ? Math.min(duration, animationDurationsMobile.normal)
       : duration;
 
-  const skip = wasAboveFold.current;
-
   return (
     <motion.div
       ref={ref}
-      initial={skip ? false : { opacity: 0, x: hiddenX, y: hiddenY }}
+      initial={{ opacity: 0, x: hiddenX, y: hiddenY }}
       animate={
-        isInView || skip
+        isInView
           ? { opacity: 1, x: 0, y: 0 }
           : { opacity: 0, x: hiddenX, y: hiddenY }
       }
-      transition={skip ? { duration: 0 } : {
+      transition={{
         duration: transitionDuration,
         delay,
         ease: animationEasing,
