@@ -3,21 +3,23 @@
 import { animationEasing } from "lib/animation-config";
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const [mounted, setMounted] = useState(false);
   const [isMobile, setIsMobile] = useState(false);
+  const initialPath = useRef(pathname);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
     check();
+    setMounted(true);
     window.addEventListener("resize", check);
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Disable browser scroll restoration and always scroll to top
   useEffect(() => {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
@@ -29,7 +31,11 @@ export function PageTransition({ children }: { children: ReactNode }) {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  if (isMobile) return <>{children}</>;
+  // First render (SSR + initial hydration): show content immediately, no animation
+  // Subsequent navigations: animate in
+  const isInitialLoad = !mounted || pathname === initialPath.current;
+
+  if (isMobile || isInitialLoad) return <>{children}</>;
 
   return (
     <motion.div
