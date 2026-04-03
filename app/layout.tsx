@@ -52,7 +52,6 @@ export default async function RootLayout({
     getSiteImagesData(),
     getSiteThemeData(),
   ]);
-  const themeCSS = generateThemeCSS(siteTheme);
 
   return (
     <html
@@ -61,15 +60,15 @@ export default async function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body className="bg-brand-dark text-white" style={{ backgroundColor: siteTheme.brandDark }}>
-        {/* Server-injected theme CSS — applied before any rendering */}
-        <style id="atheles-server-theme" dangerouslySetInnerHTML={{ __html: themeCSS }} />
-        {/* Per-user theme overrides from session (personal themes) */}
+        {/* Inject theme CSS + per-user overrides before any content renders */}
         <script
           dangerouslySetInnerHTML={{
             __html: `try{
-              var s=sessionStorage.getItem("atheles-session");
-              if(s&&document.cookie.includes("atheles-logged-in=1")){
-                var u=JSON.parse(s),t=u.theme;
+              var css=${JSON.stringify(generateThemeCSS(siteTheme))};
+              var s=document.createElement("style");s.id="atheles-server-theme";s.textContent=css;document.head.appendChild(s);
+              var ss=sessionStorage.getItem("atheles-session");
+              if(ss&&document.cookie.includes("atheles-logged-in=1")){
+                var u=JSON.parse(ss),t=u.theme;
                 if(t&&t!=="none"){document.body.setAttribute("data-theme",t);if(u.globalTheme)document.body.setAttribute("data-theme-global","1")}
               }
             }catch(e){}`,
