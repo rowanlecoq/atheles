@@ -73,6 +73,7 @@ html {
   text-size-adjust: 100%;
   width: 100%;
   overflow-x: hidden;
+  overflow-y: overlay; /* Overlay scrollbar — doesn't take space, no layout shift */
   scroll-padding-top: 120px;
   scroll-behavior: auto;
   -webkit-tap-highlight-color: transparent;

@@ -45,6 +45,21 @@ function normalizeSlot(val: unknown, key: string): SlotData {
 let cachedSlots: Record<string, SlotData> | null = null;
 let fetchPromise: Promise<void> | null = null;
 
+// Try to load from sessionStorage instantly (no fetch delay on refresh)
+if (typeof window !== "undefined") {
+  try {
+    const stored = sessionStorage.getItem("atheles-site-images");
+    if (stored) {
+      const parsed = JSON.parse(stored);
+      const slots: Record<string, SlotData> = {};
+      for (const [k, v] of Object.entries(parsed)) {
+        slots[k] = normalizeSlot(v, k);
+      }
+      cachedSlots = slots;
+    }
+  } catch {}
+}
+
 function fetchImages() {
   if (fetchPromise) return fetchPromise;
   fetchPromise = fetch("/api/admin/images")
@@ -56,6 +71,8 @@ function fetchImages() {
           slots[k] = normalizeSlot(v, k);
         }
         cachedSlots = slots;
+        // Cache to sessionStorage for instant load on next refresh
+        try { sessionStorage.setItem("atheles-site-images", JSON.stringify(d.images)); } catch {}
       }
     })
     .catch(() => {});
