@@ -25,8 +25,13 @@ export async function GET() {
       return NextResponse.json({ user: null });
     }
 
-    const customer = await getCustomerByToken(token);
+    let customer = await getCustomerByToken(token);
+    // Retry once on failure — Shopify API can have transient hiccups
     if (!customer) {
+      customer = await getCustomerByToken(token);
+    }
+    if (!customer) {
+      // Only delete cookies if token is truly invalid (both attempts failed)
       cookieStore.delete("atheles-auth-token");
       cookieStore.delete("atheles-logged-in");
       return NextResponse.json({ user: null });
