@@ -29,8 +29,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
   return (
     <motion.div
       key={pathname}
-      // Navigation: full fade + slide. Refresh: subtle slide only (no dark tint)
-      initial={hasNavigated.current ? { opacity: 0, y: 8 } : { opacity: 1, y: 6 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
         duration: 0.3,
