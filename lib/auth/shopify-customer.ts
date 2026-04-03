@@ -601,7 +601,10 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       isAthlete = tags.includes("tier:athlete");
       isAdmin = tags.includes("tier:admin");
     } catch {
-      // Tags not available
+      // Admin API failed — preserve theme from previous session if available
+      // This prevents transient Shopify failures from wiping the user's theme
+      theme = "__preserve__" as string;
+      globalTheme = false;
     }
   }
 
