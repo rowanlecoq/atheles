@@ -3,12 +3,14 @@
 import { animationEasing } from "lib/animation-config";
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import type { ReactNode } from "react";
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
   const [isMobile, setIsMobile] = useState(false);
+  const hasNavigated = useRef(false);
+  const prevPath = useRef(pathname);
 
   useEffect(() => {
     const check = () => setIsMobile(window.innerWidth < 768);
@@ -17,16 +19,19 @@ export function PageTransition({ children }: { children: ReactNode }) {
     return () => window.removeEventListener("resize", check);
   }, []);
 
-  // Disable browser scroll restoration and always scroll to top
   useEffect(() => {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
-    window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    // Only scroll to top on actual navigation, not on initial load
+    if (prevPath.current !== pathname) {
+      hasNavigated.current = true;
+      prevPath.current = pathname;
+      window.scrollTo(0, 0);
+    }
   }, [pathname]);
 
   if (isMobile) return <>{children}</>;
@@ -34,7 +39,9 @@ export function PageTransition({ children }: { children: ReactNode }) {
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0, y: 8 }}
+      // First load: no animation, content visible immediately, scrollable
+      // Navigation: smooth fade-in
+      initial={hasNavigated.current ? { opacity: 0, y: 8 } : false}
       animate={{ opacity: 1, y: 0 }}
       transition={{
         duration: 0.3,
