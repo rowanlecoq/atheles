@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchSession } from "lib/fetch-session";
 import { usePathname } from "next/navigation";
 import { updateSessionCache } from "lib/session-cache";
 import { useEffect, useRef, useState } from "react";
@@ -96,11 +97,10 @@ export function ThemeBackground() {
     }
 
     // Always fetch fresh session in background to ensure full data
-    fetch("/api/auth/session")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.user) {
-          updateSessionCache(data.user as Record<string, unknown>);
+    fetchSession()
+      .then((user) => {
+        if (user) {
+          updateSessionCache(user as Record<string, unknown>);
           applyFromCache();
         }
       })
@@ -115,11 +115,10 @@ export function ThemeBackground() {
     const handleVisibility = () => {
       if (document.visibilityState !== "visible") return;
       if (!document.cookie.includes("atheles-logged-in=1")) return;
-      fetch("/api/auth/session")
-        .then((r) => (r.ok ? r.json() : null))
-        .then((data) => {
-          if (data?.user) {
-            updateSessionCache(data.user as Record<string, unknown>);
+      fetchSession()
+        .then((user) => {
+          if (user) {
+            updateSessionCache(user as Record<string, unknown>);
             applyFromCache();
           }
         })

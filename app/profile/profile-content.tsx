@@ -1,5 +1,6 @@
 "use client";
 
+import { fetchSession } from "lib/fetch-session";
 import { updateSessionCache } from "lib/session-cache";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -275,12 +276,11 @@ export default function ProfileContent() {
       }
     } catch { /* ignore */ }
 
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data.user) {
-          applyUser(data.user);
-          updateSessionCache(data.user as Record<string, unknown>);
+    fetchSession()
+      .then((user) => {
+        if (user) {
+          applyUser(user as User);
+          updateSessionCache(user as Record<string, unknown>);
           setLoading(false);
         } else {
           // Session returned null — could be transient Shopify API failure

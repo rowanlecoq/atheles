@@ -1,6 +1,7 @@
 "use client";
 
 import { UserIcon } from "@heroicons/react/24/outline";
+import { fetchSession } from "lib/fetch-session";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
@@ -29,12 +30,11 @@ export function AccountIcon() {
   const pathname = usePathname();
 
   const refreshSession = useCallback(() => {
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.user) {
+    fetchSession()
+      .then((user) => {
+        if (user) {
           setLoggedIn(true);
-          const name = data.user.name || data.user.email || "A";
+          const name = (user.name || user.email || "A") as string;
           setInitials(
             name
               .split(" ")
@@ -43,7 +43,7 @@ export function AccountIcon() {
               .toUpperCase()
               .slice(0, 2),
           );
-          const avatarKey = `atheles-avatar-${data.user.email}`;
+          const avatarKey = `atheles-avatar-${user.email}`;
           try {
             const cached = sessionStorage.getItem(avatarKey);
             if (cached) setAvatar(cached);

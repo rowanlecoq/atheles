@@ -1,6 +1,7 @@
 "use client";
 
 import { Dialog, Transition } from "@headlessui/react";
+import { fetchSession } from "lib/fetch-session";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { Fragment, Suspense, useCallback, useEffect, useState } from "react";
@@ -137,14 +138,13 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const closeMobileMenu = () => setIsOpen(false);
 
   const refreshSession = useCallback(() => {
-    fetch("/api/auth/session")
-      .then((res) => res.json())
-      .then((data) => {
-        if (data?.user) {
+    fetchSession()
+      .then((user) => {
+        if (user) {
           setLoggedIn(true);
-          setUserName(data.user.name || data.user.firstName || "");
+          setUserName((user.name || user.firstName || "") as string);
           // Per-user avatar cache
-          const avatarKey = `atheles-avatar-${data.user.email}`;
+          const avatarKey = `atheles-avatar-${(user as Record<string, unknown>).email}`;
           try {
             const cached = sessionStorage.getItem(avatarKey);
             if (cached) setAvatar(cached);
