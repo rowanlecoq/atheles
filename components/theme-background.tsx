@@ -25,10 +25,19 @@ function readCache(): { theme: string | null; globalTheme: boolean } {
   return { theme: null, globalTheme: false };
 }
 
+function getInitialState(): { theme: string | null; globalOn: boolean } {
+  if (typeof window === "undefined") return { theme: null, globalOn: false };
+  if (!document.cookie.includes("atheles-logged-in=1")) return { theme: null, globalOn: false };
+  const { theme, globalTheme } = readCache();
+  if (theme && theme !== "none") return { theme, globalOn: !!globalTheme };
+  return { theme: null, globalOn: false };
+}
+
 export function ThemeBackground() {
   const pathname = usePathname();
-  const [theme, setTheme] = useState<string | null>(null);
-  const [globalOn, setGlobalOn] = useState(false);
+  const initial = useRef(getInitialState());
+  const [theme, setTheme] = useState<string | null>(initial.current.theme);
+  const [globalOn, setGlobalOn] = useState(initial.current.globalOn);
   const [customBg, setCustomBg] = useState<string | null>(null);
   const initializedRef = useRef(false);
 
