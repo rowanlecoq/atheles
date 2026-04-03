@@ -305,8 +305,8 @@ export default function CartModal() {
                                         <span className="text-[8px] text-brand-grey">ATHELES</span>
                                       </div>
                                     )}
-                                    <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/0 transition-colors group-hover:bg-brand-dark/40">
-                                      <span className="text-xs font-medium uppercase tracking-wider text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                    <div className={`absolute inset-0 flex items-center justify-center transition-colors ${addingFav === p.handle ? "bg-brand-dark/50" : "bg-brand-dark/0 group-hover:bg-brand-dark/40"}`}>
+                                      <span className={`text-xs font-medium uppercase tracking-wider text-white transition-opacity ${addingFav === p.handle ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                                         {addingFav === p.handle ? "adding..." : "+ add"}
                                       </span>
                                     </div>
