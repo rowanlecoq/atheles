@@ -26,12 +26,6 @@ export function PageTransition({ children }: { children: ReactNode }) {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  // First load: plain div, zero framer-motion overhead, immediately scrollable
-  // Subsequent navigations: motion.div with fade-in animation
-  if (!hasNavigated.current) {
-    return <div>{children}</div>;
-  }
-
   return (
     <motion.div
       key={pathname}
