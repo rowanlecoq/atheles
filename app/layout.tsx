@@ -6,12 +6,10 @@ import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ScrollProgress } from "components/scroll-progress";
+import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";
 import { ThemeBackground } from "components/theme-background";
 import { getCart } from "lib/shopify";
-import { SiteImagesProvider } from "components/site-images-context";
-import { getSiteImagesData } from "lib/site-images-server";
-import { getSiteThemeData, generateThemeCSS } from "lib/site-theme-server";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -48,10 +46,6 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   const cart = getCart();
-  const [siteImages, siteTheme] = await Promise.all([
-    getSiteImagesData(),
-    getSiteThemeData(),
-  ]);
 
   return (
     <html
@@ -59,22 +53,30 @@ export default async function RootLayout({
       className={`dark ${playfair.variable}`}
       style={{ colorScheme: "dark" }}
     >
-      <body className="bg-brand-dark text-white" style={{ backgroundColor: siteTheme.brandDark }}>
-        {/* Inject theme CSS + per-user overrides before any content renders */}
+      <body className="bg-brand-dark text-white">
+        {/* Inline script to set theme + colors before React hydrates — prevents flash */}
         <script
           dangerouslySetInnerHTML={{
             __html: `try{
-              var css=${JSON.stringify(generateThemeCSS(siteTheme))};
-              var s=document.createElement("style");s.id="atheles-server-theme";s.textContent=css;document.head.appendChild(s);
-              var ss=sessionStorage.getItem("atheles-session");
-              if(ss&&document.cookie.includes("atheles-logged-in=1")){
-                var u=JSON.parse(ss),t=u.theme;
+              var s=sessionStorage.getItem("atheles-session");
+              if(s&&document.cookie.includes("atheles-logged-in=1")){
+                var u=JSON.parse(s),t=u.theme;
                 if(t&&t!=="none"){document.body.setAttribute("data-theme",t);if(u.globalTheme)document.body.setAttribute("data-theme-global","1")}
+              }
+              var st=sessionStorage.getItem("atheles-site-theme");
+              if(st){
+                var th=JSON.parse(st),r=document.documentElement;
+                if(th.brandGold){r.style.setProperty("--color-brand-gold",th.brandGold);r.style.setProperty("--color-brand-dark-gold",th.brandDarkGold);r.style.setProperty("--color-brand-dark",th.brandDark);document.body.style.backgroundColor=th.brandDark}
+                if(th.headingStyle==="gradient"&&th.headingGradientFrom){
+                  var gs=document.createElement("style");gs.id="atheles-heading-gradient";
+                  gs.textContent=".text-brand-gold,.text-brand-dark-gold,.text-brand-pale-gold,.text-brand-light-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+","+th.headingGradientTo+") !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;background-clip:text !important}.text-brand-dark-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+"99,"+th.headingGradientTo+"99) !important}";
+                  document.head.appendChild(gs)
+                }
               }
             }catch(e){}`,
           }}
         />
-        <SiteImagesProvider data={siteImages}>
+        <SiteImagesProvider>
           <CurrencyProvider>
             <CartProvider cartPromise={cart}>
               <SiteThemeProvider />
