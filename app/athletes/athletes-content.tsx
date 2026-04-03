@@ -160,9 +160,7 @@ export function AthletesContent() {
       </p>
 
       {!loaded ? (
-        <div className="flex justify-center py-20">
-          <p className="text-sm text-brand-grey">loading...</p>
-        </div>
+        <div className="py-20" />
       ) : (
       <>
       <div className="mb-14 grid gap-6 sm:grid-cols-2">
