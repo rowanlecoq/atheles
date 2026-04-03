@@ -58,27 +58,25 @@ export function ThemeBackground() {
       return;
     }
 
-    // Check cache first
+    // Show from cache instantly
     const { theme: cachedTheme } = readCache();
     if (cachedTheme !== null) {
-      // Cache exists — use it (it's the source of truth, written by profile page)
       applyFromCache();
-      initializedRef.current = true;
-    } else {
-      // No cache — fetch session to populate it, then read
-      fetch("/api/auth/session")
-        .then((r) => (r.ok ? r.json() : null))
-        .then((data) => {
-          if (data?.user) {
-            try {
-              sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
-            } catch {}
-            applyFromCache();
-          }
-        })
-        .catch(() => {});
-      initializedRef.current = true;
     }
+
+    // Always fetch fresh session in background to ensure full data
+    fetch("/api/auth/session")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((data) => {
+        if (data?.user) {
+          try {
+            sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+          } catch {}
+          applyFromCache();
+        }
+      })
+      .catch(() => {});
+    initializedRef.current = true;
 
     // Listen for profile page theme changes (cache is already updated when this fires)
     const handleChange = () => applyFromCache();

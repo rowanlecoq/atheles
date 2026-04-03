@@ -46,6 +46,9 @@ export async function POST(request: Request) {
             totalSpent: customer.totalSpent,
             dob: customer.dob,
             theme: customer.theme,
+            globalTheme: customer.globalTheme,
+            isAthlete: customer.isAthlete,
+            isAdmin: customer.isAdmin,
           }
         : null,
     });
