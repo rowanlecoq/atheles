@@ -22,7 +22,6 @@ export type SlotData = {
 
 let cachedSlots: Record<string, SlotData> | null = null;
 let fetchPromise: Promise<void> | null = null;
-let fetchDone = false;
 
 /** Normalise legacy string or new SlotData */
 function normalizeSlot(val: unknown, key: string): SlotData {
@@ -54,9 +53,8 @@ function fetchImages() {
         }
         cachedSlots = slots;
       }
-      fetchDone = true;
     })
-    .catch(() => { fetchDone = true; });
+    .catch(() => {});
   return fetchPromise;
 }
 
@@ -87,7 +85,6 @@ export function useSiteSlideshow(key: string) {
   const defaultSlot: SlotData = { media: [fallback], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
 
   const [slot, setSlot] = useState<SlotData>(cachedSlots?.[key] || defaultSlot);
-  const [ready, setReady] = useState(fetchDone || !!cachedSlots);
   const [index, setIndex] = useState(0);
   const [layers, setLayers] = useState<[string, string]>(() => {
     const first = cachedSlots?.[key]?.media[0] || fallback;
@@ -100,14 +97,12 @@ export function useSiteSlideshow(key: string) {
       const s = cachedSlots[key] || defaultSlot;
       setSlot(s);
       setLayers([s.media[0] || fallback, s.media[0] || fallback]);
-      setReady(true);
       return;
     }
     fetchImages().then(() => {
       const s = cachedSlots?.[key] || defaultSlot;
       setSlot(s);
       setLayers([s.media[0] || fallback, s.media[0] || fallback]);
-      setReady(true);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
@@ -139,7 +134,6 @@ export function useSiteSlideshow(key: string) {
     activeLayer,
     slot,
     index,
-    ready,
     isSlideshow: slot.media.length > 1,
     currentSrc: layers[activeLayer] || fallback,
   };

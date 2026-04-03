@@ -74,7 +74,7 @@ export function SlideshowMedia({
   priority?: boolean;
   iframeClass?: string;
 }) {
-  const { currentSrc, layers, activeLayer, isSlideshow, slot, ready } = useSiteSlideshow(slotKey);
+  const { currentSrc, layers, activeLayer, isSlideshow, slot } = useSiteSlideshow(slotKey);
 
   // Strip hardcoded opacity/grayscale from classes — we control via inline style
   const cleanClass = stripDisplayClasses(className);
@@ -84,14 +84,7 @@ export function SlideshowMedia({
   const mediaStyle: React.CSSProperties = {
     opacity: slot.opacity / 100,
     filter: slot.grayscale ? "grayscale(1)" : "none",
-    // Fade in once ready to prevent flash of defaults
-    transition: "opacity 0.6s ease",
   };
-
-  // While loading, render invisible to prevent flash
-  if (!ready) {
-    return <div className="absolute inset-0" />;
-  }
 
   if (!isSlideshow) {
     return (
