@@ -12,10 +12,11 @@ const DEFAULT_IMAGES: Record<string, string> = {
   interstitial: "/statues/hadrian-cuirassed.jpg",
 };
 
-type SlotData = {
+export type SlotData = {
   media: string[];
   transition: "crossfade" | "slide" | "fade";
   interval: number;
+  grayscale: boolean;
 };
 
 let cachedSlots: Record<string, SlotData> | null = null;
@@ -23,17 +24,18 @@ let fetchPromise: Promise<void> | null = null;
 
 /** Normalise legacy string or new SlotData */
 function normalizeSlot(val: unknown, key: string): SlotData {
-  if (!val) return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000 };
-  if (typeof val === "string") return { media: [val], transition: "crossfade", interval: 6000 };
+  if (!val) return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true };
+  if (typeof val === "string") return { media: [val], transition: "crossfade", interval: 6000, grayscale: true };
   if (typeof val === "object" && val !== null) {
     const obj = val as Record<string, unknown>;
     return {
       media: Array.isArray(obj.media) ? obj.media.filter((m): m is string => typeof m === "string") : [],
       transition: (["crossfade", "slide", "fade"].includes(obj.transition as string) ? obj.transition : "crossfade") as SlotData["transition"],
       interval: typeof obj.interval === "number" ? obj.interval : 6000,
+      grayscale: typeof obj.grayscale === "boolean" ? obj.grayscale : true,
     };
   }
-  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000 };
+  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true };
 }
 
 function fetchImages() {
@@ -71,54 +73,67 @@ export function useSiteImage(key: string): string {
   return src;
 }
 
-/** Returns full slideshow data for a slot: current src, all media, transition config */
+/**
+ * Returns full slideshow data for a slot using a dual-layer A/B crossfade.
+ * `activeLayer` alternates between 0 and 1. The active layer holds the new
+ * image and fades in; the other layer holds the old image underneath.
+ */
 export function useSiteSlideshow(key: string) {
   const fallback = DEFAULT_IMAGES[key] || "";
-  const defaultSlot: SlotData = { media: [fallback], transition: "crossfade", interval: 6000 };
+  const defaultSlot: SlotData = { media: [fallback], transition: "crossfade", interval: 6000, grayscale: true };
 
   const [slot, setSlot] = useState<SlotData>(cachedSlots?.[key] || defaultSlot);
   const [index, setIndex] = useState(0);
-  const [prevIndex, setPrevIndex] = useState(0);
-  const [transitioning, setTransitioning] = useState(false);
+  // Dual-layer A/B: layers[0] and layers[1] each hold a media src
+  const [layers, setLayers] = useState<[string, string]>([fallback, fallback]);
+  // Which layer (0 or 1) is currently visible / fading in
+  const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
 
   useEffect(() => {
     if (cachedSlots) {
-      setSlot(cachedSlots[key] || defaultSlot);
+      const s = cachedSlots[key] || defaultSlot;
+      setSlot(s);
+      setLayers([s.media[0] || fallback, s.media[0] || fallback]);
       return;
     }
     fetchImages().then(() => {
-      setSlot(cachedSlots?.[key] || defaultSlot);
+      const s = cachedSlots?.[key] || defaultSlot;
+      setSlot(s);
+      setLayers([s.media[0] || fallback, s.media[0] || fallback]);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  // Slideshow timer
+  // Slideshow timer — advances index and swaps active layer
   useEffect(() => {
     if (slot.media.length <= 1) return;
     const timer = setInterval(() => {
-      setTransitioning(true);
-      setPrevIndex((prev) => {
-        // prev is old index; we set it to current before advancing
-        return index;
+      setIndex((prev) => {
+        const next = (prev + 1) % slot.media.length;
+        const nextSrc = slot.media[next] || fallback;
+        // Load the new src into the *inactive* layer, then make it active
+        setActiveLayer((al) => {
+          const newActive: 0 | 1 = al === 0 ? 1 : 0;
+          setLayers((ls) => {
+            const copy: [string, string] = [...ls];
+            copy[newActive] = nextSrc;
+            return copy;
+          });
+          return newActive;
+        });
+        return next;
       });
-      setTimeout(() => {
-        setIndex((i) => (i + 1) % slot.media.length);
-        setTimeout(() => setTransitioning(false), 50);
-      }, 0);
     }, slot.interval);
     return () => clearInterval(timer);
-  }, [slot.media.length, slot.interval, index]);
-
-  const currentSrc = slot.media[index] || fallback;
-  const prevSrc = slot.media[prevIndex] || currentSrc;
+  }, [slot.media.length, slot.interval, slot.media, fallback]);
 
   return {
-    currentSrc,
-    prevSrc,
-    transitioning,
+    layers,
+    activeLayer,
     slot,
     index,
     isSlideshow: slot.media.length > 1,
+    currentSrc: layers[activeLayer] || fallback,
   };
 }
 

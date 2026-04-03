@@ -7,6 +7,7 @@ type SlotData = {
   media: string[];
   transition: "crossfade" | "slide" | "fade";
   interval: number;
+  grayscale: boolean;
 };
 
 const IMAGE_SLOTS = [
@@ -70,46 +71,56 @@ function MediaThumb({ src, className = "" }: { src: string; className?: string }
   return <img src={src} alt="" className={`object-cover ${className}`} />;
 }
 
-/* ── Slideshow preview ── */
+/* ── Slideshow preview (A/B layer crossfade) ── */
 function SlideshowPreview({ slot }: { slot: SlotData }) {
-  const [idx, setIdx] = useState(0);
-  const [fading, setFading] = useState(false);
+  const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
+  const [layers, setLayers] = useState<[string, string]>([
+    slot.media[0] || "",
+    slot.media[0] || "",
+  ]);
+  const idxRef = useRef(0);
 
   useEffect(() => {
     if (slot.media.length <= 1) return;
     const timer = setInterval(() => {
-      setFading(true);
-      setTimeout(() => {
-        setIdx((i) => (i + 1) % slot.media.length);
-        setFading(false);
-      }, 600);
+      idxRef.current = (idxRef.current + 1) % slot.media.length;
+      const nextSrc = slot.media[idxRef.current] || "";
+      setActiveLayer((al) => {
+        const newActive: 0 | 1 = al === 0 ? 1 : 0;
+        setLayers((ls) => {
+          const copy: [string, string] = [...ls];
+          copy[newActive] = nextSrc;
+          return copy;
+        });
+        return newActive;
+      });
     }, Math.max(slot.interval, 2000));
     return () => clearInterval(timer);
-  }, [slot.media.length, slot.interval]);
+  }, [slot.media.length, slot.interval, slot.media]);
 
-  const current = slot.media[idx] || slot.media[0] || "";
-  const next = slot.media[(idx + 1) % slot.media.length] || current;
-
-  if (!current) {
+  if (!layers[0]) {
     return <div className="flex h-full w-full items-center justify-center text-xs text-brand-grey">no media</div>;
   }
 
   return (
     <div className="relative h-full w-full overflow-hidden">
-      {/* Current */}
-      <div className={`absolute inset-0 transition-opacity duration-[600ms] ${fading ? "opacity-0" : "opacity-100"}`}>
-        <MediaThumb src={current} className="h-full w-full" />
-      </div>
-      {/* Next (underneath) */}
-      {slot.media.length > 1 && (
-        <div className="absolute inset-0">
-          <MediaThumb src={next} className="h-full w-full" />
+      {[0, 1].map((i) => (
+        <div
+          key={i}
+          className="absolute inset-0"
+          style={{
+            opacity: activeLayer === i ? 1 : 0,
+            zIndex: activeLayer === i ? 1 : 0,
+            transition: "opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)",
+          }}
+        >
+          <MediaThumb src={layers[i as 0 | 1]!} className={`h-full w-full ${slot.grayscale ? "grayscale" : ""}`} />
         </div>
-      )}
+      ))}
       {/* Slide count badge */}
       {slot.media.length > 1 && (
         <div className="absolute bottom-2 right-2 rounded bg-black/60 px-2 py-0.5 text-[10px] text-white backdrop-blur-sm">
-          {idx + 1}/{slot.media.length}
+          {idxRef.current + 1}/{slot.media.length}
         </div>
       )}
     </div>
@@ -202,6 +213,12 @@ function SlotEditor({
     saveSlot(next);
   };
 
+  const toggleGrayscale = () => {
+    const next = { ...data, grayscale: !data.grayscale };
+    onUpdate(slotKey, next);
+    saveSlot(next);
+  };
+
   const resetSlot = async () => {
     try {
       const res = await fetch("/api/admin/images", {
@@ -211,7 +228,7 @@ function SlotEditor({
       });
       const d = await res.json();
       if (d.url) {
-        onUpdate(slotKey, { media: [d.url], transition: "crossfade", interval: 6000 });
+        onUpdate(slotKey, { media: [d.url], transition: "crossfade", interval: 6000, grayscale: true });
         flash();
       }
     } catch {}
@@ -256,6 +273,7 @@ function SlotEditor({
             <p className="text-xs text-brand-grey">
               {data.media.length} {data.media.length === 1 ? "item" : "items"}
               {data.media.length > 1 && ` · ${data.transition} · ${data.interval / 1000}s`}
+              {!data.grayscale && " · color"}
             </p>
           </div>
         </div>
@@ -340,31 +358,49 @@ function SlotEditor({
             }}
           />
 
-          {/* Slideshow settings — only show when >1 media */}
-          {data.media.length > 1 && (
-            <div className="flex flex-wrap items-center gap-4 rounded border border-brand-dark-gold/10 bg-brand-dark-gold/5 p-3">
-              <div className="flex items-center gap-2">
-                <label className="text-xs text-brand-grey">transition</label>
-                <select
-                  value={data.transition}
-                  onChange={(e) => updateTransition(e.target.value as SlotData["transition"])}
-                  className="rounded border border-brand-dark-gold/20 bg-brand-dark px-2 py-1 text-xs text-white focus:border-brand-gold focus:outline-none"
-                >
-                  {TRANSITIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
+          {/* Display & slideshow settings */}
+          <div className="flex flex-wrap items-center gap-4 rounded border border-brand-dark-gold/10 bg-brand-dark-gold/5 p-3">
+            {/* Color mode toggle */}
+            <button
+              type="button"
+              onClick={toggleGrayscale}
+              className="flex items-center gap-2 text-xs"
+            >
+              <div className={`relative h-4 w-8 rounded-full transition-colors ${data.grayscale ? "bg-brand-medium-grey/40" : "bg-brand-gold/60"}`}>
+                <div className={`absolute top-0.5 h-3 w-3 rounded-full transition-all ${data.grayscale ? "left-0.5 bg-brand-grey" : "left-[18px] bg-brand-gold"}`} />
               </div>
-              <div className="flex items-center gap-2">
-                <label className="text-xs text-brand-grey">interval</label>
-                <select
-                  value={data.interval}
-                  onChange={(e) => updateInterval(Number(e.target.value))}
-                  className="rounded border border-brand-dark-gold/20 bg-brand-dark px-2 py-1 text-xs text-white focus:border-brand-gold focus:outline-none"
-                >
-                  {INTERVALS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
-                </select>
-              </div>
-            </div>
-          )}
+              <span className={data.grayscale ? "text-brand-grey" : "text-brand-gold"}>
+                {data.grayscale ? "grayscale" : "full color"}
+              </span>
+            </button>
+
+            {/* Slideshow settings — only show when >1 media */}
+            {data.media.length > 1 && (
+              <>
+                <div className="h-4 w-px bg-brand-dark-gold/20" />
+                <div className="flex items-center gap-2">
+                  <label className="text-xs text-brand-grey">transition</label>
+                  <select
+                    value={data.transition}
+                    onChange={(e) => updateTransition(e.target.value as SlotData["transition"])}
+                    className="rounded border border-brand-dark-gold/20 bg-brand-dark px-2 py-1 text-xs text-white focus:border-brand-gold focus:outline-none"
+                  >
+                    {TRANSITIONS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+                <div className="flex items-center gap-2">
+                  <label className="text-xs text-brand-grey">interval</label>
+                  <select
+                    value={data.interval}
+                    onChange={(e) => updateInterval(Number(e.target.value))}
+                    className="rounded border border-brand-dark-gold/20 bg-brand-dark px-2 py-1 text-xs text-white focus:border-brand-gold focus:outline-none"
+                  >
+                    {INTERVALS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+                  </select>
+                </div>
+              </>
+            )}
+          </div>
 
           {/* Reset */}
           <div className="mt-3 flex justify-end">
@@ -429,7 +465,7 @@ export default function AdminImagesPage() {
               key={slot.key}
               slotKey={slot.key}
               slotDef={slot}
-              data={slots[slot.key] || { media: [], transition: "crossfade", interval: 6000 }}
+              data={slots[slot.key] || { media: [], transition: "crossfade", interval: 6000, grayscale: true }}
               onUpdate={handleUpdate}
             />
           ))}
