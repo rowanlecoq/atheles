@@ -188,6 +188,21 @@ textarea {
   }
 }
 
+@keyframes content-enter {
+  0% {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-content-enter {
+  animation: content-enter 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) 0.1s both;
+}
+
 @keyframes nav-enter {
   0% {
     opacity: 0;
