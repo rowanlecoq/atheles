@@ -292,6 +292,17 @@ export default function ProfileContent() {
                 updateSessionCache(retry.user as Record<string, unknown>);
                 setLoading(false);
               } else {
+                // Both attempts failed — use cached session if available
+                try {
+                  const fallback = sessionStorage.getItem("atheles-session");
+                  if (fallback) {
+                    const u = JSON.parse(fallback) as User;
+                    applyUser(u);
+                    setLoading(false);
+                    return;
+                  }
+                } catch {}
+                // No cache — truly invalid, redirect to login
                 sessionStorage.removeItem("atheles-session");
                 sessionStorage.removeItem("atheles-avatar");
                 sessionStorage.removeItem("atheles-custom-bg");
