@@ -76,8 +76,6 @@ html {
   scroll-padding-top: 120px;
   scroll-behavior: auto;
   -webkit-tap-highlight-color: transparent;
-  /* scrollbar-color prevents a gray flash on non-overlay scrollbar systems */
-  scrollbar-color: var(--color-brand-medium-grey) var(--color-brand-dark);
 }
 
 /* Hide scrollbar for horizontal scroll containers */
@@ -140,22 +138,12 @@ textarea {
   }
 }
 
-/* Scrollbar styling */
+/* Hide scrollbar but keep scroll functionality */
+html {
+  scrollbar-width: none; /* Firefox */
+}
 ::-webkit-scrollbar {
-  width: 6px;
-}
-
-::-webkit-scrollbar-track {
-  background: var(--color-brand-dark);
-}
-
-::-webkit-scrollbar-thumb {
-  background: var(--color-brand-medium-grey);
-  border-radius: 3px;
-}
-
-::-webkit-scrollbar-thumb:hover {
-  background: var(--color-brand-dark-gold);
+  display: none; /* Chrome, Safari, Edge */
 }
 
 /* Selection styling */
