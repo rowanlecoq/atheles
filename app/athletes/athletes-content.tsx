@@ -78,13 +78,27 @@ function SocialIcon({ platform }: { platform: string }) {
   }
 }
 
-function isVideoUrl(url: string) {
-  return url.includes("youtube.com") || url.includes("youtu.be") || url.endsWith(".mp4") || url.endsWith(".webm");
+function isMediaUrl(url: string) {
+  return url.includes("youtube.com") || url.includes("youtu.be") || url.includes("instagram.com") || url.includes("tiktok.com") || url.endsWith(".mp4") || url.endsWith(".webm");
 }
 
-function getYoutubeEmbedUrl(url: string): string | null {
-  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
-  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+function getEmbedUrl(url: string): { type: "youtube" | "instagram" | "tiktok" | "video" | "image"; embedUrl: string } {
+  // YouTube (watch, shorts, youtu.be)
+  const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]+)/);
+  if (ytMatch) return { type: "youtube", embedUrl: `https://www.youtube.com/embed/${ytMatch[1]}` };
+
+  // Instagram post/reel
+  const igMatch = url.match(/instagram\.com\/(?:p|reel)\/([\w-]+)/);
+  if (igMatch) return { type: "instagram", embedUrl: `https://www.instagram.com/p/${igMatch[1]}/embed` };
+
+  // TikTok
+  const ttMatch = url.match(/tiktok\.com\/@[\w.]+\/video\/(\d+)/);
+  if (ttMatch) return { type: "tiktok", embedUrl: `https://www.tiktok.com/embed/v2/${ttMatch[1]}` };
+
+  // Direct video
+  if (url.endsWith(".mp4") || url.endsWith(".webm")) return { type: "video", embedUrl: url };
+
+  return { type: "image", embedUrl: url };
 }
 
 export function AthletesContent() {
@@ -154,7 +168,7 @@ export function AthletesContent() {
             {athlete.images && athlete.images.length > 0 && (
               <div className="flex gap-1 overflow-x-auto p-1 scrollbar-hide">
                 {athlete.images.map((item, idx) => {
-                  const isVideo = item.includes("youtube.com") || item.includes("youtu.be") || item.endsWith(".mp4") || item.endsWith(".webm");
+                  const isMedia = isMediaUrl(item);
                   return (
                     <button
                       key={idx}
@@ -162,7 +176,7 @@ export function AthletesContent() {
                       onClick={() => setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: idx + (athlete.image ? 1 : 0) })}
                       className="relative aspect-square h-20 w-20 flex-none overflow-hidden transition-opacity hover:opacity-80"
                     >
-                      {isVideo ? (
+                      {isMedia ? (
                         <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-2xl text-brand-grey">▶</div>
                       ) : (
                         // eslint-disable-next-line @next/next/no-img-element
@@ -258,12 +272,12 @@ export function AthletesContent() {
           <div onClick={(e) => e.stopPropagation()} className="max-h-[85vh] max-w-[90vw]">
             {(() => {
               const item = lightbox.items[lightbox.index] || "";
-              const ytEmbed = getYoutubeEmbedUrl(item);
-              if (ytEmbed) {
-                return <iframe src={ytEmbed} className="aspect-video w-full max-w-3xl rounded-lg" allowFullScreen />;
+              const embed = getEmbedUrl(item);
+              if (embed.type === "youtube" || embed.type === "instagram" || embed.type === "tiktok") {
+                return <iframe src={embed.embedUrl} className="aspect-[9/16] h-[80vh] max-h-[80vh] w-auto rounded-lg sm:aspect-video sm:h-auto sm:w-full sm:max-w-3xl" allowFullScreen />;
               }
-              if (item.endsWith(".mp4") || item.endsWith(".webm")) {
-                return <video src={item} controls className="max-h-[80vh] rounded-lg" />;
+              if (embed.type === "video") {
+                return <video src={embed.embedUrl} controls className="max-h-[80vh] rounded-lg" />;
               }
               // eslint-disable-next-line @next/next/no-img-element
               return <img src={item} alt="" className="max-h-[80vh] rounded-lg object-contain" />;
