@@ -41,7 +41,7 @@ type FavProduct = {
 };
 
 export default function CartModal() {
-  const { cart, updateCartItem } = useCart();
+  const { cart, updateCartItem, addCartItem } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
@@ -292,8 +292,10 @@ export default function CartModal() {
                                   onClick={async () => {
                                     if (!p.firstVariantId) return;
                                     setAddingFav(p.handle);
-                                    try { await addItem(null, p.firstVariantId); } catch {}
-                                    setAddingFav(null);
+                                    addItem(null, p.firstVariantId).catch(() => {});
+                                    // Clear fav cache so filtered list updates
+                                    favCacheRef.current = null;
+                                    setTimeout(() => setAddingFav(null), 600);
                                   }}
                                   className="text-left"
                                 >

@@ -96,13 +96,7 @@ export function ThemeBackground() {
       return;
     }
 
-    // Show from cache instantly
-    const { theme: cachedTheme } = readCache();
-    if (cachedTheme !== null) {
-      applyFromCache();
-    }
-
-    // Always fetch fresh session in background to ensure full data
+    // Theme already set from useState initialization — just sync in background
     fetch("/api/auth/session")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -110,7 +104,13 @@ export function ThemeBackground() {
           try {
             sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
           } catch {}
-          applyFromCache();
+          // Only update if data changed
+          const freshTheme = data.user.theme || null;
+          const freshGlobal = !!data.user.globalTheme;
+          if (freshTheme && freshTheme !== "none") {
+            setTheme(freshTheme);
+            setGlobalOn(freshGlobal);
+          }
         }
       })
       .catch(() => {});
