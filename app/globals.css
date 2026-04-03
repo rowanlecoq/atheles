@@ -73,12 +73,10 @@ html {
   text-size-adjust: 100%;
   width: 100%;
   overflow-x: hidden;
-  overflow-y: overlay; /* Overlay scrollbar — doesn't take space, no layout shift */
   scroll-padding-top: 120px;
   scroll-behavior: auto;
   -webkit-tap-highlight-color: transparent;
-  /* scrollbar-color prevents a gray flash on non-overlay scrollbar systems */
-  scrollbar-color: var(--color-brand-medium-grey) var(--color-brand-dark);
+  scrollbar-width: none; /* Firefox — hide scrollbar, prevent layout shift */
 }
 
 /* Hide scrollbar for horizontal scroll containers */
@@ -141,17 +139,18 @@ textarea {
   }
 }
 
-/* Scrollbar styling */
+/* Scrollbar styling — zero width prevents layout shift */
 ::-webkit-scrollbar {
-  width: 6px;
+  width: 0px;
+  background: transparent;
 }
 
 ::-webkit-scrollbar-track {
-  background: var(--color-brand-dark);
+  background: transparent;
 }
 
 ::-webkit-scrollbar-thumb {
-  background: var(--color-brand-medium-grey);
+  background: transparent;
   border-radius: 3px;
 }
 

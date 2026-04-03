@@ -45,19 +45,35 @@ function normalizeSlot(val: unknown, key: string): SlotData {
 let cachedSlots: Record<string, SlotData> | null = null;
 let fetchPromise: Promise<void> | null = null;
 
-// Try to load from sessionStorage instantly (no fetch delay on refresh)
+// Load from server-injected data (instant, in HTML) or sessionStorage (refresh)
 if (typeof window !== "undefined") {
   try {
-    const stored = sessionStorage.getItem("atheles-site-images");
-    if (stored) {
-      const parsed = JSON.parse(stored);
+    // Priority 1: server-injected data (always fresh, in the HTML)
+    const injected = (window as unknown as Record<string, unknown>).__SITE_IMAGES__;
+    if (injected && typeof injected === "object") {
       const slots: Record<string, SlotData> = {};
-      for (const [k, v] of Object.entries(parsed)) {
+      for (const [k, v] of Object.entries(injected as Record<string, unknown>)) {
         slots[k] = normalizeSlot(v, k);
       }
       cachedSlots = slots;
+      // Also update sessionStorage for any edge cases
+      try { sessionStorage.setItem("atheles-site-images", JSON.stringify(injected)); } catch {}
     }
   } catch {}
+  // Priority 2: sessionStorage fallback
+  if (!cachedSlots) {
+    try {
+      const stored = sessionStorage.getItem("atheles-site-images");
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        const slots: Record<string, SlotData> = {};
+        for (const [k, v] of Object.entries(parsed)) {
+          slots[k] = normalizeSlot(v, k);
+        }
+        cachedSlots = slots;
+      }
+    } catch {}
+  }
 }
 
 function fetchImages() {
