@@ -1,7 +1,7 @@
 "use client";
 
 import { GoldParticles } from "components/gold-particles";
-import { useSiteImage, isVideoSrc } from "lib/hooks/use-site-images";
+import { useSiteImage, isVideoSrc, isYouTubeSrc, getYouTubeEmbedUrl } from "lib/hooks/use-site-images";
 import Image from "next/image";
 import { HeroCategoryNav } from "./hero-category-nav";
 import { HeroCenter } from "./hero-center";
@@ -13,8 +13,15 @@ export function Hero() {
 
   return (
     <section className="relative overflow-x-hidden bg-brand-dark">
-      {/* Background — supports video or image */}
-      {isVideoSrc(heroBg) ? (
+      {/* Background — supports video, YouTube, or image */}
+      {isYouTubeSrc(heroBg) ? (
+        <iframe
+          src={getYouTubeEmbedUrl(heroBg) || ""}
+          className="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] opacity-15 grayscale pointer-events-none"
+          allow="autoplay"
+          style={{ border: 0 }}
+        />
+      ) : isVideoSrc(heroBg) ? (
         <video
           src={heroBg}
           autoPlay
@@ -41,7 +48,9 @@ export function Hero() {
         {/* === Left panel === */}
         <div className="hidden overflow-hidden rounded-sm md:block">
           <div className="relative h-full w-full">
-            {isVideoSrc(heroLeft) ? (
+            {isYouTubeSrc(heroLeft) ? (
+              <iframe src={getYouTubeEmbedUrl(heroLeft) || ""} className="h-full w-full opacity-50 grayscale pointer-events-none" allow="autoplay" style={{ border: 0 }} />
+            ) : isVideoSrc(heroLeft) ? (
               <video src={heroLeft} autoPlay muted loop playsInline className="h-full w-full object-cover opacity-50 grayscale" />
             ) : (
               <Image src={heroLeft} alt="" fill className="object-cover object-top opacity-50 grayscale" sizes="(min-width: 768px) 25vw, 0px" />
@@ -59,7 +68,9 @@ export function Hero() {
         {/* === Right panel === */}
         <div className="hidden overflow-hidden rounded-sm md:block">
           <div className="relative h-full w-full">
-            {isVideoSrc(heroRight) ? (
+            {isYouTubeSrc(heroRight) ? (
+              <iframe src={getYouTubeEmbedUrl(heroRight) || ""} className="h-full w-full opacity-50 grayscale pointer-events-none" allow="autoplay" style={{ border: 0 }} />
+            ) : isVideoSrc(heroRight) ? (
               <video src={heroRight} autoPlay muted loop playsInline className="h-full w-full object-cover opacity-50 grayscale" />
             ) : (
               <Image src={heroRight} alt="" fill className="object-cover object-top opacity-50 grayscale" sizes="(min-width: 768px) 25vw, 0px" />

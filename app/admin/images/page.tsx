@@ -104,27 +104,35 @@ export default function AdminImagesPage() {
           {IMAGE_SLOTS.map((slot) => {
             const current = images[slot.key] || "";
             const isVideo = current.endsWith(".mp4") || current.endsWith(".webm");
+            const ytMatch = current.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]+)/);
+            const isYT = !!ytMatch;
             return (
               <div key={slot.key} className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4">
-                <div className="mb-2 flex items-start justify-between">
+                <div className="mb-3 flex items-start justify-between">
                   <div>
                     <p className="text-sm font-medium text-white">{slot.label}</p>
                     <p className="text-xs text-brand-grey">{slot.description}</p>
                   </div>
                   {saved === slot.key && <span className="text-xs text-green-400">saved!</span>}
                 </div>
+                {/* Preview — larger */}
+                <div className="relative mb-3 aspect-video w-full overflow-hidden rounded-lg bg-brand-medium-grey/10">
+                  {isYT && ytMatch ? (
+                    <div className="relative h-full w-full">
+                      {/* eslint-disable-next-line @next/next/no-img-element */}
+                      <img src={`https://img.youtube.com/vi/${ytMatch[1]}/hqdefault.jpg`} alt="" className="h-full w-full object-cover" />
+                      <div className="absolute inset-0 flex items-center justify-center bg-black/30"><span className="text-3xl text-white">▶</span></div>
+                    </div>
+                  ) : isVideo ? (
+                    <div className="flex h-full w-full items-center justify-center text-3xl text-brand-grey">▶</div>
+                  ) : current ? (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={current} alt="" className="h-full w-full object-cover" />
+                  ) : (
+                    <div className="flex h-full w-full items-center justify-center text-xs text-brand-grey">no image set</div>
+                  )}
+                </div>
                 <div className="flex items-center gap-3">
-                  {/* Preview */}
-                  <div className="relative h-16 w-24 flex-none overflow-hidden rounded bg-brand-medium-grey/10">
-                    {isVideo ? (
-                      <div className="flex h-full w-full items-center justify-center text-lg text-brand-grey">▶</div>
-                    ) : current ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img src={current} alt="" className="h-full w-full object-cover" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center text-[8px] text-brand-grey">no image</div>
-                    )}
-                  </div>
                   {/* Actions */}
                   <div className="flex flex-col gap-1">
                     <label className={`cursor-pointer text-xs text-brand-gold hover:text-brand-pale-gold ${uploading === slot.key ? "opacity-50" : ""}`}>

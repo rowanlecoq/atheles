@@ -45,3 +45,12 @@ export function useSiteImage(key: string): string {
 export function isVideoSrc(src: string): boolean {
   return src.endsWith(".mp4") || src.endsWith(".webm");
 }
+
+export function isYouTubeSrc(src: string): boolean {
+  return src.includes("youtube.com") || src.includes("youtu.be");
+}
+
+export function getYouTubeEmbedUrl(src: string): string | null {
+  const match = src.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]+)/);
+  return match ? `https://www.youtube.com/embed/${match[1]}?autoplay=1&mute=1&loop=1&controls=0&showinfo=0&modestbranding=1&playlist=${match[1]}` : null;
+}
