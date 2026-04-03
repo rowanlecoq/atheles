@@ -211,11 +211,16 @@ export default function AdminThemePage() {
 
             {/* Preview */}
             <div className="mt-4 rounded-lg p-4" style={{ background: theme.brandDark }}>
-              <p className="text-xs" style={{ color: theme.brandDarkGold }}>preview text</p>
               {theme.headingStyle === "gradient" ? (
-                <p className="bg-clip-text font-heading text-lg font-bold text-transparent" style={{ backgroundImage: `linear-gradient(90deg, ${theme.headingGradientFrom}, ${theme.headingGradientTo})` }}>ATHELES</p>
+                <>
+                  <p className="bg-clip-text text-xs text-transparent" style={{ backgroundImage: `linear-gradient(90deg, ${theme.headingGradientFrom}cc, ${theme.headingGradientTo}cc)` }}>preview text</p>
+                  <p className="bg-clip-text font-heading text-lg font-bold text-transparent" style={{ backgroundImage: `linear-gradient(90deg, ${theme.headingGradientFrom}, ${theme.headingGradientTo})` }}>ATHELES</p>
+                </>
               ) : (
-                <p className="font-heading text-lg" style={{ color: theme.brandGold }}>ATHELES</p>
+                <>
+                  <p className="text-xs" style={{ color: theme.brandDarkGold }}>preview text</p>
+                  <p className="font-heading text-lg" style={{ color: theme.brandGold }}>ATHELES</p>
+                </>
               )}
               <div className="mt-1 h-px w-16" style={{ background: `linear-gradient(90deg, ${theme.headingGradientFrom || theme.brandGold}, ${theme.headingGradientTo || theme.brandDarkGold})` }} />
             </div>
