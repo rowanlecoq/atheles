@@ -117,9 +117,21 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const searchParams = useSearchParams();
   const routeKey = `${pathname}?${searchParams?.toString() ?? ""}`;
   const [isOpen, setIsOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [avatar, setAvatar] = useState<string | null>(null);
+  // Read cached auth state synchronously to avoid flash
+  const [loggedIn, setLoggedIn] = useState(() => {
+    if (typeof window === "undefined") return false;
+    return document.cookie.includes("atheles-logged-in=1");
+  });
+  const [userName, setUserName] = useState(() => {
+    if (typeof window === "undefined") return "";
+    try { const c = sessionStorage.getItem("atheles-session"); if (c) { const u = JSON.parse(c); return u.name || u.firstName || ""; } } catch {}
+    return "";
+  });
+  const [avatar, setAvatar] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try { const c = sessionStorage.getItem("atheles-session"); if (c) { const u = JSON.parse(c); return sessionStorage.getItem(`atheles-avatar-${u.email}`) || null; } } catch {}
+    return null;
+  });
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
