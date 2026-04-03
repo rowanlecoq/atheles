@@ -76,7 +76,8 @@ html {
   scroll-padding-top: 120px;
   scroll-behavior: auto;
   -webkit-tap-highlight-color: transparent;
-  scrollbar-width: none; /* Firefox — hide scrollbar, prevent layout shift */
+  /* scrollbar-color prevents a gray flash on non-overlay scrollbar systems */
+  scrollbar-color: var(--color-brand-medium-grey) var(--color-brand-dark);
 }
 
 /* Hide scrollbar for horizontal scroll containers */
@@ -139,18 +140,17 @@ textarea {
   }
 }
 
-/* Scrollbar styling — zero width prevents layout shift */
+/* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 0px;
-  background: transparent;
+  width: 6px;
 }
 
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-brand-dark);
 }
 
 ::-webkit-scrollbar-thumb {
-  background: transparent;
+  background: var(--color-brand-medium-grey);
   border-radius: 3px;
 }
 
@@ -186,21 +186,6 @@ textarea {
   .animate-carousel {
     animation: none;
   }
-}
-
-@keyframes content-enter {
-  0% {
-    opacity: 0;
-    transform: translateY(10px);
-  }
-  100% {
-    opacity: 1;
-    transform: translateY(0);
-  }
-}
-
-.animate-content-enter {
-  animation: content-enter 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) 0.1s both;
 }
 
 @keyframes nav-enter {
