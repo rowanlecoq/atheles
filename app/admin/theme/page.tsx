@@ -284,10 +284,17 @@ export default function AdminThemePage() {
             </div>
           </div>
 
-          {/* Save */}
+          {/* Save + Reset */}
           <div className="flex items-center gap-3">
             <button type="button" onClick={save} disabled={saving} className="rounded-full bg-brand-gold px-6 py-2.5 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50">
               {saving ? "saving..." : "save changes"}
+            </button>
+            <button
+              type="button"
+              onClick={() => { setTheme(DEFAULT_THEME); }}
+              className="rounded-full border border-brand-dark-gold/30 px-4 py-2.5 text-xs uppercase tracking-wider text-brand-grey transition-colors hover:text-red-400"
+            >
+              reset all to default
             </button>
             {saved && <span className="text-xs text-green-400">saved! refresh the site to see changes.</span>}
           </div>
