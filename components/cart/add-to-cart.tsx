@@ -32,8 +32,10 @@ export function AddToCart({ product }: { product: Product }) {
     addCartItem(finalVariant, product);
     // Open cart drawer immediately
     window.dispatchEvent(new Event("open-cart"));
-    // Server action — runs in background
-    addItem(null, selectedVariantId).catch(() => {});
+    // Server action — runs in background, keep button disabled until done
+    try {
+      await addItem(null, selectedVariantId);
+    } catch {}
     setAdding(false);
   };
 

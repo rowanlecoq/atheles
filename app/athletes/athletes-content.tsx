@@ -179,7 +179,7 @@ export function AthletesContent() {
             </div>
             {/* Gallery strip — clickable */}
             {athlete.images && athlete.images.length > 0 && (
-              <div className="flex gap-1 overflow-x-auto p-1 scrollbar-hide">
+              <div className="flex gap-1.5 overflow-x-auto p-1 scrollbar-hide snap-x snap-mandatory">
                 {athlete.images.map((item, idx) => {
                   const isMedia = isMediaUrl(item);
                   return (
@@ -187,7 +187,7 @@ export function AthletesContent() {
                       key={idx}
                       type="button"
                       onClick={() => setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: idx + (athlete.image ? 1 : 0) })}
-                      className="relative aspect-square h-20 w-20 flex-none overflow-hidden transition-opacity hover:opacity-80"
+                      className="relative aspect-square h-20 w-20 flex-none snap-start overflow-hidden rounded transition-opacity hover:opacity-80"
                     >
                       {(() => {
                         const ytThumb = getYoutubeThumbnail(item);
@@ -290,8 +290,24 @@ export function AthletesContent() {
             >‹</button>
           )}
 
-          {/* Content */}
-          <div onClick={(e) => e.stopPropagation()} className="max-h-[85vh] max-w-[90vw]">
+          {/* Content — swipe to navigate on mobile */}
+          <div
+            onClick={(e) => e.stopPropagation()}
+            className="max-h-[85vh] max-w-[90vw]"
+            onTouchStart={(e) => {
+              const touch = e.touches[0];
+              if (touch) (e.currentTarget as HTMLElement).dataset.touchX = String(touch.clientX);
+            }}
+            onTouchEnd={(e) => {
+              const startX = Number((e.currentTarget as HTMLElement).dataset.touchX || 0);
+              const endX = e.changedTouches[0]?.clientX || 0;
+              const diff = startX - endX;
+              if (Math.abs(diff) > 50 && lightbox.items.length > 1) {
+                if (diff > 0) setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length });
+                else setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length });
+              }
+            }}
+          >
             {(() => {
               const item = lightbox.items[lightbox.index] || "";
               const embed = getEmbedUrl(item);
@@ -305,7 +321,7 @@ export function AthletesContent() {
                 return <video src={embed.embedUrl} controls className="max-h-[80vh] rounded-lg" />;
               }
               // eslint-disable-next-line @next/next/no-img-element
-              return <img src={item} alt="" className="max-h-[80vh] rounded-lg object-contain" />;
+              return <img src={item} alt="" className="max-h-[80vh] rounded-lg object-contain" style={{ touchAction: "pinch-zoom" }} />;
             })()}
           </div>
 
