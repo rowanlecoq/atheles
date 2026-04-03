@@ -30,7 +30,7 @@ const DEFAULT_THEME: SiteTheme = {
 };
 
 const SEASONAL_PRESETS = [
-  { name: "default", gold: "#ccb173", darkGold: "#7f6f4c", dark: "#1a1a1a", from: "#ccb173", to: "#e5c685", style: "solid" as const },
+  { name: "default", gold: "#ccb173", darkGold: "#7f6f4c", dark: "#1a1a1a", from: "#ccb173", to: "#e5c685", style: "gradient" as const },
   { name: "winter", gold: "#a8d8ea", darkGold: "#5b8fa8", dark: "#0f1923", from: "#a8d8ea", to: "#f0f8ff", style: "gradient" as const },
   { name: "christmas", gold: "#c41e3a", darkGold: "#2d5a27", dark: "#1a0a0a", from: "#c41e3a", to: "#2d8c3c", style: "gradient" as const },
   { name: "halloween", gold: "#ff6f00", darkGold: "#6a1b9a", dark: "#1a1010", from: "#ff6f00", to: "#9c27b0", style: "gradient" as const },
@@ -178,8 +178,12 @@ export default function AdminThemePage() {
             {/* Preview */}
             <div className="mt-4 rounded-lg p-4" style={{ background: theme.brandDark }}>
               <p className="text-xs" style={{ color: theme.brandDarkGold }}>preview text</p>
-              <p className="font-heading text-lg" style={{ color: theme.brandGold }}>ATHELES</p>
-              <div className="mt-1 h-px w-16" style={{ background: theme.brandDarkGold }} />
+              {theme.headingStyle === "gradient" ? (
+                <p className="bg-clip-text font-heading text-lg font-bold text-transparent" style={{ backgroundImage: `linear-gradient(90deg, ${theme.headingGradientFrom}, ${theme.headingGradientTo})` }}>ATHELES</p>
+              ) : (
+                <p className="font-heading text-lg" style={{ color: theme.brandGold }}>ATHELES</p>
+              )}
+              <div className="mt-1 h-px w-16" style={{ background: `linear-gradient(90deg, ${theme.headingGradientFrom || theme.brandGold}, ${theme.headingGradientTo || theme.brandDarkGold})` }} />
             </div>
           </div>
 
