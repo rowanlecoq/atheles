@@ -46,8 +46,22 @@ export function SiteThemeProvider() {
       .then((d) => {
         if (!d?.theme) return;
         const t: SiteTheme = d.theme;
-        // CSS vars are set server-side on <html> inline style.
-        // Only inject gradient heading styles (can't be done via inline style).
+        const root = document.documentElement;
+
+        // Core brand colors
+        root.style.setProperty("--color-brand-gold", t.brandGold);
+        root.style.setProperty("--color-brand-dark-gold", t.brandDarkGold);
+        root.style.setProperty("--color-brand-dark", t.brandDark);
+
+        // Derived colors — auto-generate from primary
+        root.style.setProperty("--color-brand-pale-gold", darken(t.brandGold, 0.1));
+        root.style.setProperty("--color-brand-light-gold", lighten(t.brandGold, 0.2));
+        root.style.setProperty("--color-brand-gold-wash", darken(t.brandGold, 0.05));
+
+        // Body background
+        document.body.style.backgroundColor = t.brandDark;
+
+        // Gradient heading support — inject a style tag for gradient text
         let gradientStyle = document.getElementById("atheles-heading-gradient");
         if (!gradientStyle) {
           gradientStyle = document.createElement("style");
