@@ -9,12 +9,14 @@ function MediaElement({
   sizes = "100vw",
   priority = false,
   iframeClass = "",
+  objectPosition,
 }: {
   src: string;
   className?: string;
   sizes?: string;
   priority?: boolean;
   iframeClass?: string;
+  objectPosition?: string;
 }) {
   if (isYouTubeSrc(src)) {
     return (
@@ -28,7 +30,15 @@ function MediaElement({
   }
   if (isVideoSrc(src)) {
     return (
-      <video src={src} autoPlay muted loop playsInline className={className} />
+      <video
+        src={src}
+        autoPlay
+        muted
+        loop
+        playsInline
+        className={className}
+        style={objectPosition ? { objectPosition } : undefined}
+      />
     );
   }
   return (
@@ -39,6 +49,7 @@ function MediaElement({
       priority={priority}
       className={className}
       sizes={sizes}
+      style={objectPosition ? { objectPosition } : undefined}
     />
   );
 }
@@ -57,9 +68,7 @@ function stripDisplayClasses(cls: string): string {
 
 /**
  * Renders a slideshow with smooth cinematic crossfade transitions.
- * - Stays invisible until the API has responded (prevents flash of defaults).
- * - Uses admin-configured opacity and grayscale per slot.
- * - Dual A/B layer crossfade for seamless transitions.
+ * Uses admin-configured opacity, grayscale, and focal point per slot.
  */
 export function SlideshowMedia({
   slotKey,
@@ -76,11 +85,10 @@ export function SlideshowMedia({
 }) {
   const { currentSrc, layers, activeLayer, isSlideshow, slot } = useSiteSlideshow(slotKey);
 
-  // Strip hardcoded opacity/grayscale from classes — we control via inline style
   const cleanClass = stripDisplayClasses(className);
   const cleanIframeClass = stripDisplayClasses(iframeClass);
+  const objPos = `${slot.focusX}% ${slot.focusY}%`;
 
-  // Inline styles from admin config
   const mediaStyle: React.CSSProperties = {
     opacity: slot.opacity / 100,
     filter: slot.grayscale ? "grayscale(1)" : "none",
@@ -89,7 +97,7 @@ export function SlideshowMedia({
   if (!isSlideshow) {
     return (
       <div className="absolute inset-0 overflow-hidden" style={mediaStyle}>
-        <MediaElement src={currentSrc} className={cleanClass} sizes={sizes} priority={priority} iframeClass={cleanIframeClass} />
+        <MediaElement src={currentSrc} className={cleanClass} sizes={sizes} priority={priority} iframeClass={cleanIframeClass} objectPosition={objPos} />
       </div>
     );
   }
@@ -117,6 +125,7 @@ export function SlideshowMedia({
               sizes={sizes}
               priority={priority && layerIdx === 0}
               iframeClass={cleanIframeClass}
+              objectPosition={objPos}
             />
           </div>
         );

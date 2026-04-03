@@ -18,6 +18,8 @@ export type SlotData = {
   interval: number;
   grayscale: boolean;
   opacity: number; // 0–100
+  focusX: number;  // 0–100
+  focusY: number;  // 0–100
 };
 
 /** Read server-injected data synchronously — available before React hydrates */
@@ -33,7 +35,7 @@ let cachedSlots: Record<string, SlotData> | null = getInjectedSlots();
 let fetchPromise: Promise<void> | null = null;
 
 function normalizeSlot(val: unknown, key: string): SlotData {
-  const base: SlotData = { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+  const base: SlotData = { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
   if (!val) return base;
   if (typeof val === "string") return { ...base, media: [val] };
   if (typeof val === "object" && val !== null) {
@@ -44,6 +46,8 @@ function normalizeSlot(val: unknown, key: string): SlotData {
       interval: typeof obj.interval === "number" ? obj.interval : 6000,
       grayscale: typeof obj.grayscale === "boolean" ? obj.grayscale : true,
       opacity: typeof obj.opacity === "number" ? obj.opacity : 50,
+      focusX: typeof obj.focusX === "number" ? obj.focusX : 50,
+      focusY: typeof obj.focusY === "number" ? obj.focusY : 50,
     };
   }
   return base;
@@ -72,7 +76,7 @@ function getSlot(key: string): SlotData {
   // Try injected data first (synchronous, instant)
   if (!cachedSlots) cachedSlots = getInjectedSlots();
   if (cachedSlots?.[key]) return cachedSlots[key];
-  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
 }
 
 /** Returns the first media URL for a slot (backwards-compatible) */

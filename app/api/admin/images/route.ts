@@ -46,12 +46,14 @@ export type SlotData = {
   interval: number;
   grayscale: boolean;
   opacity: number; // 0–100
+  focusX: number;  // 0–100 (object-position x%)
+  focusY: number;  // 0–100 (object-position y%)
 };
 
 /** Normalise legacy string values and new slot objects into SlotData */
 function normalizeSlot(val: unknown, key: string): SlotData {
-  if (!val) return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
-  if (typeof val === "string") return { media: [val], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+  if (!val) return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
+  if (typeof val === "string") return { media: [val], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
   if (typeof val === "object" && val !== null) {
     const obj = val as Record<string, unknown>;
     return {
@@ -60,9 +62,11 @@ function normalizeSlot(val: unknown, key: string): SlotData {
       interval: typeof obj.interval === "number" ? obj.interval : 6000,
       grayscale: typeof obj.grayscale === "boolean" ? obj.grayscale : true,
       opacity: typeof obj.opacity === "number" ? obj.opacity : 50,
+      focusX: typeof obj.focusX === "number" ? obj.focusX : 50,
+      focusY: typeof obj.focusY === "number" ? obj.focusY : 50,
     };
   }
-  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
 }
 
 async function getStoredData(): Promise<Record<string, unknown>> {
@@ -103,7 +107,7 @@ export async function GET() {
   } catch {
     const images: Record<string, SlotData> = {};
     for (const key of Object.keys(DEFAULT_IMAGES)) {
-      images[key] = { media: [DEFAULT_IMAGES[key]!], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+      images[key] = { media: [DEFAULT_IMAGES[key]!], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
     }
     return NextResponse.json({ images });
   }
@@ -126,6 +130,8 @@ export async function POST(request: Request) {
       interval: slotData.interval,
       grayscale: slotData.grayscale,
       opacity: slotData.opacity,
+      focusX: slotData.focusX,
+      focusY: slotData.focusY,
     };
     await saveData(current);
     return NextResponse.json({ success: true, slotData: current[slot] });

@@ -28,10 +28,12 @@ type SlotData = {
   interval: number;
   grayscale: boolean;
   opacity: number;
+  focusX: number;
+  focusY: number;
 };
 
 function normalizeSlot(val: unknown, key: string): SlotData {
-  const base: SlotData = { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+  const base: SlotData = { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
   if (!val) return base;
   if (typeof val === "string") return { ...base, media: [val] };
   if (typeof val === "object" && val !== null) {
@@ -42,6 +44,8 @@ function normalizeSlot(val: unknown, key: string): SlotData {
       interval: typeof obj.interval === "number" ? obj.interval : 6000,
       grayscale: typeof obj.grayscale === "boolean" ? obj.grayscale : true,
       opacity: typeof obj.opacity === "number" ? obj.opacity : 50,
+      focusX: typeof obj.focusX === "number" ? obj.focusX : 50,
+      focusY: typeof obj.focusY === "number" ? obj.focusY : 50,
     };
   }
   return base;
@@ -71,7 +75,7 @@ export async function getSiteImagesData(): Promise<Record<string, SlotData>> {
     }
   } catch {
     for (const key of Object.keys(DEFAULT_IMAGES)) {
-      images[key] = { media: [DEFAULT_IMAGES[key]!], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+      images[key] = { media: [DEFAULT_IMAGES[key]!], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
     }
   }
 
