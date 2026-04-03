@@ -3,13 +3,21 @@
 import { animationEasing } from "lib/animation-config";
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect, useState } from "react";
 import type { ReactNode } from "react";
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const isFirstLoad = useRef(true);
+  const [isMobile, setIsMobile] = useState(false);
 
+  useEffect(() => {
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener("resize", check);
+    return () => window.removeEventListener("resize", check);
+  }, []);
+
+  // Disable browser scroll restoration and always scroll to top
   useEffect(() => {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
@@ -19,19 +27,17 @@ export function PageTransition({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    // After first render, allow animations on subsequent navigations
-    if (isFirstLoad.current) isFirstLoad.current = false;
   }, [pathname]);
+
+  if (isMobile) return <>{children}</>;
 
   return (
     <motion.div
       key={pathname}
-      // First load: content fully visible immediately (no flash)
-      // Subsequent navigations: subtle fade-in animation
-      initial={isFirstLoad.current ? false : { opacity: 0, y: 6 }}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
-        duration: 0.25,
+        duration: 0.3,
         ease: animationEasing,
       }}
     >
