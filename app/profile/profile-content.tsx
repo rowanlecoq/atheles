@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { updateSessionCache } from "lib/session-cache";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -280,47 +279,32 @@ export default function ProfileContent() {
       .then((data) => {
         if (data.user) {
           applyUser(data.user);
-          updateSessionCache(data.user as Record<string, unknown>);
+          sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
           setLoading(false);
         } else {
-          // Session might be transiently invalid — retry once before clearing
-          fetch("/api/auth/session")
-            .then((r) => r.json())
-            .then((retry) => {
-              if (retry?.user) {
-                applyUser(retry.user);
-                updateSessionCache(retry.user as Record<string, unknown>);
-                setLoading(false);
-              } else {
-                // Both attempts failed — use cached session if available
-                try {
-                  const fallback = sessionStorage.getItem("atheles-session");
-                  if (fallback) {
-                    const u = JSON.parse(fallback) as User;
-                    applyUser(u);
-                    setLoading(false);
-                    return;
-                  }
-                } catch {}
-                // No cache — truly invalid, redirect to login
-                sessionStorage.removeItem("atheles-session");
-                sessionStorage.removeItem("atheles-avatar");
-                sessionStorage.removeItem("atheles-custom-bg");
-                document.cookie = "atheles-logged-in=; max-age=0; path=/";
-                setUser(null);
-                setLoading(false);
-                setRedirecting(true);
-                setTimeout(() => { window.location.replace("/login"); }, 100);
-              }
-            })
-            .catch(() => {
-              setLoading(false);
-            });
+          // Session invalid — clean up and redirect once
+          sessionStorage.removeItem("atheles-session");
+          sessionStorage.removeItem("atheles-avatar");
+          sessionStorage.removeItem("atheles-custom-bg");
+          document.cookie = "atheles-logged-in=; max-age=0; path=/";
+          setUser(null);
+          setLoading(false);
+          setRedirecting(true);
+          // Use setTimeout to ensure state updates render before redirect
+          setTimeout(() => {
+            window.location.replace("/login");
+          }, 100);
         }
       })
       .catch(() => {
-        // Network error — don't clear session, just stop loading
+        sessionStorage.removeItem("atheles-session");
+        document.cookie = "atheles-logged-in=; max-age=0; path=/";
+        setUser(null);
         setLoading(false);
+        setRedirecting(true);
+        setTimeout(() => {
+          window.location.replace("/login");
+        }, 100);
       });
   }, [router]);
 
@@ -432,7 +416,7 @@ export default function ProfileContent() {
           setDobMonth(m ? String(parseInt(m)) : "");
           setDobDay(d ? String(parseInt(d)) : "");
         }
-        updateSessionCache(data.user as Record<string, unknown>);
+        sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
         setEditing(false);
         setSaveMessage("profile updated.");
         setTimeout(() => setSaveMessage(""), 3000);
@@ -1309,7 +1293,7 @@ export default function ProfileContent() {
                     if (cached) {
                       const u = JSON.parse(cached);
                       u.theme = theme.id;
-                      updateSessionCache(u as Record<string, unknown>);
+                      sessionStorage.setItem("atheles-session", JSON.stringify(u));
                     }
                   } catch {}
                   window.dispatchEvent(new Event("theme-changed"));
@@ -1347,7 +1331,7 @@ export default function ProfileContent() {
                     if (cached) {
                       const u = JSON.parse(cached);
                       u.theme = "custom";
-                      updateSessionCache(u as Record<string, unknown>);
+                      sessionStorage.setItem("atheles-session", JSON.stringify(u));
                     }
                   } catch {}
                   window.dispatchEvent(new Event("theme-changed"));
@@ -1447,7 +1431,7 @@ export default function ProfileContent() {
                   if (cached) {
                     const u = JSON.parse(cached);
                     u.theme = "custom";
-                    updateSessionCache(u as Record<string, unknown>);
+                    sessionStorage.setItem("atheles-session", JSON.stringify(u));
                   }
                 } catch {}
                 await fetch("/api/auth/update-theme", {
@@ -1488,7 +1472,7 @@ export default function ProfileContent() {
                   if (cached) {
                     const u = JSON.parse(cached);
                     u.globalTheme = next;
-                    updateSessionCache(u as Record<string, unknown>);
+                    sessionStorage.setItem("atheles-session", JSON.stringify(u));
                   }
                 } catch {}
                 // Notify other components
