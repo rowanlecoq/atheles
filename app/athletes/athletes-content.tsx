@@ -107,14 +107,18 @@ function getEmbedUrl(url: string): { type: "youtube" | "instagram" | "tiktok" | 
 }
 
 export function AthletesContent() {
-  const [athletes, setAthletes] = useState<Athlete[]>(defaultAthletes);
+  const [athletes, setAthletes] = useState<Athlete[]>([]);
+  const [loaded, setLoaded] = useState(false);
   const [lightbox, setLightbox] = useState<{ items: string[]; index: number } | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/athletes")
       .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d?.athletes?.length > 0) setAthletes(d.athletes); })
-      .catch(() => {});
+      .then((d) => {
+        setAthletes(d?.athletes?.length > 0 ? d.athletes : defaultAthletes);
+        setLoaded(true);
+      })
+      .catch(() => { setAthletes(defaultAthletes); setLoaded(true); });
   }, []);
 
   return (
@@ -155,6 +159,12 @@ export function AthletesContent() {
         atheles athletes are on the way. stay tuned.
       </p>
 
+      {!loaded ? (
+        <div className="flex justify-center py-20">
+          <p className="text-sm text-brand-grey">loading...</p>
+        </div>
+      ) : (
+      <>
       <div className="mb-14 grid gap-6 sm:grid-cols-2">
         {athletes.map((athlete) => (
           <div key={athlete.name} className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
@@ -245,6 +255,8 @@ export function AthletesContent() {
           </div>
         ))}
       </div>
+      </>
+      )}
 
       <div className="mb-12 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6 sm:p-8">
         <h2 className="mb-1 font-heading text-xl text-brand-gold">want to become an atheles athlete?</h2>
