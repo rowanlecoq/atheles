@@ -80,14 +80,18 @@ function ProductCard({ product }: { product: Product }) {
             e.preventDefault();
             e.stopPropagation();
             toggleFavorite(product.handle);
+            // Scale pop animation on tap
+            const btn = e.currentTarget;
+            btn.style.transform = "scale(1.3)";
+            setTimeout(() => { btn.style.transform = ""; }, 200);
           }}
-          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-all hover:bg-brand-dark/80"
+          className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-all duration-200 hover:bg-brand-dark/80 active:scale-90"
           aria-label={liked ? "Remove from favorites" : "Add to favorites"}
         >
           {liked ? (
-            <HeartIconSolid className="h-4 w-4 text-brand-gold" />
+            <HeartIconSolid className="h-5 w-5 text-brand-gold" />
           ) : (
-            <HeartIcon className="h-4 w-4 text-white/70 transition-colors group-hover:text-white" />
+            <HeartIcon className="h-5 w-5 text-white/70 transition-colors group-hover:text-white" />
           )}
         </button>
 
