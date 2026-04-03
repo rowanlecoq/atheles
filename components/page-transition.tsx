@@ -8,8 +8,10 @@ import type { ReactNode } from "react";
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const hasNavigated = useRef(false);
-  const prevPath = useRef(pathname);
+  const initialPath = useRef(pathname);
+
+  // Detect navigation: any pathname different from the very first one
+  const isNavigation = pathname !== initialPath.current;
 
   useEffect(() => {
     if ("scrollRestoration" in history) {
@@ -19,17 +21,14 @@ export function PageTransition({ children }: { children: ReactNode }) {
   }, []);
 
   useEffect(() => {
-    if (prevPath.current !== pathname) {
-      hasNavigated.current = true;
-      prevPath.current = pathname;
-    }
     window.scrollTo(0, 0);
   }, [pathname]);
 
   return (
     <motion.div
       key={pathname}
-      initial={hasNavigated.current ? { opacity: 0, y: 8 } : false}
+      // Refresh: no animation (initial={false}). Navigation: fade + slide
+      initial={isNavigation ? { opacity: 0, y: 8 } : false}
       animate={{ opacity: 1, y: 0 }}
       transition={{
         duration: 0.3,
