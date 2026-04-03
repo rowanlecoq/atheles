@@ -30,8 +30,12 @@ export const metadata = {
   description:
     "the new era of gymwear and streetwear. unlock your fullest potential 🔱 craft your aesthetic.",
   icons: {
-    icon: "/logocircular.png",
-    apple: "/logocircular.png",
+    icon: [
+      { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
+      { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+    ],
+    apple: "/apple-touch-icon.png",
+    shortcut: "/icon-32.png",
   },
   robots: {
     follow: true,

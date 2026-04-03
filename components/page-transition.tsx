@@ -3,21 +3,13 @@
 import { animationEasing } from "lib/animation-config";
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const [isMobile, setIsMobile] = useState(false);
   const hasNavigated = useRef(false);
   const prevPath = useRef(pathname);
-
-  useEffect(() => {
-    const check = () => setIsMobile(window.innerWidth < 768);
-    check();
-    window.addEventListener("resize", check);
-    return () => window.removeEventListener("resize", check);
-  }, []);
 
   useEffect(() => {
     if ("scrollRestoration" in history) {
@@ -34,14 +26,16 @@ export function PageTransition({ children }: { children: ReactNode }) {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  if (isMobile) return <>{children}</>;
+  // First load: plain div, zero framer-motion overhead, immediately scrollable
+  // Subsequent navigations: motion.div with fade-in animation
+  if (!hasNavigated.current) {
+    return <div>{children}</div>;
+  }
 
   return (
     <motion.div
       key={pathname}
-      // First load: no animation, content visible immediately, scrollable
-      // Navigation: smooth fade-in
-      initial={hasNavigated.current ? { opacity: 0, y: 8 } : false}
+      initial={{ opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
         duration: 0.3,
