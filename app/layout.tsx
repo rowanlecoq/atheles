@@ -6,6 +6,7 @@ import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ScrollProgress } from "components/scroll-progress";
+import { SiteThemeProvider } from "components/site-theme-provider";
 import { ThemeBackground } from "components/theme-background";
 import { getCart } from "lib/shopify";
 import localFont from "next/font/local";
@@ -60,6 +61,7 @@ export default async function RootLayout({
         />
         <CurrencyProvider>
           <CartProvider cartPromise={cart}>
+            <SiteThemeProvider />
             <AnnouncementBar />
             <ScrollProgress />
             <KonamiLightning />

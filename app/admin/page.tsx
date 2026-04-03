@@ -67,6 +67,12 @@ export default function AdminDashboard() {
           icon="🖼️"
         />
         <AdminCard
+          title="website theme"
+          description="customize brand colors, text gradients, and logos for seasonal updates."
+          href="/admin/theme"
+          icon="🎨"
+        />
+        <AdminCard
           title="athlete profiles"
           description="edit athlete bios, photos, and social links on the athletes page."
           href="/admin/athletes"
