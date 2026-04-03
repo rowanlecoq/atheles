@@ -2,26 +2,26 @@
 
 import clsx from "clsx";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import tan1Logo from "../tan1.png";
 import tan2Logo from "../tan2.png";
 
 export default function LogoSquare({ size }: { size?: "sm" | undefined }) {
-  const [customDefault, setCustomDefault] = useState<string | null>(null);
-  const [customHover, setCustomHover] = useState<string | null>(null);
-  const [customSmall, setCustomSmall] = useState<string | null>(null);
-
-  useEffect(() => {
+  const [logos] = useState(() => {
+    if (typeof window === "undefined") return { d: null, h: null, s: null };
     try {
       const cached = sessionStorage.getItem("atheles-site-theme");
       if (cached) {
         const t = JSON.parse(cached);
-        if (t.logoDefault) setCustomDefault(t.logoDefault);
-        if (t.logoHover) setCustomHover(t.logoHover);
-        if (t.logoSmall) setCustomSmall(t.logoSmall);
+        return { d: t.logoDefault || null, h: t.logoHover || null, s: t.logoSmall || null };
       }
     } catch {}
-  }, []);
+    return { d: null, h: null, s: null };
+  });
+
+  const customDefault = logos.d;
+  const customHover = logos.h;
+  const customSmall = logos.s;
 
   // Use small logo variant for "sm" size
   const defaultSrc = size === "sm" && customSmall ? customSmall : customDefault;

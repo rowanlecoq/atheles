@@ -53,10 +53,26 @@ export default async function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body className="bg-brand-dark text-white">
-        {/* Inline script to set theme background before React hydrates — prevents flash */}
+        {/* Inline script to set theme + colors before React hydrates — prevents flash */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `try{var s=sessionStorage.getItem("atheles-session");if(s&&document.cookie.includes("atheles-logged-in=1")){var u=JSON.parse(s),t=u.theme;if(t&&t!=="none"){document.body.setAttribute("data-theme",t);if(u.globalTheme)document.body.setAttribute("data-theme-global","1")}}}catch(e){}`,
+            __html: `try{
+              var s=sessionStorage.getItem("atheles-session");
+              if(s&&document.cookie.includes("atheles-logged-in=1")){
+                var u=JSON.parse(s),t=u.theme;
+                if(t&&t!=="none"){document.body.setAttribute("data-theme",t);if(u.globalTheme)document.body.setAttribute("data-theme-global","1")}
+              }
+              var st=sessionStorage.getItem("atheles-site-theme");
+              if(st){
+                var th=JSON.parse(st),r=document.documentElement;
+                if(th.brandGold){r.style.setProperty("--color-brand-gold",th.brandGold);r.style.setProperty("--color-brand-dark-gold",th.brandDarkGold);r.style.setProperty("--color-brand-dark",th.brandDark);document.body.style.backgroundColor=th.brandDark}
+                if(th.headingStyle==="gradient"&&th.headingGradientFrom){
+                  var gs=document.createElement("style");gs.id="atheles-heading-gradient";
+                  gs.textContent=".text-brand-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+","+th.headingGradientTo+") !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;background-clip:text !important}";
+                  document.head.appendChild(gs)
+                }
+              }
+            }catch(e){}`,
           }}
         />
         <CurrencyProvider>
