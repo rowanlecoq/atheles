@@ -1,5 +1,6 @@
 import { getCustomerByToken } from "lib/auth/shopify-customer";
 import { put } from "@vercel/blob";
+import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -80,6 +81,10 @@ async function getStoredData(): Promise<Record<string, unknown>> {
   return {};
 }
 
+function purgeCache() {
+  try { revalidateTag("site-images", "seconds"); } catch {}
+}
+
 async function saveData(current: Record<string, unknown>) {
   const shopData = await adminFetch(`query { shop { id } }`);
   const shopId = shopData.data?.shop?.id;
@@ -134,6 +139,7 @@ export async function POST(request: Request) {
       focusY: slotData.focusY,
     };
     await saveData(current);
+    purgeCache();
     return NextResponse.json({ success: true, slotData: current[slot] });
   }
 

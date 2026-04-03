@@ -9,6 +9,7 @@ import { ScrollProgress } from "components/scroll-progress";
 import { SiteThemeProvider } from "components/site-theme-provider";
 import { ThemeBackground } from "components/theme-background";
 import { getCart } from "lib/shopify";
+import { SiteImagesProvider } from "components/site-images-context";
 import { getSiteImagesData } from "lib/site-images-server";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
@@ -55,12 +56,6 @@ export default async function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body className="bg-brand-dark text-white">
-        {/* Inject site images data before React hydrates — instant load, no flash */}
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `window.__SITE_IMAGES__=${JSON.stringify(siteImages)};`,
-          }}
-        />
         {/* Inline script to set theme + colors before React hydrates — prevents flash */}
         <script
           dangerouslySetInnerHTML={{
@@ -83,20 +78,22 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
-        <CurrencyProvider>
-          <CartProvider cartPromise={cart}>
-            <SiteThemeProvider />
-            <AnnouncementBar />
-            <ScrollProgress />
-            <KonamiLightning />
-            <Navbar />
-            <ThemeBackground />
-            <main className="relative z-[1] w-full">
-              <PageTransition>{children}</PageTransition>
-              <Toaster closeButton />
-            </main>
-          </CartProvider>
-        </CurrencyProvider>
+        <SiteImagesProvider data={siteImages}>
+          <CurrencyProvider>
+            <CartProvider cartPromise={cart}>
+              <SiteThemeProvider />
+              <AnnouncementBar />
+              <ScrollProgress />
+              <KonamiLightning />
+              <Navbar />
+              <ThemeBackground />
+              <main className="relative z-[1] w-full">
+                <PageTransition>{children}</PageTransition>
+                <Toaster closeButton />
+              </main>
+            </CartProvider>
+          </CurrencyProvider>
+        </SiteImagesProvider>
         <Analytics />
       </body>
     </html>

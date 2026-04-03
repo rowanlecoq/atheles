@@ -1,6 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { useSiteImagesContext, type SlotData } from "components/site-images-context";
+
+export type { SlotData } from "components/site-images-context";
 
 const DEFAULT_IMAGES: Record<string, string> = {
   hero_bg: "/statues/greek-god-hero.png",
@@ -12,121 +15,34 @@ const DEFAULT_IMAGES: Record<string, string> = {
   interstitial: "/statues/hadrian-cuirassed.jpg",
 };
 
-export type SlotData = {
-  media: string[];
-  transition: "crossfade" | "slide" | "fade";
-  interval: number;
-  grayscale: boolean;
-  opacity: number; // 0–100
-  focusX: number;  // 0–100
-  focusY: number;  // 0–100
-};
-
-/** Read server-injected data synchronously — available before React hydrates */
-function getInjectedSlots(): Record<string, SlotData> | null {
-  if (typeof window !== "undefined" && (window as unknown as Record<string, unknown>).__SITE_IMAGES__) {
-    return (window as unknown as Record<string, unknown>).__SITE_IMAGES__ as Record<string, SlotData>;
-  }
-  return null;
-}
-
-// Cache: populated from injected data or API fallback
-let cachedSlots: Record<string, SlotData> | null = getInjectedSlots();
-let fetchPromise: Promise<void> | null = null;
-
-function normalizeSlot(val: unknown, key: string): SlotData {
-  const base: SlotData = { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
-  if (!val) return base;
-  if (typeof val === "string") return { ...base, media: [val] };
-  if (typeof val === "object" && val !== null) {
-    const obj = val as Record<string, unknown>;
-    return {
-      media: Array.isArray(obj.media) ? obj.media.filter((m): m is string => typeof m === "string") : [],
-      transition: (["crossfade", "slide", "fade"].includes(obj.transition as string) ? obj.transition : "crossfade") as SlotData["transition"],
-      interval: typeof obj.interval === "number" ? obj.interval : 6000,
-      grayscale: typeof obj.grayscale === "boolean" ? obj.grayscale : true,
-      opacity: typeof obj.opacity === "number" ? obj.opacity : 50,
-      focusX: typeof obj.focusX === "number" ? obj.focusX : 50,
-      focusY: typeof obj.focusY === "number" ? obj.focusY : 50,
-    };
-  }
-  return base;
-}
-
-/** Fallback: only used if server injection somehow failed */
-function fetchImages() {
-  if (cachedSlots) return Promise.resolve();
-  if (fetchPromise) return fetchPromise;
-  fetchPromise = fetch("/api/admin/images")
-    .then((r) => (r.ok ? r.json() : null))
-    .then((d) => {
-      if (d?.images) {
-        const slots: Record<string, SlotData> = {};
-        for (const [k, v] of Object.entries(d.images)) {
-          slots[k] = normalizeSlot(v, k);
-        }
-        cachedSlots = slots;
-      }
-    })
-    .catch(() => {});
-  return fetchPromise;
-}
-
-function getSlot(key: string): SlotData {
-  // Try injected data first (synchronous, instant)
-  if (!cachedSlots) cachedSlots = getInjectedSlots();
-  if (cachedSlots?.[key]) return cachedSlots[key];
-  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
-}
+const DEFAULT_SLOT: SlotData = { media: [], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
 
 /** Returns the first media URL for a slot (backwards-compatible) */
 export function useSiteImage(key: string): string {
-  const [src, setSrc] = useState(() => getSlot(key).media[0] || DEFAULT_IMAGES[key] || "");
-
-  useEffect(() => {
-    // If we already have data, we're done
-    if (cachedSlots) {
-      setSrc(cachedSlots[key]?.media[0] || DEFAULT_IMAGES[key] || "");
-      return;
-    }
-    // Fallback fetch only if injected data is missing
-    fetchImages().then(() => {
-      setSrc(getSlot(key).media[0] || DEFAULT_IMAGES[key] || "");
-    });
-  }, [key]);
-
-  return src;
+  const ctx = useSiteImagesContext();
+  return ctx[key]?.media[0] || DEFAULT_IMAGES[key] || "";
 }
 
 /**
  * Returns full slideshow data for a slot using a dual-layer A/B crossfade.
- * Reads from server-injected data synchronously — no flash, no delay.
+ * Reads from server-provided context — same data on SSR and client, no flash.
  */
 export function useSiteSlideshow(key: string) {
-  const initial = getSlot(key);
-  const fallback = initial.media[0] || DEFAULT_IMAGES[key] || "";
+  const ctx = useSiteImagesContext();
+  const slot = ctx[key] || { ...DEFAULT_SLOT, media: [DEFAULT_IMAGES[key] || ""] };
+  const fallback = slot.media[0] || DEFAULT_IMAGES[key] || "";
 
-  const [slot, setSlot] = useState<SlotData>(initial);
   const [index, setIndex] = useState(0);
   const [layers, setLayers] = useState<[string, string]>([fallback, fallback]);
   const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
 
+  // Sync layers when context data changes (e.g. after admin save)
   useEffect(() => {
-    // If we already have data, apply it
-    if (cachedSlots) {
-      const s = cachedSlots[key] || initial;
-      setSlot(s);
-      setLayers([s.media[0] || fallback, s.media[0] || fallback]);
-      return;
-    }
-    // Fallback fetch only if injected data is missing
-    fetchImages().then(() => {
-      const s = getSlot(key);
-      setSlot(s);
-      setLayers([s.media[0] || fallback, s.media[0] || fallback]);
-    });
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [key]);
+    const src = slot.media[0] || fallback;
+    setLayers([src, src]);
+    setIndex(0);
+    setActiveLayer(0);
+  }, [slot.media[0], fallback]);
 
   // Slideshow timer
   useEffect(() => {

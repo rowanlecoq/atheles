@@ -62,7 +62,7 @@ export async function getSiteImagesData(): Promise<Record<string, SlotData>> {
       body: JSON.stringify({
         query: `query { shop { metafield(namespace: "atheles", key: "site_images") { value } } }`,
       }),
-      next: { revalidate: 60 },
+      next: { revalidate: 30, tags: ["site-images"] },
     });
     const data = await res.json();
     const raw = data.data?.shop?.metafield?.value;
