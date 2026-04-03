@@ -1,6 +1,7 @@
 "use client";
 
 import { SlideshowMedia } from "components/slideshow-media";
+import { updateSessionCache } from "lib/session-cache";
 import { useEffect, useState } from "react";
 
 export function NewsletterSignup() {
@@ -61,7 +62,7 @@ export function NewsletterSignup() {
           if (cached) {
             const u = JSON.parse(cached);
             u.acceptsMarketing = true;
-            sessionStorage.setItem("atheles-session", JSON.stringify(u));
+            updateSessionCache(u as Record<string, unknown>);
           }
         } catch {}
       } else {

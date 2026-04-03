@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { updateSessionCache } from "lib/session-cache";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -43,7 +44,7 @@ export default function RegisterForm() {
       const data = await res.json();
 
       if (data.success && data.user) {
-        sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+        updateSessionCache(data.user as Record<string, unknown>);
         router.push("/profile");
         router.refresh();
       } else if (data.success && !data.user) {

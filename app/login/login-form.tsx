@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { updateSessionCache } from "lib/session-cache";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
@@ -38,7 +39,7 @@ export default function LoginForm() {
 
         // Cache new session
         if (data.user) {
-          sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+          updateSessionCache(data.user as Record<string, unknown>);
         }
         // Full reload to clear all React state from previous account
         window.location.href = "/profile";

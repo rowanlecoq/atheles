@@ -1,6 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { updateSessionCache } from "lib/session-cache";
 import { useEffect, useRef, useState } from "react";
 
 // Same intensity as profile page
@@ -99,18 +100,7 @@ export function ThemeBackground() {
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (data?.user) {
-          try {
-            // Preserve cached theme/globalTheme if API returned null (tag fetch may have failed)
-            const existing = sessionStorage.getItem("atheles-session");
-            if (existing && (!data.user.theme || data.user.theme === "none")) {
-              const cached = JSON.parse(existing);
-              if (cached.theme && cached.theme !== "none") {
-                data.user.theme = cached.theme;
-                data.user.globalTheme = cached.globalTheme ?? data.user.globalTheme;
-              }
-            }
-            sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
-          } catch {}
+          updateSessionCache(data.user as Record<string, unknown>);
           applyFromCache();
         }
       })
@@ -129,17 +119,7 @@ export function ThemeBackground() {
         .then((r) => (r.ok ? r.json() : null))
         .then((data) => {
           if (data?.user) {
-            try {
-              const existing = sessionStorage.getItem("atheles-session");
-              if (existing && (!data.user.theme || data.user.theme === "none")) {
-                const cached = JSON.parse(existing);
-                if (cached.theme && cached.theme !== "none") {
-                  data.user.theme = cached.theme;
-                  data.user.globalTheme = cached.globalTheme ?? data.user.globalTheme;
-                }
-              }
-              sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
-            } catch {}
+            updateSessionCache(data.user as Record<string, unknown>);
             applyFromCache();
           }
         })
