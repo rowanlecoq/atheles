@@ -151,6 +151,40 @@ export default function AdminThemePage() {
               ))}
             </div>
 
+            {/* Solid / Gradient toggle */}
+            <div className="mb-4 flex gap-3">
+              <button
+                type="button"
+                onClick={() => setTheme((prev) => ({ ...prev, headingStyle: "solid" }))}
+                className={`rounded-lg px-4 py-2 text-xs ${theme.headingStyle === "solid" ? "bg-brand-gold/10 text-brand-gold" : "border border-brand-dark-gold/20 text-brand-grey"}`}
+              >solid color</button>
+              <button
+                type="button"
+                onClick={() => setTheme((prev) => ({ ...prev, headingStyle: "gradient" }))}
+                className={`rounded-lg px-4 py-2 text-xs ${theme.headingStyle === "gradient" ? "bg-brand-gold/10 text-brand-gold" : "border border-brand-dark-gold/20 text-brand-grey"}`}
+              >gradient</button>
+            </div>
+
+            {/* Gradient from/to pickers */}
+            {theme.headingStyle === "gradient" && (
+              <div className="mb-4 grid gap-3 sm:grid-cols-2">
+                <div>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">gradient from</label>
+                  <div className="flex gap-2">
+                    <input type="color" value={theme.headingGradientFrom} onChange={(e) => setTheme((prev) => ({ ...prev, headingGradientFrom: e.target.value }))} className="h-9 w-12 cursor-pointer rounded border border-brand-dark-gold/20 bg-transparent" />
+                    <input type="text" value={theme.headingGradientFrom} onChange={(e) => setTheme((prev) => ({ ...prev, headingGradientFrom: e.target.value }))} className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-2 py-1 text-xs text-white font-mono focus:border-brand-gold focus:outline-none" />
+                  </div>
+                </div>
+                <div>
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">gradient to</label>
+                  <div className="flex gap-2">
+                    <input type="color" value={theme.headingGradientTo} onChange={(e) => setTheme((prev) => ({ ...prev, headingGradientTo: e.target.value }))} className="h-9 w-12 cursor-pointer rounded border border-brand-dark-gold/20 bg-transparent" />
+                    <input type="text" value={theme.headingGradientTo} onChange={(e) => setTheme((prev) => ({ ...prev, headingGradientTo: e.target.value }))} className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-2 py-1 text-xs text-white font-mono focus:border-brand-gold focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+            )}
+
             <div className="grid gap-3 sm:grid-cols-3">
               <div>
                 <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">primary accent</label>
@@ -185,68 +219,6 @@ export default function AdminThemePage() {
               )}
               <div className="mt-1 h-px w-16" style={{ background: `linear-gradient(90deg, ${theme.headingGradientFrom || theme.brandGold}, ${theme.headingGradientTo || theme.brandDarkGold})` }} />
             </div>
-          </div>
-
-          {/* Heading Text Style */}
-          <div className="mb-6 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
-            <h2 className="mb-3 text-sm font-medium text-brand-pale-gold">heading text style</h2>
-
-            <div className="mb-4 flex gap-3">
-              <button
-                type="button"
-                onClick={() => setTheme((prev) => ({ ...prev, headingStyle: "solid" }))}
-                className={`rounded-lg px-4 py-2 text-xs ${theme.headingStyle === "solid" ? "bg-brand-gold/10 text-brand-gold" : "border border-brand-dark-gold/20 text-brand-grey"}`}
-              >solid color</button>
-              <button
-                type="button"
-                onClick={() => setTheme((prev) => ({ ...prev, headingStyle: "gradient" }))}
-                className={`rounded-lg px-4 py-2 text-xs ${theme.headingStyle === "gradient" ? "bg-brand-gold/10 text-brand-gold" : "border border-brand-dark-gold/20 text-brand-grey"}`}
-              >gradient</button>
-            </div>
-
-            {theme.headingStyle === "solid" ? (
-              <div>
-                <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">heading color</label>
-                <div className="flex gap-2">
-                  <input type="color" value={theme.headingColor} onChange={(e) => setTheme((prev) => ({ ...prev, headingColor: e.target.value }))} className="h-9 w-12 cursor-pointer rounded border border-brand-dark-gold/20 bg-transparent" />
-                  <input type="text" value={theme.headingColor} onChange={(e) => setTheme((prev) => ({ ...prev, headingColor: e.target.value }))} className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-2 py-1 text-xs text-white font-mono focus:border-brand-gold focus:outline-none" />
-                </div>
-                <p className="mt-3 font-heading text-2xl" style={{ color: theme.headingColor }}>preview heading</p>
-              </div>
-            ) : (
-              <div>
-                <div className="mb-3 flex flex-wrap gap-2">
-                  {SEASONAL_PRESETS.filter((g) => g.style === "gradient").map((g) => (
-                    <button
-                      key={g.name}
-                      type="button"
-                      onClick={() => setTheme((prev) => ({ ...prev, headingGradientFrom: g.from, headingGradientTo: g.to }))}
-                      className="rounded-full border border-brand-dark-gold/20 px-3 py-1.5 text-xs text-brand-grey hover:text-white"
-                    >
-                      <span className="mr-1.5 inline-block h-2.5 w-6 rounded-full" style={{ background: `linear-gradient(90deg, ${g.from}, ${g.to})` }} />
-                      {g.name}
-                    </button>
-                  ))}
-                </div>
-                <div className="grid gap-3 sm:grid-cols-2">
-                  <div>
-                    <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">gradient from</label>
-                    <div className="flex gap-2">
-                      <input type="color" value={theme.headingGradientFrom} onChange={(e) => setTheme((prev) => ({ ...prev, headingGradientFrom: e.target.value }))} className="h-9 w-12 cursor-pointer rounded border border-brand-dark-gold/20 bg-transparent" />
-                      <input type="text" value={theme.headingGradientFrom} onChange={(e) => setTheme((prev) => ({ ...prev, headingGradientFrom: e.target.value }))} className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-2 py-1 text-xs text-white font-mono focus:border-brand-gold focus:outline-none" />
-                    </div>
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">gradient to</label>
-                    <div className="flex gap-2">
-                      <input type="color" value={theme.headingGradientTo} onChange={(e) => setTheme((prev) => ({ ...prev, headingGradientTo: e.target.value }))} className="h-9 w-12 cursor-pointer rounded border border-brand-dark-gold/20 bg-transparent" />
-                      <input type="text" value={theme.headingGradientTo} onChange={(e) => setTheme((prev) => ({ ...prev, headingGradientTo: e.target.value }))} className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-2 py-1 text-xs text-white font-mono focus:border-brand-gold focus:outline-none" />
-                    </div>
-                  </div>
-                </div>
-                <p className="mt-3 bg-clip-text font-heading text-2xl font-bold text-transparent" style={{ backgroundImage: `linear-gradient(90deg, ${theme.headingGradientFrom}, ${theme.headingGradientTo})` }}>preview heading</p>
-              </div>
-            )}
           </div>
 
           {/* Logo Management */}
@@ -296,7 +268,20 @@ export default function AdminThemePage() {
             </button>
             <button
               type="button"
-              onClick={() => { setTheme(DEFAULT_THEME); }}
+              onClick={async () => {
+                setTheme(DEFAULT_THEME);
+                setSaving(true);
+                try {
+                  await fetch("/api/admin/theme", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ theme: DEFAULT_THEME }),
+                  });
+                  setSaved(true);
+                  setTimeout(() => setSaved(false), 3000);
+                } catch {}
+                setSaving(false);
+              }}
               className="rounded-full border border-brand-dark-gold/30 px-4 py-2.5 text-xs uppercase tracking-wider text-brand-grey transition-colors hover:text-red-400"
             >
               reset all to default
