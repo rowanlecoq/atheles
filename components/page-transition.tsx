@@ -6,18 +6,21 @@ import { usePathname } from "next/navigation";
 import { useEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
-let hasEverNavigated = false;
+// Module-level: tracks the very first pathname seen
+let firstPathname: string | null = null;
+let navigationCount = 0;
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const renderCount = useRef(0);
-  renderCount.current++;
 
-  // First render = page load/refresh. Any subsequent render with new key = navigation.
-  const isFirstRender = renderCount.current === 1;
+  // Track first pathname and count navigations
+  if (firstPathname === null) {
+    firstPathname = pathname;
+  } else if (pathname !== firstPathname || navigationCount > 0) {
+    navigationCount++;
+  }
 
-  // Mark that navigation has happened (persists across component remounts)
-  if (!isFirstRender) hasEverNavigated = true;
+  const isInitialLoad = navigationCount === 0 && pathname === firstPathname;
 
   useEffect(() => {
     if ("scrollRestoration" in history) {
@@ -33,7 +36,7 @@ export function PageTransition({ children }: { children: ReactNode }) {
   return (
     <motion.div
       key={pathname}
-      initial={hasEverNavigated ? { opacity: 0, y: 8 } : false}
+      initial={isInitialLoad ? false : { opacity: 0, y: 8 }}
       animate={{ opacity: 1, y: 0 }}
       transition={{
         duration: 0.3,
