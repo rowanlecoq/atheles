@@ -29,24 +29,16 @@ const DEFAULT_THEME: SiteTheme = {
   logoSmall: null,
 };
 
-const PRESET_COLORS = [
-  { name: "gold (default)", gold: "#ccb173", darkGold: "#7f6f4c" },
-  { name: "silver", gold: "#c0c0c0", darkGold: "#808080" },
-  { name: "rose gold", gold: "#e8a87c", darkGold: "#9c6644" },
-  { name: "icy blue", gold: "#7ec8e3", darkGold: "#4a7c9b" },
-  { name: "emerald", gold: "#50c878", darkGold: "#2e7d32" },
-  { name: "crimson", gold: "#dc3545", darkGold: "#8b1a1a" },
-  { name: "purple", gold: "#9b59b6", darkGold: "#6c3483" },
-];
-
-const GRADIENT_PRESETS = [
-  { name: "gold shimmer", from: "#ccb173", to: "#e5c685" },
-  { name: "sunset", from: "#f97316", to: "#ec4899" },
-  { name: "ocean", from: "#22d3ee", to: "#3b82f6" },
-  { name: "emerald", from: "#10b981", to: "#34d399" },
-  { name: "purple haze", from: "#8b5cf6", to: "#ec4899" },
-  { name: "fire", from: "#ef4444", to: "#f59e0b" },
-  { name: "arctic", from: "#6366f1", to: "#22d3ee" },
+const SEASONAL_PRESETS = [
+  { name: "default", gold: "#ccb173", darkGold: "#7f6f4c", dark: "#1a1a1a", from: "#ccb173", to: "#e5c685", style: "solid" as const },
+  { name: "winter", gold: "#a8d8ea", darkGold: "#5b8fa8", dark: "#0f1923", from: "#a8d8ea", to: "#f0f8ff", style: "gradient" as const },
+  { name: "christmas", gold: "#c41e3a", darkGold: "#2d5a27", dark: "#1a0a0a", from: "#c41e3a", to: "#2d8c3c", style: "gradient" as const },
+  { name: "halloween", gold: "#ff6f00", darkGold: "#6a1b9a", dark: "#1a1010", from: "#ff6f00", to: "#9c27b0", style: "gradient" as const },
+  { name: "autumn", gold: "#d4763a", darkGold: "#8b4513", dark: "#1a1510", from: "#d4763a", to: "#c0392b", style: "gradient" as const },
+  { name: "valentines", gold: "#e91e63", darkGold: "#880e4f", dark: "#1a0f14", from: "#e91e63", to: "#f48fb1", style: "gradient" as const },
+  { name: "spring", gold: "#66bb6a", darkGold: "#558b2f", dark: "#101a12", from: "#66bb6a", to: "#ffeb3b", style: "gradient" as const },
+  { name: "summer", gold: "#ffa726", darkGold: "#e65100", dark: "#1a1510", from: "#ffa726", to: "#ff7043", style: "gradient" as const },
+  { name: "beach", gold: "#26c6da", darkGold: "#00838f", dark: "#0f1a1c", from: "#26c6da", to: "#ffca28", style: "gradient" as const },
 ];
 
 export default function AdminThemePage() {
@@ -134,17 +126,26 @@ export default function AdminThemePage() {
           {/* Brand Colors */}
           <div className="mb-6 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
             <h2 className="mb-3 text-sm font-medium text-brand-pale-gold">brand colors</h2>
-            <p className="mb-4 text-xs text-brand-grey">choose a preset or set custom colors.</p>
+            <p className="mb-4 text-xs text-brand-grey">choose a seasonal preset or set custom colors.</p>
 
             <div className="mb-4 flex flex-wrap gap-2">
-              {PRESET_COLORS.map((p) => (
+              {SEASONAL_PRESETS.map((p) => (
                 <button
                   key={p.name}
                   type="button"
-                  onClick={() => setTheme((prev) => ({ ...prev, brandGold: p.gold, brandDarkGold: p.darkGold, headingColor: p.gold, headingGradientFrom: p.gold }))}
-                  className={`rounded-full px-3 py-1.5 text-xs transition-colors ${theme.brandGold === p.gold ? "bg-white/10 text-white" : "border border-brand-dark-gold/20 text-brand-grey hover:text-white"}`}
+                  onClick={() => setTheme((prev) => ({
+                    ...prev,
+                    brandGold: p.gold,
+                    brandDarkGold: p.darkGold,
+                    brandDark: p.dark,
+                    headingStyle: p.style,
+                    headingColor: p.gold,
+                    headingGradientFrom: p.from,
+                    headingGradientTo: p.to,
+                  }))}
+                  className={`rounded-full px-3 py-1.5 text-xs transition-colors ${theme.brandGold === p.gold && theme.brandDark === p.dark ? "bg-white/10 text-white" : "border border-brand-dark-gold/20 text-brand-grey hover:text-white"}`}
                 >
-                  <span className="mr-1.5 inline-block h-2.5 w-2.5 rounded-full" style={{ background: p.gold }} />
+                  <span className="mr-1.5 inline-block h-3 w-6 rounded-full" style={{ background: `linear-gradient(90deg, ${p.from}, ${p.to})` }} />
                   {p.name}
                 </button>
               ))}
@@ -211,7 +212,7 @@ export default function AdminThemePage() {
             ) : (
               <div>
                 <div className="mb-3 flex flex-wrap gap-2">
-                  {GRADIENT_PRESETS.map((g) => (
+                  {SEASONAL_PRESETS.filter((g) => g.style === "gradient").map((g) => (
                     <button
                       key={g.name}
                       type="button"
