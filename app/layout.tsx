@@ -64,7 +64,7 @@ export default async function RootLayout({
         {/* Server-injected theme CSS — applied before any rendering, no flash */}
         <style id="atheles-server-theme" dangerouslySetInnerHTML={{ __html: themeCSS }} />
       </head>
-      <body className="text-white" style={{ backgroundColor: siteTheme.brandDark }}>
+      <body className="bg-brand-dark text-white" style={{ backgroundColor: siteTheme.brandDark }}>
         {/* Per-user theme overrides from session (personal themes) */}
         <script
           dangerouslySetInnerHTML={{
