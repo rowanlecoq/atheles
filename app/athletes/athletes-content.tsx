@@ -10,6 +10,7 @@ type Athlete = {
   role: string;
   description?: string;
   image: string | null;
+  images?: string[];
   socials: Social[] | Record<string, string>;
   hobbies: string[];
 };
@@ -138,6 +139,17 @@ export function AthletesContent() {
                 </div>
               )}
             </div>
+            {/* Gallery strip */}
+            {athlete.images && athlete.images.length > 0 && (
+              <div className="flex gap-1 overflow-x-auto p-1 scrollbar-hide">
+                {athlete.images.map((img, idx) => (
+                  <div key={idx} className="relative aspect-square h-20 w-20 flex-none overflow-hidden">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={img} alt={`${athlete.name} photo ${idx + 2}`} className="h-full w-full object-cover" />
+                  </div>
+                ))}
+              </div>
+            )}
             <div className="p-5">
               <div className="mb-1 flex items-baseline justify-between">
                 <h2 className="font-heading text-lg text-brand-gold">{athlete.name}</h2>

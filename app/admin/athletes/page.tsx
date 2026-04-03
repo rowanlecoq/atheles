@@ -23,6 +23,7 @@ type Athlete = {
   role: string;
   description: string;
   image: string | null;
+  images: string[];
   socials: Social[];
   hobbies: string[];
 };
@@ -51,6 +52,7 @@ export default function AdminAthletesPage() {
                 setAthletes(d.athletes.map((a: Record<string, unknown>) => ({
                   ...a,
                   description: a.description || "",
+                  images: a.images || [],
                   socials: Array.isArray(a.socials)
                     ? a.socials
                     : Object.entries(a.socials || {})
@@ -95,7 +97,7 @@ export default function AdminAthletesPage() {
 
   const addNew = () => {
     setAthletes((prev) => [...prev, {
-      name: "", age: 18, role: "athlete", description: "", image: null, socials: [], hobbies: [],
+      name: "", age: 18, role: "athlete", description: "", image: null, images: [], socials: [], hobbies: [],
     }]);
   };
 
@@ -117,6 +119,65 @@ export default function AdminAthletesPage() {
   const removeSocial = (athleteIdx: number, socialIdx: number) => {
     setAthletes((prev) => prev.map((a, i) =>
       i === athleteIdx ? { ...a, socials: a.socials.filter((_, j) => j !== socialIdx) } : a
+    ));
+  };
+
+  const addHobby = (athleteIdx: number) => {
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? { ...a, hobbies: [...a.hobbies, ""] } : a
+    ));
+  };
+
+  const updateHobby = (athleteIdx: number, hobbyIdx: number, value: string) => {
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? { ...a, hobbies: a.hobbies.map((h, j) => j === hobbyIdx ? value : h) } : a
+    ));
+  };
+
+  const removeHobby = (athleteIdx: number, hobbyIdx: number) => {
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? { ...a, hobbies: a.hobbies.filter((_, j) => j !== hobbyIdx) } : a
+    ));
+  };
+
+  const addExtraImage = async (athleteIdx: number, file: File) => {
+    if (file.size > 5 * 1024 * 1024) {
+      setUploadError("image must be under 5mb.");
+      setTimeout(() => setUploadError(""), 3000);
+      return;
+    }
+    setUploading(athleteIdx);
+    try {
+      const reader = new FileReader();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch("/api/admin/athletes/upload", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ image: dataUrl }),
+      });
+      const d = await res.json();
+      if (d.url) {
+        setAthletes((prev) => prev.map((a, i) =>
+          i === athleteIdx ? { ...a, images: [...(a.images || []), d.url] } : a
+        ));
+      } else {
+        setUploadError(d.error || "upload failed.");
+        setTimeout(() => setUploadError(""), 3000);
+      }
+    } catch {
+      setUploadError("upload failed.");
+      setTimeout(() => setUploadError(""), 3000);
+    }
+    setUploading(null);
+  };
+
+  const removeExtraImage = (athleteIdx: number, imgIdx: number) => {
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? { ...a, images: (a.images || []).filter((_, j) => j !== imgIdx) } : a
     ));
   };
 
@@ -247,14 +308,34 @@ export default function AdminAthletesPage() {
 
                 {/* Hobbies */}
                 <div className="mt-3">
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">hobbies (comma separated)</label>
-                  <input
-                    type="text"
-                    value={a.hobbies.join(", ")}
-                    onChange={(e) => updateAt(i, "hobbies", e.target.value.split(",").map((h: string) => h.trim()).filter(Boolean))}
-                    placeholder="working out, reading, cooking..."
-                    className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
-                  />
+                  <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">interests</label>
+                  <div className="space-y-2">
+                    {a.hobbies.map((h, j) => (
+                      <div key={j} className="flex gap-2">
+                        <input type="text" value={h} onChange={(e) => updateHobby(i, j, e.target.value)} placeholder="e.g. working out" className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
+                        <button type="button" onClick={() => removeHobby(i, j)} className="flex-none text-xs text-brand-grey hover:text-red-400">×</button>
+                      </div>
+                    ))}
+                  </div>
+                  <button type="button" onClick={() => addHobby(i)} className="mt-2 text-xs text-brand-gold hover:text-brand-pale-gold">+ add interest</button>
+                </div>
+
+                {/* Extra Photos */}
+                <div className="mt-3">
+                  <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">gallery photos</label>
+                  <div className="flex flex-wrap gap-2">
+                    {(a.images || []).map((img, j) => (
+                      <div key={j} className="group relative h-16 w-16 overflow-hidden rounded-lg">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={img} alt="" className="h-full w-full object-cover" />
+                        <button type="button" onClick={() => removeExtraImage(i, j)} className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-0 group-hover:opacity-100">×</button>
+                      </div>
+                    ))}
+                    <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-brand-dark-gold/20 text-xs text-brand-gold hover:border-brand-gold/40">
+                      +
+                      <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => { const f = e.target.files?.[0]; if (f) addExtraImage(i, f); e.target.value = ""; }} className="hidden" />
+                    </label>
+                  </div>
                 </div>
 
                 {/* Dynamic Socials */}
