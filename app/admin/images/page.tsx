@@ -266,7 +266,7 @@ function SlotEditor({
         <div className="flex items-center gap-3">
           {/* Mini preview */}
           <div className="h-10 w-16 flex-shrink-0 overflow-hidden rounded bg-brand-medium-grey/10">
-            {data.media[0] ? <MediaThumb src={data.media[0]} className="h-full w-full" /> : null}
+            {data.media[0] ? <MediaThumb src={data.media[0]} className={`h-full w-full ${data.grayscale ? "grayscale" : ""}`} /> : null}
           </div>
           <div className="text-left">
             <p className="text-sm font-medium text-white">{slotDef.label}</p>
@@ -358,26 +358,26 @@ function SlotEditor({
             }}
           />
 
-          {/* Display & slideshow settings */}
-          <div className="flex flex-wrap items-center gap-4 rounded border border-brand-dark-gold/10 bg-brand-dark-gold/5 p-3">
-            {/* Color mode toggle */}
+          {/* Settings row */}
+          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-2.5">
+            {/* Color mode toggle — prominent */}
             <button
               type="button"
               onClick={toggleGrayscale}
-              className="flex items-center gap-2 text-xs"
+              className="flex items-center gap-2.5 rounded-md border border-brand-dark-gold/20 bg-brand-dark px-3 py-1.5 text-xs transition-colors hover:border-brand-gold/40"
             >
-              <div className={`relative h-4 w-8 rounded-full transition-colors ${data.grayscale ? "bg-brand-medium-grey/40" : "bg-brand-gold/60"}`}>
-                <div className={`absolute top-0.5 h-3 w-3 rounded-full transition-all ${data.grayscale ? "left-0.5 bg-brand-grey" : "left-[18px] bg-brand-gold"}`} />
+              <div className={`relative h-[18px] w-9 rounded-full transition-colors ${data.grayscale ? "bg-brand-medium-grey/50" : "bg-brand-gold"}`}>
+                <div className={`absolute top-[3px] h-3 w-3 rounded-full bg-white shadow transition-all ${data.grayscale ? "left-[3px]" : "left-[21px]"}`} />
               </div>
-              <span className={data.grayscale ? "text-brand-grey" : "text-brand-gold"}>
-                {data.grayscale ? "grayscale" : "full color"}
+              <span className={`font-medium ${data.grayscale ? "text-brand-grey" : "text-brand-gold"}`}>
+                {data.grayscale ? "black & white" : "full color"}
               </span>
             </button>
 
             {/* Slideshow settings — only show when >1 media */}
             {data.media.length > 1 && (
               <>
-                <div className="h-4 w-px bg-brand-dark-gold/20" />
+                <div className="h-5 w-px bg-brand-dark-gold/20" />
                 <div className="flex items-center gap-2">
                   <label className="text-xs text-brand-grey">transition</label>
                   <select
