@@ -1,5 +1,6 @@
 "use client";
 
+import { updateSessionCache } from "lib/session-cache";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -279,7 +280,7 @@ export default function ProfileContent() {
       .then((data) => {
         if (data.user) {
           applyUser(data.user);
-          sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+          updateSessionCache(data.user as Record<string, unknown>);
           setLoading(false);
         } else {
           // Session invalid — clean up and redirect once
@@ -416,7 +417,7 @@ export default function ProfileContent() {
           setDobMonth(m ? String(parseInt(m)) : "");
           setDobDay(d ? String(parseInt(d)) : "");
         }
-        sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+        updateSessionCache(data.user as Record<string, unknown>);
         setEditing(false);
         setSaveMessage("profile updated.");
         setTimeout(() => setSaveMessage(""), 3000);
@@ -1293,7 +1294,7 @@ export default function ProfileContent() {
                     if (cached) {
                       const u = JSON.parse(cached);
                       u.theme = theme.id;
-                      sessionStorage.setItem("atheles-session", JSON.stringify(u));
+                      updateSessionCache(u as Record<string, unknown>);
                     }
                   } catch {}
                   window.dispatchEvent(new Event("theme-changed"));
@@ -1331,7 +1332,7 @@ export default function ProfileContent() {
                     if (cached) {
                       const u = JSON.parse(cached);
                       u.theme = "custom";
-                      sessionStorage.setItem("atheles-session", JSON.stringify(u));
+                      updateSessionCache(u as Record<string, unknown>);
                     }
                   } catch {}
                   window.dispatchEvent(new Event("theme-changed"));
@@ -1431,7 +1432,7 @@ export default function ProfileContent() {
                   if (cached) {
                     const u = JSON.parse(cached);
                     u.theme = "custom";
-                    sessionStorage.setItem("atheles-session", JSON.stringify(u));
+                    updateSessionCache(u as Record<string, unknown>);
                   }
                 } catch {}
                 await fetch("/api/auth/update-theme", {
@@ -1472,7 +1473,7 @@ export default function ProfileContent() {
                   if (cached) {
                     const u = JSON.parse(cached);
                     u.globalTheme = next;
-                    sessionStorage.setItem("atheles-session", JSON.stringify(u));
+                    updateSessionCache(u as Record<string, unknown>);
                   }
                 } catch {}
                 // Notify other components
