@@ -79,11 +79,20 @@ function ProductCard({ product }: { product: Product }) {
           onClick={(e) => {
             e.preventDefault();
             e.stopPropagation();
+            const wasLiked = liked;
             toggleFavorite(product.handle);
-            // Scale pop animation on tap
+            // Pop animation
             const btn = e.currentTarget;
             btn.style.transform = "scale(1.3)";
             setTimeout(() => { btn.style.transform = ""; }, 200);
+            // Show toast
+            const toast = btn.querySelector("[data-fav-toast]") as HTMLElement;
+            if (toast) {
+              toast.textContent = wasLiked ? "removed!" : "added!";
+              toast.style.opacity = "1";
+              toast.style.transform = "translateY(0)";
+              setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translateY(4px)"; }, 1000);
+            }
           }}
           className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-all duration-200 hover:bg-brand-dark/80 active:scale-90"
           aria-label={liked ? "Remove from favorites" : "Add to favorites"}
@@ -93,6 +102,7 @@ function ProductCard({ product }: { product: Product }) {
           ) : (
             <HeartIcon className="h-5 w-5 text-white/70 transition-colors group-hover:text-white" />
           )}
+          <span data-fav-toast className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-brand-dark/90 px-2 py-0.5 text-[10px] text-brand-gold opacity-0 transition-all duration-300" style={{ transform: "translateY(4px)" }} />
         </button>
 
         {/* Stock badge */}
