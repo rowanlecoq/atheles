@@ -7,6 +7,7 @@ import {
   animationViewportMargins,
   animationViewportMarginsMobile,
 } from "lib/animation-config";
+import { useAboveFold } from "lib/hooks/use-above-fold";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion, useInView } from "motion/react";
@@ -24,6 +25,7 @@ export function BlurReveal({
   className?: string;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const { wasAboveFold } = useAboveFold(ref);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
   const isInView = useInView(ref, {
@@ -32,31 +34,21 @@ export function BlurReveal({
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal,
   });
-  const hiddenBlur = prefersReducedMotion
-    ? "blur(0px)"
-    : isMobileViewport
-      ? "blur(6px)"
-      : "blur(12px)";
+  const hiddenBlur = prefersReducedMotion ? "blur(0px)" : isMobileViewport ? "blur(6px)" : "blur(12px)";
   const transitionDuration = prefersReducedMotion
     ? Math.min(duration, animationDurations.fast)
     : isMobileViewport
       ? Math.min(duration, animationDurationsMobile.slow)
       : duration;
 
+  const skip = wasAboveFold.current;
+
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, filter: hiddenBlur }}
-      animate={
-        isInView
-          ? { opacity: 1, filter: "blur(0px)" }
-          : { opacity: 0, filter: hiddenBlur }
-      }
-      transition={{
-        duration: transitionDuration,
-        delay,
-        ease: animationEasing,
-      }}
+      initial={skip ? false : { opacity: 0, filter: hiddenBlur }}
+      animate={isInView || skip ? { opacity: 1, filter: "blur(0px)" } : { opacity: 0, filter: hiddenBlur }}
+      transition={skip ? { duration: 0 } : { duration: transitionDuration, delay, ease: animationEasing }}
       className={className}
     >
       {children}

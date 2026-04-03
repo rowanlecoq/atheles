@@ -73,6 +73,7 @@ html {
   text-size-adjust: 100%;
   width: 100%;
   overflow-x: hidden;
+  overflow-y: scroll; /* Always show single scrollbar — prevents double scrollbar */
   scroll-padding-top: 120px;
   scroll-behavior: auto;
   -webkit-tap-highlight-color: transparent;
@@ -109,6 +110,7 @@ body {
   min-width: 320px;
   width: 100%;
   overflow-x: hidden;
+  overflow-y: visible; /* Let html handle vertical scroll — prevents double scrollbar */
   text-transform: lowercase;
 }
 
@@ -190,8 +192,8 @@ textarea {
 
 @keyframes nav-enter {
   0% {
-    opacity: 0;
-    transform: translateY(-12px);
+    opacity: 0.7;
+    transform: translateY(-4px);
   }
   100% {
     opacity: 1;
@@ -200,13 +202,13 @@ textarea {
 }
 
 .animate-nav-enter {
-  animation: nav-enter 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  animation: nav-enter 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) both;
 }
 
 @keyframes category-nav-enter {
   0% {
-    opacity: 0;
-    transform: translateY(-8px);
+    opacity: 0.7;
+    transform: translateY(-3px);
   }
   100% {
     opacity: 1;
@@ -215,7 +217,7 @@ textarea {
 }
 
 .animate-category-nav-enter {
-  animation: category-nav-enter 0.5s cubic-bezier(0.25, 0.1, 0.25, 1) 0.3s both;
+  animation: category-nav-enter 0.4s cubic-bezier(0.25, 0.1, 0.25, 1) 0.15s both;
 }
 
 @keyframes footer-enter {

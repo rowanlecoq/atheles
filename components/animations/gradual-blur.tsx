@@ -7,6 +7,7 @@ import {
   animationViewportMargins,
   animationViewportMarginsMobile,
 } from "lib/animation-config";
+import { useAboveFold } from "lib/hooks/use-above-fold";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion, useInView } from "motion/react";
@@ -26,6 +27,7 @@ export function GradualBlur({
   once?: boolean;
 }) {
   const ref = useRef<HTMLDivElement>(null);
+  const { wasAboveFold } = useAboveFold(ref);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
   const isInView = useInView(ref, {
@@ -34,11 +36,7 @@ export function GradualBlur({
       ? animationViewportMarginsMobile.early
       : animationViewportMargins.early,
   });
-  const hiddenBlur = prefersReducedMotion
-    ? "blur(0px)"
-    : isMobileViewport
-      ? "blur(6px)"
-      : "blur(12px)";
+  const hiddenBlur = prefersReducedMotion ? "blur(0px)" : isMobileViewport ? "blur(6px)" : "blur(12px)";
   const hiddenScale = prefersReducedMotion ? 1 : isMobileViewport ? 0.99 : 0.98;
   const hiddenY = prefersReducedMotion ? 0 : isMobileViewport ? 12 : 20;
   const transitionDuration = prefersReducedMotion
@@ -47,25 +45,14 @@ export function GradualBlur({
       ? Math.min(duration, animationDurationsMobile.slow)
       : duration;
 
+  const skip = wasAboveFold.current;
+
   return (
     <motion.div
       ref={ref}
-      initial={{
-        opacity: 0,
-        filter: hiddenBlur,
-        scale: hiddenScale,
-        y: hiddenY,
-      }}
-      animate={
-        isInView
-          ? { opacity: 1, filter: "blur(0px)", scale: 1, y: 0 }
-          : { opacity: 0, filter: hiddenBlur, scale: hiddenScale, y: hiddenY }
-      }
-      transition={{
-        duration: transitionDuration,
-        delay,
-        ease: animationEasing,
-      }}
+      initial={skip ? false : { opacity: 0, filter: hiddenBlur, scale: hiddenScale, y: hiddenY }}
+      animate={isInView || skip ? { opacity: 1, filter: "blur(0px)", scale: 1, y: 0 } : { opacity: 0, filter: hiddenBlur, scale: hiddenScale, y: hiddenY }}
+      transition={skip ? { duration: 0 } : { duration: transitionDuration, delay, ease: animationEasing }}
       className={className}
     >
       {children}
