@@ -8,6 +8,7 @@ import { PageTransition } from "components/page-transition";
 import { ScrollProgress } from "components/scroll-progress";
 import { SiteThemeProvider } from "components/site-theme-provider";
 import { ThemeBackground } from "components/theme-background";
+import { SiteImagesProvider } from "components/site-images-context";
 import { getCart } from "lib/shopify";
 import { getSiteImagesData } from "lib/site-images-server";
 import localFont from "next/font/local";
@@ -59,10 +60,10 @@ export default async function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body className="bg-brand-dark text-white">
-        {/* Inject site images + theme data before React hydrates */}
+        {/* Inline script to set theme + colors before React hydrates — prevents flash */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `window.__SITE_IMAGES__=${JSON.stringify(siteImages)};try{
+            __html: `try{
               var s=sessionStorage.getItem("atheles-session");
               if(s&&document.cookie.includes("atheles-logged-in=1")){
                 var u=JSON.parse(s),t=u.theme;
@@ -81,20 +82,22 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
-        <CurrencyProvider>
-          <CartProvider cartPromise={cart}>
-            <SiteThemeProvider />
-            <AnnouncementBar />
-            <ScrollProgress />
-            <KonamiLightning />
-            <Navbar />
-            <ThemeBackground />
-            <main className="relative z-[1] w-full">
-              <PageTransition>{children}</PageTransition>
-              <Toaster closeButton />
-            </main>
-          </CartProvider>
-        </CurrencyProvider>
+        <SiteImagesProvider data={siteImages}>
+          <CurrencyProvider>
+            <CartProvider cartPromise={cart}>
+              <SiteThemeProvider />
+              <AnnouncementBar />
+              <ScrollProgress />
+              <KonamiLightning />
+              <Navbar />
+              <ThemeBackground />
+              <main className="relative z-[1] w-full">
+                <PageTransition>{children}</PageTransition>
+                <Toaster closeButton />
+              </main>
+            </CartProvider>
+          </CurrencyProvider>
+        </SiteImagesProvider>
         <Analytics />
       </body>
     </html>
