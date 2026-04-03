@@ -43,7 +43,10 @@ export function ThemeBackground() {
   const initial = useRef(getInitialState());
   const [theme, setTheme] = useState<string | null>(initial.current.theme);
   const [globalOn, setGlobalOn] = useState(initial.current.globalOn);
-  const [customBg, setCustomBg] = useState<string | null>(null);
+  const [customBg, setCustomBg] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try { return sessionStorage.getItem("atheles-custom-bg-url") || null; } catch { return null; }
+  });
   const initializedRef = useRef(false);
 
   const applyFromCache = () => {
@@ -52,9 +55,22 @@ export function ThemeBackground() {
       setTheme(t);
       setGlobalOn(!!g);
       if (t === "custom") {
+        // Show cached custom bg instantly
+        try {
+          const cached = sessionStorage.getItem("atheles-custom-bg-url");
+          if (cached) setCustomBg(cached);
+        } catch {}
         fetch("/api/auth/background")
           .then((r) => (r.ok ? r.json() : null))
-          .then((d) => { if (d?.background) setCustomBg(d.background); })
+          .then((d) => {
+            if (d?.background) {
+              setCustomBg(d.background);
+              try { sessionStorage.setItem("atheles-custom-bg-url", d.background); } catch {}
+            } else {
+              setCustomBg(null);
+              try { sessionStorage.removeItem("atheles-custom-bg-url"); } catch {}
+            }
+          })
           .catch(() => {});
       }
     } else {
