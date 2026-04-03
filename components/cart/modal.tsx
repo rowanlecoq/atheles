@@ -183,6 +183,10 @@ export default function CartModal() {
 
   const hasItems = cart && cart.lines.length > 0;
 
+  // Filter out favorites that are already in the cart
+  const cartHandles = new Set(cart?.lines.map((line) => line.merchandise.product.handle) || []);
+  const filteredFavProducts = favProducts.filter((p) => !cartHandles.has(p.handle));
+
   return (
     <>
       <button
@@ -265,7 +269,7 @@ export default function CartModal() {
                   </div>
 
                   {/* Favorites section in empty cart too */}
-                  {favProducts.length > 0 && (
+                  {filteredFavProducts.length > 0 && (
                     <div className="border-t border-brand-dark-gold/20 px-1 pb-4 pt-3">
                       <div className="mb-2 flex items-center gap-1.5">
                         <HeartIcon className="h-3.5 w-3.5 text-brand-gold" />
@@ -274,7 +278,7 @@ export default function CartModal() {
                         </p>
                       </div>
                       <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                        {favProducts.map((p) => {
+                        {filteredFavProducts.map((p) => {
                           const canAdd = !!p.firstVariantId && !!p.availableForSale;
                           return (
                             <div
@@ -288,8 +292,8 @@ export default function CartModal() {
                                   onClick={async () => {
                                     if (!p.firstVariantId) return;
                                     setAddingFav(p.handle);
-                                    addItem(null, p.firstVariantId).catch(() => {});
-                                    setTimeout(() => setAddingFav(null), 500);
+                                    try { await addItem(null, p.firstVariantId); } catch {}
+                                    setAddingFav(null);
                                   }}
                                   className="text-left"
                                 >
@@ -460,7 +464,7 @@ export default function CartModal() {
                   </ul>
 
                   {/* Favorites section */}
-                  {favProducts.length > 0 && (
+                  {filteredFavProducts.length > 0 && (
                     <div className="border-t border-brand-dark-gold/20 pt-3">
                       <div className="mb-2 flex items-center gap-1.5">
                         <HeartIcon className="h-3.5 w-3.5 text-brand-gold" />
@@ -469,7 +473,7 @@ export default function CartModal() {
                         </p>
                       </div>
                       <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        {favProducts.map((p) => {
+                        {filteredFavProducts.map((p) => {
                           const canAdd = !!p.firstVariantId && !!p.availableForSale;
                           return (
                           <div
@@ -506,8 +510,8 @@ export default function CartModal() {
                                     </div>
                                   )}
                                   {/* Add overlay */}
-                                  <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/0 transition-colors group-hover:bg-brand-dark/40">
-                                    <span className="text-xs font-medium uppercase tracking-wider text-white opacity-0 transition-opacity group-hover:opacity-100">
+                                  <div className={`absolute inset-0 flex items-center justify-center transition-colors ${addingFav === p.handle ? "bg-brand-dark/50" : "bg-brand-dark/0 group-hover:bg-brand-dark/40"}`}>
+                                    <span className={`text-xs font-medium uppercase tracking-wider text-white transition-opacity ${addingFav === p.handle ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
                                       {addingFav === p.handle ? "adding..." : "+ add"}
                                     </span>
                                   </div>
