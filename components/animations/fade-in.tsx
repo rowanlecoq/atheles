@@ -10,7 +10,7 @@ import {
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion, useInView } from "motion/react";
-import { useRef, type ReactNode } from "react";
+import { useEffect, useRef, type ReactNode } from "react";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
 
@@ -40,6 +40,19 @@ export function FadeIn({
   const ref = useRef<HTMLDivElement>(null);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
+  // Track if this element was visible on first paint (above the fold)
+  const wasVisibleOnMount = useRef<boolean | null>(null);
+
+  useEffect(() => {
+    if (wasVisibleOnMount.current !== null) return;
+    // Check if element is in viewport on mount — if so, skip entrance animation
+    const el = ref.current;
+    if (el) {
+      const rect = el.getBoundingClientRect();
+      wasVisibleOnMount.current = rect.top < window.innerHeight && rect.bottom > 0;
+    }
+  }, []);
+
   const isInView = useInView(ref, {
     once,
     margin: isMobileViewport
@@ -56,16 +69,20 @@ export function FadeIn({
       ? Math.min(duration, animationDurationsMobile.normal)
       : duration;
 
+  // If element was visible on initial page load, skip the fade-in animation
+  // to prevent the "content starts invisible then appears" glitch
+  const skipAnimation = wasVisibleOnMount.current === true;
+
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, x: hiddenX, y: hiddenY }}
+      initial={skipAnimation ? false : { opacity: 0, x: hiddenX, y: hiddenY }}
       animate={
-        isInView
+        isInView || skipAnimation
           ? { opacity: 1, x: 0, y: 0 }
           : { opacity: 0, x: hiddenX, y: hiddenY }
       }
-      transition={{
+      transition={skipAnimation ? { duration: 0 } : {
         duration: transitionDuration,
         delay,
         ease: animationEasing,
