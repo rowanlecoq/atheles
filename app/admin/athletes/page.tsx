@@ -141,8 +141,10 @@ export default function AdminAthletesPage() {
   };
 
   const addExtraImage = async (athleteIdx: number, file: File) => {
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError("image must be under 5mb.");
+    const isVideo = file.type.startsWith("video/");
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setUploadError(`file too large (max ${isVideo ? "50" : "10"}mb).`);
       setTimeout(() => setUploadError(""), 3000);
       return;
     }

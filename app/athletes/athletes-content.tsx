@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { createPortal } from "react-dom";
 
 type Social = { platform: string; url: string };
 
@@ -235,10 +236,10 @@ export function AthletesContent() {
         </ul>
       </div>
 
-      {/* Lightbox modal */}
-      {lightbox && (
+      {/* Lightbox modal — portaled to cover navbar */}
+      {lightbox && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-4"
           onClick={() => setLightbox(null)}
         >
           {/* Close */}
@@ -282,7 +283,8 @@ export function AthletesContent() {
           {lightbox.items.length > 1 && (
             <p className="absolute bottom-4 text-xs text-white/50">{lightbox.index + 1} / {lightbox.items.length}</p>
           )}
-        </div>
+        </div>,
+        document.body,
       )}
     </div>
   );

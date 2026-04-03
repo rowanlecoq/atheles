@@ -27,14 +27,16 @@ export async function POST(request: Request) {
 
     const matches = image.match(/^data:(.+);base64,(.+)$/);
     if (!matches) {
-      return NextResponse.json({ error: "invalid image data" }, { status: 400 });
+      return NextResponse.json({ error: "invalid file data" }, { status: 400 });
     }
 
     const contentType = matches[1] as string;
     const buffer = Buffer.from(matches[2] as string, "base64");
+    const isVideo = contentType.startsWith("video/");
+    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
 
-    if (buffer.byteLength > 5 * 1024 * 1024) {
-      return NextResponse.json({ error: "image too large (max 5MB)" }, { status: 400 });
+    if (buffer.byteLength > maxSize) {
+      return NextResponse.json({ error: `file too large (max ${isVideo ? "50" : "10"}MB)` }, { status: 400 });
     }
 
     const ext = contentType.split("/")[1] || "jpg";
