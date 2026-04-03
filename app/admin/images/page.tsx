@@ -142,6 +142,36 @@ export default function AdminImagesPage() {
                     </button>
                   </div>
                 </div>
+                {/* Paste URL for large files / external videos */}
+                <div className="mt-2">
+                  <input
+                    type="text"
+                    placeholder="or paste a video/image url and press enter..."
+                    className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-1.5 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                    onKeyDown={async (e) => {
+                      if (e.key === "Enter") {
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (!val) return;
+                        setUploading(slot.key);
+                        try {
+                          const res = await fetch("/api/admin/images", {
+                            method: "POST",
+                            headers: { "Content-Type": "application/json" },
+                            body: JSON.stringify({ key: slot.key, file: val }),
+                          });
+                          const d = await res.json();
+                          if (d.url) {
+                            setImages((prev) => ({ ...prev, [slot.key]: d.url }));
+                            setSaved(slot.key);
+                            setTimeout(() => setSaved(null), 2000);
+                            (e.target as HTMLInputElement).value = "";
+                          }
+                        } catch {}
+                        setUploading(null);
+                      }
+                    }}
+                  />
+                </div>
               </div>
             );
           })}
