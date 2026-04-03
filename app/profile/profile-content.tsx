@@ -279,6 +279,7 @@ export default function ProfileContent() {
       .then((data) => {
         if (data.user) {
           applyUser(data.user);
+          try { if (!data.user.theme) { const p = sessionStorage.getItem("atheles-session"); if (p) { const c = JSON.parse(p); if (c.theme) { data.user.theme = c.theme; data.user.globalTheme = c.globalTheme; } } } } catch {}
           sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
           setLoading(false);
         } else {
@@ -416,6 +417,7 @@ export default function ProfileContent() {
           setDobMonth(m ? String(parseInt(m)) : "");
           setDobDay(d ? String(parseInt(d)) : "");
         }
+        try { if (!data.user.theme) { const p = sessionStorage.getItem("atheles-session"); if (p) { const c = JSON.parse(p); if (c.theme) { data.user.theme = c.theme; data.user.globalTheme = c.globalTheme; } } } } catch {}
         sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
         setEditing(false);
         setSaveMessage("profile updated.");
