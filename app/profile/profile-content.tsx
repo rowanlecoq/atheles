@@ -283,29 +283,33 @@ export default function ProfileContent() {
           updateSessionCache(data.user as Record<string, unknown>);
           setLoading(false);
         } else {
-          // Session invalid — clean up and redirect once
-          sessionStorage.removeItem("atheles-session");
-          sessionStorage.removeItem("atheles-avatar");
-          sessionStorage.removeItem("atheles-custom-bg");
-          document.cookie = "atheles-logged-in=; max-age=0; path=/";
+          // Session returned null — could be transient Shopify API failure
+          // Don't wipe session/cookies client-side; server handles that if truly invalid
+          // Just use cached data if available
+          try {
+            const cached = sessionStorage.getItem("atheles-session");
+            if (cached) {
+              applyUser(JSON.parse(cached));
+              setLoading(false);
+              return;
+            }
+          } catch {}
+          // No cache at all — redirect to login
           setUser(null);
           setLoading(false);
           setRedirecting(true);
-          // Use setTimeout to ensure state updates render before redirect
-          setTimeout(() => {
-            window.location.replace("/login");
-          }, 100);
+          setTimeout(() => { window.location.replace("/login"); }, 100);
         }
       })
       .catch(() => {
-        sessionStorage.removeItem("atheles-session");
-        document.cookie = "atheles-logged-in=; max-age=0; path=/";
-        setUser(null);
+        // Network error — use cached data, don't wipe anything
+        try {
+          const cached = sessionStorage.getItem("atheles-session");
+          if (cached) {
+            applyUser(JSON.parse(cached));
+          }
+        } catch {}
         setLoading(false);
-        setRedirecting(true);
-        setTimeout(() => {
-          window.location.replace("/login");
-        }, 100);
       });
   }, [router]);
 
