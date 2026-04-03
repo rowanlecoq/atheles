@@ -26,14 +26,12 @@ export async function GET() {
     }
 
     let customer = await getCustomerByToken(token);
-    // Retry once on failure — Shopify API can have transient hiccups
     if (!customer) {
       customer = await getCustomerByToken(token);
     }
     if (!customer) {
-      // Only delete cookies if token is truly invalid (both attempts failed)
-      cookieStore.delete("atheles-auth-token");
-      cookieStore.delete("atheles-logged-in");
+      // Don't delete cookies — could be transient Shopify API failure
+      // If token is truly expired, client will handle redirect naturally
       return NextResponse.json({ user: null });
     }
 
