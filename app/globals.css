@@ -138,12 +138,23 @@ textarea {
   }
 }
 
-/* Hide scrollbar but keep scroll functionality */
+/* Minimal scrollbar — thin and dark, blends with background */
 html {
-  scrollbar-width: none; /* Firefox */
+  scrollbar-width: thin; /* Firefox — thin scrollbar */
+  scrollbar-color: rgba(255,255,255,0.08) transparent; /* thumb, track */
 }
 ::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  width: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(255,255,255,0.08);
+  border-radius: 3px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(255,255,255,0.15);
 }
 
 /* Selection styling */
