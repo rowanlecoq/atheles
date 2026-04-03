@@ -1,5 +1,6 @@
 import { getCustomerByToken } from "lib/auth/shopify-customer";
 import { put } from "@vercel/blob";
+import { revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -117,6 +118,7 @@ export async function POST(request: Request) {
             `, { metafields: [{ ownerId: shopId, namespace: "atheles", key: "site_theme", type: "json", value: JSON.stringify(current) }] });
           }
 
+          try { revalidateTag("site-theme", "seconds"); } catch {}
           return NextResponse.json({ success: true, theme: current });
         }
       }
@@ -134,6 +136,7 @@ export async function POST(request: Request) {
           }
         `, { metafields: [{ ownerId: shopId, namespace: "atheles", key: "site_theme", type: "json", value: JSON.stringify(theme) }] });
       }
+      try { revalidateTag("site-theme", "seconds"); } catch {}
       return NextResponse.json({ success: true });
     }
 
