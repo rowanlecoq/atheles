@@ -73,6 +73,7 @@ html {
   text-size-adjust: 100%;
   width: 100%;
   overflow-x: hidden;
+  overflow-y: scroll;
   scroll-padding-top: 120px;
   scroll-behavior: auto;
   -webkit-tap-highlight-color: transparent;
