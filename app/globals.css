@@ -200,7 +200,7 @@ textarea {
 }
 
 .animate-nav-enter {
-  /* Instant — no slide-down animation (conflicts with page transition) */
+  animation: nav-enter 0.7s cubic-bezier(0.25, 0.1, 0.25, 1) both;
 }
 
 @keyframes category-nav-enter {
