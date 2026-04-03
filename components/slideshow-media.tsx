@@ -43,9 +43,25 @@ function MediaElement({
   );
 }
 
-/** Strips "grayscale" from a className string when admin disables it. */
-function stripGrayscale(cls: string): string {
-  return cls.replace(/\bgrayscale\b/g, "").replace(/\s{2,}/g, " ").trim();
+/**
+ * When grayscale is off, strip the grayscale class and boost opacity
+ * so full-color images are actually visible (the grayscale defaults
+ * used very low opacity like 10-15% which looks washed out in color).
+ */
+function resolveColorClasses(cls: string): string {
+  return cls
+    .replace(/\bgrayscale\b/g, "")
+    .replace(/\bopacity-(\d+)\b/g, (_match, val) => {
+      const n = parseInt(val, 10);
+      // Boost low opacities: 10→30, 15→35, 25→45, 50→60, 70→80
+      if (n <= 15) return `opacity-30`;
+      if (n <= 25) return `opacity-45`;
+      if (n <= 50) return `opacity-60`;
+      if (n <= 70) return `opacity-80`;
+      return `opacity-${val}`;
+    })
+    .replace(/\s{2,}/g, " ")
+    .trim();
 }
 
 /**
@@ -69,8 +85,8 @@ export function SlideshowMedia({
 }) {
   const { currentSrc, layers, activeLayer, isSlideshow, slot } = useSiteSlideshow(slotKey);
 
-  const resolvedClass = slot.grayscale ? className : stripGrayscale(className);
-  const resolvedIframeClass = slot.grayscale ? iframeClass : stripGrayscale(iframeClass);
+  const resolvedClass = slot.grayscale ? className : resolveColorClasses(className);
+  const resolvedIframeClass = slot.grayscale ? iframeClass : resolveColorClasses(iframeClass);
 
   if (!isSlideshow) {
     return <MediaElement src={currentSrc} className={resolvedClass} sizes={sizes} priority={priority} iframeClass={resolvedIframeClass} />;
