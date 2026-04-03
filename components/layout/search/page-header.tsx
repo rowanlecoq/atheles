@@ -1,6 +1,7 @@
 "use client";
 
 import { SplitText } from "components/animations";
+import { useSiteImage, isVideoSrc } from "lib/hooks/use-site-images";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
 
@@ -17,6 +18,7 @@ const collectionTitles: Record<string, string> = {
 
 export default function SearchPageHeader() {
   const pathname = usePathname();
+  const storeHeader = useSiteImage("store_header");
   const segments = pathname.split("/").filter(Boolean);
   // /search/mens → ["search", "mens"] → collection = "mens"
   const collection = segments.length > 1 ? segments[segments.length - 1]! : null;
@@ -26,13 +28,11 @@ export default function SearchPageHeader() {
     <div className="relative overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
       {/* Hero background image */}
       <div className="absolute inset-0">
-        <Image
-          src="/statues/greek-god-hero.png"
-          alt=""
-          fill
-          className="object-cover object-center opacity-25 sm:opacity-20"
-          priority
-        />
+        {isVideoSrc(storeHeader) ? (
+          <video src={storeHeader} autoPlay muted loop playsInline className="h-full w-full object-cover opacity-25 sm:opacity-20" />
+        ) : (
+          <Image src={storeHeader} alt="" fill className="object-cover object-center opacity-25 sm:opacity-20" priority />
+        )}
         <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/30 via-brand-dark/60 to-brand-dark" />
       </div>
       {/* Content */}

@@ -61,6 +61,12 @@ export default function AdminDashboard() {
           icon="📢"
         />
         <AdminCard
+          title="site images"
+          description="replace placeholder images and videos across the homepage and store."
+          href="/admin/images"
+          icon="🖼️"
+        />
+        <AdminCard
           title="athlete profiles"
           description="edit athlete bios, photos, and social links on the athletes page."
           href="/admin/athletes"

@@ -1,5 +1,6 @@
 "use client";
 
+import { useSiteImage, isVideoSrc } from "lib/hooks/use-site-images";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 
@@ -74,15 +75,15 @@ export function NewsletterSignup() {
     setLoading(false);
   };
 
+  const newsletterImg = useSiteImage("newsletter");
+
   return (
     <section className="relative overflow-hidden border-t border-brand-dark-gold/20 bg-brand-dark py-20">
-      <Image
-        src="/statues/roman-emperor-pergamon.jpg"
-        alt=""
-        fill
-        className="object-cover object-[center_30%] opacity-10 grayscale"
-        sizes="100vw"
-      />
+      {isVideoSrc(newsletterImg) ? (
+        <video src={newsletterImg} autoPlay muted loop playsInline className="absolute inset-0 h-full w-full object-cover opacity-10 grayscale" />
+      ) : (
+        <Image src={newsletterImg} alt="" fill className="object-cover object-[center_30%] opacity-10 grayscale" sizes="100vw" />
+      )}
       <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-transparent to-brand-dark/60" />
       <div className="relative z-10 mx-auto max-w-2xl px-4 text-center">
         {alreadySubscribed ? (
