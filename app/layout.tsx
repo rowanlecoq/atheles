@@ -11,7 +11,7 @@ import { SiteThemeProvider } from "components/site-theme-provider";
 import { ThemeBackground } from "components/theme-background";
 import { getCart } from "lib/shopify";
 import { getSiteImagesData } from "lib/site-images-server";
-import { getSiteThemeData, generateThemeCSS } from "lib/site-theme-server";
+import { getSiteThemeData, generateThemeCSS, getThemeInlineStyle } from "lib/site-theme-server";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -61,13 +61,13 @@ export default async function RootLayout({
     <html
       lang="en"
       className={`dark ${playfair.variable}`}
-      style={{ colorScheme: "dark" }}
+      style={getThemeInlineStyle(siteTheme) as React.CSSProperties}
     >
       <body className="bg-brand-dark text-white" style={{ backgroundColor: siteTheme.brandDark }}>
-        {/* Server theme + per-user overrides before React hydrates */}
+        {/* Gradient headings + per-user theme overrides */}
         <script
           dangerouslySetInnerHTML={{
-            __html: `(function(){var s=document.createElement("style");s.textContent=${JSON.stringify(generateThemeCSS(siteTheme))};document.head.appendChild(s)})();try{
+            __html: `${siteTheme.headingStyle === "gradient" ? `(function(){var s=document.createElement("style");s.id="atheles-heading-gradient";s.textContent=${JSON.stringify(generateThemeCSS(siteTheme).split("}").slice(1).join("}"))};document.head.appendChild(s)})();` : ""}try{
               var s=sessionStorage.getItem("atheles-session");
               if(s&&document.cookie.includes("atheles-logged-in=1")){
                 var u=JSON.parse(s),t=u.theme;

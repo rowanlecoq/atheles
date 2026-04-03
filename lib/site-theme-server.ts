@@ -83,9 +83,24 @@ export async function getSiteThemeData(): Promise<SiteTheme> {
 }
 
 /**
- * Generate a CSS string with all theme variables that can be injected
- * into a <style> tag in the <head> — applied before any rendering.
+ * Returns inline style object for <html> element with all CSS variables.
+ * Applied as HTML attributes — no script needed, no flash possible.
  */
+export function getThemeInlineStyle(theme: SiteTheme): Record<string, string> {
+  const paleGold = darken(theme.brandGold, 0.1);
+  const lightGold = lighten(theme.brandGold, 0.2);
+  const goldWash = darken(theme.brandGold, 0.05);
+  return {
+    "--color-brand-gold": theme.brandGold,
+    "--color-brand-dark-gold": theme.brandDarkGold,
+    "--color-brand-dark": theme.brandDark,
+    "--color-brand-pale-gold": paleGold,
+    "--color-brand-light-gold": lightGold,
+    "--color-brand-gold-wash": goldWash,
+    colorScheme: "dark",
+  };
+}
+
 export function generateThemeCSS(theme: SiteTheme): string {
   const paleGold = darken(theme.brandGold, 0.1);
   const lightGold = lighten(theme.brandGold, 0.2);
