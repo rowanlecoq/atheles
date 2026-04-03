@@ -77,8 +77,18 @@ function SocialIcon({ platform }: { platform: string }) {
   }
 }
 
+function isVideoUrl(url: string) {
+  return url.includes("youtube.com") || url.includes("youtu.be") || url.endsWith(".mp4") || url.endsWith(".webm");
+}
+
+function getYoutubeEmbedUrl(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/watch\?v=|youtu\.be\/)([\w-]+)/);
+  return match ? `https://www.youtube.com/embed/${match[1]}` : null;
+}
+
 export function AthletesContent() {
   const [athletes, setAthletes] = useState<Athlete[]>(defaultAthletes);
+  const [lightbox, setLightbox] = useState<{ items: string[]; index: number } | null>(null);
 
   useEffect(() => {
     fetch("/api/admin/athletes")
@@ -128,7 +138,7 @@ export function AthletesContent() {
       <div className="mb-14 grid gap-6 sm:grid-cols-2">
         {athletes.map((athlete) => (
           <div key={athlete.name} className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
-            <div className="relative aspect-[4/5] w-full bg-brand-medium-grey/10">
+            <div className="relative aspect-[4/5] w-full bg-brand-medium-grey/10 cursor-pointer" onClick={() => athlete.image && setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: 0 })}>
               {athlete.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={athlete.image} alt={athlete.name} className="h-full w-full object-cover" />
@@ -139,15 +149,27 @@ export function AthletesContent() {
                 </div>
               )}
             </div>
-            {/* Gallery strip */}
+            {/* Gallery strip — clickable */}
             {athlete.images && athlete.images.length > 0 && (
               <div className="flex gap-1 overflow-x-auto p-1 scrollbar-hide">
-                {athlete.images.map((img, idx) => (
-                  <div key={idx} className="relative aspect-square h-20 w-20 flex-none overflow-hidden">
-                    {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={img} alt={`${athlete.name} photo ${idx + 2}`} className="h-full w-full object-cover" />
-                  </div>
-                ))}
+                {athlete.images.map((item, idx) => {
+                  const isVideo = item.includes("youtube.com") || item.includes("youtu.be") || item.endsWith(".mp4") || item.endsWith(".webm");
+                  return (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: idx + (athlete.image ? 1 : 0) })}
+                      className="relative aspect-square h-20 w-20 flex-none overflow-hidden transition-opacity hover:opacity-80"
+                    >
+                      {isVideo ? (
+                        <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-2xl text-brand-grey">▶</div>
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img src={item} alt={`${athlete.name} ${idx + 2}`} className="h-full w-full object-cover" />
+                      )}
+                    </button>
+                  );
+                })}
               </div>
             )}
             <div className="p-5">
@@ -212,6 +234,56 @@ export function AthletesContent() {
           ))}
         </ul>
       </div>
+
+      {/* Lightbox modal */}
+      {lightbox && (
+        <div
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/90 p-4"
+          onClick={() => setLightbox(null)}
+        >
+          {/* Close */}
+          <button type="button" onClick={() => setLightbox(null)} className="absolute right-4 top-4 text-2xl text-white/70 hover:text-white">×</button>
+
+          {/* Prev */}
+          {lightbox.items.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }}
+              className="absolute left-4 text-3xl text-white/50 hover:text-white"
+            >‹</button>
+          )}
+
+          {/* Content */}
+          <div onClick={(e) => e.stopPropagation()} className="max-h-[85vh] max-w-[90vw]">
+            {(() => {
+              const item = lightbox.items[lightbox.index] || "";
+              const ytEmbed = getYoutubeEmbedUrl(item);
+              if (ytEmbed) {
+                return <iframe src={ytEmbed} className="aspect-video w-full max-w-3xl rounded-lg" allowFullScreen />;
+              }
+              if (item.endsWith(".mp4") || item.endsWith(".webm")) {
+                return <video src={item} controls className="max-h-[80vh] rounded-lg" />;
+              }
+              // eslint-disable-next-line @next/next/no-img-element
+              return <img src={item} alt="" className="max-h-[80vh] rounded-lg object-contain" />;
+            })()}
+          </div>
+
+          {/* Next */}
+          {lightbox.items.length > 1 && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }}
+              className="absolute right-4 text-3xl text-white/50 hover:text-white"
+            >›</button>
+          )}
+
+          {/* Counter */}
+          {lightbox.items.length > 1 && (
+            <p className="absolute bottom-4 text-xs text-white/50">{lightbox.index + 1} / {lightbox.items.length}</p>
+          )}
+        </div>
+      )}
     </div>
   );
 }

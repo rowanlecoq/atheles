@@ -320,21 +320,47 @@ export default function AdminAthletesPage() {
                   <button type="button" onClick={() => addHobby(i)} className="mt-2 text-xs text-brand-gold hover:text-brand-pale-gold">+ add interest</button>
                 </div>
 
-                {/* Extra Photos */}
+                {/* Gallery Photos & Videos */}
                 <div className="mt-3">
-                  <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">gallery photos</label>
+                  <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">gallery (photos & videos)</label>
                   <div className="flex flex-wrap gap-2">
-                    {(a.images || []).map((img, j) => (
-                      <div key={j} className="group relative h-16 w-16 overflow-hidden rounded-lg">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={img} alt="" className="h-full w-full object-cover" />
-                        <button type="button" onClick={() => removeExtraImage(i, j)} className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-0 group-hover:opacity-100">×</button>
-                      </div>
-                    ))}
-                    <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-brand-dark-gold/20 text-xs text-brand-gold hover:border-brand-gold/40">
+                    {(a.images || []).map((item, j) => {
+                      const isVideo = item.includes("youtube.com") || item.includes("youtu.be") || item.endsWith(".mp4") || item.endsWith(".webm");
+                      return (
+                        <div key={j} className="group relative h-16 w-16 overflow-hidden rounded-lg">
+                          {isVideo ? (
+                            <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-lg">▶</div>
+                          ) : (
+                            // eslint-disable-next-line @next/next/no-img-element
+                            <img src={item} alt="" className="h-full w-full object-cover" />
+                          )}
+                          <button type="button" onClick={() => removeExtraImage(i, j)} className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-0 group-hover:opacity-100">×</button>
+                        </div>
+                      );
+                    })}
+                    <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-brand-dark-gold/20 text-xs text-brand-gold hover:border-brand-gold/40" title="upload image">
                       +
-                      <input type="file" accept="image/png,image/jpeg,image/webp" onChange={(e) => { const f = e.target.files?.[0]; if (f) addExtraImage(i, f); e.target.value = ""; }} className="hidden" />
+                      <input type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" onChange={(e) => { const f = e.target.files?.[0]; if (f) addExtraImage(i, f); e.target.value = ""; }} className="hidden" />
                     </label>
+                  </div>
+                  {/* Add URL (for YouTube etc) */}
+                  <div className="mt-2 flex gap-2">
+                    <input
+                      type="text"
+                      placeholder="paste video/image url..."
+                      className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-1.5 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") {
+                          const val = (e.target as HTMLInputElement).value.trim();
+                          if (val) {
+                            setAthletes((prev) => prev.map((a2, i2) =>
+                              i2 === i ? { ...a2, images: [...(a2.images || []), val] } : a2
+                            ));
+                            (e.target as HTMLInputElement).value = "";
+                          }
+                        }
+                      }}
+                    />
                   </div>
                 </div>
 
