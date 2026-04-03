@@ -44,10 +44,10 @@ export function BrandStory() {
           <div className="relative h-[200px] w-full overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark sm:h-[240px] md:h-[280px]">
             <SlideshowMedia
               slotKey="brand_story"
-              className="object-cover object-[center_24%] opacity-70 grayscale"
+              className="object-cover object-[center_24%]"
               sizes="(min-width: 768px) 50vw, 100vw"
             />
-            <div className="absolute inset-0 bg-brand-dark/30" />
+            <div className="absolute inset-0 z-10 bg-brand-dark/30" />
           </div>
         </GradualBlur>
       </div>

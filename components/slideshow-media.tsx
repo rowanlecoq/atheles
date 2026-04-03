@@ -44,31 +44,22 @@ function MediaElement({
 }
 
 /**
- * When grayscale is off, strip the grayscale class and boost opacity
- * so full-color images are actually visible (the grayscale defaults
- * used very low opacity like 10-15% which looks washed out in color).
+ * Strip opacity-* and grayscale from Tailwind classes — we apply them
+ * via inline style using the admin-configured values instead.
  */
-function resolveColorClasses(cls: string): string {
+function stripDisplayClasses(cls: string): string {
   return cls
     .replace(/\bgrayscale\b/g, "")
-    .replace(/\bopacity-(\d+)\b/g, (_match, val) => {
-      const n = parseInt(val, 10);
-      // Boost low opacities: 10→30, 15→35, 25→45, 50→60, 70→80
-      if (n <= 15) return `opacity-30`;
-      if (n <= 25) return `opacity-45`;
-      if (n <= 50) return `opacity-60`;
-      if (n <= 70) return `opacity-80`;
-      return `opacity-${val}`;
-    })
+    .replace(/\bopacity-\d+\b/g, "")
     .replace(/\s{2,}/g, " ")
     .trim();
 }
 
 /**
  * Renders a slideshow with smooth cinematic crossfade transitions.
- * Uses a dual A/B layer approach: the active layer fades in over the
- * outgoing layer with a long, eased transition for a premium feel.
- * Respects per-slot grayscale setting from admin.
+ * - Stays invisible until the API has responded (prevents flash of defaults).
+ * - Uses admin-configured opacity and grayscale per slot.
+ * - Dual A/B layer crossfade for seamless transitions.
  */
 export function SlideshowMedia({
   slotKey,
@@ -83,20 +74,37 @@ export function SlideshowMedia({
   priority?: boolean;
   iframeClass?: string;
 }) {
-  const { currentSrc, layers, activeLayer, isSlideshow, slot } = useSiteSlideshow(slotKey);
+  const { currentSrc, layers, activeLayer, isSlideshow, slot, ready } = useSiteSlideshow(slotKey);
 
-  const resolvedClass = slot.grayscale ? className : resolveColorClasses(className);
-  const resolvedIframeClass = slot.grayscale ? iframeClass : resolveColorClasses(iframeClass);
+  // Strip hardcoded opacity/grayscale from classes — we control via inline style
+  const cleanClass = stripDisplayClasses(className);
+  const cleanIframeClass = stripDisplayClasses(iframeClass);
 
-  if (!isSlideshow) {
-    return <MediaElement src={currentSrc} className={resolvedClass} sizes={sizes} priority={priority} iframeClass={resolvedIframeClass} />;
+  // Inline styles from admin config
+  const mediaStyle: React.CSSProperties = {
+    opacity: slot.opacity / 100,
+    filter: slot.grayscale ? "grayscale(1)" : "none",
+    // Fade in once ready to prevent flash of defaults
+    transition: "opacity 0.6s ease",
+  };
+
+  // While loading, render invisible to prevent flash
+  if (!ready) {
+    return <div className="absolute inset-0" />;
   }
 
-  // Transition duration: longer = smoother
+  if (!isSlideshow) {
+    return (
+      <div className="absolute inset-0 overflow-hidden" style={mediaStyle}>
+        <MediaElement src={currentSrc} className={cleanClass} sizes={sizes} priority={priority} iframeClass={cleanIframeClass} />
+      </div>
+    );
+  }
+
   const durationMs = slot.transition === "fade" ? 1800 : 2000;
 
   return (
-    <>
+    <div className="absolute inset-0 overflow-hidden" style={mediaStyle}>
       {[0, 1].map((layerIdx) => {
         const isActive = activeLayer === layerIdx;
         return (
@@ -112,14 +120,14 @@ export function SlideshowMedia({
           >
             <MediaElement
               src={layers[layerIdx as 0 | 1]!}
-              className={resolvedClass}
+              className={cleanClass}
               sizes={sizes}
               priority={priority && layerIdx === 0}
-              iframeClass={resolvedIframeClass}
+              iframeClass={cleanIframeClass}
             />
           </div>
         );
       })}
-    </>
+    </div>
   );
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 
 const DEFAULT_IMAGES: Record<string, string> = {
   hero_bg: "/statues/greek-god-hero.png",
@@ -17,15 +17,18 @@ export type SlotData = {
   transition: "crossfade" | "slide" | "fade";
   interval: number;
   grayscale: boolean;
+  opacity: number; // 0–100
 };
 
 let cachedSlots: Record<string, SlotData> | null = null;
 let fetchPromise: Promise<void> | null = null;
+let fetchDone = false;
 
 /** Normalise legacy string or new SlotData */
 function normalizeSlot(val: unknown, key: string): SlotData {
-  if (!val) return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true };
-  if (typeof val === "string") return { media: [val], transition: "crossfade", interval: 6000, grayscale: true };
+  const base: SlotData = { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+  if (!val) return base;
+  if (typeof val === "string") return { ...base, media: [val] };
   if (typeof val === "object" && val !== null) {
     const obj = val as Record<string, unknown>;
     return {
@@ -33,9 +36,10 @@ function normalizeSlot(val: unknown, key: string): SlotData {
       transition: (["crossfade", "slide", "fade"].includes(obj.transition as string) ? obj.transition : "crossfade") as SlotData["transition"],
       interval: typeof obj.interval === "number" ? obj.interval : 6000,
       grayscale: typeof obj.grayscale === "boolean" ? obj.grayscale : true,
+      opacity: typeof obj.opacity === "number" ? obj.opacity : 50,
     };
   }
-  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true };
+  return base;
 }
 
 function fetchImages() {
@@ -50,8 +54,9 @@ function fetchImages() {
         }
         cachedSlots = slots;
       }
+      fetchDone = true;
     })
-    .catch(() => {});
+    .catch(() => { fetchDone = true; });
   return fetchPromise;
 }
 
@@ -75,18 +80,19 @@ export function useSiteImage(key: string): string {
 
 /**
  * Returns full slideshow data for a slot using a dual-layer A/B crossfade.
- * `activeLayer` alternates between 0 and 1. The active layer holds the new
- * image and fades in; the other layer holds the old image underneath.
+ * `ready` is false until the API has responded, preventing flash of defaults.
  */
 export function useSiteSlideshow(key: string) {
   const fallback = DEFAULT_IMAGES[key] || "";
-  const defaultSlot: SlotData = { media: [fallback], transition: "crossfade", interval: 6000, grayscale: true };
+  const defaultSlot: SlotData = { media: [fallback], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
 
   const [slot, setSlot] = useState<SlotData>(cachedSlots?.[key] || defaultSlot);
+  const [ready, setReady] = useState(fetchDone || !!cachedSlots);
   const [index, setIndex] = useState(0);
-  // Dual-layer A/B: layers[0] and layers[1] each hold a media src
-  const [layers, setLayers] = useState<[string, string]>([fallback, fallback]);
-  // Which layer (0 or 1) is currently visible / fading in
+  const [layers, setLayers] = useState<[string, string]>(() => {
+    const first = cachedSlots?.[key]?.media[0] || fallback;
+    return [first, first];
+  });
   const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
 
   useEffect(() => {
@@ -94,12 +100,14 @@ export function useSiteSlideshow(key: string) {
       const s = cachedSlots[key] || defaultSlot;
       setSlot(s);
       setLayers([s.media[0] || fallback, s.media[0] || fallback]);
+      setReady(true);
       return;
     }
     fetchImages().then(() => {
       const s = cachedSlots?.[key] || defaultSlot;
       setSlot(s);
       setLayers([s.media[0] || fallback, s.media[0] || fallback]);
+      setReady(true);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
@@ -111,7 +119,6 @@ export function useSiteSlideshow(key: string) {
       setIndex((prev) => {
         const next = (prev + 1) % slot.media.length;
         const nextSrc = slot.media[next] || fallback;
-        // Load the new src into the *inactive* layer, then make it active
         setActiveLayer((al) => {
           const newActive: 0 | 1 = al === 0 ? 1 : 0;
           setLayers((ls) => {
@@ -132,6 +139,7 @@ export function useSiteSlideshow(key: string) {
     activeLayer,
     slot,
     index,
+    ready,
     isSlideshow: slot.media.length > 1,
     currentSrc: layers[activeLayer] || fallback,
   };

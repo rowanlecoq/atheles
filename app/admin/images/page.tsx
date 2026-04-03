@@ -8,6 +8,7 @@ type SlotData = {
   transition: "crossfade" | "slide" | "fade";
   interval: number;
   grayscale: boolean;
+  opacity: number;
 };
 
 const IMAGE_SLOTS = [
@@ -103,18 +104,19 @@ function SlideshowPreview({ slot }: { slot: SlotData }) {
   }
 
   return (
-    <div className="relative h-full w-full overflow-hidden">
+    <div className="relative h-full w-full overflow-hidden bg-brand-dark">
       {[0, 1].map((i) => (
         <div
           key={i}
           className="absolute inset-0"
           style={{
-            opacity: activeLayer === i ? 1 : 0,
+            opacity: activeLayer === i ? slot.opacity / 100 : 0,
             zIndex: activeLayer === i ? 1 : 0,
+            filter: slot.grayscale ? "grayscale(1)" : "none",
             transition: "opacity 1.5s cubic-bezier(0.4, 0, 0.2, 1)",
           }}
         >
-          <MediaThumb src={layers[i as 0 | 1]!} className={`h-full w-full ${slot.grayscale ? "grayscale" : ""}`} />
+          <MediaThumb src={layers[i as 0 | 1]!} className="h-full w-full" />
         </div>
       ))}
       {/* Slide count badge */}
@@ -219,6 +221,16 @@ function SlotEditor({
     saveSlot(next);
   };
 
+  const updateOpacity = (opacity: number) => {
+    const next = { ...data, opacity };
+    onUpdate(slotKey, next);
+    // Debounce save — only save on mouseup via onChangeCommitted
+  };
+
+  const commitOpacity = () => {
+    saveSlot(data);
+  };
+
   const resetSlot = async () => {
     try {
       const res = await fetch("/api/admin/images", {
@@ -228,7 +240,7 @@ function SlotEditor({
       });
       const d = await res.json();
       if (d.url) {
-        onUpdate(slotKey, { media: [d.url], transition: "crossfade", interval: 6000, grayscale: true });
+        onUpdate(slotKey, { media: [d.url], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 });
         flash();
       }
     } catch {}
@@ -272,8 +284,9 @@ function SlotEditor({
             <p className="text-sm font-medium text-white">{slotDef.label}</p>
             <p className="text-xs text-brand-grey">
               {data.media.length} {data.media.length === 1 ? "item" : "items"}
-              {data.media.length > 1 && ` · ${data.transition} · ${data.interval / 1000}s`}
+              {` · ${data.opacity}%`}
               {!data.grayscale && " · color"}
+              {data.media.length > 1 && ` · ${data.transition} · ${data.interval / 1000}s`}
             </p>
           </div>
         </div>
@@ -358,26 +371,47 @@ function SlotEditor({
             }}
           />
 
-          {/* Settings row */}
-          <div className="flex flex-wrap items-center gap-3 rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-2.5">
-            {/* Color mode toggle — prominent */}
-            <button
-              type="button"
-              onClick={toggleGrayscale}
-              className="flex items-center gap-2.5 rounded-md border border-brand-dark-gold/20 bg-brand-dark px-3 py-1.5 text-xs transition-colors hover:border-brand-gold/40"
-            >
-              <div className={`relative h-[18px] w-9 rounded-full transition-colors ${data.grayscale ? "bg-brand-medium-grey/50" : "bg-brand-gold"}`}>
-                <div className={`absolute top-[3px] h-3 w-3 rounded-full bg-white shadow transition-all ${data.grayscale ? "left-[3px]" : "left-[21px]"}`} />
+          {/* Settings */}
+          <div className="space-y-2.5 rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-2.5">
+            {/* Top row: color toggle + opacity slider */}
+            <div className="flex flex-wrap items-center gap-3">
+              {/* Color mode toggle */}
+              <button
+                type="button"
+                onClick={toggleGrayscale}
+                className="flex items-center gap-2.5 rounded-md border border-brand-dark-gold/20 bg-brand-dark px-3 py-1.5 text-xs transition-colors hover:border-brand-gold/40"
+              >
+                <div className={`relative h-[18px] w-9 rounded-full transition-colors ${data.grayscale ? "bg-brand-medium-grey/50" : "bg-brand-gold"}`}>
+                  <div className={`absolute top-[3px] h-3 w-3 rounded-full bg-white shadow transition-all ${data.grayscale ? "left-[3px]" : "left-[21px]"}`} />
+                </div>
+                <span className={`font-medium ${data.grayscale ? "text-brand-grey" : "text-brand-gold"}`}>
+                  {data.grayscale ? "black & white" : "full color"}
+                </span>
+              </button>
+
+              <div className="h-5 w-px bg-brand-dark-gold/20" />
+
+              {/* Opacity slider */}
+              <div className="flex items-center gap-2">
+                <label className="text-xs text-brand-grey">opacity</label>
+                <input
+                  type="range"
+                  min={5}
+                  max={100}
+                  step={5}
+                  value={data.opacity}
+                  onChange={(e) => updateOpacity(Number(e.target.value))}
+                  onMouseUp={commitOpacity}
+                  onTouchEnd={commitOpacity}
+                  className="h-1.5 w-20 cursor-pointer appearance-none rounded-full bg-brand-medium-grey/30 accent-brand-gold sm:w-28"
+                />
+                <span className="min-w-[2ch] text-xs text-brand-grey">{data.opacity}%</span>
               </div>
-              <span className={`font-medium ${data.grayscale ? "text-brand-grey" : "text-brand-gold"}`}>
-                {data.grayscale ? "black & white" : "full color"}
-              </span>
-            </button>
+            </div>
 
             {/* Slideshow settings — only show when >1 media */}
             {data.media.length > 1 && (
-              <>
-                <div className="h-5 w-px bg-brand-dark-gold/20" />
+              <div className="flex flex-wrap items-center gap-3 border-t border-brand-dark-gold/10 pt-2.5">
                 <div className="flex items-center gap-2">
                   <label className="text-xs text-brand-grey">transition</label>
                   <select
@@ -398,7 +432,7 @@ function SlotEditor({
                     {INTERVALS.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
                   </select>
                 </div>
-              </>
+              </div>
             )}
           </div>
 
@@ -465,7 +499,7 @@ export default function AdminImagesPage() {
               key={slot.key}
               slotKey={slot.key}
               slotDef={slot}
-              data={slots[slot.key] || { media: [], transition: "crossfade", interval: 6000, grayscale: true }}
+              data={slots[slot.key] || { media: [], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 }}
               onUpdate={handleUpdate}
             />
           ))}

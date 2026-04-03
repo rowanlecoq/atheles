@@ -40,18 +40,18 @@ const DEFAULT_IMAGES: Record<string, string> = {
   interstitial: "/statues/hadrian-cuirassed.jpg",
 };
 
-// Slot data shape: { media: string[], transition: "crossfade"|"slide"|"fade", interval: number, grayscale: boolean }
 export type SlotData = {
   media: string[];
   transition: "crossfade" | "slide" | "fade";
   interval: number;
   grayscale: boolean;
+  opacity: number; // 0–100
 };
 
 /** Normalise legacy string values and new slot objects into SlotData */
 function normalizeSlot(val: unknown, key: string): SlotData {
-  if (!val) return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true };
-  if (typeof val === "string") return { media: [val], transition: "crossfade", interval: 6000, grayscale: true };
+  if (!val) return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+  if (typeof val === "string") return { media: [val], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
   if (typeof val === "object" && val !== null) {
     const obj = val as Record<string, unknown>;
     return {
@@ -59,9 +59,10 @@ function normalizeSlot(val: unknown, key: string): SlotData {
       transition: (["crossfade", "slide", "fade"].includes(obj.transition as string) ? obj.transition : "crossfade") as SlotData["transition"],
       interval: typeof obj.interval === "number" ? obj.interval : 6000,
       grayscale: typeof obj.grayscale === "boolean" ? obj.grayscale : true,
+      opacity: typeof obj.opacity === "number" ? obj.opacity : 50,
     };
   }
-  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true };
+  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
 }
 
 async function getStoredData(): Promise<Record<string, unknown>> {
@@ -102,7 +103,7 @@ export async function GET() {
   } catch {
     const images: Record<string, SlotData> = {};
     for (const key of Object.keys(DEFAULT_IMAGES)) {
-      images[key] = { media: [DEFAULT_IMAGES[key]!], transition: "crossfade", interval: 6000, grayscale: true };
+      images[key] = { media: [DEFAULT_IMAGES[key]!], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
     }
     return NextResponse.json({ images });
   }
@@ -124,6 +125,7 @@ export async function POST(request: Request) {
       transition: slotData.transition,
       interval: slotData.interval,
       grayscale: slotData.grayscale,
+      opacity: slotData.opacity,
     };
     await saveData(current);
     return NextResponse.json({ success: true, slotData: current[slot] });

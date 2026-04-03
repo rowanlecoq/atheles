@@ -24,15 +24,13 @@ export default function SearchPageHeader() {
   return (
     <div className="relative overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
       {/* Hero background image — slideshow */}
-      <div className="absolute inset-0">
-        <SlideshowMedia
-          slotKey="store_header"
-          className="object-cover object-center opacity-25 sm:opacity-20"
-          sizes="100vw"
-          priority
-        />
-        <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/30 via-brand-dark/60 to-brand-dark" />
-      </div>
+      <SlideshowMedia
+        slotKey="store_header"
+        className="object-cover object-center"
+        sizes="100vw"
+        priority
+      />
+      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/30 via-brand-dark/60 to-brand-dark" />
       {/* Content */}
       <div className="relative px-4 pb-8 pt-10 sm:pb-10 sm:pt-14">
         <div className="mx-auto max-w-(--breakpoint-2xl) text-center">
