@@ -73,7 +73,7 @@ html {
   text-size-adjust: 100%;
   width: 100%;
   overflow-x: hidden;
-  overflow-y: scroll; /* Always show single scrollbar — prevents double scrollbar */
+  scrollbar-gutter: stable; /* Reserve scrollbar space to prevent layout shift */
   scroll-padding-top: 120px;
   scroll-behavior: auto;
   -webkit-tap-highlight-color: transparent;
@@ -110,7 +110,6 @@ body {
   min-width: 320px;
   width: 100%;
   overflow-x: hidden;
-  overflow-y: visible; /* Let html handle vertical scroll — prevents double scrollbar */
   text-transform: lowercase;
 }
 

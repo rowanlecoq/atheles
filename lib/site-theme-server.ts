@@ -71,7 +71,7 @@ export async function getSiteThemeData(): Promise<SiteTheme> {
       body: JSON.stringify({
         query: `query { shop { metafield(namespace: "atheles", key: "site_theme") { value } } }`,
       }),
-      next: { revalidate: 30, tags: ["site-theme"] },
+      next: { revalidate: 300, tags: ["site-theme"] },
     });
     const data = await res.json();
     const raw = data.data?.shop?.metafield?.value;
