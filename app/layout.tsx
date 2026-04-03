@@ -6,7 +6,6 @@ import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ScrollProgress } from "components/scroll-progress";
-import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";
 import { ThemeBackground } from "components/theme-background";
 import { getCart } from "lib/shopify";
@@ -76,22 +75,20 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
-        <SiteImagesProvider>
-          <CurrencyProvider>
-            <CartProvider cartPromise={cart}>
-              <SiteThemeProvider />
-              <AnnouncementBar />
-              <ScrollProgress />
-              <KonamiLightning />
-              <Navbar />
-              <ThemeBackground />
-              <main className="relative z-[1] w-full">
-                <PageTransition>{children}</PageTransition>
-                <Toaster closeButton />
-              </main>
-            </CartProvider>
-          </CurrencyProvider>
-        </SiteImagesProvider>
+        <CurrencyProvider>
+          <CartProvider cartPromise={cart}>
+            <SiteThemeProvider />
+            <AnnouncementBar />
+            <ScrollProgress />
+            <KonamiLightning />
+            <Navbar />
+            <ThemeBackground />
+            <main className="relative z-[1] w-full">
+              <PageTransition>{children}</PageTransition>
+              <Toaster closeButton />
+            </main>
+          </CartProvider>
+        </CurrencyProvider>
         <Analytics />
       </body>
     </html>

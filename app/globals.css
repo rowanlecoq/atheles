@@ -76,6 +76,8 @@ html {
   scroll-padding-top: 120px;
   scroll-behavior: auto;
   -webkit-tap-highlight-color: transparent;
+  /* scrollbar-color prevents a gray flash on non-overlay scrollbar systems */
+  scrollbar-color: var(--color-brand-medium-grey) var(--color-brand-dark);
 }
 
 /* Hide scrollbar for horizontal scroll containers */
@@ -138,23 +140,22 @@ textarea {
   }
 }
 
-/* Minimal scrollbar — thin and dark, blends with background */
-html {
-  scrollbar-width: thin; /* Firefox — thin scrollbar */
-  scrollbar-color: rgba(255,255,255,0.08) transparent; /* thumb, track */
-}
+/* Scrollbar styling */
 ::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
+
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: var(--color-brand-dark);
 }
+
 ::-webkit-scrollbar-thumb {
-  background: rgba(255,255,255,0.08);
+  background: var(--color-brand-medium-grey);
   border-radius: 3px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255,255,255,0.15);
+  background: var(--color-brand-dark-gold);
 }
 
 /* Selection styling */

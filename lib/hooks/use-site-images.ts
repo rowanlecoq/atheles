@@ -1,9 +1,6 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useSiteImagesContext, type SlotData } from "components/site-images-context";
-
-export type { SlotData } from "components/site-images-context";
 
 const DEFAULT_IMAGES: Record<string, string> = {
   hero_bg: "/statues/greek-god-hero.png",
@@ -15,29 +12,102 @@ const DEFAULT_IMAGES: Record<string, string> = {
   interstitial: "/statues/hadrian-cuirassed.jpg",
 };
 
-/** Returns the first media URL for a slot (backwards-compatible) */
-export function useSiteImage(key: string): string {
-  const ctx = useSiteImagesContext();
-  return ctx[key]?.media[0] || DEFAULT_IMAGES[key] || "";
+export type SlotData = {
+  media: string[];
+  transition: "crossfade" | "slide" | "fade";
+  interval: number;
+  grayscale: boolean;
+  opacity: number;
+  focusX: number;
+  focusY: number;
+};
+
+function normalizeSlot(val: unknown, key: string): SlotData {
+  const base: SlotData = { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
+  if (!val) return base;
+  if (typeof val === "string") return { ...base, media: [val] };
+  if (typeof val === "object" && val !== null) {
+    const obj = val as Record<string, unknown>;
+    return {
+      media: Array.isArray(obj.media) ? obj.media.filter((m): m is string => typeof m === "string") : [],
+      transition: (["crossfade", "slide", "fade"].includes(obj.transition as string) ? obj.transition : "crossfade") as SlotData["transition"],
+      interval: typeof obj.interval === "number" ? obj.interval : 6000,
+      grayscale: typeof obj.grayscale === "boolean" ? obj.grayscale : true,
+      opacity: typeof obj.opacity === "number" ? obj.opacity : 50,
+      focusX: typeof obj.focusX === "number" ? obj.focusX : 50,
+      focusY: typeof obj.focusY === "number" ? obj.focusY : 50,
+    };
+  }
+  return base;
 }
 
-/**
- * Returns full slideshow data for a slot.
- * Reads from server-provided context — identical on SSR and client.
- * No useEffect on mount = no hydration re-render = no flash.
- */
-export function useSiteSlideshow(key: string) {
-  const ctx = useSiteImagesContext();
-  const defaultSlot: SlotData = { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
-  const slot = ctx[key] || defaultSlot;
-  const first = slot.media[0] || DEFAULT_IMAGES[key] || "";
+// Module-level cache — shared across all hook instances, no re-renders
+let cachedSlots: Record<string, SlotData> | null = null;
+let fetchPromise: Promise<void> | null = null;
 
-  // All state initialised from context — same on server and client
+function fetchImages() {
+  if (fetchPromise) return fetchPromise;
+  fetchPromise = fetch("/api/admin/images")
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => {
+      if (d?.images) {
+        const slots: Record<string, SlotData> = {};
+        for (const [k, v] of Object.entries(d.images)) {
+          slots[k] = normalizeSlot(v, k);
+        }
+        cachedSlots = slots;
+      }
+    })
+    .catch(() => {});
+  return fetchPromise;
+}
+
+function getSlot(key: string): SlotData {
+  if (cachedSlots?.[key]) return cachedSlots[key];
+  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
+}
+
+export function useSiteImage(key: string): string {
+  const [src, setSrc] = useState(cachedSlots?.[key]?.media[0] || DEFAULT_IMAGES[key] || "");
+
+  useEffect(() => {
+    if (cachedSlots) {
+      setSrc(cachedSlots[key]?.media[0] || DEFAULT_IMAGES[key] || "");
+      return;
+    }
+    fetchImages().then(() => {
+      setSrc(cachedSlots?.[key]?.media[0] || DEFAULT_IMAGES[key] || "");
+    });
+  }, [key]);
+
+  return src;
+}
+
+export function useSiteSlideshow(key: string) {
+  const initial = getSlot(key);
+  const first = initial.media[0] || DEFAULT_IMAGES[key] || "";
+
+  const [slot, setSlot] = useState<SlotData>(initial);
   const [index, setIndex] = useState(0);
   const [layers, setLayers] = useState<[string, string]>([first, first]);
   const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
 
-  // Slideshow timer — only runs on client, only when multiple media
+  useEffect(() => {
+    if (cachedSlots) {
+      const s = cachedSlots[key] || initial;
+      setSlot(s);
+      setLayers([s.media[0] || first, s.media[0] || first]);
+      return;
+    }
+    fetchImages().then(() => {
+      const s = getSlot(key);
+      setSlot(s);
+      setLayers([s.media[0] || first, s.media[0] || first]);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  // Slideshow timer
   useEffect(() => {
     if (slot.media.length <= 1) return;
     const timer = setInterval(() => {
