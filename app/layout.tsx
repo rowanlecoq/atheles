@@ -52,6 +52,12 @@ export default async function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body className="bg-brand-dark text-white">
+        {/* Inline script to set theme background before React hydrates — prevents flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{var s=sessionStorage.getItem("atheles-session");if(s&&document.cookie.includes("atheles-logged-in=1")){var u=JSON.parse(s),t=u.theme;if(t&&t!=="none"){document.body.setAttribute("data-theme",t);if(u.globalTheme)document.body.setAttribute("data-theme-global","1")}}}catch(e){}`,
+          }}
+        />
         <CurrencyProvider>
           <CartProvider cartPromise={cart}>
             <AnnouncementBar />

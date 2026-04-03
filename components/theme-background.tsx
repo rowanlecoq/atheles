@@ -27,6 +27,11 @@ function readCache(): { theme: string | null; globalTheme: boolean } {
 
 function getInitialState(): { theme: string | null; globalOn: boolean } {
   if (typeof window === "undefined") return { theme: null, globalOn: false };
+  // Read from data attribute first (set by inline script before hydration)
+  const bodyTheme = document.body.getAttribute("data-theme");
+  const bodyGlobal = document.body.getAttribute("data-theme-global") === "1";
+  if (bodyTheme && bodyTheme !== "none") return { theme: bodyTheme, globalOn: bodyGlobal };
+  // Fallback to session cache
   if (!document.cookie.includes("atheles-logged-in=1")) return { theme: null, globalOn: false };
   const { theme, globalTheme } = readCache();
   if (theme && theme !== "none") return { theme, globalOn: !!globalTheme };
