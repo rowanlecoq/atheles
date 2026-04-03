@@ -327,10 +327,17 @@ export default function AdminAthletesPage() {
                   <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">gallery (photos & videos)</label>
                   <div className="flex flex-wrap gap-2">
                     {(a.images || []).map((item, j) => {
-                      const isVideo = item.includes("youtube.com") || item.includes("youtu.be") || item.endsWith(".mp4") || item.endsWith(".webm");
+                      const ytThumb = item.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]+)/);
+                      const isVideo = item.includes("youtube.com") || item.includes("youtu.be") || item.includes("tiktok.com") || item.includes("instagram.com") || item.endsWith(".mp4") || item.endsWith(".webm");
                       return (
                         <div key={j} className="group relative h-16 w-16 overflow-hidden rounded-lg">
-                          {isVideo ? (
+                          {ytThumb ? (
+                            <div className="relative h-full w-full">
+                              {/* eslint-disable-next-line @next/next/no-img-element */}
+                              <img src={`https://img.youtube.com/vi/${ytThumb[1]}/mqdefault.jpg`} alt="" className="h-full w-full object-cover" />
+                              <div className="absolute inset-0 flex items-center justify-center bg-black/30"><span className="text-sm text-white">▶</span></div>
+                            </div>
+                          ) : isVideo ? (
                             <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-lg">▶</div>
                           ) : (
                             // eslint-disable-next-line @next/next/no-img-element

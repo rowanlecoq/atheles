@@ -82,6 +82,11 @@ function isMediaUrl(url: string) {
   return url.includes("youtube.com") || url.includes("youtu.be") || url.includes("instagram.com") || url.includes("tiktok.com") || url.endsWith(".mp4") || url.endsWith(".webm");
 }
 
+function getYoutubeThumbnail(url: string): string | null {
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]+)/);
+  return match ? `https://img.youtube.com/vi/${match[1]}/mqdefault.jpg` : null;
+}
+
 function getEmbedUrl(url: string): { type: "youtube" | "instagram" | "tiktok" | "video" | "image"; embedUrl: string } {
   // YouTube (watch, shorts, youtu.be)
   const ytMatch = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]+)/);
@@ -176,12 +181,19 @@ export function AthletesContent() {
                       onClick={() => setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: idx + (athlete.image ? 1 : 0) })}
                       className="relative aspect-square h-20 w-20 flex-none overflow-hidden transition-opacity hover:opacity-80"
                     >
-                      {isMedia ? (
-                        <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-2xl text-brand-grey">▶</div>
-                      ) : (
+                      {(() => {
+                        const ytThumb = getYoutubeThumbnail(item);
+                        if (ytThumb) return (
+                          <div className="relative h-full w-full">
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
+                            <img src={ytThumb} alt="" className="h-full w-full object-cover" />
+                            <div className="absolute inset-0 flex items-center justify-center bg-black/30"><span className="text-xl text-white">▶</span></div>
+                          </div>
+                        );
+                        if (isMedia) return <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-xl text-brand-grey">▶</div>;
                         // eslint-disable-next-line @next/next/no-img-element
-                        <img src={item} alt={`${athlete.name} ${idx + 2}`} className="h-full w-full object-cover" />
-                      )}
+                        return <img src={item} alt={`${athlete.name} ${idx + 2}`} className="h-full w-full object-cover" />;
+                      })()}
                     </button>
                   );
                 })}
@@ -273,8 +285,11 @@ export function AthletesContent() {
             {(() => {
               const item = lightbox.items[lightbox.index] || "";
               const embed = getEmbedUrl(item);
-              if (embed.type === "youtube" || embed.type === "instagram" || embed.type === "tiktok") {
-                return <iframe src={embed.embedUrl} className="aspect-[9/16] h-[80vh] max-h-[80vh] w-auto rounded-lg sm:aspect-video sm:h-auto sm:w-full sm:max-w-3xl" allowFullScreen />;
+              if (embed.type === "youtube") {
+                return <iframe src={embed.embedUrl} className="aspect-video w-[90vw] max-w-3xl rounded-lg" allowFullScreen />;
+              }
+              if (embed.type === "instagram" || embed.type === "tiktok") {
+                return <iframe src={embed.embedUrl} className="h-[80vh] w-[90vw] max-w-md rounded-lg" allowFullScreen />;
               }
               if (embed.type === "video") {
                 return <video src={embed.embedUrl} controls className="max-h-[80vh] rounded-lg" />;
