@@ -40,17 +40,9 @@ function getInitialState(): { theme: string | null; globalOn: boolean } {
 
 export function ThemeBackground() {
   const pathname = usePathname();
-  // Read cached theme synchronously to avoid flash
-  const [theme, setTheme] = useState<string | null>(() => {
-    if (typeof window === "undefined") return null;
-    const s = getInitialState();
-    return s.theme;
-  });
-  const [globalOn, setGlobalOn] = useState(() => {
-    if (typeof window === "undefined") return false;
-    const s = getInitialState();
-    return s.globalOn;
-  });
+  const initial = useRef(getInitialState());
+  const [theme, setTheme] = useState<string | null>(initial.current.theme);
+  const [globalOn, setGlobalOn] = useState(initial.current.globalOn);
   const [customBg, setCustomBg] = useState<string | null>(() => {
     if (typeof window === "undefined") return null;
     try { return sessionStorage.getItem("atheles-custom-bg-url") || null; } catch { return null; }
@@ -96,7 +88,7 @@ export function ThemeBackground() {
       return;
     }
 
-    // Show from cache instantly (may already be set via useState init)
+    // Show from cache instantly
     const { theme: cachedTheme } = readCache();
     if (cachedTheme !== null) {
       applyFromCache();
