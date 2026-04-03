@@ -20,10 +20,18 @@ export type SlotData = {
   opacity: number; // 0–100
 };
 
-let cachedSlots: Record<string, SlotData> | null = null;
+/** Read server-injected data synchronously — available before React hydrates */
+function getInjectedSlots(): Record<string, SlotData> | null {
+  if (typeof window !== "undefined" && (window as unknown as Record<string, unknown>).__SITE_IMAGES__) {
+    return (window as unknown as Record<string, unknown>).__SITE_IMAGES__ as Record<string, SlotData>;
+  }
+  return null;
+}
+
+// Cache: populated from injected data or API fallback
+let cachedSlots: Record<string, SlotData> | null = getInjectedSlots();
 let fetchPromise: Promise<void> | null = null;
 
-/** Normalise legacy string or new SlotData */
 function normalizeSlot(val: unknown, key: string): SlotData {
   const base: SlotData = { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
   if (!val) return base;
@@ -41,7 +49,9 @@ function normalizeSlot(val: unknown, key: string): SlotData {
   return base;
 }
 
+/** Fallback: only used if server injection somehow failed */
 function fetchImages() {
+  if (cachedSlots) return Promise.resolve();
   if (fetchPromise) return fetchPromise;
   fetchPromise = fetch("/api/admin/images")
     .then((r) => (r.ok ? r.json() : null))
@@ -58,56 +68,63 @@ function fetchImages() {
   return fetchPromise;
 }
 
+function getSlot(key: string): SlotData {
+  // Try injected data first (synchronous, instant)
+  if (!cachedSlots) cachedSlots = getInjectedSlots();
+  if (cachedSlots?.[key]) return cachedSlots[key];
+  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+}
+
 /** Returns the first media URL for a slot (backwards-compatible) */
 export function useSiteImage(key: string): string {
-  const fallback = DEFAULT_IMAGES[key] || "";
-  const [src, setSrc] = useState(cachedSlots?.[key]?.media[0] || fallback);
+  const [src, setSrc] = useState(() => getSlot(key).media[0] || DEFAULT_IMAGES[key] || "");
 
   useEffect(() => {
+    // If we already have data, we're done
     if (cachedSlots) {
-      setSrc(cachedSlots[key]?.media[0] || fallback);
+      setSrc(cachedSlots[key]?.media[0] || DEFAULT_IMAGES[key] || "");
       return;
     }
+    // Fallback fetch only if injected data is missing
     fetchImages().then(() => {
-      setSrc(cachedSlots?.[key]?.media[0] || fallback);
+      setSrc(getSlot(key).media[0] || DEFAULT_IMAGES[key] || "");
     });
-  }, [key, fallback]);
+  }, [key]);
 
   return src;
 }
 
 /**
  * Returns full slideshow data for a slot using a dual-layer A/B crossfade.
- * `ready` is false until the API has responded, preventing flash of defaults.
+ * Reads from server-injected data synchronously — no flash, no delay.
  */
 export function useSiteSlideshow(key: string) {
-  const fallback = DEFAULT_IMAGES[key] || "";
-  const defaultSlot: SlotData = { media: [fallback], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50 };
+  const initial = getSlot(key);
+  const fallback = initial.media[0] || DEFAULT_IMAGES[key] || "";
 
-  const [slot, setSlot] = useState<SlotData>(cachedSlots?.[key] || defaultSlot);
+  const [slot, setSlot] = useState<SlotData>(initial);
   const [index, setIndex] = useState(0);
-  const [layers, setLayers] = useState<[string, string]>(() => {
-    const first = cachedSlots?.[key]?.media[0] || fallback;
-    return [first, first];
-  });
+  const [layers, setLayers] = useState<[string, string]>([fallback, fallback]);
   const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
 
   useEffect(() => {
+    // If we already have data, apply it
     if (cachedSlots) {
-      const s = cachedSlots[key] || defaultSlot;
+      const s = cachedSlots[key] || initial;
       setSlot(s);
       setLayers([s.media[0] || fallback, s.media[0] || fallback]);
       return;
     }
+    // Fallback fetch only if injected data is missing
     fetchImages().then(() => {
-      const s = cachedSlots?.[key] || defaultSlot;
+      const s = getSlot(key);
       setSlot(s);
       setLayers([s.media[0] || fallback, s.media[0] || fallback]);
     });
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [key]);
 
-  // Slideshow timer — advances index and swaps active layer
+  // Slideshow timer
   useEffect(() => {
     if (slot.media.length <= 1) return;
     const timer = setInterval(() => {

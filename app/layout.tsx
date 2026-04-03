@@ -9,6 +9,7 @@ import { ScrollProgress } from "components/scroll-progress";
 import { SiteThemeProvider } from "components/site-theme-provider";
 import { ThemeBackground } from "components/theme-background";
 import { getCart } from "lib/shopify";
+import { getSiteImagesData } from "lib/site-images-server";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
 import { Toaster } from "sonner";
@@ -45,6 +46,7 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   const cart = getCart();
+  const siteImages = await getSiteImagesData();
 
   return (
     <html
@@ -53,6 +55,12 @@ export default async function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body className="bg-brand-dark text-white">
+        {/* Inject site images data before React hydrates — instant load, no flash */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `window.__SITE_IMAGES__=${JSON.stringify(siteImages)};`,
+          }}
+        />
         {/* Inline script to set theme + colors before React hydrates — prevents flash */}
         <script
           dangerouslySetInnerHTML={{
