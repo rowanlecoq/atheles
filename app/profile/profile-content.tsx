@@ -279,16 +279,10 @@ export default function ProfileContent() {
       .then((data) => {
         if (data.user) {
           applyUser(data.user);
-          try { if (!data.user.theme) { const p = sessionStorage.getItem("atheles-session"); if (p) { const c = JSON.parse(p); if (c.theme) { data.user.theme = c.theme; data.user.globalTheme = c.globalTheme; } } } } catch {}
           sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
           setLoading(false);
         } else {
-          // Session may be transiently null — use cache if available
-          try {
-            const cached = sessionStorage.getItem("atheles-session");
-            if (cached) { applyUser(JSON.parse(cached)); setLoading(false); return; }
-          } catch {}
-          // No cache — truly invalid
+          // Session invalid — clean up and redirect once
           sessionStorage.removeItem("atheles-session");
           sessionStorage.removeItem("atheles-avatar");
           sessionStorage.removeItem("atheles-custom-bg");
@@ -296,16 +290,15 @@ export default function ProfileContent() {
           setUser(null);
           setLoading(false);
           setRedirecting(true);
-          setTimeout(() => { window.location.replace("/login"); }, 100);
+          // Use setTimeout to ensure state updates render before redirect
+          setTimeout(() => {
+            window.location.replace("/login");
+          }, 100);
         }
       })
       .catch(() => {
-        // Network error — use cache, don't wipe
-        try {
-          const cached = sessionStorage.getItem("atheles-session");
-          if (cached) { applyUser(JSON.parse(cached)); }
-        } catch {}
-        setLoading(false);
+        sessionStorage.removeItem("atheles-session");
+        document.cookie = "atheles-logged-in=; max-age=0; path=/";
         setUser(null);
         setLoading(false);
         setRedirecting(true);
@@ -423,7 +416,6 @@ export default function ProfileContent() {
           setDobMonth(m ? String(parseInt(m)) : "");
           setDobDay(d ? String(parseInt(d)) : "");
         }
-        try { if (!data.user.theme) { const p = sessionStorage.getItem("atheles-session"); if (p) { const c = JSON.parse(p); if (c.theme) { data.user.theme = c.theme; data.user.globalTheme = c.globalTheme; } } } } catch {}
         sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
         setEditing(false);
         setSaveMessage("profile updated.");

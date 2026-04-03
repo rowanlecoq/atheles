@@ -100,10 +100,6 @@ export function ThemeBackground() {
       .then((data) => {
         if (data?.user) {
           try {
-            if (!data.user.theme) {
-              const prev = sessionStorage.getItem("atheles-session");
-              if (prev) { const c = JSON.parse(prev); if (c.theme) { data.user.theme = c.theme; data.user.globalTheme = c.globalTheme; } }
-            }
             sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
           } catch {}
           applyFromCache();
@@ -125,10 +121,6 @@ export function ThemeBackground() {
         .then((data) => {
           if (data?.user) {
             try {
-              if (!data.user.theme) {
-                const prev = sessionStorage.getItem("atheles-session");
-                if (prev) { const c = JSON.parse(prev); if (c.theme) { data.user.theme = c.theme; data.user.globalTheme = c.globalTheme; } }
-              }
               sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
             } catch {}
             applyFromCache();
