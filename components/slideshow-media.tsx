@@ -58,12 +58,15 @@ function MediaElement({
  * Strip opacity-* and grayscale from Tailwind classes — we apply them
  * via inline style using the admin-configured values instead.
  */
-function stripDisplayClasses(cls: string): string {
-  return cls
+function stripDisplayClasses(cls: string, stripPosition = false): string {
+  let result = cls
     .replace(/\bgrayscale\b/g, "")
-    .replace(/\bopacity-\d+\b/g, "")
-    .replace(/\s{2,}/g, " ")
-    .trim();
+    .replace(/\bopacity-\d+\b/g, "");
+  if (stripPosition) {
+    // Remove object-position classes when admin focal point overrides them
+    result = result.replace(/\bobject-(top|bottom|center|left|right|left-top|left-bottom|right-top|right-bottom)\b/g, "");
+  }
+  return result.replace(/\s{2,}/g, " ").trim();
 }
 
 /**
@@ -85,9 +88,11 @@ export function SlideshowMedia({
 }) {
   const { currentSrc, layers, activeLayer, isSlideshow, slot } = useSiteSlideshow(slotKey);
 
-  const cleanClass = stripDisplayClasses(className);
-  const cleanIframeClass = stripDisplayClasses(iframeClass);
-  const objPos = `${slot.focusX}% ${slot.focusY}%`;
+  // Only override CSS object-position when admin has set a custom focal point
+  const hasCustomFocus = slot.focusX !== 50 || slot.focusY !== 50;
+  const objPos = hasCustomFocus ? `${slot.focusX}% ${slot.focusY}%` : undefined;
+  const cleanClass = stripDisplayClasses(className, hasCustomFocus);
+  const cleanIframeClass = stripDisplayClasses(iframeClass, hasCustomFocus);
 
   const mediaStyle: React.CSSProperties = {
     opacity: slot.opacity / 100,
