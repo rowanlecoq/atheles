@@ -23,15 +23,15 @@ export function PageTransition({ children }: { children: ReactNode }) {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
+    window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    // Only scroll to top on actual navigation, not on initial load
     if (prevPath.current !== pathname) {
       hasNavigated.current = true;
       prevPath.current = pathname;
-      window.scrollTo(0, 0);
     }
+    window.scrollTo(0, 0);
   }, [pathname]);
 
   if (isMobile) return <>{children}</>;
