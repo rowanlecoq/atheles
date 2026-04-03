@@ -27,8 +27,7 @@ export async function GET() {
 
     const customer = await getCustomerByToken(token);
     if (!customer) {
-      cookieStore.delete("atheles-auth-token");
-      cookieStore.delete("atheles-logged-in");
+      // Don't delete cookies — could be transient Shopify failure
       return NextResponse.json({ user: null });
     }
 

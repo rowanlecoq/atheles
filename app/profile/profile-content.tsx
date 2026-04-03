@@ -283,7 +283,12 @@ export default function ProfileContent() {
           sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
           setLoading(false);
         } else {
-          // Session invalid — clean up and redirect once
+          // Session may be transiently null — use cache if available
+          try {
+            const cached = sessionStorage.getItem("atheles-session");
+            if (cached) { applyUser(JSON.parse(cached)); setLoading(false); return; }
+          } catch {}
+          // No cache — truly invalid
           sessionStorage.removeItem("atheles-session");
           sessionStorage.removeItem("atheles-avatar");
           sessionStorage.removeItem("atheles-custom-bg");
@@ -291,15 +296,16 @@ export default function ProfileContent() {
           setUser(null);
           setLoading(false);
           setRedirecting(true);
-          // Use setTimeout to ensure state updates render before redirect
-          setTimeout(() => {
-            window.location.replace("/login");
-          }, 100);
+          setTimeout(() => { window.location.replace("/login"); }, 100);
         }
       })
       .catch(() => {
-        sessionStorage.removeItem("atheles-session");
-        document.cookie = "atheles-logged-in=; max-age=0; path=/";
+        // Network error — use cache, don't wipe
+        try {
+          const cached = sessionStorage.getItem("atheles-session");
+          if (cached) { applyUser(JSON.parse(cached)); }
+        } catch {}
+        setLoading(false);
         setUser(null);
         setLoading(false);
         setRedirecting(true);
