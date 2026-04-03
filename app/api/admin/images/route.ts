@@ -40,18 +40,69 @@ const DEFAULT_IMAGES: Record<string, string> = {
   interstitial: "/statues/hadrian-cuirassed.jpg",
 };
 
+// Slot data shape: { media: string[], transition: "crossfade"|"slide"|"fade", interval: number }
+export type SlotData = {
+  media: string[];
+  transition: "crossfade" | "slide" | "fade";
+  interval: number;
+};
+
+/** Normalise legacy string values and new slot objects into SlotData */
+function normalizeSlot(val: unknown, key: string): SlotData {
+  if (!val) return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000 };
+  if (typeof val === "string") return { media: [val], transition: "crossfade", interval: 6000 };
+  if (typeof val === "object" && val !== null) {
+    const obj = val as Record<string, unknown>;
+    return {
+      media: Array.isArray(obj.media) ? obj.media.filter((m): m is string => typeof m === "string") : [],
+      transition: (["crossfade", "slide", "fade"].includes(obj.transition as string) ? obj.transition : "crossfade") as SlotData["transition"],
+      interval: typeof obj.interval === "number" ? obj.interval : 6000,
+    };
+  }
+  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000 };
+}
+
+async function getStoredData(): Promise<Record<string, unknown>> {
+  const data = await adminFetch(`
+    query { shop { metafield(namespace: "atheles", key: "site_images") { value } } }
+  `);
+  const raw = data.data?.shop?.metafield?.value;
+  if (raw) {
+    try { return JSON.parse(raw); } catch {}
+  }
+  return {};
+}
+
+async function saveData(current: Record<string, unknown>) {
+  const shopData = await adminFetch(`query { shop { id } }`);
+  const shopId = shopData.data?.shop?.id;
+  if (shopId) {
+    await adminFetch(`
+      mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
+        metafieldsSet(metafields: $metafields) { metafields { key } userErrors { message } }
+      }
+    `, { metafields: [{ ownerId: shopId, namespace: "atheles", key: "site_images", type: "json", value: JSON.stringify(current) }] });
+  }
+}
+
 export async function GET() {
   try {
-    const data = await adminFetch(`
-      query { shop { metafield(namespace: "atheles", key: "site_images") { value } } }
-    `);
-    const raw = data.data?.shop?.metafield?.value;
-    if (raw) {
-      try { return NextResponse.json({ images: { ...DEFAULT_IMAGES, ...JSON.parse(raw) } }); } catch {}
+    const stored = await getStoredData();
+    const images: Record<string, SlotData> = {};
+    for (const key of Object.keys(DEFAULT_IMAGES)) {
+      images[key] = normalizeSlot(stored[key], key);
+      // Ensure at least the default if media is empty
+      if (images[key].media.length === 0) {
+        images[key].media = [DEFAULT_IMAGES[key] || ""];
+      }
     }
-    return NextResponse.json({ images: DEFAULT_IMAGES });
+    return NextResponse.json({ images });
   } catch {
-    return NextResponse.json({ images: DEFAULT_IMAGES });
+    const images: Record<string, SlotData> = {};
+    for (const key of Object.keys(DEFAULT_IMAGES)) {
+      images[key] = { media: [DEFAULT_IMAGES[key]!], transition: "crossfade", interval: 6000 };
+    }
+    return NextResponse.json({ images });
   }
 }
 
@@ -60,9 +111,24 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const { key, file } = await request.json();
+  const body = await request.json();
 
-  // If file is a data URL, upload to blob
+  // ── Bulk update: save entire slot config (media array, transition, interval)
+  if (body.slot && body.slotData) {
+    const { slot, slotData } = body as { slot: string; slotData: SlotData };
+    const current = await getStoredData();
+    current[slot] = {
+      media: slotData.media,
+      transition: slotData.transition,
+      interval: slotData.interval,
+    };
+    await saveData(current);
+    return NextResponse.json({ success: true, slotData: current[slot] });
+  }
+
+  // ── Upload a single file to a slot (appends to media array)
+  const { key, file } = body;
+
   if (file && file.startsWith("data:")) {
     if (!process.env.BLOB_READ_WRITE_TOKEN) {
       return NextResponse.json({ error: "blob storage not configured" }, { status: 500 });
@@ -83,64 +149,41 @@ export async function POST(request: Request) {
     const filename = `site-images/${key}-${Date.now()}.${ext}`;
     const blob = await put(filename, buffer, { access: "public", contentType, addRandomSuffix: false });
 
-    // Save to metafield
-    const currentData = await adminFetch(`
-      query { shop { metafield(namespace: "atheles", key: "site_images") { value } } }
-    `);
-    const current = currentData.data?.shop?.metafield?.value ? JSON.parse(currentData.data.shop.metafield.value) : {};
-    current[key] = blob.url;
-
-    const shopData = await adminFetch(`query { shop { id } }`);
-    const shopId = shopData.data?.shop?.id;
-    if (shopId) {
-      await adminFetch(`
-        mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
-          metafieldsSet(metafields: $metafields) { metafields { key } userErrors { message } }
-        }
-      `, { metafields: [{ ownerId: shopId, namespace: "atheles", key: "site_images", type: "json", value: JSON.stringify(current) }] });
+    // Add to slot media array
+    const current = await getStoredData();
+    const slot = normalizeSlot(current[key], key);
+    // Replace default image if it's the only one
+    if (slot.media.length === 1 && DEFAULT_IMAGES[key] && slot.media[0] === DEFAULT_IMAGES[key]) {
+      slot.media = [blob.url];
+    } else {
+      slot.media.push(blob.url);
     }
+    current[key] = slot;
+    await saveData(current);
 
-    return NextResponse.json({ success: true, url: blob.url });
+    return NextResponse.json({ success: true, url: blob.url, slotData: slot });
   }
 
-  // If file is a URL (external), just save it
+  // If file is a URL (external), add to media array
   if (file && file.startsWith("http")) {
-    const currentData = await adminFetch(`
-      query { shop { metafield(namespace: "atheles", key: "site_images") { value } } }
-    `);
-    const current = currentData.data?.shop?.metafield?.value ? JSON.parse(currentData.data.shop.metafield.value) : {};
-    current[key] = file;
-
-    const shopData = await adminFetch(`query { shop { id } }`);
-    const shopId = shopData.data?.shop?.id;
-    if (shopId) {
-      await adminFetch(`
-        mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
-          metafieldsSet(metafields: $metafields) { metafields { key } userErrors { message } }
-        }
-      `, { metafields: [{ ownerId: shopId, namespace: "atheles", key: "site_images", type: "json", value: JSON.stringify(current) }] });
+    const current = await getStoredData();
+    const slot = normalizeSlot(current[key], key);
+    if (slot.media.length === 1 && DEFAULT_IMAGES[key] && slot.media[0] === DEFAULT_IMAGES[key]) {
+      slot.media = [file];
+    } else {
+      slot.media.push(file);
     }
+    current[key] = slot;
+    await saveData(current);
 
-    return NextResponse.json({ success: true, url: file });
+    return NextResponse.json({ success: true, url: file, slotData: slot });
   }
 
   // Reset to default
   if (key && !file) {
-    const currentData = await adminFetch(`
-      query { shop { metafield(namespace: "atheles", key: "site_images") { value } } }
-    `);
-    const current = currentData.data?.shop?.metafield?.value ? JSON.parse(currentData.data.shop.metafield.value) : {};
+    const current = await getStoredData();
     delete current[key];
-
-    const shopData = await adminFetch(`query { shop { id } }`);
-    const shopId = shopData.data?.shop?.id;
-    if (shopId) {
-      await adminFetch(`
-        mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
-          metafieldsSet(metafields: $metafields) { metafields { key } userErrors { message } }
-        }
-      `, { metafields: [{ ownerId: shopId, namespace: "atheles", key: "site_images", type: "json", value: JSON.stringify(current) }] });
-    }
+    await saveData(current);
 
     return NextResponse.json({ success: true, url: DEFAULT_IMAGES[key] || null });
   }

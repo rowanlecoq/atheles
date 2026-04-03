@@ -6,7 +6,7 @@ import {
   ScrollFloat,
   SplitText,
 } from "components/animations";
-import Image from "next/image";
+import { SlideshowMedia } from "components/slideshow-media";
 
 export function BrandStory() {
   return (
@@ -39,13 +39,11 @@ export function BrandStory() {
           </p>
         </FadeIn>
 
-        {/* Statue image */}
+        {/* Statue image — now supports slideshow */}
         <GradualBlur className="flex items-center justify-center">
           <div className="relative h-[200px] w-full overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark sm:h-[240px] md:h-[280px]">
-            <Image
-              src="/statues/roman-emperor-pergamon.jpg"
-              alt=""
-              fill
+            <SlideshowMedia
+              slotKey="brand_story"
               className="object-cover object-[center_24%] opacity-70 grayscale"
               sizes="(min-width: 768px) 50vw, 100vw"
             />

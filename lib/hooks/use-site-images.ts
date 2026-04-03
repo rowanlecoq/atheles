@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 
 const DEFAULT_IMAGES: Record<string, string> = {
   hero_bg: "/statues/greek-god-hero.png",
@@ -12,34 +12,114 @@ const DEFAULT_IMAGES: Record<string, string> = {
   interstitial: "/statues/hadrian-cuirassed.jpg",
 };
 
-let cachedImages: Record<string, string> | null = null;
+type SlotData = {
+  media: string[];
+  transition: "crossfade" | "slide" | "fade";
+  interval: number;
+};
+
+let cachedSlots: Record<string, SlotData> | null = null;
 let fetchPromise: Promise<void> | null = null;
+
+/** Normalise legacy string or new SlotData */
+function normalizeSlot(val: unknown, key: string): SlotData {
+  if (!val) return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000 };
+  if (typeof val === "string") return { media: [val], transition: "crossfade", interval: 6000 };
+  if (typeof val === "object" && val !== null) {
+    const obj = val as Record<string, unknown>;
+    return {
+      media: Array.isArray(obj.media) ? obj.media.filter((m): m is string => typeof m === "string") : [],
+      transition: (["crossfade", "slide", "fade"].includes(obj.transition as string) ? obj.transition : "crossfade") as SlotData["transition"],
+      interval: typeof obj.interval === "number" ? obj.interval : 6000,
+    };
+  }
+  return { media: [DEFAULT_IMAGES[key] || ""], transition: "crossfade", interval: 6000 };
+}
 
 function fetchImages() {
   if (fetchPromise) return fetchPromise;
   fetchPromise = fetch("/api/admin/images")
     .then((r) => (r.ok ? r.json() : null))
     .then((d) => {
-      if (d?.images) cachedImages = d.images;
+      if (d?.images) {
+        const slots: Record<string, SlotData> = {};
+        for (const [k, v] of Object.entries(d.images)) {
+          slots[k] = normalizeSlot(v, k);
+        }
+        cachedSlots = slots;
+      }
     })
     .catch(() => {});
   return fetchPromise;
 }
 
+/** Returns the first media URL for a slot (backwards-compatible) */
 export function useSiteImage(key: string): string {
-  const [src, setSrc] = useState(cachedImages?.[key] || DEFAULT_IMAGES[key] || "");
+  const fallback = DEFAULT_IMAGES[key] || "";
+  const [src, setSrc] = useState(cachedSlots?.[key]?.media[0] || fallback);
 
   useEffect(() => {
-    if (cachedImages) {
-      setSrc(cachedImages[key] || DEFAULT_IMAGES[key] || "");
+    if (cachedSlots) {
+      setSrc(cachedSlots[key]?.media[0] || fallback);
       return;
     }
     fetchImages().then(() => {
-      setSrc(cachedImages?.[key] || DEFAULT_IMAGES[key] || "");
+      setSrc(cachedSlots?.[key]?.media[0] || fallback);
     });
-  }, [key]);
+  }, [key, fallback]);
 
   return src;
+}
+
+/** Returns full slideshow data for a slot: current src, all media, transition config */
+export function useSiteSlideshow(key: string) {
+  const fallback = DEFAULT_IMAGES[key] || "";
+  const defaultSlot: SlotData = { media: [fallback], transition: "crossfade", interval: 6000 };
+
+  const [slot, setSlot] = useState<SlotData>(cachedSlots?.[key] || defaultSlot);
+  const [index, setIndex] = useState(0);
+  const [prevIndex, setPrevIndex] = useState(0);
+  const [transitioning, setTransitioning] = useState(false);
+
+  useEffect(() => {
+    if (cachedSlots) {
+      setSlot(cachedSlots[key] || defaultSlot);
+      return;
+    }
+    fetchImages().then(() => {
+      setSlot(cachedSlots?.[key] || defaultSlot);
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [key]);
+
+  // Slideshow timer
+  useEffect(() => {
+    if (slot.media.length <= 1) return;
+    const timer = setInterval(() => {
+      setTransitioning(true);
+      setPrevIndex((prev) => {
+        // prev is old index; we set it to current before advancing
+        return index;
+      });
+      setTimeout(() => {
+        setIndex((i) => (i + 1) % slot.media.length);
+        setTimeout(() => setTransitioning(false), 50);
+      }, 0);
+    }, slot.interval);
+    return () => clearInterval(timer);
+  }, [slot.media.length, slot.interval, index]);
+
+  const currentSrc = slot.media[index] || fallback;
+  const prevSrc = slot.media[prevIndex] || currentSrc;
+
+  return {
+    currentSrc,
+    prevSrc,
+    transitioning,
+    slot,
+    index,
+    isSlideshow: slot.media.length > 1,
+  };
 }
 
 export function isVideoSrc(src: string): boolean {

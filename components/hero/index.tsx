@@ -1,45 +1,23 @@
 "use client";
 
 import { GoldParticles } from "components/gold-particles";
-import { useSiteImage, isVideoSrc, isYouTubeSrc, getYouTubeEmbedUrl } from "lib/hooks/use-site-images";
-import Image from "next/image";
+import { SlideshowMedia } from "components/slideshow-media";
 import { HeroCategoryNav } from "./hero-category-nav";
 import { HeroCenter } from "./hero-center";
 
 export function Hero() {
-  const heroBg = useSiteImage("hero_bg");
-  const heroLeft = useSiteImage("hero_left");
-  const heroRight = useSiteImage("hero_right");
-
   return (
     <section className="relative overflow-x-hidden bg-brand-dark">
-      {/* Background — supports video, YouTube, or image */}
-      {isYouTubeSrc(heroBg) ? (
-        <iframe
-          src={getYouTubeEmbedUrl(heroBg) || ""}
-          className="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] opacity-15 grayscale pointer-events-none"
-          allow="autoplay"
-          style={{ border: 0 }}
-        />
-      ) : isVideoSrc(heroBg) ? (
-        <video
-          src={heroBg}
-          autoPlay
-          muted
-          loop
-          playsInline
-          className="absolute inset-0 h-full w-full object-cover opacity-15 grayscale"
-        />
-      ) : (
-        <Image
-          src={heroBg}
-          alt=""
-          fill
-          priority
+      {/* Background — slideshow with crossfade */}
+      <div className="absolute inset-0">
+        <SlideshowMedia
+          slotKey="hero_bg"
           className="object-cover object-center opacity-10 grayscale"
+          iframeClass="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] opacity-15 grayscale pointer-events-none"
           sizes="100vw"
+          priority
         />
-      )}
+      </div>
       <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/76 via-brand-dark/70 to-brand-dark/90" />
       <GoldParticles count={16} />
 
@@ -48,13 +26,12 @@ export function Hero() {
         {/* === Left panel === */}
         <div className="hidden overflow-hidden rounded-sm md:block">
           <div className="relative h-full w-full">
-            {isYouTubeSrc(heroLeft) ? (
-              <iframe src={getYouTubeEmbedUrl(heroLeft) || ""} className="h-full w-full opacity-50 grayscale pointer-events-none" allow="autoplay" style={{ border: 0 }} />
-            ) : isVideoSrc(heroLeft) ? (
-              <video src={heroLeft} autoPlay muted loop playsInline className="h-full w-full object-cover opacity-50 grayscale" />
-            ) : (
-              <Image src={heroLeft} alt="" fill className="object-cover object-top opacity-50 grayscale" sizes="(min-width: 768px) 25vw, 0px" />
-            )}
+            <SlideshowMedia
+              slotKey="hero_left"
+              className="object-cover object-top opacity-50 grayscale"
+              iframeClass="h-full w-full opacity-50 grayscale pointer-events-none"
+              sizes="(min-width: 768px) 25vw, 0px"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/60 via-transparent to-brand-dark/30" />
           </div>
         </div>
@@ -68,13 +45,12 @@ export function Hero() {
         {/* === Right panel === */}
         <div className="hidden overflow-hidden rounded-sm md:block">
           <div className="relative h-full w-full">
-            {isYouTubeSrc(heroRight) ? (
-              <iframe src={getYouTubeEmbedUrl(heroRight) || ""} className="h-full w-full opacity-50 grayscale pointer-events-none" allow="autoplay" style={{ border: 0 }} />
-            ) : isVideoSrc(heroRight) ? (
-              <video src={heroRight} autoPlay muted loop playsInline className="h-full w-full object-cover opacity-50 grayscale" />
-            ) : (
-              <Image src={heroRight} alt="" fill className="object-cover object-top opacity-50 grayscale" sizes="(min-width: 768px) 25vw, 0px" />
-            )}
+            <SlideshowMedia
+              slotKey="hero_right"
+              className="object-cover object-top opacity-50 grayscale"
+              iframeClass="h-full w-full opacity-50 grayscale pointer-events-none"
+              sizes="(min-width: 768px) 25vw, 0px"
+            />
             <div className="absolute inset-0 bg-gradient-to-t from-brand-dark/60 via-transparent to-brand-dark/30" />
           </div>
         </div>
