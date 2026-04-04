@@ -288,16 +288,16 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     className="tap-target mb-1 flex min-h-[48px] items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-dark-gold/10"
                   >
                     {loggedIn ? (
-                      <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-brand-gold bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
+                      <span className="relative flex h-11 w-11 items-center justify-center rounded-full bg-brand-dark-gold/20 text-sm font-bold text-brand-gold">
                         {initials}
                         {avatar && (
                           // eslint-disable-next-line @next/next/no-img-element
                           <img
                             src={avatar}
                             alt="Profile"
-                            width={36}
-                            height={36}
-                            className="absolute inset-0 h-9 w-9 rounded-full border border-brand-gold object-cover"
+                            width={44}
+                            height={44}
+                            className="absolute inset-0 h-11 w-11 rounded-full object-cover"
                           />
                         )}
                       </span>
