@@ -53,7 +53,7 @@ export async function GET() {
       champion: process.env.DISCOUNT_CHAMPION,
     };
 
-    return NextResponse.json({
+    const response = NextResponse.json({
       user: {
         id: customer.id,
         email: customer.email,
@@ -75,6 +75,15 @@ export async function GET() {
           : (discountCodes[tierName] || null),
       },
     });
+
+    // Set admin cookie so middleware can bypass site lock for admins
+    if (customer.isAdmin) {
+      response.cookies.set("atheles-admin", "1", { path: "/", httpOnly: false, sameSite: "lax", maxAge: 60 * 60 * 24 * 7 });
+    } else {
+      response.cookies.delete("atheles-admin");
+    }
+
+    return response;
   } catch {
     return NextResponse.json({ user: null });
   }

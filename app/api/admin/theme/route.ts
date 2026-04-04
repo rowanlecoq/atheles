@@ -45,6 +45,9 @@ export type SiteTheme = {
   logoDefault: string | null;
   logoHover: string | null;
   logoSmall: string | null; // mobile/footer
+  // Main background image/video
+  mainBackground: string | null;
+  mainBackgroundOpacity: number; // 0–100
 };
 
 const DEFAULT_THEME: SiteTheme = {
@@ -58,6 +61,8 @@ const DEFAULT_THEME: SiteTheme = {
   logoDefault: null,
   logoHover: null,
   logoSmall: null,
+  mainBackground: null,
+  mainBackgroundOpacity: 15,
 };
 
 export async function GET() {
@@ -83,7 +88,7 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { theme, logoFile, logoType } = await request.json();
+    const { theme, logoFile, logoType, backgroundFile } = await request.json();
 
     // Handle logo upload if present
     if (logoFile && logoType) {
@@ -123,6 +128,45 @@ export async function POST(request: Request) {
         }
       }
       return NextResponse.json({ error: "logo upload failed" }, { status: 400 });
+    }
+
+    // Handle background upload
+    if (backgroundFile) {
+      const matches = backgroundFile.match(/^data:(.+);base64,(.+)$/);
+      if (matches && process.env.BLOB_READ_WRITE_TOKEN) {
+        const contentType = matches[1] as string;
+        const buffer = Buffer.from(matches[2] as string, "base64");
+        // 50MB limit for videos, 10MB for images
+        const maxSize = contentType.startsWith("video/") ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+        if (buffer.byteLength <= maxSize) {
+          const ext = contentType.split("/")[1] || "png";
+          const filename = `site-theme/main-bg-${Date.now()}.${ext}`;
+          const blob = await put(filename, buffer, { access: "public", contentType, addRandomSuffix: false });
+
+          const currentData = await adminFetch(`
+            query { shop { metafield(namespace: "atheles", key: "site_theme") { value } } }
+          `);
+          const current = currentData.data?.shop?.metafield?.value
+            ? { ...DEFAULT_THEME, ...JSON.parse(currentData.data.shop.metafield.value) }
+            : { ...DEFAULT_THEME };
+
+          current.mainBackground = blob.url;
+
+          const shopData = await adminFetch(`query { shop { id } }`);
+          const shopId = shopData.data?.shop?.id;
+          if (shopId) {
+            await adminFetch(`
+              mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
+                metafieldsSet(metafields: $metafields) { metafields { key } userErrors { message } }
+              }
+            `, { metafields: [{ ownerId: shopId, namespace: "atheles", key: "site_theme", type: "json", value: JSON.stringify(current) }] });
+          }
+
+          try { revalidateTag("site-theme"); } catch {}
+          return NextResponse.json({ success: true, theme: current });
+        }
+      }
+      return NextResponse.json({ error: "background upload failed" }, { status: 400 });
     }
 
     // Save theme settings

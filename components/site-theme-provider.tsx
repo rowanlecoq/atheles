@@ -13,6 +13,8 @@ type SiteTheme = {
   logoDefault: string | null;
   logoHover: string | null;
   logoSmall: string | null;
+  mainBackground: string | null;
+  mainBackgroundOpacity: number;
 };
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -85,6 +87,38 @@ export function SiteThemeProvider() {
           `;
         } else {
           gradientStyle.textContent = "";
+        }
+
+        // Main background image/video
+        const bgId = "atheles-main-background";
+        const existing = document.getElementById(bgId);
+        const mainBg = t.mainBackground;
+        const bgOpacity = t.mainBackgroundOpacity ?? 15;
+        if (mainBg) {
+          const isVideo = /\.(mp4|webm|mov)(\?|$)/i.test(mainBg);
+          if (existing) existing.remove();
+          const wrapper = document.createElement("div");
+          wrapper.id = bgId;
+          wrapper.style.cssText = `position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;`;
+          if (isVideo) {
+            const video = document.createElement("video");
+            video.src = mainBg;
+            video.autoplay = true;
+            video.muted = true;
+            video.loop = true;
+            video.playsInline = true;
+            video.style.cssText = `width:100%;height:100%;object-fit:cover;opacity:${bgOpacity / 100};`;
+            wrapper.appendChild(video);
+          } else {
+            const img = document.createElement("img");
+            img.src = mainBg;
+            img.alt = "";
+            img.style.cssText = `width:100%;height:100%;object-fit:cover;opacity:${bgOpacity / 100};`;
+            wrapper.appendChild(img);
+          }
+          document.body.prepend(wrapper);
+        } else if (existing) {
+          existing.remove();
         }
 
         // Store for logo component

@@ -72,6 +72,19 @@ export default async function RootLayout({
                   gs.textContent=".text-brand-gold,.text-brand-dark-gold,.text-brand-pale-gold,.text-brand-light-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+","+th.headingGradientTo+") !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;background-clip:text !important}.text-brand-dark-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+"99,"+th.headingGradientTo+"99) !important}";
                   document.head.appendChild(gs)
                 }
+                if(th.mainBackground){
+                  var w=document.createElement("div");w.id="atheles-main-background";
+                  w.style.cssText="position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden;";
+                  var op=(th.mainBackgroundOpacity||15)/100;
+                  if(/\\.(mp4|webm|mov)(\\?|$)/i.test(th.mainBackground)){
+                    var v=document.createElement("video");v.src=th.mainBackground;v.autoplay=true;v.muted=true;v.loop=true;v.playsInline=true;
+                    v.style.cssText="width:100%;height:100%;object-fit:cover;opacity:"+op+";";w.appendChild(v)
+                  }else{
+                    var im=document.createElement("img");im.src=th.mainBackground;im.alt="";
+                    im.style.cssText="width:100%;height:100%;object-fit:cover;opacity:"+op+";";w.appendChild(im)
+                  }
+                  document.body.prepend(w)
+                }
               }
             }catch(e){}`,
           }}

@@ -14,6 +14,8 @@ type SiteTheme = {
   logoDefault: string | null;
   logoHover: string | null;
   logoSmall: string | null;
+  mainBackground: string | null;
+  mainBackgroundOpacity: number;
 };
 
 const DEFAULT_THEME: SiteTheme = {
@@ -27,6 +29,8 @@ const DEFAULT_THEME: SiteTheme = {
   logoDefault: null,
   logoHover: null,
   logoSmall: null,
+  mainBackground: null,
+  mainBackgroundOpacity: 15,
 };
 
 const SEASONAL_PRESETS = [
@@ -49,6 +53,7 @@ export default function AdminThemePage() {
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState<string | null>(null);
+  const [uploadingBg, setUploadingBg] = useState(false);
 
   useEffect(() => {
     fetch("/api/auth/session")
@@ -109,6 +114,32 @@ export default function AdminThemePage() {
   const removeLogo = (type: "default" | "hover" | "small") => {
     const key = type === "default" ? "logoDefault" : type === "hover" ? "logoHover" : "logoSmall";
     setTheme((prev) => ({ ...prev, [key]: null }));
+  };
+
+  const uploadBackground = async (file: File) => {
+    const maxSize = file.type.startsWith("video/") ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) { alert(file.type.startsWith("video/") ? "video must be under 50mb" : "image must be under 10mb"); return; }
+    setUploadingBg(true);
+    try {
+      const reader = new FileReader();
+      const dataUrl = await new Promise<string>((resolve, reject) => {
+        reader.onload = () => resolve(reader.result as string);
+        reader.onerror = reject;
+        reader.readAsDataURL(file);
+      });
+      const res = await fetch("/api/admin/theme", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ backgroundFile: dataUrl }),
+      });
+      const d = await res.json();
+      if (d.theme) setTheme(d.theme);
+    } catch {}
+    setUploadingBg(false);
+  };
+
+  const removeBackground = () => {
+    setTheme((prev) => ({ ...prev, mainBackground: null }));
   };
 
   if (!authorized) return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-brand-grey">checking access...</p></div>;
@@ -263,6 +294,60 @@ export default function AdminThemePage() {
                   </div>
                 );
               })}
+            </div>
+          </div>
+
+          {/* Main Background */}
+          <div className="mb-6 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
+            <h2 className="mb-3 text-sm font-medium text-brand-pale-gold">main background</h2>
+            <p className="mb-4 text-xs text-brand-grey">upload an image or video that sits behind the entire website. this is a subtle, fixed background that won&apos;t interfere with any other content.</p>
+
+            {theme.mainBackground ? (
+              <div className="mb-4">
+                <div className="relative overflow-hidden rounded-lg border border-brand-dark-gold/10" style={{ aspectRatio: "21/9" }}>
+                  {theme.mainBackground.match(/\.(mp4|webm|mov)(\?|$)/i) ? (
+                    // eslint-disable-next-line jsx-a11y/media-has-caption
+                    <video src={theme.mainBackground} className="h-full w-full object-cover" style={{ opacity: theme.mainBackgroundOpacity / 100 }} autoPlay muted loop playsInline />
+                  ) : (
+                    // eslint-disable-next-line @next/next/no-img-element
+                    <img src={theme.mainBackground} alt="Background preview" className="h-full w-full object-cover" style={{ opacity: theme.mainBackgroundOpacity / 100 }} />
+                  )}
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <p className="rounded bg-black/50 px-3 py-1 text-xs text-white">preview at {theme.mainBackgroundOpacity}% opacity</p>
+                  </div>
+                </div>
+                <div className="mt-3 flex items-center gap-4">
+                  <label className="cursor-pointer text-xs text-brand-gold hover:text-brand-pale-gold">
+                    {uploadingBg ? "uploading..." : "replace"}
+                    <input type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" disabled={uploadingBg} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadBackground(f); e.target.value = ""; }} className="hidden" />
+                  </label>
+                  <button type="button" onClick={removeBackground} className="text-xs text-brand-grey hover:text-red-400">remove</button>
+                </div>
+              </div>
+            ) : (
+              <label className={`flex cursor-pointer flex-col items-center gap-2 rounded-lg border-2 border-dashed border-brand-dark-gold/20 p-8 transition-colors hover:border-brand-gold/40 ${uploadingBg ? "opacity-50" : ""}`}>
+                <span className="text-2xl">🖼️</span>
+                <span className="text-xs text-brand-grey">{uploadingBg ? "uploading..." : "click to upload an image or video"}</span>
+                <span className="text-[10px] text-brand-grey/60">images up to 10mb, videos up to 50mb</span>
+                <input type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" disabled={uploadingBg} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadBackground(f); e.target.value = ""; }} className="hidden" />
+              </label>
+            )}
+
+            <div className="mt-4">
+              <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">opacity ({theme.mainBackgroundOpacity}%)</label>
+              <input
+                type="range"
+                min={0}
+                max={100}
+                value={theme.mainBackgroundOpacity}
+                onChange={(e) => setTheme((prev) => ({ ...prev, mainBackgroundOpacity: parseInt(e.target.value) }))}
+                className="w-full accent-brand-gold"
+              />
+              <div className="mt-1 flex justify-between text-[10px] text-brand-grey/50">
+                <span>invisible</span>
+                <span>subtle</span>
+                <span>full</span>
+              </div>
             </div>
           </div>
 

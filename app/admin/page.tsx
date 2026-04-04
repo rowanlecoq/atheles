@@ -85,6 +85,12 @@ export default function AdminDashboard() {
           icon="💬"
         />
         <AdminCard
+          title="site lock"
+          description="lock the entire site for maintenance or emergencies with an optional countdown timer."
+          href="/admin/site-lock"
+          icon="🔒"
+        />
+        <AdminCard
           title="shopify admin"
           description="go to your shopify dashboard for orders, products, and more."
           href={`https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || "admin.shopify.com"}/admin`}
