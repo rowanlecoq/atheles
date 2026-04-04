@@ -5,28 +5,30 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
-export function AccountIcon() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [initials, setInitials] = useState<string | null>(null);
-  const [avatar, setAvatar] = useState<string | null>(null);
-  const pathname = usePathname();
+function getCachedSession() {
+  try {
+    if (!document.cookie.includes("atheles-logged-in=1")) return null;
+    const cached = sessionStorage.getItem("atheles-session");
+    if (cached) return JSON.parse(cached);
+  } catch {}
+  return null;
+}
 
-  // Show cached avatar instantly before session loads
-  useEffect(() => {
-    if (!document.cookie.includes("atheles-logged-in=1")) return;
-    try {
-      const cached = sessionStorage.getItem("atheles-session");
-      if (cached) {
-        const u = JSON.parse(cached);
-        const key = `atheles-avatar-${u.email}`;
-        const av = sessionStorage.getItem(key);
-        if (av) setAvatar(av);
-        setLoggedIn(true);
-        const n = u.name || u.email || "A";
-        setInitials(n.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2));
-      }
-    } catch {}
-  }, []);
+export function AccountIcon() {
+  const [loggedIn, setLoggedIn] = useState(() => getCachedSession() !== null);
+  const [initials, setInitials] = useState<string | null>(() => {
+    const u = getCachedSession();
+    if (!u) return null;
+    const n = u.name || u.email || "A";
+    return n.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+  });
+  const [avatar, setAvatar] = useState<string | null>(() => {
+    const u = getCachedSession();
+    if (!u) return null;
+    try { return sessionStorage.getItem(`atheles-avatar-${u.email}`); } catch {}
+    return null;
+  });
+  const pathname = usePathname();
 
   const refreshSession = useCallback(() => {
     fetch("/api/auth/session")

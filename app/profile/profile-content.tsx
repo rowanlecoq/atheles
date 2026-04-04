@@ -177,7 +177,16 @@ export default function ProfileContent() {
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [avatar, setAvatar] = useState<string | null>(() => {
+    try {
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        return sessionStorage.getItem(`atheles-avatar-${u.email}`);
+      }
+    } catch {}
+    return null;
+  });
   const [avatarError, setAvatarError] = useState("");
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [editing, setEditing] = useState(false);

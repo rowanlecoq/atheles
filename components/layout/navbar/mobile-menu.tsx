@@ -117,9 +117,35 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const searchParams = useSearchParams();
   const routeKey = `${pathname}?${searchParams?.toString() ?? ""}`;
   const [isOpen, setIsOpen] = useState(false);
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [userName, setUserName] = useState("");
-  const [avatar, setAvatar] = useState<string | null>(null);
+  const [loggedIn, setLoggedIn] = useState(() => {
+    try {
+      if (!document.cookie.includes("atheles-logged-in=1")) return false;
+      return sessionStorage.getItem("atheles-session") !== null;
+    } catch {}
+    return false;
+  });
+  const [userName, setUserName] = useState(() => {
+    try {
+      if (!document.cookie.includes("atheles-logged-in=1")) return "";
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        return u.name || u.firstName || "";
+      }
+    } catch {}
+    return "";
+  });
+  const [avatar, setAvatar] = useState<string | null>(() => {
+    try {
+      if (!document.cookie.includes("atheles-logged-in=1")) return null;
+      const cached = sessionStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        return sessionStorage.getItem(`atheles-avatar-${u.email}`);
+      }
+    } catch {}
+    return null;
+  });
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
