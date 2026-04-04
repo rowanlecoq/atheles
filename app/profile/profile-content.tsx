@@ -255,24 +255,25 @@ export default function ProfileContent() {
           sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
           setLoading(false);
         } else {
-          // Session invalid — clean up and redirect once
-          sessionStorage.removeItem("atheles-session");
-          sessionStorage.removeItem("atheles-avatar");
-
+          // Session returned null — use cache if available
+          try {
+            const fallback = sessionStorage.getItem("atheles-session");
+            if (fallback) { applyUser(JSON.parse(fallback)); setLoading(false); return; }
+          } catch {}
           document.cookie = "atheles-logged-in=; max-age=0; path=/";
           setUser(null);
           setLoading(false);
           setRedirecting(true);
-          // Use setTimeout to ensure state updates render before redirect
-          setTimeout(() => {
-            window.location.replace("/login");
-          }, 100);
+          setTimeout(() => { window.location.replace("/login"); }, 100);
         }
       })
       .catch(() => {
-        sessionStorage.removeItem("atheles-session");
-        document.cookie = "atheles-logged-in=; max-age=0; path=/";
-        setUser(null);
+        // Network error — use cache
+        try {
+          const fallback = sessionStorage.getItem("atheles-session");
+          if (fallback) { applyUser(JSON.parse(fallback)); }
+        } catch {}
+        setLoading(false);
         setLoading(false);
         setRedirecting(true);
         setTimeout(() => {
