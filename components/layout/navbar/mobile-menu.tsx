@@ -287,18 +287,19 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     onClick={closeMobileMenu}
                     className="tap-target mb-1 flex min-h-[48px] items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-dark-gold/10"
                   >
-                    {avatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={avatar}
-                        alt="Profile"
-                        width={36}
-                        height={36}
-                        className="h-9 w-9 rounded-full border border-brand-gold object-cover"
-                      />
-                    ) : loggedIn && initials ? (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-gold bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
+                    {loggedIn ? (
+                      <span className="relative flex h-9 w-9 items-center justify-center rounded-full border border-brand-gold bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
                         {initials}
+                        {avatar && (
+                          // eslint-disable-next-line @next/next/no-img-element
+                          <img
+                            src={avatar}
+                            alt="Profile"
+                            width={36}
+                            height={36}
+                            className="absolute inset-0 h-9 w-9 rounded-full border border-brand-gold object-cover"
+                          />
+                        )}
                       </span>
                     ) : (
                       <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark-gold/10">

@@ -112,18 +112,19 @@ export function AccountIcon() {
       className="hidden h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold md:flex"
       aria-label="Account"
     >
-      {loggedIn && avatar ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={avatar}
-          alt="Profile"
-          width={36}
-          height={36}
-          className="h-9 w-9 rounded-full object-cover transition-transform duration-200 hover:scale-110"
-        />
-      ) : loggedIn && initials ? (
-        <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold transition-transform duration-200 hover:scale-110">
+      {loggedIn ? (
+        <span className="relative flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold transition-transform duration-200 hover:scale-110">
           {initials}
+          {avatar && (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={avatar}
+              alt="Profile"
+              width={36}
+              height={36}
+              className="absolute inset-0 h-9 w-9 rounded-full object-cover"
+            />
+          )}
         </span>
       ) : (
         <UserIcon className="h-5 w-5" />

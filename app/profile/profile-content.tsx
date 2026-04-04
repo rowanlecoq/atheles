@@ -572,19 +572,18 @@ export default function ProfileContent() {
             className={`flex h-32 w-32 items-center justify-center overflow-hidden rounded-full sm:h-36 sm:w-36 ${avatar ? "cursor-pointer" : ""} bg-brand-dark-gold/20`}
             onClick={() => avatar && setShowAvatarPreview(true)}
           >
-            {avatar ? (
+            <span className="font-heading text-2xl text-brand-gold">
+              {initials}
+            </span>
+            {avatar && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 src={avatar}
                 alt="Profile photo"
                 width={144}
                 height={144}
-                className="h-full w-full rounded-full object-cover transition-transform group-hover:scale-105"
+                className="absolute inset-0 h-full w-full rounded-full object-cover transition-transform group-hover:scale-105"
               />
-            ) : (
-              <span className="font-heading text-2xl text-brand-gold">
-                {initials}
-              </span>
             )}
           </div>
           <button
