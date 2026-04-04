@@ -193,11 +193,7 @@ export default function ProfileContent() {
   const [dobYear, setDobYear] = useState("");
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
   const [discountRevealed, setDiscountRevealed] = useState(false);
-  const [profileBg, setProfileBg] = useState("none");
-  const [globalThemeOn, setGlobalThemeOn] = useState(false);
-  const [customBgImage, setCustomBgImage] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const bgFileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
   useEffect(() => {
@@ -239,29 +235,6 @@ export default function ProfileContent() {
         })
         .catch(() => {});
 
-      // Theme: server is source of truth
-      const serverTheme = u.theme || "none";
-      setProfileBg(serverTheme);
-      setGlobalThemeOn(!!u.globalTheme);
-
-      // Custom background: per-user cache key
-      const bgCacheKey = `atheles-bg-${u.email}`;
-      try {
-        const cachedBg = sessionStorage.getItem(bgCacheKey);
-        if (cachedBg) setCustomBgImage(cachedBg);
-      } catch {}
-      fetch("/api/auth/background")
-        .then((r) => (r.ok ? r.json() : null))
-        .then((d) => {
-          if (d?.background) {
-            setCustomBgImage(d.background);
-            try { sessionStorage.setItem(bgCacheKey, d.background); } catch {}
-          } else {
-            setCustomBgImage(null);
-            try { sessionStorage.removeItem(bgCacheKey); } catch {}
-          }
-        })
-        .catch(() => {});
     };
 
     // Show cached session instantly while fetching fresh data
@@ -285,7 +258,7 @@ export default function ProfileContent() {
           // Session invalid — clean up and redirect once
           sessionStorage.removeItem("atheles-session");
           sessionStorage.removeItem("atheles-avatar");
-          sessionStorage.removeItem("atheles-custom-bg");
+
           document.cookie = "atheles-logged-in=; max-age=0; path=/";
           setUser(null);
           setLoading(false);
@@ -380,7 +353,7 @@ export default function ProfileContent() {
     }).catch(() => {});
   };
 
-  const [uploadingBg, setUploadingBg] = useState(false);
+
 
   const handleSave = async () => {
     if (!firstName.trim()) {
