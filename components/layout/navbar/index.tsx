@@ -22,7 +22,7 @@ export async function Navbar() {
 
   return (
     <div className="animate-nav-enter sticky top-0 z-50">
-      <nav className="border-b border-brand-dark-gold/20 bg-brand-dark/95 px-4 py-2 backdrop-blur-sm transition-[background-color,border-color] duration-500 lg:px-6">
+      <nav className="border-b border-brand-dark-gold/20 bg-brand-dark/95 px-4 py-2 backdrop-blur-sm lg:px-6">
         <div className="flex items-center justify-between">
           {/* Left: Mobile hamburger | Desktop: Country + Favorites */}
           <div className="flex w-1/3 items-center gap-3">
