@@ -1,6 +1,7 @@
 "use client";
 
 import { FadeIn } from "components/animations";
+import { SlideshowMedia } from "components/slideshow-media";
 import { useEffect, useState } from "react";
 
 const defaultQuotes = [
@@ -31,18 +32,21 @@ export function GreekQuote() {
   }, []);
 
   return (
-    <FadeIn
-      direction="up"
-      className="border-t border-brand-dark-gold/20 py-12 sm:py-16"
-    >
-      <div className="mx-auto max-w-2xl px-4 text-center">
+    <section className="relative overflow-hidden border-t border-brand-dark-gold/20 bg-brand-dark py-12 sm:py-16">
+      <SlideshowMedia
+        slotKey="interstitial"
+        className="object-cover object-center"
+        iframeClass="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] pointer-events-none"
+        sizes="100vw"
+      />
+      <FadeIn direction="up" className="relative z-10 mx-auto max-w-2xl px-4 text-center">
         <p className="mb-3 font-heading text-sm italic leading-relaxed text-brand-pale-gold sm:text-base">
           &ldquo;{quote.text}&rdquo;
         </p>
         <p className="text-[11px] uppercase tracking-[0.2em] text-brand-grey sm:text-xs">
           &mdash; {quote.author}
         </p>
-      </div>
-    </FadeIn>
+      </FadeIn>
+    </section>
   );
 }
