@@ -191,6 +191,7 @@ function SlotEditor({
 }) {
   const [uploading, setUploading] = useState(false);
   const [saved, setSaved] = useState(false);
+  const [uploadError, setUploadError] = useState("");
   const [expanded, setExpanded] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
@@ -202,6 +203,7 @@ function SlotEditor({
     const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
     if (file.size > maxSize) { alert(`file too large (max ${isVideo ? "50" : "10"}mb)`); return; }
     setUploading(true);
+    setUploadError("");
     try {
       const reader = new FileReader();
       const dataUrl = await new Promise<string>((resolve, reject) => {
@@ -216,13 +218,18 @@ function SlotEditor({
       });
       const d = await res.json();
       if (d.slotData) { onUpdate(slotKey, d.slotData); flash(); }
-    } catch {}
+      else if (d.error) {
+        const msg = d.error.includes("blob storage") ? "file uploads require Vercel Blob — paste an image URL instead, or add BLOB_READ_WRITE_TOKEN in Vercel settings" : d.error;
+        setUploadError(msg);
+      }
+    } catch { setUploadError("upload failed — try pasting an image URL instead"); }
     setUploading(false);
   };
 
   const addUrl = async (url: string) => {
     if (!url) return;
     setUploading(true);
+    setUploadError("");
     try {
       const res = await fetch("/api/admin/images", {
         method: "POST",
@@ -231,7 +238,8 @@ function SlotEditor({
       });
       const d = await res.json();
       if (d.slotData) { onUpdate(slotKey, d.slotData); flash(); }
-    } catch {}
+      else if (d.error) setUploadError(d.error);
+    } catch { setUploadError("failed to add url"); }
     setUploading(false);
   };
 
@@ -381,6 +389,7 @@ function SlotEditor({
             </div>
             <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); e.target.value = ""; }} />
           </div>
+          {uploadError && <p className="mb-2 text-xs text-red-400">{uploadError}</p>}
 
           {/* URL input */}
           <input
