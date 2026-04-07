@@ -72,10 +72,23 @@ function MediaThumb({ src, className = "", style }: { src: string; className?: s
 
 const DEFAULT_SLOT: SlotData = { media: [], transition: "crossfade", interval: 6000, grayscale: true, opacity: 50, focusX: 50, focusY: 50 };
 
+const DEFAULT_IMAGES: Record<string, string> = {
+  hero_bg: "/statues/greek-god-hero.png",
+  hero_left: "/statues/augustus-primaporta.jpg",
+  hero_right: "/statues/trajan-louvre.jpg",
+  store_header: "/statues/greek-god-hero.png",
+  newsletter: "/statues/roman-emperor-pergamon.jpg",
+  brand_story: "/statues/roman-emperor-pergamon.jpg",
+  interstitial: "/statues/hadrian-cuirassed.jpg",
+};
+
 /* ── Realistic site preview (shows how it'll look on the actual site) ── */
 function SitePreview({ slot, slotDef }: { slot: SlotData; slotDef: (typeof IMAGE_SLOTS)[number] }) {
+  const fallbackSrc = DEFAULT_IMAGES[slotDef.key] || "";
+  const firstSrc = slot.media[0] || fallbackSrc;
+
   const [activeLayer, setActiveLayer] = useState<0 | 1>(0);
-  const [layers, setLayers] = useState<[string, string]>([slot.media[0] || "", slot.media[0] || ""]);
+  const [layers, setLayers] = useState<[string, string]>([firstSrc, firstSrc]);
   const idxRef = useRef(0);
 
   useEffect(() => {
@@ -92,7 +105,7 @@ function SitePreview({ slot, slotDef }: { slot: SlotData; slotDef: (typeof IMAGE
     return () => clearInterval(timer);
   }, [slot.media.length, slot.interval, slot.media]);
 
-  if (!slot.media[0]) {
+  if (!firstSrc) {
     return <div className={`flex w-full items-center justify-center bg-brand-dark text-xs text-brand-grey ${slotDef.aspect}`}>no media</div>;
   }
 
@@ -120,7 +133,7 @@ function SitePreview({ slot, slotDef }: { slot: SlotData; slotDef: (typeof IMAGE
       {slotDef.overlay && <div className={`absolute inset-0 z-[2] ${slotDef.overlay}`} />}
       {/* Label */}
       <div className="absolute bottom-2 left-2 z-[3] rounded bg-black/50 px-2 py-0.5 text-[10px] text-white/70 backdrop-blur-sm">
-        site preview
+        {slot.media.length === 0 ? "default image" : "site preview"}
         {slot.media.length > 1 && ` · ${idxRef.current + 1}/${slot.media.length}`}
       </div>
     </div>
@@ -293,21 +306,17 @@ function SlotEditor({
       >
         <div className="flex items-center gap-3">
           <div className="h-10 w-16 flex-shrink-0 overflow-hidden rounded bg-brand-medium-grey/10">
-            {data.media[0] ? (
-              <div className="relative h-full w-full">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={data.media[0]}
-                  alt=""
-                  className="h-full w-full object-cover"
-                  style={{
-                    objectPosition: `${data.focusX}% ${data.focusY}%`,
-                    filter: data.grayscale ? "grayscale(1)" : "none",
-                    opacity: data.opacity / 100,
-                  }}
-                />
-              </div>
-            ) : null}
+            {/* eslint-disable-next-line @next/next/no-img-element */}
+            <img
+              src={data.media[0] || DEFAULT_IMAGES[slotKey] || ""}
+              alt=""
+              className="h-full w-full object-cover"
+              style={{
+                objectPosition: `${data.focusX}% ${data.focusY}%`,
+                filter: data.grayscale ? "grayscale(1)" : "none",
+                opacity: data.media[0] ? data.opacity / 100 : 0.3,
+              }}
+            />
           </div>
           <div className="text-left">
             <p className="text-sm font-medium text-white">{slotDef.label}</p>

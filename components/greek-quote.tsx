@@ -1,6 +1,5 @@
 "use client";
 
-import { FadeIn } from "components/animations";
 import { SlideshowMedia } from "components/slideshow-media";
 import { useEffect, useState } from "react";
 
@@ -17,10 +16,8 @@ export function GreekQuote() {
   const [quote, setQuote] = useState<Quote>(defaultQuotes[0]!);
 
   useEffect(() => {
-    // Pick random default immediately
     setQuote(defaultQuotes[Math.floor(Math.random() * defaultQuotes.length)]!);
 
-    // Fetch from Shopify metafield (may have admin-edited quotes)
     fetch("/api/admin/quotes")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
@@ -39,14 +36,15 @@ export function GreekQuote() {
         iframeClass="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] pointer-events-none"
         sizes="100vw"
       />
-      <FadeIn direction="up" className="relative z-10 mx-auto max-w-2xl px-4 text-center">
+      <div className="relative z-10 mx-auto max-w-2xl px-4 text-center">
         <p className="mb-3 font-heading text-sm italic leading-relaxed text-brand-pale-gold sm:text-base">
           &ldquo;{quote.text}&rdquo;
         </p>
         <p className="text-[11px] uppercase tracking-[0.2em] text-brand-grey sm:text-xs">
           &mdash; {quote.author}
         </p>
-      </FadeIn>
+      </div>
     </section>
   );
 }
+
