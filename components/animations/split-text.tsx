@@ -46,12 +46,7 @@ export function SplitText({
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal,
   });
-  const hiddenY = prefersReducedMotion ? 0 : isMobileViewport ? 18 : 28;
-  const hiddenBlur = prefersReducedMotion
-    ? "blur(0px)"
-    : isMobileViewport
-      ? "blur(6px)"
-      : "blur(12px)";
+  const hiddenY = prefersReducedMotion ? 0 : isMobileViewport ? 16 : 24;
   const transitionDuration = prefersReducedMotion
     ? Math.min(duration, animationDurations.fast)
     : isMobileViewport
@@ -114,11 +109,10 @@ export function SplitText({
                   : "inline-block"
               }
               variants={{
-                hidden: { opacity: 0, y: hiddenY, filter: hiddenBlur },
+                hidden: { opacity: 0, y: hiddenY },
                 visible: {
                   opacity: 1,
                   y: 0,
-                  filter: "blur(0px)",
                   transition: {
                     duration: transitionDuration,
                     ease: animationEasing,

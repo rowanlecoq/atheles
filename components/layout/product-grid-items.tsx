@@ -4,17 +4,11 @@ import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { useCart } from "components/cart/cart-context";
 import {
-  animationDurations,
-  animationDurationsMobile,
   animationEasing,
   animationStaggers,
-  animationStaggersMobile,
   animationViewportMargins,
-  animationViewportMarginsMobile,
 } from "lib/animation-config";
 import { useFavorites } from "lib/hooks/use-favorites";
-import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
-import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import type { Product } from "lib/shopify/types";
 import Image from "next/image";
 import Link from "next/link";
@@ -220,25 +214,19 @@ export default function ProductGridItems({
 }: {
   products: Product[];
 }) {
-  const isMobileViewport = useMobileViewport();
-  const prefersReducedMotion = useReducedMotion();
-  const hiddenY = prefersReducedMotion ? 0 : isMobileViewport ? 14 : 22;
-  const hiddenScale = prefersReducedMotion ? 1 : isMobileViewport ? 0.985 : 0.97;
-  const hiddenBlur = prefersReducedMotion ? "blur(0px)" : isMobileViewport ? "blur(3px)" : "blur(6px)";
-  const transitionDuration = prefersReducedMotion ? animationDurations.fast : isMobileViewport ? animationDurationsMobile.normal : animationDurations.normal;
-  const staggerDelay = prefersReducedMotion ? 0.01 : isMobileViewport ? animationStaggersMobile.tight : animationStaggers.tight;
-  const viewportMargin = isMobileViewport ? animationViewportMarginsMobile.early : animationViewportMargins.early;
-
   return (
     <>
       {products.map((product, index) => (
         <motion.li
           key={product.handle}
-          initial={{ opacity: 0, y: hiddenY, scale: hiddenScale, filter: hiddenBlur }}
-          whileInView={{ opacity: 1, y: 0, scale: 1, filter: "blur(0px)" }}
-          viewport={{ once: true, margin: viewportMargin }}
-          transition={{ duration: transitionDuration, delay: index * staggerDelay, ease: animationEasing }}
-          className="transition-opacity"
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true, margin: animationViewportMargins.early }}
+          transition={{
+            duration: 0.45,
+            delay: index * animationStaggers.tight,
+            ease: animationEasing,
+          }}
         >
           <ProductCard product={product} />
         </motion.li>
