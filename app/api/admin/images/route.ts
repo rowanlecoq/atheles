@@ -82,19 +82,21 @@ async function getStoredData(): Promise<Record<string, unknown>> {
 }
 
 function purgeCache() {
-  try { revalidateTag("site-images", "seconds"); } catch {}
+  try { revalidateTag("site-images"); } catch {}
 }
 
-async function saveData(current: Record<string, unknown>) {
+async function saveData(current: Record<string, unknown>): Promise<string | null> {
   const shopData = await adminFetch(`query { shop { id } }`);
   const shopId = shopData.data?.shop?.id;
-  if (shopId) {
-    await adminFetch(`
-      mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
-        metafieldsSet(metafields: $metafields) { metafields { key } userErrors { message } }
-      }
-    `, { metafields: [{ ownerId: shopId, namespace: "atheles", key: "site_images", type: "json", value: JSON.stringify(current) }] });
-  }
+  if (!shopId) return "could not fetch shop ID from Shopify";
+  const result = await adminFetch(`
+    mutation metafieldsSet($metafields: [MetafieldsSetInput!]!) {
+      metafieldsSet(metafields: $metafields) { metafields { key } userErrors { message } }
+    }
+  `, { metafields: [{ ownerId: shopId, namespace: "atheles", key: "site_images", type: "json", value: JSON.stringify(current) }] });
+  const errors = result.data?.metafieldsSet?.userErrors;
+  if (errors?.length) return errors.map((e: { message: string }) => e.message).join(", ");
+  return null;
 }
 
 export async function GET() {
@@ -138,7 +140,8 @@ export async function POST(request: Request) {
       focusX: slotData.focusX,
       focusY: slotData.focusY,
     };
-    await saveData(current);
+    const saveError = await saveData(current);
+    if (saveError) return NextResponse.json({ error: `save failed: ${saveError}` }, { status: 500 });
     purgeCache();
     return NextResponse.json({ success: true, slotData: current[slot] });
   }
@@ -176,7 +179,8 @@ export async function POST(request: Request) {
       slot.media.push(blob.url);
     }
     current[key] = slot;
-    await saveData(current);
+    const saveError1 = await saveData(current);
+    if (saveError1) return NextResponse.json({ error: `save failed: ${saveError1}` }, { status: 500 });
 
     return NextResponse.json({ success: true, url: blob.url, slotData: slot });
   }
@@ -191,7 +195,8 @@ export async function POST(request: Request) {
       slot.media.push(file);
     }
     current[key] = slot;
-    await saveData(current);
+    const saveError2 = await saveData(current);
+    if (saveError2) return NextResponse.json({ error: `save failed: ${saveError2}` }, { status: 500 });
 
     return NextResponse.json({ success: true, url: file, slotData: slot });
   }

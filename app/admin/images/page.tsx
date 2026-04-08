@@ -127,7 +127,18 @@ function SitePreview({ slot, slotDef }: { slot: SlotData; slotDef: (typeof IMAGE
           }}
         >
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={layers[i as 0 | 1]!} alt="" className="h-full w-full object-cover" style={{ objectPosition: objPos }} />
+          <img
+            src={layers[i as 0 | 1]!}
+            alt=""
+            className="h-full w-full object-cover"
+            style={{ objectPosition: objPos }}
+            onError={(e) => {
+              if (fallbackSrc && !e.currentTarget.dataset.fallbackTried) {
+                e.currentTarget.dataset.fallbackTried = "1";
+                e.currentTarget.src = fallbackSrc;
+              }
+            }}
+          />
         </div>
       ))}
       {/* Site overlay (gradients matching the real site) */}
@@ -142,10 +153,12 @@ function SitePreview({ slot, slotDef }: { slot: SlotData; slotDef: (typeof IMAGE
 }
 
 /* ── Focal point picker — click on image to set focus ── */
-function FocalPointPicker({ slot, onChange }: { slot: SlotData; onChange: (x: number, y: number) => void }) {
+function FocalPointPicker({ slot, onChange, slotKey }: { slot: SlotData; onChange: (x: number, y: number) => void; slotKey: string }) {
   const ref = useRef<HTMLDivElement>(null);
   const src = slot.media[0];
-  if (!src || isVideoUrl(src)) return null;
+  const fallback = DEFAULT_IMAGES[slotKey] || "";
+  // Skip non-image media (videos, YouTube)
+  if (!src || isVideoUrl(src) || getYouTubeThumb(src)) return null;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -159,9 +172,21 @@ function FocalPointPicker({ slot, onChange }: { slot: SlotData; onChange: (x: nu
   return (
     <div className="mb-3">
       <p className="mb-1.5 text-xs font-medium text-brand-grey">focal point <span className="font-normal text-brand-grey/60">(click to set — controls how the image is cropped)</span></p>
-      <div ref={ref} onClick={handleClick} className="relative cursor-crosshair overflow-hidden rounded-lg border border-brand-dark-gold/20" style={{ maxHeight: 220 }}>
+      <div ref={ref} onClick={handleClick} className="relative cursor-crosshair overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark" style={{ minHeight: 120, maxHeight: 220 }}>
         {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img src={src} alt="" className="w-full object-contain" />
+        <img
+          src={src}
+          alt=""
+          className="block w-full"
+          style={{ maxHeight: 220, objectFit: "contain" }}
+          onError={(e) => {
+            // Fall back to default image if the media URL fails to load
+            if (fallback && !e.currentTarget.dataset.fallbackTried) {
+              e.currentTarget.dataset.fallbackTried = "1";
+              e.currentTarget.src = fallback;
+            }
+          }}
+        />
         {/* Crosshair at focal point */}
         <div
           className="pointer-events-none absolute z-10"
@@ -171,8 +196,6 @@ function FocalPointPicker({ slot, onChange }: { slot: SlotData; onChange: (x: nu
           <div className="absolute left-1/2 top-0 h-full w-px -translate-x-1/2 bg-brand-gold/50" style={{ height: 40, top: -7 }} />
           <div className="absolute left-0 top-1/2 h-px w-full -translate-y-1/2 bg-brand-gold/50" style={{ width: 40, left: -7 }} />
         </div>
-        {/* Dim area outside focus */}
-        <div className="pointer-events-none absolute inset-0 bg-black/20" />
       </div>
       <p className="mt-1 text-[10px] text-brand-grey/50">position: {slot.focusX}% x, {slot.focusY}% y</p>
     </div>
@@ -372,7 +395,7 @@ function SlotEditor({
           </div>
 
           {/* Focal point picker */}
-          <FocalPointPicker slot={data} onChange={updateFocus} />
+          <FocalPointPicker slot={data} onChange={updateFocus} slotKey={slotKey} />
 
           {/* Media grid — drag to reorder */}
           <div className="mb-3">
