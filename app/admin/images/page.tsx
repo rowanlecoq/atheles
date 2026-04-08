@@ -147,6 +147,7 @@ function FocalPointPicker({ slot, onChange }: { slot: SlotData; onChange: (x: nu
   if (!src || isVideoUrl(src)) return null;
 
   const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
     const rect = ref.current?.getBoundingClientRect();
     if (!rect) return;
     const x = Math.round(((e.clientX - rect.left) / rect.width) * 100);
@@ -195,22 +196,53 @@ function SlotEditor({
   const [expanded, setExpanded] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
+  // Ref tracks latest opacity so commitOpacity doesn't capture a stale closure
+  const pendingOpacity = useRef(data.opacity);
+  // Sync when external reset changes data.opacity (but not during a drag)
+  useEffect(() => { pendingOpacity.current = data.opacity; }, [data.opacity]);
 
   const flash = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
 
+  // Compress images client-side before upload to stay under Vercel's 4.5MB body limit
+  const compressImage = (file: File): Promise<string> =>
+    new Promise((resolve, reject) => {
+      const img = new Image();
+      const url = URL.createObjectURL(file);
+      img.onload = () => {
+        const MAX = 1920;
+        let { width, height } = img;
+        if (width > MAX || height > MAX) {
+          if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
+          else { width = Math.round(width * MAX / height); height = MAX; }
+        }
+        const canvas = document.createElement("canvas");
+        canvas.width = width;
+        canvas.height = height;
+        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
+        URL.revokeObjectURL(url);
+        resolve(canvas.toDataURL("image/jpeg", 0.85));
+      };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("failed to load image")); };
+      img.src = url;
+    });
+
   const uploadFile = async (file: File) => {
     const isVideo = file.type.startsWith("video/");
-    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
-    if (file.size > maxSize) { alert(`file too large (max ${isVideo ? "50" : "10"}mb)`); return; }
+    if (isVideo && file.size > 50 * 1024 * 1024) { alert("video too large (max 50mb)"); return; }
     setUploading(true);
     setUploadError("");
     try {
-      const reader = new FileReader();
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
+      let dataUrl: string;
+      if (isVideo) {
+        const reader = new FileReader();
+        dataUrl = await new Promise<string>((resolve, reject) => {
+          reader.onload = () => resolve(reader.result as string);
+          reader.onerror = reject;
+          reader.readAsDataURL(file);
+        });
+      } else {
+        dataUrl = await compressImage(file);
+      }
       const res = await fetch("/api/admin/images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -218,11 +250,13 @@ function SlotEditor({
       });
       const d = await res.json();
       if (d.slotData) { onUpdate(slotKey, d.slotData); flash(); }
-      else if (d.error) {
-        const msg = d.error.includes("blob storage") ? "file uploads require Vercel Blob — paste an image URL instead, or add BLOB_READ_WRITE_TOKEN in Vercel settings" : d.error;
+      else {
+        const msg = (d.error || "upload failed").includes("blob storage")
+          ? "file uploads require Vercel Blob — add BLOB_READ_WRITE_TOKEN in Vercel settings, or paste an image URL below"
+          : (d.error || "upload failed");
         setUploadError(msg);
       }
-    } catch { setUploadError("upload failed — try pasting an image URL instead"); }
+    } catch (err) { setUploadError(err instanceof Error ? err.message : "upload failed — try pasting an image URL instead"); }
     setUploading(false);
   };
 
@@ -238,7 +272,7 @@ function SlotEditor({
       });
       const d = await res.json();
       if (d.slotData) { onUpdate(slotKey, d.slotData); flash(); }
-      else if (d.error) setUploadError(d.error);
+      else setUploadError(d.error || "failed to add url");
     } catch { setUploadError("failed to add url"); }
     setUploading(false);
   };
@@ -262,8 +296,8 @@ function SlotEditor({
   const updateTransition = (t: SlotData["transition"]) => { const n = { ...data, transition: t }; onUpdate(slotKey, n); saveSlot(n); };
   const updateInterval = (v: number) => { const n = { ...data, interval: v }; onUpdate(slotKey, n); saveSlot(n); };
   const toggleGrayscale = () => { const n = { ...data, grayscale: !data.grayscale }; onUpdate(slotKey, n); saveSlot(n); };
-  const updateOpacity = (opacity: number) => { onUpdate(slotKey, { ...data, opacity }); };
-  const commitOpacity = () => { saveSlot(data); };
+  const updateOpacity = (opacity: number) => { pendingOpacity.current = opacity; onUpdate(slotKey, { ...data, opacity }); };
+  const commitOpacity = () => { saveSlot({ ...data, opacity: pendingOpacity.current }); };
 
   const updateFocus = (focusX: number, focusY: number) => {
     const next = { ...data, focusX, focusY };
@@ -288,13 +322,15 @@ function SlotEditor({
 
   const saveSlot = async (slotData: SlotData) => {
     try {
-      await fetch("/api/admin/images", {
+      const res = await fetch("/api/admin/images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ slot: slotKey, slotData }),
       });
-      flash();
-    } catch {}
+      const d = await res.json();
+      if (d.success) flash();
+      else setUploadError(d.error || "save failed");
+    } catch { setUploadError("save failed"); }
   };
 
   const handleDragStart = (idx: number) => setDragIdx(idx);
