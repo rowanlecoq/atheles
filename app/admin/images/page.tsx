@@ -203,13 +203,14 @@ function SlotEditor({
 
   const flash = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
 
-  // Compress images client-side before upload to stay under Vercel's 4.5MB body limit
+  // Compress images client-side to stay well under Vercel's 4.5MB body limit.
+  // Max 1200px + JPEG 0.82 keeps output under ~500KB for typical photos.
   const compressImage = (file: File): Promise<string> =>
     new Promise((resolve, reject) => {
       const img = new Image();
       const url = URL.createObjectURL(file);
       img.onload = () => {
-        const MAX = 1920;
+        const MAX = 1200;
         let { width, height } = img;
         if (width > MAX || height > MAX) {
           if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
@@ -220,15 +221,20 @@ function SlotEditor({
         canvas.height = height;
         canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
         URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL("image/jpeg", 0.85));
+        resolve(canvas.toDataURL("image/jpeg", 0.82));
       };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("failed to load image")); };
+      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image format not supported by browser — please convert to JPEG or PNG first")); };
       img.src = url;
     });
 
   const uploadFile = async (file: File) => {
     const isVideo = file.type.startsWith("video/");
     if (isVideo && file.size > 50 * 1024 * 1024) { alert("video too large (max 50mb)"); return; }
+    // HEIC/HEIF (common iPhone format) can't be decoded by browser canvas
+    if (file.type === "image/heic" || file.type === "image/heif" || file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")) {
+      setUploadError("HEIC photos from iPhone are not supported — share the photo to convert it to JPEG first, or paste an image URL below");
+      return;
+    }
     setUploading(true);
     setUploadError("");
     try {
@@ -248,13 +254,19 @@ function SlotEditor({
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ key: slotKey, file: dataUrl }),
       });
-      const d = await res.json();
-      if (d.slotData) { onUpdate(slotKey, d.slotData); flash(); }
+      // Server may return 413 "Request Entity Too Large" as plain text, not JSON
+      let d: Record<string, unknown> = {};
+      try { d = await res.json(); } catch {
+        setUploadError(res.status === 413 ? "image still too large after compression — try a smaller image or paste a URL instead" : "server error — try pasting an image URL instead");
+        setUploading(false);
+        return;
+      }
+      if (d.slotData) { onUpdate(slotKey, d.slotData as SlotData); flash(); }
       else {
-        const msg = (d.error || "upload failed").includes("blob storage")
+        const msg = String(d.error || "upload failed");
+        setUploadError(msg.includes("blob storage")
           ? "file uploads require Vercel Blob — add BLOB_READ_WRITE_TOKEN in Vercel settings, or paste an image URL below"
-          : (d.error || "upload failed");
-        setUploadError(msg);
+          : msg);
       }
     } catch (err) { setUploadError(err instanceof Error ? err.message : "upload failed — try pasting an image URL instead"); }
     setUploading(false);
