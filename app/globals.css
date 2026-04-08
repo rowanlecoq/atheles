@@ -121,6 +121,13 @@ button {
   @apply focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-brand-dark-gold/40 focus-visible:ring-offset-1 focus-visible:ring-offset-brand-dark;
 }
 
+/* Logo link: never show focus ring (prevents box appearing on mobile after navigation) */
+.atheles-logo-link:focus,
+.atheles-logo-link:focus-visible {
+  outline: none !important;
+  box-shadow: none !important;
+}
+
 input,
 textarea {
   @apply focus-visible:outline-hidden focus-visible:ring-0;
