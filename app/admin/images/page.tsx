@@ -1,5 +1,6 @@
 "use client";
 
+import { upload } from "@vercel/blob/client";
 import { useEffect, useState, useCallback, useRef } from "react";
 import { useRouter } from "next/navigation";
 
@@ -203,72 +204,37 @@ function SlotEditor({
 
   const flash = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
 
-  // Compress images client-side to stay well under Vercel's 4.5MB body limit.
-  // Max 1200px + JPEG 0.82 keeps output under ~500KB for typical photos.
-  const compressImage = (file: File): Promise<string> =>
-    new Promise((resolve, reject) => {
-      const img = new Image();
-      const url = URL.createObjectURL(file);
-      img.onload = () => {
-        const MAX = 1200;
-        let { width, height } = img;
-        if (width > MAX || height > MAX) {
-          if (width > height) { height = Math.round(height * MAX / width); width = MAX; }
-          else { width = Math.round(width * MAX / height); height = MAX; }
-        }
-        const canvas = document.createElement("canvas");
-        canvas.width = width;
-        canvas.height = height;
-        canvas.getContext("2d")!.drawImage(img, 0, 0, width, height);
-        URL.revokeObjectURL(url);
-        resolve(canvas.toDataURL("image/jpeg", 0.82));
-      };
-      img.onerror = () => { URL.revokeObjectURL(url); reject(new Error("image format not supported by browser — please convert to JPEG or PNG first")); };
-      img.src = url;
-    });
-
   const uploadFile = async (file: File) => {
     const isVideo = file.type.startsWith("video/");
     if (isVideo && file.size > 50 * 1024 * 1024) { alert("video too large (max 50mb)"); return; }
-    // HEIC/HEIF (common iPhone format) can't be decoded by browser canvas
     if (file.type === "image/heic" || file.type === "image/heif" || file.name.toLowerCase().endsWith(".heic") || file.name.toLowerCase().endsWith(".heif")) {
-      setUploadError("HEIC photos from iPhone are not supported — share the photo to convert it to JPEG first, or paste an image URL below");
+      setUploadError("HEIC photos (iPhone) aren't supported — share/airdrop the photo first to convert it to JPEG, or paste an image URL below");
       return;
     }
     setUploading(true);
     setUploadError("");
     try {
-      let dataUrl: string;
-      if (isVideo) {
-        const reader = new FileReader();
-        dataUrl = await new Promise<string>((resolve, reject) => {
-          reader.onload = () => resolve(reader.result as string);
-          reader.onerror = reject;
-          reader.readAsDataURL(file);
-        });
-      } else {
-        dataUrl = await compressImage(file);
-      }
+      // Upload directly from browser to Vercel Blob — bypasses serverless function size limits
+      const blob = await upload(file.name, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/images/upload",
+      });
+      // Register the URL in the slot metadata
       const res = await fetch("/api/admin/images", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ key: slotKey, file: dataUrl }),
+        body: JSON.stringify({ key: slotKey, file: blob.url }),
       });
-      // Server may return 413 "Request Entity Too Large" as plain text, not JSON
       let d: Record<string, unknown> = {};
-      try { d = await res.json(); } catch {
-        setUploadError(res.status === 413 ? "image still too large after compression — try a smaller image or paste a URL instead" : "server error — try pasting an image URL instead");
-        setUploading(false);
-        return;
-      }
+      try { d = await res.json(); } catch { /* non-JSON response */ }
       if (d.slotData) { onUpdate(slotKey, d.slotData as SlotData); flash(); }
-      else {
-        const msg = String(d.error || "upload failed");
-        setUploadError(msg.includes("blob storage")
-          ? "file uploads require Vercel Blob — add BLOB_READ_WRITE_TOKEN in Vercel settings, or paste an image URL below"
-          : msg);
-      }
-    } catch (err) { setUploadError(err instanceof Error ? err.message : "upload failed — try pasting an image URL instead"); }
+      else setUploadError(String(d.error || "uploaded but failed to save — try again"));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setUploadError(msg.includes("blob") || msg.includes("BLOB")
+        ? "Vercel Blob not configured — add BLOB_READ_WRITE_TOKEN in Vercel environment variables"
+        : msg);
+    }
     setUploading(false);
   };
 
