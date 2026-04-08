@@ -197,10 +197,10 @@ function SlotEditor({
   const [expanded, setExpanded] = useState(false);
   const [dragIdx, setDragIdx] = useState<number | null>(null);
   const fileRef = useRef<HTMLInputElement>(null);
-  // Ref tracks latest opacity so commitOpacity doesn't capture a stale closure
-  const pendingOpacity = useRef(data.opacity);
-  // Sync when external reset changes data.opacity (but not during a drag)
-  useEffect(() => { pendingOpacity.current = data.opacity; }, [data.opacity]);
+  const opacitySaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  // Always-fresh ref to current data so debounced save never captures stale closure
+  const latestData = useRef(data);
+  latestData.current = data;
 
   const flash = () => { setSaved(true); setTimeout(() => setSaved(false), 2000); };
 
@@ -274,8 +274,14 @@ function SlotEditor({
   const updateTransition = (t: SlotData["transition"]) => { const n = { ...data, transition: t }; onUpdate(slotKey, n); saveSlot(n); };
   const updateInterval = (v: number) => { const n = { ...data, interval: v }; onUpdate(slotKey, n); saveSlot(n); };
   const toggleGrayscale = () => { const n = { ...data, grayscale: !data.grayscale }; onUpdate(slotKey, n); saveSlot(n); };
-  const updateOpacity = (opacity: number) => { pendingOpacity.current = opacity; onUpdate(slotKey, { ...data, opacity }); };
-  const commitOpacity = () => { saveSlot({ ...data, opacity: pendingOpacity.current }); };
+  const updateOpacity = (opacity: number) => {
+    const n = { ...latestData.current, opacity };
+    latestData.current = n;
+    onUpdate(slotKey, n);
+    // Debounced save — fires 500ms after the user stops dragging, works on mobile too
+    if (opacitySaveTimer.current) clearTimeout(opacitySaveTimer.current);
+    opacitySaveTimer.current = setTimeout(() => saveSlot(latestData.current), 500);
+  };
 
   const updateFocus = (focusX: number, focusY: number) => {
     const next = { ...data, focusX, focusY };
@@ -427,7 +433,7 @@ function SlotEditor({
               <div className="h-5 w-px bg-brand-dark-gold/20" />
               <div className="flex items-center gap-2">
                 <label className="text-xs text-brand-grey">opacity</label>
-                <input type="range" min={5} max={100} step={5} value={data.opacity} onChange={(e) => updateOpacity(Number(e.target.value))} onMouseUp={commitOpacity} onTouchEnd={commitOpacity} className="h-1.5 w-20 cursor-pointer appearance-none rounded-full bg-brand-medium-grey/30 accent-brand-gold sm:w-28" />
+                <input type="range" min={5} max={100} step={5} value={data.opacity} onChange={(e) => updateOpacity(Number(e.target.value))} className="h-1.5 w-20 cursor-pointer appearance-none rounded-full bg-brand-medium-grey/30 accent-brand-gold sm:w-28" />
                 <span className="min-w-[2ch] text-xs text-brand-grey">{data.opacity}%</span>
               </div>
             </div>
