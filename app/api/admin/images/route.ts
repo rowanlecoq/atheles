@@ -82,7 +82,7 @@ async function getStoredData(): Promise<Record<string, unknown>> {
 }
 
 function purgeCache() {
-  try { revalidateTag("site-images"); } catch {}
+  try { revalidateTag("site-images", "layout"); } catch {}
 }
 
 async function saveData(current: Record<string, unknown>): Promise<string | null> {
