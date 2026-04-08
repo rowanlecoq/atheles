@@ -174,15 +174,15 @@ html { scrollbar-width: none; }
 
 @keyframes nav-enter {
   0% {
-    transform: translateY(-12px);
+    opacity: 0;
   }
   100% {
-    transform: translateY(0);
+    opacity: 1;
   }
 }
 
 .animate-nav-enter {
-  animation: nav-enter 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+  animation: nav-enter 0.4s ease-out both;
 }
 
 @keyframes category-nav-enter {
