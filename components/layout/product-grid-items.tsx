@@ -214,15 +214,13 @@ export default function ProductGridItems({
       {products.map((product, index) => (
         <motion.li
           key={product.handle}
-          initial={{ opacity: 0, y: 44 }}
+          initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: "-20px" }}
+          viewport={{ once: true, margin: "0px" }}
           transition={{
-            duration: 0.55,
-            // Base delay of 0.08s lets the page settle first.
-            // Stagger capped at 8 items so off-screen cards don't wait forever.
-            delay: Math.min(index, 8) * 0.055 + 0.08,
-            ease: [0.25, 0.46, 0.45, 0.94],
+            duration: 0.38,
+            delay: Math.min(index, 7) * 0.04,
+            ease: [0.22, 1, 0.36, 1],
           }}
         >
           <ProductCard product={product} />

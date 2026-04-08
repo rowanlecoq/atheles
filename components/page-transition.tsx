@@ -1,18 +1,11 @@
 "use client";
 
-import { animationEasing } from "lib/animation-config";
-import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import type { ReactNode } from "react";
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
-  const prevPathname = useRef(pathname);
-
-  // Detect actual navigation (pathname changed from previous render)
-  const didNavigate = prevPathname.current !== pathname;
-  if (didNavigate) prevPathname.current = pathname;
 
   useEffect(() => {
     if ("scrollRestoration" in history) {
@@ -25,17 +18,9 @@ export function PageTransition({ children }: { children: ReactNode }) {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  return (
-    <motion.div
-      key={pathname}
-      initial={{ y: 10 }}
-      animate={{ y: 0 }}
-      transition={{
-        duration: 0.2,
-        ease: animationEasing,
-      }}
-    >
-      {children}
-    </motion.div>
-  );
+  // No wrapper animation — individual sections/cards handle their own entrances.
+  // A wrapper opacity/y transition causes a full-screen black flash on every
+  // navigation (the body background shows through opacity:0, and even y-only
+  // causes a visible jump when the key remounts the entire tree).
+  return <>{children}</>;
 }
