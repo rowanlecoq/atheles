@@ -268,10 +268,10 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                         alt="Profile"
                         width={36}
                         height={36}
-                        className="h-9 w-9 rounded-full border border-brand-gold object-cover"
+                        className="h-9 w-9 rounded-full object-cover"
                       />
                     ) : loggedIn && initials ? (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-gold bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
+                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
                         {initials}
                       </span>
                     ) : (
