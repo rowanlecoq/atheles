@@ -45,13 +45,18 @@ export function HeroCenter() {
 
   return (
     <div className="flex flex-1 flex-col items-center justify-center px-4 text-center">
-      {userName && greeting && (
-        <FadeIn direction="up" delay={0.15}>
-          <p className="mb-1 text-xs lowercase tracking-[0.08em] text-brand-dark-gold sm:text-sm">
-            {greeting.text} {userName.toLowerCase()}{greeting.suffix}
-          </p>
-        </FadeIn>
-      )}
+      {/* Always reserve space for greeting to prevent layout shift */}
+      <div className="mb-1">
+        {userName && greeting ? (
+          <FadeIn direction="up" delay={0.15}>
+            <p className="text-xs lowercase tracking-[0.08em] text-brand-dark-gold sm:text-sm">
+              {greeting.text} {userName.toLowerCase()}{greeting.suffix}
+            </p>
+          </FadeIn>
+        ) : (
+          <p className="invisible text-xs sm:text-sm">&nbsp;</p>
+        )}
+      </div>
 
       <FadeIn direction="up" delay={0.3}>
         <p className="mb-2 text-sm lowercase tracking-[0.06em] text-brand-grey sm:text-base sm:tracking-[0.08em]">
