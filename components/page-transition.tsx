@@ -28,10 +28,10 @@ export function PageTransition({ children }: { children: ReactNode }) {
   return (
     <motion.div
       key={pathname}
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
+      initial={{ y: 10 }}
+      animate={{ y: 0 }}
       transition={{
-        duration: 0.25,
+        duration: 0.2,
         ease: animationEasing,
       }}
     >

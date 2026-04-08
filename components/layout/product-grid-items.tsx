@@ -3,11 +3,6 @@
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { useCart } from "components/cart/cart-context";
-import {
-  animationEasing,
-  animationStaggers,
-  animationViewportMargins,
-} from "lib/animation-config";
 import { useFavorites } from "lib/hooks/use-favorites";
 import type { Product } from "lib/shopify/types";
 import Image from "next/image";
@@ -219,13 +214,15 @@ export default function ProductGridItems({
       {products.map((product, index) => (
         <motion.li
           key={product.handle}
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: 44 }}
           whileInView={{ opacity: 1, y: 0 }}
-          viewport={{ once: true, margin: animationViewportMargins.early }}
+          viewport={{ once: true, margin: "-20px" }}
           transition={{
-            duration: 0.45,
-            delay: index * animationStaggers.tight,
-            ease: animationEasing,
+            duration: 0.55,
+            // Base delay of 0.08s lets the page settle first.
+            // Stagger capped at 8 items so off-screen cards don't wait forever.
+            delay: Math.min(index, 8) * 0.055 + 0.08,
+            ease: [0.25, 0.46, 0.45, 0.94],
           }}
         >
           <ProductCard product={product} />
