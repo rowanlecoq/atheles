@@ -7,6 +7,8 @@ import { useFavorites } from "lib/hooks/use-favorites";
 import type { Product } from "lib/shopify/types";
 import Image from "next/image";
 import Link from "next/link";
+import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
+import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { addItem } from "components/cart/actions";
@@ -209,13 +211,17 @@ export default function ProductGridItems({
 }: {
   products: Product[];
 }) {
+  const isMobileViewport = useMobileViewport();
+  const prefersReducedMotion = useReducedMotion();
+  const useBlur = !isMobileViewport && !prefersReducedMotion;
+
   return (
     <>
       {products.map((product, index) => (
         <motion.li
           key={product.handle}
-          initial={{ opacity: 0, y: 24 }}
-          whileInView={{ opacity: 1, y: 0 }}
+          initial={{ opacity: 0, y: 24, ...(useBlur ? { filter: "blur(8px)" } : {}) }}
+          whileInView={{ opacity: 1, y: 0, ...(useBlur ? { filter: "blur(0.001px)" } : {}) }}
           viewport={{ once: true, margin: "0px" }}
           transition={{
             duration: 0.38,

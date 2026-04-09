@@ -558,7 +558,7 @@ export default function ProfileContent() {
       )}
 
       {/* Avatar & Name */}
-      <FadeIn direction="up">
+      <FadeIn direction="up" duration={0.35}>
       <div className="mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
           <div
@@ -641,7 +641,7 @@ export default function ProfileContent() {
       </FadeIn>
 
       {/* Points & Tier Progress */}
-      <FadeIn direction="up" delay={0.12}>
+      <FadeIn direction="up" delay={0.08} duration={0.35}>
       <div className="relative mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/5 via-transparent to-brand-gold/3" />
@@ -1006,7 +1006,7 @@ export default function ProfileContent() {
       )}
 
       {/* Profile Settings */}
-      <FadeIn direction="up" delay={0.08}>
+      <FadeIn direction="up" delay={0.05} duration={0.35}>
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">
