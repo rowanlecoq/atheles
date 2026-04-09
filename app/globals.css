@@ -180,14 +180,12 @@ html { scrollbar-width: none; }
 }
 
 
-/* Sticky navbar slide-in + fade */
+/* Sticky navbar slide-in — translateY only, bar always fully opaque */
 @keyframes navbar-enter {
   from {
-    opacity: 0;
     transform: translateY(-10px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
@@ -196,14 +194,12 @@ html { scrollbar-width: none; }
   animation: navbar-enter 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Category nav in sticky header — fade + slide */
+/* Category nav in sticky header — translateY only, always visible */
 @keyframes category-nav-enter {
   from {
-    opacity: 0;
     transform: translateY(-6px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
