@@ -223,12 +223,12 @@ export default function ProductGridItems({
       {products.map((product, index) => (
         <motion.li
           key={product.handle}
-          initial={{ opacity: 0, y: 24, ...(blurInitial ? { filter: blurInitial } : {}) }}
+          initial={{ opacity: 0, y: 20, ...(blurInitial ? { filter: blurInitial } : {}) }}
           whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
           viewport={{ once: true, margin: "0px" }}
           transition={{
-            duration: 0.38,
-            delay: Math.min(index, 7) * 0.04,
+            duration: 0.28,
+            delay: Math.min(index, 5) * 0.03,
             ease: [0.22, 1, 0.36, 1],
           }}
         >

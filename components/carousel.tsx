@@ -31,13 +31,13 @@ export async function Carousel() {
         subtitle="Mens"
         viewAllHref="/search"
       >
-        {products.map((product) => (
+        {products.map((product, index) => (
           <div
             key={product.handle}
             data-card
             className="w-[72vw] max-w-[340px] flex-none sm:w-[45vw] sm:max-w-none md:w-auto md:max-w-none"
           >
-            <CarouselProductCard product={product} />
+            <CarouselProductCard product={product} index={index} />
           </div>
         ))}
       </CarouselControls>

@@ -7,10 +7,12 @@ function ThreeItemGridItem({
   item,
   size,
   priority,
+  index,
 }: {
   item: Product;
   size: "full" | "half";
   priority?: boolean;
+  index: number;
 }) {
   return (
     <div
@@ -20,7 +22,7 @@ function ThreeItemGridItem({
           : "md:col-span-2 md:row-span-1"
       }
     >
-      <HomepageProductCard product={item} size={size} priority={priority} />
+      <HomepageProductCard product={item} size={size} priority={priority} index={index} />
     </div>
   );
 }
@@ -46,9 +48,9 @@ export async function ThreeItemGrid() {
       </div>
 
       <div className="mx-auto grid max-w-(--breakpoint-2xl) gap-3 px-4 pb-4 sm:gap-4 md:grid-cols-6 md:grid-rows-2 md:max-h-[400px] lg:max-h-[500px]">
-        <ThreeItemGridItem size="full" item={firstProduct} priority={true} />
-        <ThreeItemGridItem size="half" item={secondProduct} priority={true} />
-        <ThreeItemGridItem size="half" item={thirdProduct} />
+        <ThreeItemGridItem size="full" item={firstProduct} priority={true} index={0} />
+        <ThreeItemGridItem size="half" item={secondProduct} priority={true} index={1} />
+        <ThreeItemGridItem size="half" item={thirdProduct} index={2} />
       </div>
     </section>
   );
