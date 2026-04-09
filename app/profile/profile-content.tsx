@@ -1,5 +1,6 @@
 "use client";
 
+import { FadeIn } from "components/animations";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -557,6 +558,7 @@ export default function ProfileContent() {
       )}
 
       {/* Avatar & Name */}
+      <FadeIn direction="up">
       <div className="mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
           <div
@@ -636,8 +638,10 @@ export default function ProfileContent() {
           member since {memberSince}
         </p>
       </div>
+      </FadeIn>
 
       {/* Points & Tier Progress */}
+      <FadeIn direction="up" delay={0.12}>
       <div className="relative mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/5 via-transparent to-brand-gold/3" />
@@ -902,6 +906,8 @@ export default function ProfileContent() {
         `}</style>
       </div>
 
+      </FadeIn>
+
       {/* Monthly Discount Code */}
       {user.discountCode && tier.discountPercent && (
         <div className="mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
@@ -1000,6 +1006,7 @@ export default function ProfileContent() {
       )}
 
       {/* Profile Settings */}
+      <FadeIn direction="up" delay={0.08}>
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">
@@ -1269,6 +1276,7 @@ export default function ProfileContent() {
           <span className="text-xs text-red-400/50">&rarr;</span>
         </button>
       </div>
+      </FadeIn>
       </div>
     </div>
   );

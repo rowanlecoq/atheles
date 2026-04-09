@@ -47,6 +47,10 @@ export function SplitText({
       : animationViewportMargins.normal,
   });
   const hiddenY = prefersReducedMotion ? 0 : isMobileViewport ? 16 : 24;
+  // Blur reveals on desktop only — mobile GPUs tear down compositing layers at blur(0px),
+  // causing a post-animation flicker. blur(0.001px) as end state prevents the teardown.
+  const hiddenBlur = prefersReducedMotion || isMobileViewport ? undefined : "blur(7px)";
+  const visibleBlur = hiddenBlur ? "blur(0.001px)" : undefined;
   const transitionDuration = prefersReducedMotion
     ? Math.min(duration, animationDurations.fast)
     : isMobileViewport
@@ -109,10 +113,15 @@ export function SplitText({
                   : "inline-block"
               }
               variants={{
-                hidden: { opacity: 0, y: hiddenY },
+                hidden: {
+                  opacity: 0,
+                  y: hiddenY,
+                  ...(hiddenBlur ? { filter: hiddenBlur } : {}),
+                },
                 visible: {
                   opacity: 1,
                   y: 0,
+                  ...(visibleBlur ? { filter: visibleBlur } : {}),
                   transition: {
                     duration: transitionDuration,
                     ease: animationEasing,
