@@ -208,20 +208,18 @@ html { scrollbar-width: none; }
   animation: category-nav-enter 0.22s cubic-bezier(0.25, 0.1, 0.25, 1) both;
 }
 
-/* Hero interior category nav — safe to use opacity here (solid dark bg behind) */
+/* Hero interior category nav — translateY only so it never creates an invisible gap */
 @keyframes hero-nav-enter {
   from {
-    opacity: 0;
-    transform: translateY(-10px);
+    transform: translateY(-8px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
 
 .animate-hero-nav-enter {
-  animation: hero-nav-enter 0.5s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+  animation: hero-nav-enter 0.4s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 @keyframes slide-up {
