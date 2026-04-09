@@ -63,7 +63,7 @@ export function CategoryNav() {
 
   // Hide on homepage — HeroCategoryNav is used there instead.
   // Don't use CSS visibility tricks (backdrop-blur bleeds through even at height 0).
-  if (pathname === "/") return null;
+  if (!pathname || pathname === "/") return null;
 
   return (
     <div className="animate-category-nav-enter relative hidden md:block">
