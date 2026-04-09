@@ -22,7 +22,7 @@ export default function SearchPageHeader() {
   const title = collection ? collectionTitles[collection] || collection : "store";
 
   return (
-    <div className="relative min-h-[180px] overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark sm:min-h-[220px]">
+    <div className="relative overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
       {/* Hero background image — slideshow */}
       <SlideshowMedia
         slotKey="store_header"
