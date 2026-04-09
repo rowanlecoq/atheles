@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useCallback, useRef, useState } from "react";
 
@@ -67,12 +66,7 @@ export function CategoryNav() {
   if (pathname === "/") return null;
 
   return (
-    <motion.div
-      className="relative hidden md:block"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.18, ease: [0.25, 0.1, 0.25, 1] }}
-    >
+    <div className="animate-category-nav-enter relative hidden md:block">
       {/* Category bar */}
       <nav className="border-b border-brand-dark-gold/20 bg-brand-dark/90 backdrop-blur-sm">
         <div className="mx-auto flex items-center justify-center gap-8 px-6 py-2.5">
@@ -152,6 +146,6 @@ export function CategoryNav() {
             </div>
           );
         })}
-    </motion.div>
+    </div>
   );
 }
