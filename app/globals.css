@@ -180,14 +180,12 @@ html { scrollbar-width: none; }
 }
 
 
-/* Sticky navbar slide-in + fade */
+/* Sticky navbar slide-in — translateY only, no opacity to prevent flicker */
 @keyframes navbar-enter {
   from {
-    opacity: 0;
     transform: translateY(-10px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
@@ -196,14 +194,12 @@ html { scrollbar-width: none; }
   animation: navbar-enter 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
-/* Category nav in sticky header — fade + slide */
+/* Category nav in sticky header — translateY only */
 @keyframes category-nav-enter {
   from {
-    opacity: 0;
     transform: translateY(-6px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
@@ -212,20 +208,18 @@ html { scrollbar-width: none; }
   animation: category-nav-enter 0.28s cubic-bezier(0.25, 0.1, 0.25, 1) both;
 }
 
-/* Hero section entrance — rises from bottom with fade */
+/* Hero section entrance — rises from bottom, no opacity so no dark flash */
 @keyframes hero-section-enter {
   from {
-    opacity: 0;
-    transform: translateY(24px);
+    transform: translateY(20px);
   }
   to {
-    opacity: 1;
     transform: translateY(0);
   }
 }
 
 .animate-hero-section-enter {
-  animation: hero-section-enter 0.9s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: hero-section-enter 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
 }
 
 /* Hero interior category nav — translateY only so it never creates an invisible gap */

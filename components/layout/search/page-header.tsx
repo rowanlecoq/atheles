@@ -1,6 +1,6 @@
 "use client";
 
-import { SplitText } from "components/animations";
+import { motion } from "motion/react";
 import { SlideshowMedia } from "components/slideshow-media";
 import { usePathname } from "next/navigation";
 
@@ -34,11 +34,15 @@ export default function SearchPageHeader() {
       {/* Content */}
       <div className="relative px-4 pb-8 pt-10 sm:pb-10 sm:pt-14">
         <div className="mx-auto max-w-(--breakpoint-2xl) text-center">
-          <SplitText
-            as="h1"
-            text={title}
+          <motion.h1
+            key={title}
+            initial={{ y: 10, filter: "blur(8px)" }}
+            animate={{ y: 0, filter: "blur(0.001px)" }}
+            transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
             className="mb-2 font-heading text-3xl tracking-[0.08em] text-brand-gold sm:text-4xl md:text-5xl"
-          />
+          >
+            {title}
+          </motion.h1>
         </div>
       </div>
     </div>
