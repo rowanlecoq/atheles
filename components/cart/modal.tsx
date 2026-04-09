@@ -197,16 +197,16 @@ export default function CartModal() {
       >
         <OpenCart quantity={cart?.totalQuantity} />
       </button>
-      <Transition show={isOpen} unmount={false}>
+      <Transition show={isOpen}>
         <Dialog onClose={closeCart} className="relative z-50">
           <Transition.Child
             as={Fragment}
             enter="transition-all ease-in-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
+            enterFrom="opacity-0 backdrop-blur-none"
+            enterTo="opacity-100 backdrop-blur-[.5px]"
             leave="transition-all ease-in-out duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
+            leaveFrom="opacity-100 backdrop-blur-[.5px]"
+            leaveTo="opacity-0 backdrop-blur-none"
           >
             <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
           </Transition.Child>
@@ -219,7 +219,7 @@ export default function CartModal() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col overflow-y-auto border-l border-brand-dark-gold/30 bg-brand-dark p-4 text-white sm:p-6 md:w-[390px]">
+            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col overflow-y-auto border-l border-brand-dark-gold/30 bg-brand-dark p-4 text-white sm:p-6 md:w-[390px] will-change-transform">
               {/* Header */}
               <div className="flex items-center justify-between">
                 <p className="font-heading text-lg font-semibold text-brand-gold">
