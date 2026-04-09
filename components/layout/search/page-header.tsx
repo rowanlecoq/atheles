@@ -39,6 +39,8 @@ export default function SearchPageHeader() {
             text={title}
             as="h1"
             className="mb-2 font-heading text-3xl tracking-[0.08em] text-brand-gold sm:text-4xl md:text-5xl"
+            duration={0.25}
+            stagger={0.02}
             blurOnly
           />
         </div>

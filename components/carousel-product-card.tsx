@@ -21,7 +21,7 @@ export function CarouselProductCard({ product, index = 0 }: { product: Product; 
   return (
     <motion.div
       className="group"
-      initial={{ opacity: 0, y: 20, ...(blurInitial ? { filter: blurInitial } : {}) }}
+      initial={{ opacity: 0, y: 16, ...(blurInitial ? { filter: blurInitial } : {}) }}
       whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
       viewport={{ once: true, margin: "0px" }}
       transition={{ duration: 0.28, delay: Math.min(index, 4) * 0.05, ease: [0.22, 1, 0.36, 1] }}
