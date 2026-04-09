@@ -1,7 +1,7 @@
 "use client";
 
 import clsx from "clsx";
-import { Dialog, Transition } from "@headlessui/react";
+import { Dialog } from "@headlessui/react";
 import {
   ShoppingCartIcon,
   XMarkIcon,
@@ -13,7 +13,8 @@ import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import { AnimatePresence, motion } from "motion/react";
 import { useFormStatus } from "react-dom";
 import {
   addItem,
@@ -197,29 +198,25 @@ export default function CartModal() {
       >
         <OpenCart quantity={cart?.totalQuantity} />
       </button>
-      <Transition show={isOpen}>
+      <AnimatePresence>
+        {isOpen && (
         <Dialog onClose={closeCart} className="relative z-50">
-          <Transition.Child
-            as={Fragment}
-            enter="transition-all ease-in-out duration-300"
-            enterFrom="opacity-0 backdrop-blur-none"
-            enterTo="opacity-100 backdrop-blur-[.5px]"
-            leave="transition-all ease-in-out duration-200"
-            leaveFrom="opacity-100 backdrop-blur-[.5px]"
-            leaveTo="opacity-0 backdrop-blur-none"
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            transition={{ duration: 0.25, ease: "easeInOut" }}
+            className="fixed inset-0 bg-black/50"
+            aria-hidden="true"
+          />
+          <motion.div
+            initial={{ x: "100%" }}
+            animate={{ x: 0 }}
+            exit={{ x: "100%" }}
+            transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+            className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col overflow-y-auto border-l border-brand-dark-gold/30 bg-brand-dark p-4 text-white sm:p-6 md:w-[390px]"
           >
-            <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
-          </Transition.Child>
-          <Transition.Child
-            as={Fragment}
-            enter="transition-all ease-in-out duration-300"
-            enterFrom="translate-x-full"
-            enterTo="translate-x-0"
-            leave="transition-all ease-in-out duration-200"
-            leaveFrom="translate-x-0"
-            leaveTo="translate-x-full"
-          >
-            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col overflow-y-auto border-l border-brand-dark-gold/30 bg-brand-dark p-4 text-white sm:p-6 md:w-[390px]">
+            <Dialog.Panel className="flex h-full flex-col">
               {/* Header */}
               <div className="flex items-center justify-between">
                 <p className="font-heading text-lg font-semibold text-brand-gold">
@@ -720,9 +717,10 @@ export default function CartModal() {
                 </div>
               )}
             </Dialog.Panel>
-          </Transition.Child>
+          </motion.div>
         </Dialog>
-      </Transition>
+        )}
+      </AnimatePresence>
     </>
   );
 }
