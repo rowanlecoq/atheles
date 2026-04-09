@@ -53,7 +53,7 @@ export function HeroCategoryNav() {
   }, []);
 
   return (
-    <div className="animate-category-nav-enter relative hidden md:block">
+    <div className="relative hidden md:block">
       <nav className="py-4">
         <div className="flex items-center justify-center gap-6 lg:gap-8">
           {categories.map((cat, i) => {

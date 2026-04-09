@@ -1,6 +1,6 @@
 import { getCustomerByToken } from "lib/auth/shopify-customer";
 import { put } from "@vercel/blob";
-import { revalidateTag } from "next/cache";
+import { revalidatePath, revalidateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
@@ -82,7 +82,12 @@ async function getStoredData(): Promise<Record<string, unknown>> {
 }
 
 function purgeCache() {
-  try { revalidateTag("site-images"); } catch {}
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (revalidateTag as any)("site-images");
+    revalidatePath("/");
+    revalidatePath("/search", "layout");
+  } catch {}
 }
 
 async function saveData(current: Record<string, unknown>): Promise<string | null> {
