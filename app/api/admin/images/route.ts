@@ -82,12 +82,9 @@ async function getStoredData(): Promise<Record<string, unknown>> {
 }
 
 function purgeCache() {
-  try {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (revalidateTag as any)("site-images");
-    revalidatePath("/");
-    revalidatePath("/search", "layout");
-  } catch {}
+  try { revalidateTag("site-images", "layout"); } catch {}
+  try { revalidatePath("/"); } catch {}
+  try { revalidatePath("/search", "layout"); } catch {}
 }
 
 async function saveData(current: Record<string, unknown>): Promise<string | null> {
