@@ -3,6 +3,15 @@ import { NextResponse } from "next/server";
 
 export const dynamic = "force-dynamic";
 
+function escapeHtml(str: string): string {
+  return str
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;")
+    .replace(/'/g, "&#039;");
+}
+
 export async function POST(request: Request) {
   try {
     const { name, email, subject, message } = await request.json();
@@ -43,16 +52,16 @@ export async function POST(request: Request) {
         <div style="font-family: sans-serif; max-width: 600px;">
           <h2 style="color: #c1a368;">New Contact Form Submission</h2>
           <table style="width: 100%; border-collapse: collapse;">
-            <tr><td style="padding: 8px 0; color: #888;">Name</td><td style="padding: 8px 0;">${name}</td></tr>
-            <tr><td style="padding: 8px 0; color: #888;">Email</td><td style="padding: 8px 0;"><a href="mailto:${email}">${email}</a></td></tr>
-            <tr><td style="padding: 8px 0; color: #888;">Subject</td><td style="padding: 8px 0;">${subject}</td></tr>
+            <tr><td style="padding: 8px 0; color: #888;">Name</td><td style="padding: 8px 0;">${escapeHtml(name)}</td></tr>
+            <tr><td style="padding: 8px 0; color: #888;">Email</td><td style="padding: 8px 0;"><a href="mailto:${escapeHtml(email)}">${escapeHtml(email)}</a></td></tr>
+            <tr><td style="padding: 8px 0; color: #888;">Subject</td><td style="padding: 8px 0;">${escapeHtml(subject)}</td></tr>
           </table>
           <div style="margin-top: 16px; padding: 16px; background: #f5f5f5; border-radius: 8px;">
             <p style="margin: 0; color: #888; font-size: 12px;">Message</p>
-            <p style="margin: 8px 0 0; white-space: pre-wrap;">${message}</p>
+            <p style="margin: 8px 0 0; white-space: pre-wrap;">${escapeHtml(message)}</p>
           </div>
           <p style="margin-top: 16px; font-size: 12px; color: #aaa;">
-            Sent from atheles.co contact form. Reply directly to respond to ${name}.
+            Sent from atheles.co contact form. Reply directly to respond to ${escapeHtml(name)}.
           </p>
         </div>
       `,

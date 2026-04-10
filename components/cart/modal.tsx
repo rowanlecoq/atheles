@@ -260,14 +260,14 @@ export default function CartModal() {
                     <div className="mt-6 flex w-full flex-col gap-2.5">
                       <button
                         type="button"
-                        onClick={() => { closeCart(); setTimeout(() => { window.location.href = "/search/mens"; }, 200); }}
+                        onClick={() => { closeCart(); window.location.href = "/search/mens"; }}
                         className="flex min-h-[44px] items-center justify-center rounded-full bg-brand-gold px-6 py-3 text-center text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
                       >
                         shop mens
                       </button>
                       <button
                         type="button"
-                        onClick={() => { closeCart(); setTimeout(() => { window.location.href = "/search"; }, 200); }}
+                        onClick={() => { closeCart(); window.location.href = "/search"; }}
                         className="flex min-h-[44px] items-center justify-center rounded-full border border-brand-dark-gold/30 px-6 py-3 text-center text-sm uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
                       >
                         browse all

@@ -138,13 +138,13 @@ export default function FavoritesPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <h1 className="mb-2 font-heading text-3xl uppercase tracking-wider text-brand-gold sm:text-4xl">
+      <h1 className="animate-slide-up mb-2 font-heading text-3xl uppercase tracking-wider text-brand-gold sm:text-4xl">
         your favorites.
       </h1>
-      <div className="mb-8 h-px w-24 bg-brand-dark-gold/40" />
+      <div className="animate-slide-up mb-8 h-px w-24 bg-brand-dark-gold/40" />
 
       {loading && products.length === 0 ? (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="animate-fade-in grid gap-3 sm:grid-cols-2 [animation-delay:150ms]">
           {Array.from({ length: Math.min(favorites.length || 2, 4) }).map(
             (_, i) => (
               <div
@@ -161,7 +161,7 @@ export default function FavoritesPage() {
           )}
         </div>
       ) : favorites.length === 0 ? (
-        <div className="py-12 text-center">
+        <div className="animate-fade-in py-12 text-center [animation-delay:150ms]">
           <p className="mb-6 text-base text-brand-grey">
             you haven&apos;t saved any favorites yet.
           </p>
@@ -173,7 +173,7 @@ export default function FavoritesPage() {
           </Link>
         </div>
       ) : (
-        <div className="grid gap-3 sm:grid-cols-2">
+        <div className="animate-fade-in grid gap-3 sm:grid-cols-2 [animation-delay:150ms]">
           {favorites.map((handle) => {
             const product = products.find((p) => p.handle === handle);
             if (!product) {

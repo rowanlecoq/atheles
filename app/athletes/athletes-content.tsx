@@ -221,7 +221,7 @@ function AthleteCard({
       >
         {allImages.length > 0 ? allImages.map((item, idx) => (
           <div
-            key={idx}
+            key={item}
             className="relative aspect-[4/5] w-full flex-none snap-center cursor-pointer bg-brand-medium-grey/10"
             onClick={() => onOpenLightbox(allImages, idx)}
           >
@@ -247,9 +247,9 @@ function AthleteCard({
       {/* Dot indicators */}
       {allImages.length > 1 && (
         <div className="mt-3 flex items-center justify-center gap-2">
-          {allImages.map((_, idx) => (
+          {allImages.map((item, idx) => (
             <button
-              key={idx}
+              key={item}
               type="button"
               onClick={() => goToImage(idx)}
               aria-label={`View image ${idx + 1}`}
@@ -271,7 +271,7 @@ function AthleteCard({
             const isMed = isMediaUrl(item);
             return (
               <button
-                key={idx}
+                key={item}
                 type="button"
                 onClick={() => goToImage(idx)}
                 aria-label={`View image ${idx + 1}`}
