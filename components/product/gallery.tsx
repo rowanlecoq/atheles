@@ -115,7 +115,7 @@ export function Gallery({
       {/* Desktop: inline zoom on click — no lightbox */}
       <div className="hidden lg:block">
         <div
-          className="relative aspect-square max-h-[600px] w-full cursor-pointer overflow-hidden rounded-lg"
+          className={`relative aspect-square max-h-[600px] w-full overflow-hidden rounded-lg ${isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}
           onPointerDown={(e) => {
             if (e.pointerType === "touch") return;
             if (!isZoomed) {

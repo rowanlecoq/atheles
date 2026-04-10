@@ -4,6 +4,7 @@ import { CartProvider } from "components/cart/cart-context";
 import { CurrencyProvider } from "components/currency-context";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
+import { SparkleBackground } from "components/sparkle-background";
 import { PageTransition } from "components/page-transition";
 import { ScrollProgress } from "components/scroll-progress";
 import { SiteImagesProvider } from "components/site-images-context";
@@ -80,6 +81,7 @@ export default async function RootLayout({
           <CurrencyProvider>
             <CartProvider cartPromise={cart}>
               <SiteThemeProvider />
+              <SparkleBackground />
               <AnnouncementBar />
               <ScrollProgress />
               <KonamiLightning />
