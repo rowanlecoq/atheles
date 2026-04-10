@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
@@ -109,6 +109,36 @@ function getEmbedUrl(url: string): { type: "youtube" | "instagram" | "tiktok" | 
   return { type: "image", embedUrl: url };
 }
 
+function renderMediaItem(item: string, altText: string, imgClassName: string) {
+  const ytThumb = getYoutubeThumbnail(item);
+  const isMed = isMediaUrl(item);
+  if (ytThumb) {
+    return (
+      <div className="relative h-full w-full">
+        {/* eslint-disable-next-line @next/next/no-img-element */}
+        <img src={ytThumb} alt={altText} className={imgClassName} />
+        <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
+            <span className="ml-1 text-xl text-white">▶</span>
+          </div>
+        </div>
+      </div>
+    );
+  }
+  if (isMed) {
+    return (
+      <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-brand-medium-grey/20">
+        <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/60">
+          <span className="ml-1 text-xl text-brand-grey">▶</span>
+        </div>
+        <span className="text-xs text-brand-grey">tap to view</span>
+      </div>
+    );
+  }
+  // eslint-disable-next-line @next/next/no-img-element
+  return <img src={item} alt={altText} className={imgClassName} />;
+}
+
 function AthleteCard({
   athlete,
   index,
@@ -124,6 +154,56 @@ function AthleteCard({
 }) {
   const allImages = [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[];
   const [imageIndex, setImageIndex] = useState(0);
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const isProgScrollRef = useRef(false);
+  const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  const scrollToIndex = useCallback((idx: number) => {
+    if (!scrollRef.current) return;
+    const el = scrollRef.current;
+    const child = el.children[idx] as HTMLElement;
+    if (child) {
+      isProgScrollRef.current = true;
+      el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
+      if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
+      scrollTimerRef.current = setTimeout(() => { isProgScrollRef.current = false; }, 400);
+    }
+  }, []);
+
+  const goToImage = useCallback((idx: number) => {
+    setImageIndex(idx);
+    scrollToIndex(idx);
+  }, [scrollToIndex]);
+
+  // Track swipe index on mobile scroll
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    let debounce: ReturnType<typeof setTimeout> | null = null;
+    const onScroll = () => {
+      if (isProgScrollRef.current) return;
+      if (debounce) clearTimeout(debounce);
+      debounce = setTimeout(() => {
+        if (!scrollRef.current || isProgScrollRef.current) return;
+        const scrollEl = scrollRef.current;
+        const childWidth = (scrollEl.children[0] as HTMLElement)?.offsetWidth || 1;
+        const newIdx = Math.round(scrollEl.scrollLeft / childWidth);
+        if (newIdx >= 0 && newIdx < allImages.length) setImageIndex(newIdx);
+      }, 60);
+    };
+    el.addEventListener("scroll", onScroll, { passive: true });
+    return () => {
+      el.removeEventListener("scroll", onScroll);
+      if (debounce) clearTimeout(debounce);
+    };
+  }, [allImages.length]);
+
+  const placeholder = (
+    <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+      <span className="text-3xl">🔱</span>
+      <span className="text-xs uppercase tracking-wider text-brand-dark-gold">photo coming soon</span>
+    </div>
+  );
 
   return (
     <motion.div
@@ -133,20 +213,35 @@ function AthleteCard({
       viewport={{ once: true, margin: "0px" }}
       transition={{ duration: 0.28, delay: Math.min(index, 3) * 0.07, ease: [0.22, 1, 0.36, 1] }}
     >
-      {/* Main image — click opens lightbox */}
+      {/* Mobile: horizontal scroll snap gallery — swipe to navigate, tap to open lightbox */}
       <div
-        className="relative aspect-[4/5] w-full bg-brand-medium-grey/10 cursor-pointer"
-        onClick={() => { if (allImages.length > 0) onOpenLightbox(allImages, imageIndex); }}
+        ref={scrollRef}
+        className="flex snap-x snap-mandatory overflow-x-auto scrollbar-hide lg:hidden"
+        style={{ scrollbarWidth: "none", msOverflowStyle: "none" }}
       >
-        {allImages[imageIndex] ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img src={allImages[imageIndex]} alt={athlete.name} className="h-full w-full object-cover" />
-        ) : (
-          <div className="flex h-full w-full flex-col items-center justify-center gap-2">
-            <span className="text-3xl">🔱</span>
-            <span className="text-xs uppercase tracking-wider text-brand-dark-gold">photo coming soon</span>
+        {allImages.length > 0 ? allImages.map((item, idx) => (
+          <div
+            key={idx}
+            className="relative aspect-[4/5] w-full flex-none snap-center cursor-pointer bg-brand-medium-grey/10"
+            onClick={() => onOpenLightbox(allImages, idx)}
+          >
+            {renderMediaItem(item, athlete.name, "h-full w-full object-cover")}
+          </div>
+        )) : (
+          <div className="aspect-[4/5] w-full flex-none snap-center bg-brand-medium-grey/10">
+            {placeholder}
           </div>
         )}
+      </div>
+
+      {/* Desktop: static main image — click opens lightbox */}
+      <div
+        className="relative hidden aspect-[4/5] w-full cursor-pointer bg-brand-medium-grey/10 lg:block"
+        onClick={() => { if (allImages.length > 0) onOpenLightbox(allImages, imageIndex); }}
+      >
+        {allImages[imageIndex]
+          ? renderMediaItem(allImages[imageIndex]!, athlete.name, "h-full w-full object-cover")
+          : placeholder}
       </div>
 
       {/* Dot indicators */}
@@ -156,7 +251,7 @@ function AthleteCard({
             <button
               key={idx}
               type="button"
-              onClick={() => setImageIndex(idx)}
+              onClick={() => goToImage(idx)}
               aria-label={`View image ${idx + 1}`}
               className={`h-2 rounded-full transition-all duration-300 ${
                 idx === imageIndex
@@ -178,7 +273,7 @@ function AthleteCard({
               <button
                 key={idx}
                 type="button"
-                onClick={() => setImageIndex(idx)}
+                onClick={() => goToImage(idx)}
                 aria-label={`View image ${idx + 1}`}
                 className={`relative h-16 w-16 flex-none overflow-hidden rounded transition-all duration-200 ${
                   idx === imageIndex ? "opacity-100 ring-1 ring-brand-gold" : "opacity-50 hover:opacity-80"
