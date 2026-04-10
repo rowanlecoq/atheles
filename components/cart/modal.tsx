@@ -718,7 +718,7 @@ export default function CartModal() {
 
 function CloseCart({ className }: { className?: string }) {
   return (
-    <div className="relative flex h-11 w-11 items-center justify-center rounded-md border border-brand-dark-gold/30 text-brand-grey transition-colors hover:text-brand-gold">
+    <div className="relative flex h-11 w-11 items-center justify-center rounded-md text-brand-grey transition-colors hover:text-brand-gold">
       <XMarkIcon
         className={clsx(
           "h-6 transition-all ease-in-out hover:scale-110",

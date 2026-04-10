@@ -115,9 +115,10 @@ export function AthletesContent() {
   const [lightbox, setLightbox] = useState<{ items: string[]; index: number } | null>(null);
   const [embedLoading, setEmbedLoading] = useState(false);
   const [zoom, setZoom] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const prefersReducedMotion = useReducedMotion();
   const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
-  const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
+  const blurFinal = prefersReducedMotion ? undefined : "blur(0px)";
 
   // Keyboard navigation
   useEffect(() => {
@@ -326,10 +327,10 @@ export function AthletesContent() {
           <button
             type="button"
             onClick={() => { setLightbox(null); setEmbedLoading(false); setZoom(false); }}
-            className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white"
+            className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white sm:h-14 sm:w-14"
             aria-label="close"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 sm:h-7 sm:w-7"><path d="M18 6L6 18M6 6l12 12" /></svg>
           </button>
 
           {/* Prev button — tall panel on left edge */}
@@ -337,10 +338,10 @@ export function AthletesContent() {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }}
-              className="absolute left-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white"
+              className="absolute left-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white sm:h-24 sm:w-14"
               aria-label="previous"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6"><path d="M15 18l-6-6 6-6" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6 sm:h-8 sm:w-8"><path d="M15 18l-6-6 6-6" /></svg>
             </button>
           )}
 
@@ -348,7 +349,6 @@ export function AthletesContent() {
           <div
             onClick={(e) => e.stopPropagation()}
             className="relative flex items-center justify-center"
-            style={{ maxHeight: "85vh", maxWidth: "88vw" }}
             onTouchStart={(e) => {
               const touch = e.touches[0];
               if (touch) (e.currentTarget as HTMLElement).dataset.touchX = String(touch.clientX);
@@ -381,26 +381,49 @@ export function AthletesContent() {
               if (embed.type === "video") {
                 return <video src={embed.embedUrl} controls autoPlay className="max-h-[80vh] rounded-lg" onCanPlay={() => setEmbedLoading(false)} />;
               }
-              // Image with zoom
+              // Image with zoom — matches product gallery (transform-scale with mouse tracking)
               return (
                 <div
-                  className="relative cursor-zoom-in overflow-auto rounded-lg"
-                  style={zoom ? { cursor: "zoom-out", maxHeight: "85vh", maxWidth: "88vw", overflow: "auto" } : { cursor: "zoom-in" }}
-                  onClick={() => setZoom(z => !z)}
+                  className={`relative inline-block overflow-hidden rounded-lg ${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+                  onClick={(e) => {
+                    if (!zoom) {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setZoomOrigin({
+                        x: ((e.clientX - rect.left) / rect.width) * 100,
+                        y: ((e.clientY - rect.top) / rect.height) * 100,
+                      });
+                    }
+                    setZoom(z => !z);
+                  }}
+                  onMouseMove={(e) => {
+                    if (!zoom) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setZoomOrigin({
+                      x: ((e.clientX - rect.left) / rect.width) * 100,
+                      y: ((e.clientY - rect.top) / rect.height) * 100,
+                    });
+                  }}
+                  onMouseLeave={() => { if (zoom) setZoom(false); }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
                     src={item}
                     alt=""
-                    style={zoom ? { width: "200%", maxWidth: "none", maxHeight: "none" } : { maxHeight: "80vh", maxWidth: "88vw", objectFit: "contain" }}
-                    className="block rounded-lg"
+                    className="block max-h-[80vh] max-w-[88vw] object-contain transition-transform duration-200"
+                    style={zoom ? {
+                      transform: "scale(2.5)",
+                      transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,
+                      touchAction: "none",
+                    } : {
+                      touchAction: "pinch-zoom",
+                    }}
                     onLoad={() => setEmbedLoading(false)}
                   />
-                  {/* Zoom hint badge */}
+                  {/* Zoom hint — desktop only (mobile uses native pinch-zoom) */}
                   {!zoom && (
-                    <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] text-white/70 backdrop-blur-sm">
+                    <div className="pointer-events-none absolute bottom-3 right-3 hidden items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] text-white/70 backdrop-blur-sm sm:flex">
                       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /><path d="M11 8v6M8 11h6" /></svg>
-                      tap to zoom
+                      click to zoom
                     </div>
                   )}
                 </div>
@@ -413,10 +436,10 @@ export function AthletesContent() {
             <button
               type="button"
               onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }}
-              className="absolute right-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white"
+              className="absolute right-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white sm:h-24 sm:w-14"
               aria-label="next"
             >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6"><path d="M9 18l6-6-6-6" /></svg>
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6 sm:h-8 sm:w-8"><path d="M9 18l6-6-6-6" /></svg>
             </button>
           )}
 
