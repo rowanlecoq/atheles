@@ -14,20 +14,21 @@ export function NewsletterSignup() {
 
   // Check if user is already subscribed (acceptsMarketing)
   useEffect(() => {
-    // Use cache only if it has confirmed marketing subscription — avoids stale data
+    // Gate: guests never need to call the session API
+    if (!document.cookie.includes("atheles-logged-in=1")) return;
     try {
       const cached = sessionStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
-        if (u.email && u.acceptsMarketing === true) {
-          setLoggedIn(true);
-          setUserEmail(u.email || "");
+        setLoggedIn(true);
+        setUserEmail(u.email || "");
+        if (u.acceptsMarketing === true) {
           setAlreadySubscribed(true);
-          return; // Cache is complete, skip API call
+          return; // Confirmed subscribed — skip API
         }
+        // Logged in but acceptsMarketing not confirmed — fall through to fetch
       }
     } catch {}
-    // Always fetch fresh — handles: no cookie, stale cache, logged-in users who haven't subscribed yet
     fetch("/api/auth/session")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
@@ -36,7 +37,7 @@ export function NewsletterSignup() {
           setUserEmail(d.user.email || "");
           if (d.user.acceptsMarketing) {
             setAlreadySubscribed(true);
-            // Sync acceptsMarketing into session cache
+            // Sync into cache so next visit skips the API
             try {
               const cached = sessionStorage.getItem("atheles-session");
               if (cached) {

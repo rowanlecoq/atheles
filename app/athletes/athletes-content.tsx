@@ -109,6 +109,146 @@ function getEmbedUrl(url: string): { type: "youtube" | "instagram" | "tiktok" | 
   return { type: "image", embedUrl: url };
 }
 
+function AthleteCard({
+  athlete,
+  index,
+  onOpenLightbox,
+  blurInitial,
+  blurFinal,
+}: {
+  athlete: Athlete;
+  index: number;
+  onOpenLightbox: (items: string[], index: number) => void;
+  blurInitial?: string;
+  blurFinal?: string;
+}) {
+  const allImages = [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[];
+  const [imageIndex, setImageIndex] = useState(0);
+
+  return (
+    <motion.div
+      className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
+      initial={{ opacity: 0, y: 16, ...(blurInitial ? { filter: blurInitial } : {}) }}
+      whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
+      viewport={{ once: true, margin: "0px" }}
+      transition={{ duration: 0.28, delay: Math.min(index, 3) * 0.07, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {/* Main image — click opens lightbox */}
+      <div
+        className="relative aspect-[4/5] w-full bg-brand-medium-grey/10 cursor-pointer"
+        onClick={() => { if (allImages.length > 0) onOpenLightbox(allImages, imageIndex); }}
+      >
+        {allImages[imageIndex] ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={allImages[imageIndex]} alt={athlete.name} className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+            <span className="text-3xl">🔱</span>
+            <span className="text-xs uppercase tracking-wider text-brand-dark-gold">photo coming soon</span>
+          </div>
+        )}
+      </div>
+
+      {/* Dot indicators */}
+      {allImages.length > 1 && (
+        <div className="mt-3 flex items-center justify-center gap-2">
+          {allImages.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setImageIndex(idx)}
+              aria-label={`View image ${idx + 1}`}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                idx === imageIndex
+                  ? "w-6 bg-brand-gold"
+                  : "w-2 bg-brand-dark-gold/40 hover:bg-brand-dark-gold/60"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Thumbnail strip */}
+      {allImages.length > 1 && (
+        <div className="mt-2 flex gap-1.5 overflow-x-auto px-2 pb-2 scrollbar-hide">
+          {allImages.map((item, idx) => {
+            const ytThumb = getYoutubeThumbnail(item);
+            const isMed = isMediaUrl(item);
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setImageIndex(idx)}
+                aria-label={`View image ${idx + 1}`}
+                className={`relative h-16 w-16 flex-none overflow-hidden rounded transition-all duration-200 ${
+                  idx === imageIndex ? "opacity-100 ring-1 ring-brand-gold" : "opacity-50 hover:opacity-80"
+                }`}
+              >
+                {ytThumb ? (
+                  <div className="relative h-full w-full">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ytThumb} alt="" className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <span className="text-white">▶</span>
+                    </div>
+                  </div>
+                ) : isMed ? (
+                  <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-brand-grey">▶</div>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={item} alt={`${athlete.name} ${idx + 1}`} className="h-full w-full object-cover" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Info */}
+      <div className="p-5">
+        <div className="mb-1 flex items-baseline justify-between">
+          <h2 className="font-heading text-lg text-brand-gold">{athlete.name}</h2>
+          <span className="text-xs text-brand-grey">age {athlete.age}</span>
+        </div>
+        <p className="mb-3 text-xs uppercase tracking-wider text-brand-dark-gold">{athlete.role}</p>
+
+        {athlete.description && (
+          <p className="mb-4 text-xs leading-relaxed text-brand-grey">{athlete.description}</p>
+        )}
+
+        {athlete.hobbies.length > 0 && (
+          <div className="mb-4">
+            <p className="mb-2 text-[10px] uppercase tracking-wider text-brand-grey">interests</p>
+            <div className="flex flex-wrap gap-1.5">
+              {athlete.hobbies.map((hobby) => (
+                <span key={hobby} className="rounded-full border border-brand-dark-gold/20 px-2.5 py-1 text-[11px] text-brand-grey">{hobby}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {normalizeSocials(athlete.socials).length > 0 && (
+          <div className="flex flex-wrap gap-3">
+            {normalizeSocials(athlete.socials).map((s) => (
+              <a
+                key={s.platform + s.url}
+                href={socialUrl(s)}
+                target={socialUrl(s).startsWith("mailto:") ? undefined : "_blank"}
+                rel="noopener noreferrer"
+                className="text-brand-grey transition-colors hover:text-brand-gold"
+                aria-label={s.platform}
+                title={s.platform}
+              >
+                <SocialIcon platform={s.platform} />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 export function AthletesContent() {
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [loaded, setLoaded] = useState(false);
@@ -203,99 +343,17 @@ export function AthletesContent() {
       <>
       <div className="mb-14 grid gap-6 sm:grid-cols-2">
         {athletes.map((athlete, index) => (
-          <motion.div
+          <AthleteCard
             key={athlete.name}
-            className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
-            initial={{ opacity: 0, y: 16, ...(blurInitial ? { filter: blurInitial } : {}) }}
-            whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
-            viewport={{ once: true, margin: "0px" }}
-            transition={{ duration: 0.28, delay: Math.min(index, 3) * 0.07, ease: [0.22, 1, 0.36, 1] }}
-          >
-            <div className="relative aspect-[4/5] w-full bg-brand-medium-grey/10 cursor-pointer" onClick={() => { if (athlete.image) { setEmbedLoading(false); setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: 0 }); } }}>
-              {athlete.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={athlete.image} alt={athlete.name} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-2">
-                  <span className="text-3xl">🔱</span>
-                  <span className="text-xs uppercase tracking-wider text-brand-dark-gold">photo coming soon</span>
-                </div>
-              )}
-            </div>
-            {/* Gallery strip — clickable */}
-            {athlete.images && athlete.images.length > 0 && (
-              <div className="flex gap-1.5 overflow-x-auto p-1 scrollbar-hide snap-x snap-mandatory">
-                {athlete.images.map((item, idx) => {
-                  const isMedia = isMediaUrl(item);
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => { setEmbedLoading(isMediaUrl(item)); setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: idx + (athlete.image ? 1 : 0) }); }}
-                      className="relative aspect-square h-20 w-20 flex-none snap-start overflow-hidden rounded transition-opacity hover:opacity-80"
-                    >
-                      {(() => {
-                        const ytThumb = getYoutubeThumbnail(item);
-                        if (ytThumb) return (
-                          <div className="relative h-full w-full">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={ytThumb} alt="" className="h-full w-full object-cover" />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30"><span className="text-xl text-white">▶</span></div>
-                          </div>
-                        );
-                        if (isMedia) return <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-xl text-brand-grey">▶</div>;
-                        // eslint-disable-next-line @next/next/no-img-element
-                        return <img src={item} alt={`${athlete.name} ${idx + 2}`} className="h-full w-full object-cover" />;
-                      })()}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-            <div className="p-5">
-              <div className="mb-1 flex items-baseline justify-between">
-                <h2 className="font-heading text-lg text-brand-gold">{athlete.name}</h2>
-                <span className="text-xs text-brand-grey">age {athlete.age}</span>
-              </div>
-              <p className="mb-3 text-xs uppercase tracking-wider text-brand-dark-gold">{athlete.role}</p>
-
-              {/* Description */}
-              {athlete.description && (
-                <p className="mb-4 text-xs leading-relaxed text-brand-grey">{athlete.description}</p>
-              )}
-
-              {/* Hobbies */}
-              {athlete.hobbies.length > 0 && (
-                <div className="mb-4">
-                  <p className="mb-2 text-[10px] uppercase tracking-wider text-brand-grey">interests</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {athlete.hobbies.map((hobby) => (
-                      <span key={hobby} className="rounded-full border border-brand-dark-gold/20 px-2.5 py-1 text-[11px] text-brand-grey">{hobby}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Socials */}
-              {normalizeSocials(athlete.socials).length > 0 && (
-                <div className="flex flex-wrap gap-3">
-                  {normalizeSocials(athlete.socials).map((s) => (
-                    <a
-                      key={s.platform + s.url}
-                      href={socialUrl(s)}
-                      target={socialUrl(s).startsWith("mailto:") ? undefined : "_blank"}
-                      rel="noopener noreferrer"
-                      className="text-brand-grey transition-colors hover:text-brand-gold"
-                      aria-label={s.platform}
-                      title={s.platform}
-                    >
-                      <SocialIcon platform={s.platform} />
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          </motion.div>
+            athlete={athlete}
+            index={index}
+            onOpenLightbox={(items, idx) => {
+              setEmbedLoading(isMediaUrl(items[idx] || ""));
+              setLightbox({ items, index: idx });
+            }}
+            blurInitial={blurInitial}
+            blurFinal={blurFinal}
+          />
         ))}
       </div>
       </>
