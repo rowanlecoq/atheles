@@ -99,10 +99,10 @@ export default async function ProductPage(props: {
       />
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4 py-6">
         <div className="animate-slide-up flex flex-col rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 sm:p-6 md:p-10 lg:flex-row lg:gap-8 lg:p-12">
-          <div className="h-full w-full basis-full lg:basis-4/6">
+          <div className="w-full basis-full lg:basis-4/6">
             <Suspense
               fallback={
-                <div className="relative aspect-square h-full max-h-[460px] w-full overflow-hidden sm:max-h-[550px]" />
+                <div className="relative aspect-square max-h-[460px] w-full overflow-hidden sm:max-h-[550px]" />
               }
             >
               <Gallery
