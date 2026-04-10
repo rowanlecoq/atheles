@@ -3,6 +3,8 @@
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { useFavorites } from "lib/hooks/use-favorites";
+import { useReducedMotion } from "lib/hooks/use-reduced-motion";
+import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import Price from "components/price";
@@ -12,17 +14,28 @@ export function HomepageProductCard({
   product,
   size = "half",
   priority = false,
+  index = 0,
 }: {
   product: Product;
   size?: "full" | "half";
   priority?: boolean;
+  index?: number;
 }) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const liked = isFavorite(product.handle);
   const secondImage = product.images?.[1]?.url;
+  const prefersReducedMotion = useReducedMotion();
+  const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
+  const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
 
   return (
-    <div className="group h-full">
+    <motion.div
+      className="group h-full"
+      initial={{ opacity: 0, y: 16, ...(blurInitial ? { filter: blurInitial } : {}) }}
+      whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
+      viewport={{ once: true, margin: "0px" }}
+      transition={{ duration: 0.28, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
+    >
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark md:aspect-auto md:h-full">
         <Link
           href={`/product/${product.handle}`}
@@ -100,6 +113,6 @@ export function HomepageProductCard({
           />
         </div>
       </div>
-    </div>
+    </motion.div>
   );
 }

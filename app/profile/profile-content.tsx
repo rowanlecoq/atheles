@@ -1006,7 +1006,6 @@ export default function ProfileContent() {
       )}
 
       {/* Profile Settings */}
-      <FadeIn direction="up" delay={0.05} duration={0.35}>
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">
@@ -1276,7 +1275,6 @@ export default function ProfileContent() {
           <span className="text-xs text-red-400/50">&rarr;</span>
         </button>
       </div>
-      </FadeIn>
       </div>
     </div>
   );

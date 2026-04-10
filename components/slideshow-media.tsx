@@ -6,6 +6,10 @@ import { useSiteSlideshow, isVideoSrc, isYouTubeSrc, getYouTubeEmbedUrl } from "
  * Uses plain <img> instead of Next.js Image to avoid hydration layout shifts.
  * These are background/decorative images served from CDN — they don't need
  * Next.js image optimization, and <img> renders identically on server and client.
+ *
+ * Critical layout properties (position, objectFit) are applied via inline style
+ * so they are guaranteed to be present even before the Tailwind CSS bundle loads
+ * (Turbopack injects CSS via JS, creating a brief window where classes don't apply).
  */
 function MediaElement({
   src,
@@ -18,6 +22,18 @@ function MediaElement({
   iframeClass?: string;
   objectPosition?: string;
 }) {
+  const layoutStyle: React.CSSProperties = {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    width: "100%",
+    height: "100%",
+    objectFit: "cover",
+    ...(objectPosition ? { objectPosition } : {}),
+  };
+
   if (isYouTubeSrc(src)) {
     return (
       <iframe
@@ -36,8 +52,8 @@ function MediaElement({
         muted
         loop
         playsInline
-        className={`absolute inset-0 h-full w-full ${className}`}
-        style={objectPosition ? { objectPosition } : undefined}
+        className={className}
+        style={layoutStyle}
       />
     );
   }
@@ -46,8 +62,8 @@ function MediaElement({
     <img
       src={src}
       alt=""
-      className={`absolute inset-0 h-full w-full ${className}`}
-      style={objectPosition ? { objectPosition } : undefined}
+      className={className}
+      style={layoutStyle}
     />
   );
 }
@@ -89,9 +105,19 @@ export function SlideshowMedia({
     filter: slot.grayscale ? "grayscale(1)" : "none",
   };
 
+  const wrapperStyle: React.CSSProperties = {
+    position: "absolute",
+    top: 0,
+    right: 0,
+    bottom: 0,
+    left: 0,
+    overflow: "hidden",
+    ...mediaStyle,
+  };
+
   if (!isSlideshow) {
     return (
-      <div className="absolute inset-0 overflow-hidden" style={mediaStyle}>
+      <div style={wrapperStyle}>
         <MediaElement src={currentSrc} className={cleanClass} iframeClass={cleanIframeClass} objectPosition={objPos} />
       </div>
     );
@@ -100,14 +126,18 @@ export function SlideshowMedia({
   const durationMs = slot.transition === "fade" ? 1800 : 2000;
 
   return (
-    <div className="absolute inset-0 overflow-hidden" style={mediaStyle}>
+    <div style={wrapperStyle}>
       {[0, 1].map((layerIdx) => {
         const isActive = activeLayer === layerIdx;
         return (
           <div
             key={layerIdx}
-            className="absolute inset-0"
             style={{
+              position: "absolute",
+              top: 0,
+              right: 0,
+              bottom: 0,
+              left: 0,
               opacity: isActive ? 1 : 0,
               zIndex: isActive ? 1 : 0,
               transition: `opacity ${durationMs}ms cubic-bezier(0.4, 0, 0.2, 1)`,

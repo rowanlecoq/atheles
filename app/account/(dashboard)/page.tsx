@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { FadeIn } from "components/animations";
 
 export default function AccountDashboard() {
   return (
     <div>
+      <FadeIn direction="up">
       <h2 className="mb-6 font-heading text-2xl text-brand-light-gold">
         my orders
       </h2>
@@ -71,6 +73,7 @@ export default function AccountDashboard() {
           />
         </div>
       </div>
+      </FadeIn>
     </div>
   );
 }

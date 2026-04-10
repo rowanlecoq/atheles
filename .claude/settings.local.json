@@ -27,7 +27,8 @@
       "mcp__cfabbef5-065b-4497-9947-286d95c9eaed__deploy_to_vercel",
       "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__list_teams",
       "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__list_projects",
-      "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__list_deployments"
+      "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__list_deployments",
+      "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__deploy_to_vercel"
     ]
   }
 }

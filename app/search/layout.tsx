@@ -14,10 +14,9 @@ export default function SearchLayout({
 }) {
   return (
     <>
-      {/* Page header */}
-      <Suspense fallback={null}>
-        <SearchPageHeader />
-      </Suspense>
+      {/* Page header — no Suspense: only uses usePathname (not useSearchParams),
+          so Suspense would briefly show null and cause a layout collapse on hydration */}
+      <SearchPageHeader />
 
       {/* Mobile filters — compact horizontal pills + sort dropdown */}
       <div className="animate-slide-up relative z-10 mx-auto max-w-(--breakpoint-2xl) px-4 pt-4 md:hidden">

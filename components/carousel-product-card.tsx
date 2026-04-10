@@ -3,18 +3,29 @@
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { useFavorites } from "lib/hooks/use-favorites";
+import { useReducedMotion } from "lib/hooks/use-reduced-motion";
+import { motion } from "motion/react";
 import Image from "next/image";
 import Link from "next/link";
 import Price from "components/price";
 import type { Product } from "lib/shopify/types";
 
-export function CarouselProductCard({ product }: { product: Product }) {
+export function CarouselProductCard({ product, index = 0 }: { product: Product; index?: number }) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const liked = isFavorite(product.handle);
   const secondImage = product.images?.[1]?.url;
+  const prefersReducedMotion = useReducedMotion();
+  const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
+  const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
 
   return (
-    <div className="group">
+    <motion.div
+      className="group"
+      initial={{ opacity: 0, y: 16, ...(blurInitial ? { filter: blurInitial } : {}) }}
+      whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
+      viewport={{ once: true, margin: "0px" }}
+      transition={{ duration: 0.28, delay: Math.min(index, 4) * 0.05, ease: [0.22, 1, 0.36, 1] }}
+    >
       {/* Image */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark">
         <Link href={`/product/${product.handle}`} prefetch={true}>
@@ -102,6 +113,6 @@ export function CarouselProductCard({ product }: { product: Product }) {
           currencyCode={product.priceRange.maxVariantPrice.currencyCode}
         />
       </div>
-    </div>
+    </motion.div>
   );
 }

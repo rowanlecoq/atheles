@@ -1,4 +1,5 @@
 import Footer from "components/layout/footer";
+import { FadeIn } from "components/animations";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -11,10 +12,13 @@ export default function ShippingPage() {
   return (
     <>
       <div className="mx-auto max-w-3xl px-4 py-10 sm:py-12">
+        <FadeIn direction="up">
         <h1 className="mb-8 text-balance font-heading text-4xl leading-tight text-brand-gold sm:text-5xl">
           Shipping Policy
         </h1>
+        </FadeIn>
 
+        <FadeIn direction="up" delay={0.05}>
         <div className="space-y-8 text-sm leading-relaxed text-brand-grey">
           <section>
             <h2 className="mb-3 font-heading text-lg text-brand-light-gold sm:text-xl">
@@ -114,6 +118,7 @@ export default function ShippingPage() {
             </p>
           </div>
         </div>
+        </FadeIn>
       </div>
       <Footer />
     </>

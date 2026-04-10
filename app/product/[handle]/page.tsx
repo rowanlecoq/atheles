@@ -98,7 +98,7 @@ export default async function ProductPage(props: {
         }}
       />
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4 py-6">
-        <div className="flex flex-col rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 sm:p-6 md:p-10 lg:flex-row lg:gap-8 lg:p-12">
+        <div className="animate-slide-up flex flex-col rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 sm:p-6 md:p-10 lg:flex-row lg:gap-8 lg:p-12">
           <div className="h-full w-full basis-full lg:basis-4/6">
             <Suspense
               fallback={
@@ -114,7 +114,7 @@ export default async function ProductPage(props: {
             </Suspense>
           </div>
 
-          <div className="mt-8 basis-full lg:mt-0 lg:basis-2/6">
+          <div className="mt-8 basis-full animate-slide-up-delay lg:mt-0 lg:basis-2/6">
             <Suspense fallback={null}>
               <ProductDescription product={product} />
             </Suspense>
@@ -137,9 +137,9 @@ async function RelatedProducts({ id }: { id: string }) {
   if (!relatedProducts.length) return null;
 
   return (
-    <div className="py-8">
+    <div className="animate-fade-in py-8 [animation-delay:400ms]">
       <h2 className="mb-4 font-heading text-xl font-bold text-brand-gold sm:text-2xl">
-        Related Products
+        Related Items
       </h2>
       <ul className="flex w-full gap-4 overflow-x-auto pt-1">
         {relatedProducts.map((product) => (

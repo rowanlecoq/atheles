@@ -10,8 +10,8 @@ export function Gallery({
   images: { src: string; altText: string }[];
 }) {
   const [imageIndex, setImageIndex] = useState(0);
-  const [zoomed, setZoomed] = useState(false);
-  const [zoomPos, setZoomPos] = useState({ x: 50, y: 50 });
+  const [isZoomed, setIsZoomed] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const scrollRef = useRef<HTMLDivElement>(null);
   const isProgScrollRef = useRef(false);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -29,12 +29,15 @@ export function Gallery({
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prevImage();
       if (e.key === "ArrowRight") nextImage();
+      if (e.key === "Escape") setIsZoomed(false);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [nextImage, prevImage]);
 
-  // Scroll to image when index changes from click/keyboard (not from swipe)
+  // Reset zoom when the displayed image changes
+  useEffect(() => { setIsZoomed(false); }, [imageIndex]);
+
   const scrollToIndex = useCallback((index: number) => {
     if (!scrollRef.current) return;
     const el = scrollRef.current;
@@ -42,7 +45,6 @@ export function Gallery({
     if (child) {
       isProgScrollRef.current = true;
       el.scrollTo({ left: child.offsetLeft, behavior: "smooth" });
-      // Clear the flag after scroll animation finishes
       if (scrollTimerRef.current) clearTimeout(scrollTimerRef.current);
       scrollTimerRef.current = setTimeout(() => {
         isProgScrollRef.current = false;
@@ -50,7 +52,6 @@ export function Gallery({
     }
   }, []);
 
-  // Handle dot/thumbnail click — scroll to that image
   const goToImage = useCallback(
     (index: number) => {
       setImageIndex(index);
@@ -59,17 +60,13 @@ export function Gallery({
     [scrollToIndex],
   );
 
-  // Handle scroll snap on mobile to update index (only from user swipe)
+  // Track swipe index on mobile scroll
   useEffect(() => {
     const el = scrollRef.current;
     if (!el) return;
-
     let debounce: ReturnType<typeof setTimeout> | null = null;
-
     const onScroll = () => {
-      // Ignore programmatic scrolls
       if (isProgScrollRef.current) return;
-
       if (debounce) clearTimeout(debounce);
       debounce = setTimeout(() => {
         if (!scrollRef.current || isProgScrollRef.current) return;
@@ -81,7 +78,6 @@ export function Gallery({
         }
       }, 60);
     };
-
     el.addEventListener("scroll", onScroll, { passive: true });
     return () => {
       el.removeEventListener("scroll", onScroll);
@@ -89,18 +85,9 @@ export function Gallery({
     };
   }, [images.length]);
 
-  // Desktop zoom on hover
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!zoomed) return;
-    const rect = e.currentTarget.getBoundingClientRect();
-    const x = ((e.clientX - rect.left) / rect.width) * 100;
-    const y = ((e.clientY - rect.top) / rect.height) * 100;
-    setZoomPos({ x, y });
-  };
-
   return (
     <div>
-      {/* Mobile: horizontal scroll gallery */}
+      {/* Mobile: horizontal scroll gallery — swipe to navigate */}
       <div
         ref={scrollRef}
         className="flex snap-x snap-mandatory overflow-x-auto scrollbar-hide lg:hidden"
@@ -125,33 +112,64 @@ export function Gallery({
         ))}
       </div>
 
-      {/* Desktop: single image with zoom on click */}
+      {/* Desktop: inline zoom on click — no lightbox */}
       <div className="hidden lg:block">
         <div
-          className={`relative aspect-square h-full max-h-[600px] w-full overflow-hidden rounded-lg ${
-            zoomed ? "cursor-zoom-out" : "cursor-zoom-in"
-          }`}
-          onClick={() => setZoomed(!zoomed)}
-          onMouseMove={handleMouseMove}
-          onMouseLeave={() => setZoomed(false)}
+          className={`relative aspect-square h-full max-h-[600px] w-full overflow-hidden rounded-lg ${isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+          onPointerDown={(e) => {
+            if (e.pointerType === "touch") return;
+            if (!isZoomed) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setZoomOrigin({
+                x: ((e.clientX - rect.left) / rect.width) * 100,
+                y: ((e.clientY - rect.top) / rect.height) * 100,
+              });
+              setIsZoomed(true);
+            } else {
+              setIsZoomed(false);
+            }
+          }}
+          onPointerMove={(e) => {
+            if (e.pointerType === "touch" || !isZoomed) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            setZoomOrigin({
+              x: ((e.clientX - rect.left) / rect.width) * 100,
+              y: ((e.clientY - rect.top) / rect.height) * 100,
+            });
+          }}
+          onPointerLeave={(e) => {
+            if (e.pointerType !== "touch") setIsZoomed(false);
+          }}
         >
           {images[imageIndex] && (
-            <Image
-              className="h-full w-full object-contain transition-transform duration-200"
-              fill
-              sizes="66vw"
-              alt={images[imageIndex]?.altText as string}
-              src={images[imageIndex]?.src as string}
-              priority={imageIndex === 0}
+            <div
+              className="absolute inset-0 transition-transform duration-200"
               style={
-                zoomed
-                  ? {
-                      transform: "scale(2.5)",
-                      transformOrigin: `${zoomPos.x}% ${zoomPos.y}%`,
-                    }
+                isZoomed
+                  ? { transform: "scale(2.5)", transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%` }
                   : undefined
               }
-            />
+            >
+              <Image
+                className="h-full w-full object-contain"
+                fill
+                sizes="66vw"
+                alt={images[imageIndex]?.altText as string}
+                src={images[imageIndex]?.src as string}
+                priority={imageIndex === 0}
+              />
+            </div>
+          )}
+          {/* Click to zoom badge — always visible on desktop, disappears while zoomed */}
+          {!isZoomed && (
+            <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs text-white/80 backdrop-blur-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+                <path d="M11 8v6M8 11h6" />
+              </svg>
+              click to zoom
+            </div>
           )}
         </div>
       </div>

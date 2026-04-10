@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "motion/react";
+import { useReducedMotion } from "lib/hooks/use-reduced-motion";
+import { FadeIn } from "components/animations";
 
 type Social = { platform: string; url: string };
 
@@ -106,10 +109,171 @@ function getEmbedUrl(url: string): { type: "youtube" | "instagram" | "tiktok" | 
   return { type: "image", embedUrl: url };
 }
 
+function AthleteCard({
+  athlete,
+  index,
+  onOpenLightbox,
+  blurInitial,
+  blurFinal,
+}: {
+  athlete: Athlete;
+  index: number;
+  onOpenLightbox: (items: string[], index: number) => void;
+  blurInitial?: string;
+  blurFinal?: string;
+}) {
+  const allImages = [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[];
+  const [imageIndex, setImageIndex] = useState(0);
+
+  return (
+    <motion.div
+      className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
+      initial={{ opacity: 0, y: 16, ...(blurInitial ? { filter: blurInitial } : {}) }}
+      whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
+      viewport={{ once: true, margin: "0px" }}
+      transition={{ duration: 0.28, delay: Math.min(index, 3) * 0.07, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {/* Main image — click opens lightbox */}
+      <div
+        className="relative aspect-[4/5] w-full bg-brand-medium-grey/10 cursor-pointer"
+        onClick={() => { if (allImages.length > 0) onOpenLightbox(allImages, imageIndex); }}
+      >
+        {allImages[imageIndex] ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img src={allImages[imageIndex]} alt={athlete.name} className="h-full w-full object-cover" />
+        ) : (
+          <div className="flex h-full w-full flex-col items-center justify-center gap-2">
+            <span className="text-3xl">🔱</span>
+            <span className="text-xs uppercase tracking-wider text-brand-dark-gold">photo coming soon</span>
+          </div>
+        )}
+      </div>
+
+      {/* Dot indicators */}
+      {allImages.length > 1 && (
+        <div className="mt-3 flex items-center justify-center gap-2">
+          {allImages.map((_, idx) => (
+            <button
+              key={idx}
+              type="button"
+              onClick={() => setImageIndex(idx)}
+              aria-label={`View image ${idx + 1}`}
+              className={`h-2 rounded-full transition-all duration-300 ${
+                idx === imageIndex
+                  ? "w-6 bg-brand-gold"
+                  : "w-2 bg-brand-dark-gold/40 hover:bg-brand-dark-gold/60"
+              }`}
+            />
+          ))}
+        </div>
+      )}
+
+      {/* Thumbnail strip */}
+      {allImages.length > 1 && (
+        <div className="mt-2 flex gap-1.5 overflow-x-auto px-2 pb-2 scrollbar-hide">
+          {allImages.map((item, idx) => {
+            const ytThumb = getYoutubeThumbnail(item);
+            const isMed = isMediaUrl(item);
+            return (
+              <button
+                key={idx}
+                type="button"
+                onClick={() => setImageIndex(idx)}
+                aria-label={`View image ${idx + 1}`}
+                className={`relative h-16 w-16 flex-none overflow-hidden rounded transition-all duration-200 ${
+                  idx === imageIndex ? "opacity-100 ring-1 ring-brand-gold" : "opacity-50 hover:opacity-80"
+                }`}
+              >
+                {ytThumb ? (
+                  <div className="relative h-full w-full">
+                    {/* eslint-disable-next-line @next/next/no-img-element */}
+                    <img src={ytThumb} alt="" className="h-full w-full object-cover" />
+                    <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+                      <span className="text-white">▶</span>
+                    </div>
+                  </div>
+                ) : isMed ? (
+                  <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-brand-grey">▶</div>
+                ) : (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img src={item} alt={`${athlete.name} ${idx + 1}`} className="h-full w-full object-cover" />
+                )}
+              </button>
+            );
+          })}
+        </div>
+      )}
+
+      {/* Info */}
+      <div className="p-5">
+        <div className="mb-1 flex items-baseline justify-between">
+          <h2 className="font-heading text-lg text-brand-gold">{athlete.name}</h2>
+          <span className="text-xs text-brand-grey">age {athlete.age}</span>
+        </div>
+        <p className="mb-3 text-xs uppercase tracking-wider text-brand-dark-gold">{athlete.role}</p>
+
+        {athlete.description && (
+          <p className="mb-4 text-xs leading-relaxed text-brand-grey">{athlete.description}</p>
+        )}
+
+        {athlete.hobbies.length > 0 && (
+          <div className="mb-4">
+            <p className="mb-2 text-[10px] uppercase tracking-wider text-brand-grey">interests</p>
+            <div className="flex flex-wrap gap-1.5">
+              {athlete.hobbies.map((hobby) => (
+                <span key={hobby} className="rounded-full border border-brand-dark-gold/20 px-2.5 py-1 text-[11px] text-brand-grey">{hobby}</span>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {normalizeSocials(athlete.socials).length > 0 && (
+          <div className="flex flex-wrap gap-3">
+            {normalizeSocials(athlete.socials).map((s) => (
+              <a
+                key={s.platform + s.url}
+                href={socialUrl(s)}
+                target={socialUrl(s).startsWith("mailto:") ? undefined : "_blank"}
+                rel="noopener noreferrer"
+                className="text-brand-grey transition-colors hover:text-brand-gold"
+                aria-label={s.platform}
+                title={s.platform}
+              >
+                <SocialIcon platform={s.platform} />
+              </a>
+            ))}
+          </div>
+        )}
+      </div>
+    </motion.div>
+  );
+}
+
 export function AthletesContent() {
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [lightbox, setLightbox] = useState<{ items: string[]; index: number } | null>(null);
+  const [embedLoading, setEmbedLoading] = useState(false);
+  const [zoom, setZoom] = useState(false);
+  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
+  const prefersReducedMotion = useReducedMotion();
+  const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
+  const blurFinal = prefersReducedMotion ? undefined : "blur(0px)";
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!lightbox) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setLightbox(null); setEmbedLoading(false); setZoom(false); }
+      if (e.key === "ArrowLeft" && lightbox.items.length > 1) { setEmbedLoading(true); setZoom(false); setLightbox(l => l ? { ...l, index: (l.index - 1 + l.items.length) % l.items.length } : null); }
+      if (e.key === "ArrowRight" && lightbox.items.length > 1) { setEmbedLoading(true); setZoom(false); setLightbox(l => l ? { ...l, index: (l.index + 1) % l.items.length } : null); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [lightbox]);
+
+  // Reset zoom on slide change
+  useEffect(() => { setZoom(false); }, [lightbox?.index]);
 
   useEffect(() => {
     fetch("/api/admin/athletes")
@@ -152,105 +316,44 @@ export function AthletesContent() {
         );
       })}
 
+      <FadeIn direction="up">
       <h1 className="mb-2 text-center font-heading text-3xl tracking-wider text-brand-gold sm:text-4xl">
         our athletes
       </h1>
       <p className="mb-10 text-center text-sm text-brand-grey">
         atheles athletes are on the way. stay tuned.
       </p>
+      </FadeIn>
 
       {!loaded ? (
-        <div className="py-20" />
+        <div className="mb-14 grid gap-6 sm:grid-cols-2">
+          {[0, 1].map((i) => (
+            <div key={i} className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
+              <div className="aspect-[4/5] w-full bg-white/[0.04]" />
+              <div className="p-5 space-y-3">
+                <div className="h-4 w-32 rounded bg-white/[0.06]" />
+                <div className="h-3 w-20 rounded bg-white/[0.04]" />
+                <div className="h-3 w-full rounded bg-white/[0.04]" />
+                <div className="h-3 w-3/4 rounded bg-white/[0.04]" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
       <>
       <div className="mb-14 grid gap-6 sm:grid-cols-2">
-        {athletes.map((athlete) => (
-          <div key={athlete.name} className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
-            <div className="relative aspect-[4/5] w-full bg-brand-medium-grey/10 cursor-pointer" onClick={() => athlete.image && setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: 0 })}>
-              {athlete.image ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img src={athlete.image} alt={athlete.name} className="h-full w-full object-cover" />
-              ) : (
-                <div className="flex h-full w-full flex-col items-center justify-center gap-2">
-                  <span className="text-3xl">🔱</span>
-                  <span className="text-xs uppercase tracking-wider text-brand-dark-gold">photo coming soon</span>
-                </div>
-              )}
-            </div>
-            {/* Gallery strip — clickable */}
-            {athlete.images && athlete.images.length > 0 && (
-              <div className="flex gap-1.5 overflow-x-auto p-1 scrollbar-hide snap-x snap-mandatory">
-                {athlete.images.map((item, idx) => {
-                  const isMedia = isMediaUrl(item);
-                  return (
-                    <button
-                      key={idx}
-                      type="button"
-                      onClick={() => setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: idx + (athlete.image ? 1 : 0) })}
-                      className="relative aspect-square h-20 w-20 flex-none snap-start overflow-hidden rounded transition-opacity hover:opacity-80"
-                    >
-                      {(() => {
-                        const ytThumb = getYoutubeThumbnail(item);
-                        if (ytThumb) return (
-                          <div className="relative h-full w-full">
-                            {/* eslint-disable-next-line @next/next/no-img-element */}
-                            <img src={ytThumb} alt="" className="h-full w-full object-cover" />
-                            <div className="absolute inset-0 flex items-center justify-center bg-black/30"><span className="text-xl text-white">▶</span></div>
-                          </div>
-                        );
-                        if (isMedia) return <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-xl text-brand-grey">▶</div>;
-                        // eslint-disable-next-line @next/next/no-img-element
-                        return <img src={item} alt={`${athlete.name} ${idx + 2}`} className="h-full w-full object-cover" />;
-                      })()}
-                    </button>
-                  );
-                })}
-              </div>
-            )}
-            <div className="p-5">
-              <div className="mb-1 flex items-baseline justify-between">
-                <h2 className="font-heading text-lg text-brand-gold">{athlete.name}</h2>
-                <span className="text-xs text-brand-grey">age {athlete.age}</span>
-              </div>
-              <p className="mb-3 text-xs uppercase tracking-wider text-brand-dark-gold">{athlete.role}</p>
-
-              {/* Description */}
-              {athlete.description && (
-                <p className="mb-4 text-xs leading-relaxed text-brand-grey">{athlete.description}</p>
-              )}
-
-              {/* Hobbies */}
-              {athlete.hobbies.length > 0 && (
-                <div className="mb-4">
-                  <p className="mb-2 text-[10px] uppercase tracking-wider text-brand-grey">interests</p>
-                  <div className="flex flex-wrap gap-1.5">
-                    {athlete.hobbies.map((hobby) => (
-                      <span key={hobby} className="rounded-full border border-brand-dark-gold/20 px-2.5 py-1 text-[11px] text-brand-grey">{hobby}</span>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {/* Socials */}
-              {normalizeSocials(athlete.socials).length > 0 && (
-                <div className="flex flex-wrap gap-3">
-                  {normalizeSocials(athlete.socials).map((s) => (
-                    <a
-                      key={s.platform + s.url}
-                      href={socialUrl(s)}
-                      target={socialUrl(s).startsWith("mailto:") ? undefined : "_blank"}
-                      rel="noopener noreferrer"
-                      className="text-brand-grey transition-colors hover:text-brand-gold"
-                      aria-label={s.platform}
-                      title={s.platform}
-                    >
-                      <SocialIcon platform={s.platform} />
-                    </a>
-                  ))}
-                </div>
-              )}
-            </div>
-          </div>
+        {athletes.map((athlete, index) => (
+          <AthleteCard
+            key={athlete.name}
+            athlete={athlete}
+            index={index}
+            onOpenLightbox={(items, idx) => {
+              setEmbedLoading(isMediaUrl(items[idx] || ""));
+              setLightbox({ items, index: idx });
+            }}
+            blurInitial={blurInitial}
+            blurFinal={blurFinal}
+          />
         ))}
       </div>
       </>
@@ -275,68 +378,137 @@ export function AthletesContent() {
       {/* Lightbox modal — portaled to cover navbar */}
       {lightbox && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-4"
-          onClick={() => setLightbox(null)}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
+          onClick={() => { setLightbox(null); setEmbedLoading(false); setZoom(false); }}
         >
-          {/* Close */}
-          <button type="button" onClick={() => setLightbox(null)} className="absolute right-4 top-4 text-2xl text-white/70 hover:text-white">×</button>
+          {/* Close button — matches pfp preview style */}
+          <button
+            type="button"
+            onClick={() => { setLightbox(null); setEmbedLoading(false); setZoom(false); }}
+            className="absolute right-4 top-4 z-10 text-white/70 transition-colors hover:text-white"
+            aria-label="close"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-8 w-8"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+          </button>
 
-          {/* Prev */}
+          {/* Prev button — tall panel on left edge */}
           {lightbox.items.length > 1 && (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }}
-              className="absolute left-4 text-3xl text-white/50 hover:text-white"
-            >‹</button>
+              onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }}
+              className="absolute left-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white sm:h-24 sm:w-14"
+              aria-label="previous"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6 sm:h-8 sm:w-8"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
           )}
 
           {/* Content — swipe to navigate on mobile */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[85vh] max-w-[90vw]"
+            className="relative flex items-center justify-center"
             onTouchStart={(e) => {
+              // Ignore pinch (multi-touch) — only track single-finger swipes
+              if (e.touches.length > 1) {
+                delete (e.currentTarget as HTMLElement).dataset.touchX;
+                return;
+              }
               const touch = e.touches[0];
               if (touch) (e.currentTarget as HTMLElement).dataset.touchX = String(touch.clientX);
             }}
             onTouchEnd={(e) => {
-              const startX = Number((e.currentTarget as HTMLElement).dataset.touchX || 0);
+              const stored = (e.currentTarget as HTMLElement).dataset.touchX;
+              if (!stored) return; // cleared by multi-touch, skip
+              const startX = Number(stored);
               const endX = e.changedTouches[0]?.clientX || 0;
               const diff = startX - endX;
               if (Math.abs(diff) > 50 && lightbox.items.length > 1) {
-                if (diff > 0) setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length });
-                else setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length });
+                if (diff > 0) { setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }
+                else { setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }
               }
             }}
           >
+            {/* Loading overlay while embed initialises */}
+            {embedLoading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/80">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-gold/30 border-t-brand-gold" />
+              </div>
+            )}
             {(() => {
               const item = lightbox.items[lightbox.index] || "";
               const embed = getEmbedUrl(item);
               if (embed.type === "youtube") {
-                return <iframe src={embed.embedUrl} className="aspect-video w-[90vw] max-w-3xl rounded-lg" allowFullScreen />;
+                return <iframe src={`${embed.embedUrl}?autoplay=1&mute=0&rel=0`} className="aspect-video w-[88vw] max-w-3xl rounded-lg" allowFullScreen allow="autoplay" onLoad={() => setEmbedLoading(false)} />;
               }
               if (embed.type === "instagram" || embed.type === "tiktok") {
-                return <iframe src={embed.embedUrl} className="h-[80vh] w-[90vw] max-w-md rounded-lg" allowFullScreen />;
+                return <iframe src={embed.embedUrl} className="h-[80vh] w-[88vw] max-w-md rounded-lg" allowFullScreen onLoad={() => setEmbedLoading(false)} />;
               }
               if (embed.type === "video") {
-                return <video src={embed.embedUrl} controls className="max-h-[80vh] rounded-lg" />;
+                return <video src={embed.embedUrl} controls autoPlay className="max-h-[80vh] rounded-lg" onCanPlay={() => setEmbedLoading(false)} />;
               }
-              // eslint-disable-next-line @next/next/no-img-element
-              return <img src={item} alt="" className="max-h-[80vh] rounded-lg object-contain" style={{ touchAction: "pinch-zoom" }} />;
+              // Image with zoom — matches product gallery (transform-scale with mouse tracking)
+              return (
+                <div
+                  className={`relative inline-block overflow-hidden rounded-lg sm:${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "touch") return; // touch devices: no zoom
+                    if (!zoom) {
+                      const rect = e.currentTarget.getBoundingClientRect();
+                      setZoomOrigin({
+                        x: ((e.clientX - rect.left) / rect.width) * 100,
+                        y: ((e.clientY - rect.top) / rect.height) * 100,
+                      });
+                    }
+                    setZoom(z => !z);
+                  }}
+                  onPointerMove={(e) => {
+                    if (e.pointerType === "touch" || !zoom) return;
+                    const rect = e.currentTarget.getBoundingClientRect();
+                    setZoomOrigin({
+                      x: ((e.clientX - rect.left) / rect.width) * 100,
+                      y: ((e.clientY - rect.top) / rect.height) * 100,
+                    });
+                  }}
+                  onPointerLeave={(e) => { if (e.pointerType !== "touch" && zoom) setZoom(false); }}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item}
+                    alt=""
+                    className="block max-h-[80vh] max-w-[88vw] object-contain transition-transform duration-200"
+                    style={zoom ? {
+                      transform: "scale(2.5)",
+                      transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,
+                    } : undefined}
+                    onLoad={() => setEmbedLoading(false)}
+                  />
+                  {/* Zoom hint — desktop only (mobile uses native pinch-zoom) */}
+                  {!zoom && (
+                    <div className="pointer-events-none absolute bottom-3 right-3 hidden items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] text-white/70 backdrop-blur-sm sm:flex">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /><path d="M11 8v6M8 11h6" /></svg>
+                      click to zoom
+                    </div>
+                  )}
+                </div>
+              );
             })()}
           </div>
 
-          {/* Next */}
+          {/* Next button — tall panel on right edge */}
           {lightbox.items.length > 1 && (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }}
-              className="absolute right-4 text-3xl text-white/50 hover:text-white"
-            >›</button>
+              onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }}
+              className="absolute right-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white sm:h-24 sm:w-14"
+              aria-label="next"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6 sm:h-8 sm:w-8"><path d="M9 18l6-6-6-6" /></svg>
+            </button>
           )}
 
           {/* Counter */}
           {lightbox.items.length > 1 && (
-            <p className="absolute bottom-4 text-xs text-white/50">{lightbox.index + 1} / {lightbox.items.length}</p>
+            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs text-white/60 backdrop-blur-sm">{lightbox.index + 1} / {lightbox.items.length}</p>
           )}
         </div>,
         document.body,

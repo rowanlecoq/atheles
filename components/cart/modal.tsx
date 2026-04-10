@@ -199,17 +199,24 @@ export default function CartModal() {
       </button>
       <Transition show={isOpen}>
         <Dialog onClose={closeCart} className="relative z-50">
+          {/* Desktop backdrop — subtle dark overlay that animates with the cart, click to close */}
           <Transition.Child
             as={Fragment}
-            enter="transition-all ease-in-out duration-300"
-            enterFrom="opacity-0 backdrop-blur-none"
-            enterTo="opacity-100 backdrop-blur-[.5px]"
-            leave="transition-all ease-in-out duration-200"
-            leaveFrom="opacity-100 backdrop-blur-[.5px]"
-            leaveTo="opacity-0 backdrop-blur-none"
+            enter="transition-opacity ease-in-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-in-out duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/50" aria-hidden="true" />
+            <div
+              className="fixed inset-0 hidden bg-black/30 lg:block"
+              aria-hidden="true"
+              onClick={closeCart}
+            />
           </Transition.Child>
+          {/* Mobile: transparent click-outside (panel is full-width so rarely hit, but keeps Dialog functional) */}
+          <div className="fixed inset-0 lg:hidden" onClick={closeCart} />
           <Transition.Child
             as={Fragment}
             enter="transition-all ease-in-out duration-300"
@@ -270,7 +277,7 @@ export default function CartModal() {
 
                   {/* Favorites section in empty cart too */}
                   {filteredFavProducts.length > 0 && (
-                    <div className="border-t border-brand-dark-gold/20 px-1 pb-4 pt-3">
+                    <div className="border-t border-brand-dark-gold/20 px-1 pb-4 pt-6 mt-2">
                       <div className="mb-2 flex items-center gap-1.5">
                         <HeartIcon className="h-3.5 w-3.5 text-brand-gold" />
                         <p className="text-xs uppercase tracking-wider text-brand-grey">
@@ -729,10 +736,10 @@ export default function CartModal() {
 
 function CloseCart({ className }: { className?: string }) {
   return (
-    <div className="relative flex h-11 w-11 items-center justify-center rounded-md border border-brand-dark-gold/30 text-brand-grey transition-colors hover:text-brand-gold">
+    <div className="relative flex h-11 w-11 items-center justify-center rounded-md text-brand-grey transition-colors hover:text-brand-gold">
       <XMarkIcon
         className={clsx(
-          "h-6 transition-all ease-in-out hover:scale-110",
+          "h-6 transition-colors",
           className,
         )}
       />
