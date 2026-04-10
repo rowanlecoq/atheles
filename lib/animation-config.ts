@@ -1,17 +1,17 @@
-export const animationEasing = [0.25, 0.1, 0.25, 1] as const;
+export const animationEasing = [0.22, 1, 0.36, 1] as const;
 
 export const animationDurations = {
-  fast: 0.4,
-  normal: 0.6,
-  slow: 0.8,
-  hero: 1.2,
+  fast: 0.18,
+  normal: 0.28,
+  slow: 0.45,
+  hero: 0.7,
 } as const;
 
 export const animationDurationsMobile = {
-  fast: 0.28,
-  normal: 0.42,
-  slow: 0.56,
-  hero: 0.9,
+  fast: 0.16,
+  normal: 0.25,
+  slow: 0.38,
+  hero: 0.55,
 } as const;
 
 export const animationStaggers = {
