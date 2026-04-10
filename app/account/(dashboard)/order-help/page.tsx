@@ -1,8 +1,10 @@
 import Link from "next/link";
+import { FadeIn } from "components/animations";
 
 export default function OrderHelpPage() {
   return (
     <div>
+      <FadeIn direction="up">
       <h2 className="mb-6 font-heading text-2xl text-brand-light-gold">
         order help
       </h2>
@@ -39,6 +41,7 @@ export default function OrderHelpPage() {
           link={{ href: "/contact", label: "contact us" }}
         />
       </div>
+      </FadeIn>
     </div>
   );
 }
