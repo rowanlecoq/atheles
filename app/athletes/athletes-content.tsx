@@ -110,6 +110,7 @@ export function AthletesContent() {
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [loaded, setLoaded] = useState(false);
   const [lightbox, setLightbox] = useState<{ items: string[]; index: number } | null>(null);
+  const [embedLoading, setEmbedLoading] = useState(false);
 
   useEffect(() => {
     fetch("/api/admin/athletes")
@@ -160,13 +161,25 @@ export function AthletesContent() {
       </p>
 
       {!loaded ? (
-        <div className="py-20" />
+        <div className="mb-14 grid gap-6 sm:grid-cols-2">
+          {[0, 1].map((i) => (
+            <div key={i} className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
+              <div className="aspect-[4/5] w-full bg-white/[0.04]" />
+              <div className="p-5 space-y-3">
+                <div className="h-4 w-32 rounded bg-white/[0.06]" />
+                <div className="h-3 w-20 rounded bg-white/[0.04]" />
+                <div className="h-3 w-full rounded bg-white/[0.04]" />
+                <div className="h-3 w-3/4 rounded bg-white/[0.04]" />
+              </div>
+            </div>
+          ))}
+        </div>
       ) : (
       <>
       <div className="mb-14 grid gap-6 sm:grid-cols-2">
         {athletes.map((athlete) => (
           <div key={athlete.name} className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
-            <div className="relative aspect-[4/5] w-full bg-brand-medium-grey/10 cursor-pointer" onClick={() => athlete.image && setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: 0 })}>
+            <div className="relative aspect-[4/5] w-full bg-brand-medium-grey/10 cursor-pointer" onClick={() => { if (athlete.image) { setEmbedLoading(false); setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: 0 }); } }}>
               {athlete.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img src={athlete.image} alt={athlete.name} className="h-full w-full object-cover" />
@@ -186,7 +199,7 @@ export function AthletesContent() {
                     <button
                       key={idx}
                       type="button"
-                      onClick={() => setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: idx + (athlete.image ? 1 : 0) })}
+                      onClick={() => { setEmbedLoading(isMediaUrl(item)); setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: idx + (athlete.image ? 1 : 0) }); }}
                       className="relative aspect-square h-20 w-20 flex-none snap-start overflow-hidden rounded transition-opacity hover:opacity-80"
                     >
                       {(() => {
@@ -276,16 +289,16 @@ export function AthletesContent() {
       {lightbox && typeof document !== "undefined" && createPortal(
         <div
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-4"
-          onClick={() => setLightbox(null)}
+          onClick={() => { setLightbox(null); setEmbedLoading(false); }}
         >
           {/* Close */}
-          <button type="button" onClick={() => setLightbox(null)} className="absolute right-4 top-4 text-2xl text-white/70 hover:text-white">×</button>
+          <button type="button" onClick={() => { setLightbox(null); setEmbedLoading(false); }} className="absolute right-4 top-4 text-2xl text-white/70 hover:text-white">×</button>
 
           {/* Prev */}
           {lightbox.items.length > 1 && (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }}
+              onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }}
               className="absolute left-4 text-3xl text-white/50 hover:text-white"
             >‹</button>
           )}
@@ -293,7 +306,7 @@ export function AthletesContent() {
           {/* Content — swipe to navigate on mobile */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="max-h-[85vh] max-w-[90vw]"
+            className="relative max-h-[85vh] max-w-[90vw]"
             onTouchStart={(e) => {
               const touch = e.touches[0];
               if (touch) (e.currentTarget as HTMLElement).dataset.touchX = String(touch.clientX);
@@ -303,25 +316,31 @@ export function AthletesContent() {
               const endX = e.changedTouches[0]?.clientX || 0;
               const diff = startX - endX;
               if (Math.abs(diff) > 50 && lightbox.items.length > 1) {
-                if (diff > 0) setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length });
-                else setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length });
+                if (diff > 0) { setEmbedLoading(true); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }
+                else { setEmbedLoading(true); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }
               }
             }}
           >
+            {/* Loading overlay while embed initialises */}
+            {embedLoading && (
+              <div className="absolute inset-0 z-10 flex items-center justify-center rounded-lg bg-black/80">
+                <div className="h-8 w-8 animate-spin rounded-full border-2 border-brand-gold/30 border-t-brand-gold" />
+              </div>
+            )}
             {(() => {
               const item = lightbox.items[lightbox.index] || "";
               const embed = getEmbedUrl(item);
               if (embed.type === "youtube") {
-                return <iframe src={embed.embedUrl} className="aspect-video w-[90vw] max-w-3xl rounded-lg" allowFullScreen />;
+                return <iframe src={`${embed.embedUrl}?autoplay=1&mute=0&rel=0`} className="aspect-video w-[90vw] max-w-3xl rounded-lg" allowFullScreen allow="autoplay" onLoad={() => setEmbedLoading(false)} />;
               }
               if (embed.type === "instagram" || embed.type === "tiktok") {
-                return <iframe src={embed.embedUrl} className="h-[80vh] w-[90vw] max-w-md rounded-lg" allowFullScreen />;
+                return <iframe src={embed.embedUrl} className="h-[80vh] w-[90vw] max-w-md rounded-lg" allowFullScreen onLoad={() => setEmbedLoading(false)} />;
               }
               if (embed.type === "video") {
-                return <video src={embed.embedUrl} controls className="max-h-[80vh] rounded-lg" />;
+                return <video src={embed.embedUrl} controls autoPlay className="max-h-[80vh] rounded-lg" onCanPlay={() => setEmbedLoading(false)} />;
               }
               // eslint-disable-next-line @next/next/no-img-element
-              return <img src={item} alt="" className="max-h-[80vh] rounded-lg object-contain" style={{ touchAction: "pinch-zoom" }} />;
+              return <img src={item} alt="" className="max-h-[80vh] rounded-lg object-contain" style={{ touchAction: "pinch-zoom" }} onLoad={() => setEmbedLoading(false)} />;
             })()}
           </div>
 
@@ -329,7 +348,7 @@ export function AthletesContent() {
           {lightbox.items.length > 1 && (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }}
+              onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }}
               className="absolute right-4 text-3xl text-white/50 hover:text-white"
             >›</button>
           )}

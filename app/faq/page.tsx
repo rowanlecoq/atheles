@@ -1,5 +1,6 @@
 import Footer from "components/layout/footer";
 import { FaqAccordion } from "./faq-accordion";
+import { FadeIn } from "components/animations";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -65,6 +66,7 @@ export default function FaqPage() {
   return (
     <>
       <div className="mx-auto max-w-3xl px-4 py-10 sm:py-12">
+        <FadeIn direction="up">
         <div className="mb-12 text-center">
           <h1 className="mb-4 font-heading text-4xl text-brand-gold sm:text-5xl">
             FAQ
@@ -73,6 +75,8 @@ export default function FaqPage() {
             Everything you need to know about ATHELES.
           </p>
         </div>
+        </FadeIn>
+        <FadeIn direction="up" delay={0.05}>
         <FaqAccordion faqs={faqs} />
         <div className="mt-12 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8 text-center">
           <h2 className="mb-2 font-heading text-lg text-brand-gold sm:text-xl">
@@ -89,6 +93,7 @@ export default function FaqPage() {
             Contact Us
           </a>
         </div>
+        </FadeIn>
       </div>
       <Footer />
     </>

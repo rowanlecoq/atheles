@@ -1,5 +1,6 @@
 import Footer from "components/layout/footer";
 import { ContactForm } from "./contact-form";
+import { FadeIn } from "components/animations";
 import type { Metadata } from "next";
 
 export const metadata: Metadata = {
@@ -12,6 +13,7 @@ export default function ContactPage() {
   return (
     <>
       <div className="mx-auto max-w-4xl px-4 py-10 sm:py-12">
+        <FadeIn direction="up">
         <div className="mb-12 text-center">
           <h1 className="mb-4 text-balance font-heading text-4xl text-brand-gold sm:text-5xl">
             Contact Us
@@ -21,7 +23,9 @@ export default function ContactPage() {
             to hear from you.
           </p>
         </div>
+        </FadeIn>
 
+        <FadeIn direction="up" delay={0.05}>
         <div className="grid gap-12 md:grid-cols-2">
           {/* Contact Form */}
           <div>
@@ -84,6 +88,7 @@ export default function ContactPage() {
             </div>
           </div>
         </div>
+        </FadeIn>
       </div>
       <Footer />
     </>
