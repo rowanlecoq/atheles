@@ -199,8 +199,8 @@ export default function CartModal() {
       </button>
       <Transition show={isOpen}>
         <Dialog onClose={closeCart} className="relative z-50">
-          {/* Desktop-only invisible click-outside area — no visual overlay */}
-          <div className="fixed inset-0 hidden lg:block" aria-hidden="true" onClick={closeCart} />
+          {/* Invisible click-outside overlay — behind the panel, closes cart */}
+          <div className="fixed inset-0" onClick={closeCart} />
           <Transition.Child
             as={Fragment}
             enter="transition-all ease-in-out duration-300"

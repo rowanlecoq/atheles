@@ -148,7 +148,7 @@ export function Gallery({
       {/* Desktop: single image — click to open lightbox */}
       <div className="hidden lg:block">
         <div
-          className="relative aspect-square h-full max-h-[600px] w-full cursor-zoom-in overflow-hidden rounded-lg"
+          className="group relative aspect-square h-full max-h-[600px] w-full cursor-zoom-in overflow-hidden rounded-lg"
           onClick={() => openLightbox(imageIndex)}
         >
           {images[imageIndex] && (
@@ -161,6 +161,15 @@ export function Gallery({
               priority={imageIndex === 0}
             />
           )}
+          {/* Click to zoom hint — appears on hover */}
+          <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs text-white/80 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
+              <circle cx="11" cy="11" r="8" />
+              <path d="M21 21l-4.35-4.35" />
+              <path d="M11 8v6M8 11h6" />
+            </svg>
+            click to zoom
+          </div>
         </div>
       </div>
 
