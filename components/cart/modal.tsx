@@ -199,8 +199,24 @@ export default function CartModal() {
       </button>
       <Transition show={isOpen}>
         <Dialog onClose={closeCart} className="relative z-50">
-          {/* Invisible click-outside overlay — behind the panel, closes cart */}
-          <div className="fixed inset-0" onClick={closeCart} />
+          {/* Desktop backdrop — subtle dark overlay that animates with the cart, click to close */}
+          <Transition.Child
+            as={Fragment}
+            enter="transition-opacity ease-in-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-in-out duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div
+              className="fixed inset-0 hidden bg-black/30 lg:block"
+              aria-hidden="true"
+              onClick={closeCart}
+            />
+          </Transition.Child>
+          {/* Mobile: transparent click-outside (panel is full-width so rarely hit, but keeps Dialog functional) */}
+          <div className="fixed inset-0 lg:hidden" onClick={closeCart} />
           <Transition.Child
             as={Fragment}
             enter="transition-all ease-in-out duration-300"

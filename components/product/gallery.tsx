@@ -3,7 +3,6 @@
 import { GridTileImage } from "components/grid/tile";
 import Image from "next/image";
 import { useState, useCallback, useEffect, useRef } from "react";
-import { createPortal } from "react-dom";
 
 export function Gallery({
   images,
@@ -11,8 +10,7 @@ export function Gallery({
   images: { src: string; altText: string }[];
 }) {
   const [imageIndex, setImageIndex] = useState(0);
-  const [lightboxIndex, setLightboxIndex] = useState<number | null>(null);
-  const [zoom, setZoom] = useState(false);
+  const [isZoomed, setIsZoomed] = useState(false);
   const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const scrollRef = useRef<HTMLDivElement>(null);
   const isProgScrollRef = useRef(false);
@@ -26,37 +24,19 @@ export function Gallery({
     setImageIndex((prev) => (prev === 0 ? images.length - 1 : prev - 1));
   }, [images.length]);
 
-  // Keyboard navigation for the gallery strip (lightbox closed)
+  // Keyboard navigation
   useEffect(() => {
-    if (lightboxIndex !== null) return;
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === "ArrowLeft") prevImage();
       if (e.key === "ArrowRight") nextImage();
+      if (e.key === "Escape") setIsZoomed(false);
     };
     window.addEventListener("keydown", handleKeyDown);
     return () => window.removeEventListener("keydown", handleKeyDown);
-  }, [nextImage, prevImage, lightboxIndex]);
+  }, [nextImage, prevImage]);
 
-  // Keyboard navigation inside lightbox
-  useEffect(() => {
-    if (lightboxIndex === null) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") { setLightboxIndex(null); setZoom(false); }
-      if (e.key === "ArrowLeft" && images.length > 1) {
-        setZoom(false);
-        setLightboxIndex((l) => l !== null ? (l - 1 + images.length) % images.length : null);
-      }
-      if (e.key === "ArrowRight" && images.length > 1) {
-        setZoom(false);
-        setLightboxIndex((l) => l !== null ? (l + 1) % images.length : null);
-      }
-    };
-    window.addEventListener("keydown", handler);
-    return () => window.removeEventListener("keydown", handler);
-  }, [lightboxIndex, images.length]);
-
-  // Reset zoom whenever the lightbox image changes
-  useEffect(() => { setZoom(false); }, [lightboxIndex]);
+  // Reset zoom when the displayed image changes
+  useEffect(() => { setIsZoomed(false); }, [imageIndex]);
 
   const scrollToIndex = useCallback((index: number) => {
     if (!scrollRef.current) return;
@@ -105,19 +85,9 @@ export function Gallery({
     };
   }, [images.length]);
 
-  const openLightbox = (index: number) => {
-    setLightboxIndex(index);
-    setZoom(false);
-  };
-
-  const closeLightbox = () => {
-    setLightboxIndex(null);
-    setZoom(false);
-  };
-
   return (
     <div>
-      {/* Mobile: horizontal scroll gallery — tap to open lightbox */}
+      {/* Mobile: horizontal scroll gallery — swipe to navigate */}
       <div
         ref={scrollRef}
         className="flex snap-x snap-mandatory overflow-x-auto scrollbar-hide lg:hidden"
@@ -128,10 +98,7 @@ export function Gallery({
             key={image.src}
             className="aspect-square w-full flex-none snap-center"
           >
-            <div
-              className="relative h-full w-full cursor-zoom-in"
-              onClick={() => openLightbox(index)}
-            >
+            <div className="relative h-full w-full">
               <Image
                 className="h-full w-full object-contain"
                 fill
@@ -145,31 +112,65 @@ export function Gallery({
         ))}
       </div>
 
-      {/* Desktop: single image — click to open lightbox */}
+      {/* Desktop: inline zoom on click — no lightbox */}
       <div className="hidden lg:block">
         <div
-          className="group relative aspect-square h-full max-h-[600px] w-full cursor-zoom-in overflow-hidden rounded-lg"
-          onClick={() => openLightbox(imageIndex)}
+          className={`relative aspect-square h-full max-h-[600px] w-full overflow-hidden rounded-lg ${isZoomed ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+          onPointerDown={(e) => {
+            if (e.pointerType === "touch") return;
+            if (!isZoomed) {
+              const rect = e.currentTarget.getBoundingClientRect();
+              setZoomOrigin({
+                x: ((e.clientX - rect.left) / rect.width) * 100,
+                y: ((e.clientY - rect.top) / rect.height) * 100,
+              });
+              setIsZoomed(true);
+            } else {
+              setIsZoomed(false);
+            }
+          }}
+          onPointerMove={(e) => {
+            if (e.pointerType === "touch" || !isZoomed) return;
+            const rect = e.currentTarget.getBoundingClientRect();
+            setZoomOrigin({
+              x: ((e.clientX - rect.left) / rect.width) * 100,
+              y: ((e.clientY - rect.top) / rect.height) * 100,
+            });
+          }}
+          onPointerLeave={(e) => {
+            if (e.pointerType !== "touch") setIsZoomed(false);
+          }}
         >
           {images[imageIndex] && (
-            <Image
-              className="h-full w-full object-contain"
-              fill
-              sizes="66vw"
-              alt={images[imageIndex]?.altText as string}
-              src={images[imageIndex]?.src as string}
-              priority={imageIndex === 0}
-            />
+            <div
+              className="absolute inset-0 transition-transform duration-200"
+              style={
+                isZoomed
+                  ? { transform: "scale(2.5)", transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%` }
+                  : undefined
+              }
+            >
+              <Image
+                className="h-full w-full object-contain"
+                fill
+                sizes="66vw"
+                alt={images[imageIndex]?.altText as string}
+                src={images[imageIndex]?.src as string}
+                priority={imageIndex === 0}
+              />
+            </div>
           )}
-          {/* Click to zoom hint — appears on hover */}
-          <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs text-white/80 opacity-0 backdrop-blur-sm transition-opacity duration-200 group-hover:opacity-100">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
-              <circle cx="11" cy="11" r="8" />
-              <path d="M21 21l-4.35-4.35" />
-              <path d="M11 8v6M8 11h6" />
-            </svg>
-            click to zoom
-          </div>
+          {/* Click to zoom badge — always visible on desktop, disappears while zoomed */}
+          {!isZoomed && (
+            <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs text-white/80 backdrop-blur-sm">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
+                <circle cx="11" cy="11" r="8" />
+                <path d="M21 21l-4.35-4.35" />
+                <path d="M11 8v6M8 11h6" />
+              </svg>
+              click to zoom
+            </div>
+          )}
         </div>
       </div>
 
@@ -221,150 +222,6 @@ export function Gallery({
           })}
         </ul>
       )}
-
-      {/* Lightbox — portaled to body so it covers the navbar */}
-      {lightboxIndex !== null &&
-        typeof document !== "undefined" &&
-        createPortal(
-          <div
-            className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
-            onClick={closeLightbox}
-          >
-            {/* Close button */}
-            <button
-              type="button"
-              onClick={closeLightbox}
-              className="absolute right-4 top-4 z-10 text-white/70 transition-colors hover:text-white"
-              aria-label="close"
-            >
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-8 w-8">
-                <line x1="18" y1="6" x2="6" y2="18" />
-                <line x1="6" y1="6" x2="18" y2="18" />
-              </svg>
-            </button>
-
-            {/* Prev button */}
-            {images.length > 1 && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setZoom(false);
-                  setLightboxIndex((l) => l !== null ? (l - 1 + images.length) % images.length : null);
-                }}
-                className="absolute left-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white sm:h-24 sm:w-14"
-                aria-label="previous"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6 sm:h-8 sm:w-8">
-                  <path d="M15 18l-6-6 6-6" />
-                </svg>
-              </button>
-            )}
-
-            {/* Image content — stops propagation, handles swipe on mobile */}
-            <div
-              onClick={(e) => e.stopPropagation()}
-              className="relative flex items-center justify-center"
-              onTouchStart={(e) => {
-                if (e.touches.length > 1) {
-                  delete (e.currentTarget as HTMLElement).dataset.touchX;
-                  return;
-                }
-                const touch = e.touches[0];
-                if (touch) (e.currentTarget as HTMLElement).dataset.touchX = String(touch.clientX);
-              }}
-              onTouchEnd={(e) => {
-                const stored = (e.currentTarget as HTMLElement).dataset.touchX;
-                if (!stored) return;
-                const startX = Number(stored);
-                const endX = e.changedTouches[0]?.clientX || 0;
-                const diff = startX - endX;
-                if (Math.abs(diff) > 50 && images.length > 1) {
-                  setZoom(false);
-                  if (diff > 0) {
-                    setLightboxIndex((l) => l !== null ? (l + 1) % images.length : null);
-                  } else {
-                    setLightboxIndex((l) => l !== null ? (l - 1 + images.length) % images.length : null);
-                  }
-                }
-              }}
-            >
-              {/* Zoom wrapper — desktop click-to-zoom, mouse-tracking origin */}
-              <div
-                className={`relative inline-block overflow-hidden rounded-lg ${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`}
-                onPointerDown={(e) => {
-                  if (e.pointerType === "touch") return;
-                  if (!zoom) {
-                    const rect = e.currentTarget.getBoundingClientRect();
-                    setZoomOrigin({
-                      x: ((e.clientX - rect.left) / rect.width) * 100,
-                      y: ((e.clientY - rect.top) / rect.height) * 100,
-                    });
-                  }
-                  setZoom((z) => !z);
-                }}
-                onPointerMove={(e) => {
-                  if (e.pointerType === "touch" || !zoom) return;
-                  const rect = e.currentTarget.getBoundingClientRect();
-                  setZoomOrigin({
-                    x: ((e.clientX - rect.left) / rect.width) * 100,
-                    y: ((e.clientY - rect.top) / rect.height) * 100,
-                  });
-                }}
-                onPointerLeave={(e) => { if (e.pointerType !== "touch" && zoom) setZoom(false); }}
-              >
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={images[lightboxIndex]?.src || ""}
-                  alt={images[lightboxIndex]?.altText || ""}
-                  className="block max-h-[80vh] max-w-[88vw] object-contain transition-transform duration-200"
-                  style={
-                    zoom
-                      ? { transform: "scale(2.5)", transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%` }
-                      : undefined
-                  }
-                />
-                {/* Zoom hint — desktop only */}
-                {!zoom && (
-                  <div className="pointer-events-none absolute bottom-3 right-3 hidden items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] text-white/70 backdrop-blur-sm sm:flex">
-                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3">
-                      <circle cx="11" cy="11" r="8" />
-                      <path d="M21 21l-4.35-4.35" />
-                      <path d="M11 8v6M8 11h6" />
-                    </svg>
-                    click to zoom
-                  </div>
-                )}
-              </div>
-            </div>
-
-            {/* Next button */}
-            {images.length > 1 && (
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setZoom(false);
-                  setLightboxIndex((l) => l !== null ? (l + 1) % images.length : null);
-                }}
-                className="absolute right-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white sm:h-24 sm:w-14"
-                aria-label="next"
-              >
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6 sm:h-8 sm:w-8">
-                  <path d="M9 18l6-6-6-6" />
-                </svg>
-              </button>
-            )}
-
-            {/* Counter */}
-            {images.length > 1 && (
-              <p className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs text-white/60 backdrop-blur-sm">
-                {lightboxIndex + 1} / {images.length}
-              </p>
-            )}
-          </div>,
-          document.body,
-        )}
     </div>
   );
 }
