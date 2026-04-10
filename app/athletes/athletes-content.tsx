@@ -114,9 +114,25 @@ export function AthletesContent() {
   const [loaded, setLoaded] = useState(false);
   const [lightbox, setLightbox] = useState<{ items: string[]; index: number } | null>(null);
   const [embedLoading, setEmbedLoading] = useState(false);
+  const [zoom, setZoom] = useState(false);
   const prefersReducedMotion = useReducedMotion();
   const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
   const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
+
+  // Keyboard navigation
+  useEffect(() => {
+    if (!lightbox) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") { setLightbox(null); setEmbedLoading(false); setZoom(false); }
+      if (e.key === "ArrowLeft" && lightbox.items.length > 1) { setEmbedLoading(true); setZoom(false); setLightbox(l => l ? { ...l, index: (l.index - 1 + l.items.length) % l.items.length } : null); }
+      if (e.key === "ArrowRight" && lightbox.items.length > 1) { setEmbedLoading(true); setZoom(false); setLightbox(l => l ? { ...l, index: (l.index + 1) % l.items.length } : null); }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [lightbox]);
+
+  // Reset zoom on slide change
+  useEffect(() => { setZoom(false); }, [lightbox?.index]);
 
   useEffect(() => {
     fetch("/api/admin/athletes")
@@ -284,7 +300,6 @@ export function AthletesContent() {
       </>
       )}
 
-      <FadeIn direction="up" delay={0.05}>
       <div className="mb-12 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6 sm:p-8">
         <h2 className="mb-1 font-heading text-xl text-brand-gold">want to become an atheles athlete?</h2>
         <p className="mb-6 text-sm text-brand-grey">
@@ -300,30 +315,40 @@ export function AthletesContent() {
           ))}
         </ul>
       </div>
-      </FadeIn>
 
       {/* Lightbox modal — portaled to cover navbar */}
       {lightbox && typeof document !== "undefined" && createPortal(
         <div
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95 p-4"
-          onClick={() => { setLightbox(null); setEmbedLoading(false); }}
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
+          onClick={() => { setLightbox(null); setEmbedLoading(false); setZoom(false); }}
         >
-          {/* Close */}
-          <button type="button" onClick={() => { setLightbox(null); setEmbedLoading(false); }} className="absolute right-4 top-4 text-2xl text-white/70 hover:text-white">×</button>
+          {/* Close button — large, top-right */}
+          <button
+            type="button"
+            onClick={() => { setLightbox(null); setEmbedLoading(false); setZoom(false); }}
+            className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white"
+            aria-label="close"
+          >
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5"><path d="M18 6L6 18M6 6l12 12" /></svg>
+          </button>
 
-          {/* Prev */}
+          {/* Prev button — tall panel on left edge */}
           {lightbox.items.length > 1 && (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }}
-              className="absolute left-4 text-3xl text-white/50 hover:text-white"
-            >‹</button>
+              onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }}
+              className="absolute left-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white"
+              aria-label="previous"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6"><path d="M15 18l-6-6 6-6" /></svg>
+            </button>
           )}
 
           {/* Content — swipe to navigate on mobile */}
           <div
             onClick={(e) => e.stopPropagation()}
-            className="relative max-h-[85vh] max-w-[90vw]"
+            className="relative flex items-center justify-center"
+            style={{ maxHeight: "85vh", maxWidth: "88vw" }}
             onTouchStart={(e) => {
               const touch = e.touches[0];
               if (touch) (e.currentTarget as HTMLElement).dataset.touchX = String(touch.clientX);
@@ -333,8 +358,8 @@ export function AthletesContent() {
               const endX = e.changedTouches[0]?.clientX || 0;
               const diff = startX - endX;
               if (Math.abs(diff) > 50 && lightbox.items.length > 1) {
-                if (diff > 0) { setEmbedLoading(true); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }
-                else { setEmbedLoading(true); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }
+                if (diff > 0) { setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }
+                else { setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index - 1 + lightbox.items.length) % lightbox.items.length }); }
               }
             }}
           >
@@ -348,31 +373,56 @@ export function AthletesContent() {
               const item = lightbox.items[lightbox.index] || "";
               const embed = getEmbedUrl(item);
               if (embed.type === "youtube") {
-                return <iframe src={`${embed.embedUrl}?autoplay=1&mute=0&rel=0`} className="aspect-video w-[90vw] max-w-3xl rounded-lg" allowFullScreen allow="autoplay" onLoad={() => setEmbedLoading(false)} />;
+                return <iframe src={`${embed.embedUrl}?autoplay=1&mute=0&rel=0`} className="aspect-video w-[88vw] max-w-3xl rounded-lg" allowFullScreen allow="autoplay" onLoad={() => setEmbedLoading(false)} />;
               }
               if (embed.type === "instagram" || embed.type === "tiktok") {
-                return <iframe src={embed.embedUrl} className="h-[80vh] w-[90vw] max-w-md rounded-lg" allowFullScreen onLoad={() => setEmbedLoading(false)} />;
+                return <iframe src={embed.embedUrl} className="h-[80vh] w-[88vw] max-w-md rounded-lg" allowFullScreen onLoad={() => setEmbedLoading(false)} />;
               }
               if (embed.type === "video") {
                 return <video src={embed.embedUrl} controls autoPlay className="max-h-[80vh] rounded-lg" onCanPlay={() => setEmbedLoading(false)} />;
               }
-              // eslint-disable-next-line @next/next/no-img-element
-              return <img src={item} alt="" className="max-h-[80vh] rounded-lg object-contain" style={{ touchAction: "pinch-zoom" }} onLoad={() => setEmbedLoading(false)} />;
+              // Image with zoom
+              return (
+                <div
+                  className="relative cursor-zoom-in overflow-auto rounded-lg"
+                  style={zoom ? { cursor: "zoom-out", maxHeight: "85vh", maxWidth: "88vw", overflow: "auto" } : { cursor: "zoom-in" }}
+                  onClick={() => setZoom(z => !z)}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={item}
+                    alt=""
+                    style={zoom ? { width: "200%", maxWidth: "none", maxHeight: "none" } : { maxHeight: "80vh", maxWidth: "88vw", objectFit: "contain" }}
+                    className="block rounded-lg"
+                    onLoad={() => setEmbedLoading(false)}
+                  />
+                  {/* Zoom hint badge */}
+                  {!zoom && (
+                    <div className="pointer-events-none absolute bottom-3 right-3 flex items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] text-white/70 backdrop-blur-sm">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /><path d="M11 8v6M8 11h6" /></svg>
+                      tap to zoom
+                    </div>
+                  )}
+                </div>
+              );
             })()}
           </div>
 
-          {/* Next */}
+          {/* Next button — tall panel on right edge */}
           {lightbox.items.length > 1 && (
             <button
               type="button"
-              onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }}
-              className="absolute right-4 text-3xl text-white/50 hover:text-white"
-            >›</button>
+              onClick={(e) => { e.stopPropagation(); setEmbedLoading(true); setZoom(false); setLightbox({ ...lightbox, index: (lightbox.index + 1) % lightbox.items.length }); }}
+              className="absolute right-3 top-1/2 z-10 flex h-16 w-11 -translate-y-1/2 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white"
+              aria-label="next"
+            >
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2.5} className="h-6 w-6"><path d="M9 18l6-6-6-6" /></svg>
+            </button>
           )}
 
           {/* Counter */}
           {lightbox.items.length > 1 && (
-            <p className="absolute bottom-4 text-xs text-white/50">{lightbox.index + 1} / {lightbox.items.length}</p>
+            <p className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs text-white/60 backdrop-blur-sm">{lightbox.index + 1} / {lightbox.items.length}</p>
           )}
         </div>,
         document.body,
