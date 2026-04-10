@@ -277,7 +277,7 @@ export default function CartModal() {
 
                   {/* Favorites section in empty cart too */}
                   {filteredFavProducts.length > 0 && (
-                    <div className="border-t border-brand-dark-gold/20 px-1 pb-4 pt-3">
+                    <div className="border-t border-brand-dark-gold/20 px-1 pb-4 pt-6 mt-2">
                       <div className="mb-2 flex items-center gap-1.5">
                         <HeartIcon className="h-3.5 w-3.5 text-brand-gold" />
                         <p className="text-xs uppercase tracking-wider text-brand-grey">
