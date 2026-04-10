@@ -344,17 +344,28 @@ export async function createCustomerAccount(
     };
   }
 
-  // Set DOB via Admin API tags (Storefront API doesn't support tags)
-  // Retry with delay since Shopify may not have indexed the new customer yet
-  if (dob) {
-    const setDob = async () => {
-      for (let attempt = 0; attempt < 3; attempt++) {
-        if (attempt > 0) await new Promise((r) => setTimeout(r, 2000 * attempt));
-        const result = await updateCustomerTag(email, "dob", dob);
-        if (result.success) return;
-      }
-    };
-    setDob().catch(() => {});
+  const customerId = data.customerCreate.customer?.id;
+
+  // Set initial tags (tier:bronze + optional dob) synchronously using the
+  // customer GID returned by customerCreate — no email search or retry delay needed
+  if (customerId && adminEndpoint && adminToken) {
+    const initialTags: string[] = ["tier:bronze"];
+    if (dob) initialTags.push(`dob:${dob}`);
+
+    await shopifyAdminFetch<{
+      customerUpdate: {
+        customer: { id: string } | null;
+        userErrors: { message: string }[];
+      };
+    }>(
+      `mutation customerUpdate($input: CustomerInput!) {
+        customerUpdate(input: $input) {
+          customer { id }
+          userErrors { message }
+        }
+      }`,
+      { input: { id: customerId, tags: initialTags } },
+    ).catch(() => {});
   }
 
   return { success: true };
