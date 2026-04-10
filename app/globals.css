@@ -280,22 +280,46 @@ html { scrollbar-width: none; }
   }
 }
 
-/* Sparkle background twinkle animation */
-@keyframes sparkle-twinkle {
+/* Sparkle background — 4-pointed star float animations */
+@keyframes sparkle-star-float {
   0%, 100% {
-    opacity: 0;
-    transform: scale(0.4);
+    opacity: 0.10;
+    transform: translateY(0) scale(0.60) rotate(calc(-1 * var(--spin, 15deg)));
   }
   50% {
-    opacity: var(--peak-opacity, 0.12);
-    transform: scale(1);
+    opacity: 0.42;
+    transform: translateY(var(--float-y, -14px)) scale(1) rotate(var(--spin, 15deg));
   }
 }
 
+@keyframes sparkle-star-bright {
+  0%, 100% {
+    opacity: 0.22;
+    transform: translateY(0) scale(0.65) rotate(var(--spin, 15deg));
+  }
+  50% {
+    opacity: 0.78;
+    transform: translateY(var(--float-y, -14px)) scale(1.12) rotate(calc(-1 * var(--spin, 15deg)));
+  }
+}
+
+.sparkle-star {
+  will-change: transform, opacity;
+}
+
 @media (prefers-reduced-motion: reduce) {
-  .sparkle-dot {
+  .sparkle-star {
     display: none;
   }
+}
+
+/* Custom zoom cursors — magnifying glass with + / - indicator */
+.cursor-zoom-plus {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='8' cy='8' r='6' fill='none' stroke='black' stroke-width='3' opacity='0.5'/%3E%3Cline x1='8' y1='5' x2='8' y2='11' stroke='black' stroke-width='3' stroke-linecap='round' opacity='0.5'/%3E%3Cline x1='5' y1='8' x2='11' y2='8' stroke='black' stroke-width='3' stroke-linecap='round' opacity='0.5'/%3E%3Cline x1='12.5' y1='12.5' x2='17' y2='17' stroke='black' stroke-width='3' stroke-linecap='round' opacity='0.5'/%3E%3Ccircle cx='8' cy='8' r='6' fill='none' stroke='white' stroke-width='1.8'/%3E%3Cline x1='8' y1='5' x2='8' y2='11' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3Cline x1='5' y1='8' x2='11' y2='8' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3Cline x1='12.5' y1='12.5' x2='17' y2='17' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 8 8, zoom-in;
+}
+
+.cursor-zoom-minus {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='20' height='20'%3E%3Ccircle cx='8' cy='8' r='6' fill='none' stroke='black' stroke-width='3' opacity='0.5'/%3E%3Cline x1='5' y1='8' x2='11' y2='8' stroke='black' stroke-width='3' stroke-linecap='round' opacity='0.5'/%3E%3Cline x1='12.5' y1='12.5' x2='17' y2='17' stroke='black' stroke-width='3' stroke-linecap='round' opacity='0.5'/%3E%3Ccircle cx='8' cy='8' r='6' fill='none' stroke='white' stroke-width='1.8'/%3E%3Cline x1='5' y1='8' x2='11' y2='8' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3Cline x1='12.5' y1='12.5' x2='17' y2='17' stroke='white' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 8 8, zoom-out;
 }
 
 /* Thunder shake easter egg */
