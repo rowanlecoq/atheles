@@ -350,11 +350,18 @@ export function AthletesContent() {
             onClick={(e) => e.stopPropagation()}
             className="relative flex items-center justify-center"
             onTouchStart={(e) => {
+              // Ignore pinch (multi-touch) — only track single-finger swipes
+              if (e.touches.length > 1) {
+                delete (e.currentTarget as HTMLElement).dataset.touchX;
+                return;
+              }
               const touch = e.touches[0];
               if (touch) (e.currentTarget as HTMLElement).dataset.touchX = String(touch.clientX);
             }}
             onTouchEnd={(e) => {
-              const startX = Number((e.currentTarget as HTMLElement).dataset.touchX || 0);
+              const stored = (e.currentTarget as HTMLElement).dataset.touchX;
+              if (!stored) return; // cleared by multi-touch, skip
+              const startX = Number(stored);
               const endX = e.changedTouches[0]?.clientX || 0;
               const diff = startX - endX;
               if (Math.abs(diff) > 50 && lightbox.items.length > 1) {
@@ -384,8 +391,9 @@ export function AthletesContent() {
               // Image with zoom — matches product gallery (transform-scale with mouse tracking)
               return (
                 <div
-                  className={`relative inline-block overflow-hidden rounded-lg ${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`}
-                  onClick={(e) => {
+                  className={`relative inline-block overflow-hidden rounded-lg sm:${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+                  onMouseDown={(e) => {
+                    // Desktop-only zoom — onMouseDown doesn't fire for touch
                     if (!zoom) {
                       const rect = e.currentTarget.getBoundingClientRect();
                       setZoomOrigin({
@@ -413,10 +421,7 @@ export function AthletesContent() {
                     style={zoom ? {
                       transform: "scale(2.5)",
                       transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%`,
-                      touchAction: "none",
-                    } : {
-                      touchAction: "pinch-zoom",
-                    }}
+                    } : undefined}
                     onLoad={() => setEmbedLoading(false)}
                   />
                   {/* Zoom hint — desktop only (mobile uses native pinch-zoom) */}
