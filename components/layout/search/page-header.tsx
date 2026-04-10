@@ -22,7 +22,7 @@ export default function SearchPageHeader() {
   const title = collection ? collectionTitles[collection] || collection : "store";
 
   return (
-    <div className="relative overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark" style={{ minHeight: 168 }}>
+    <div className="relative overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark" style={{ position: "relative", overflow: "hidden" }}>
       {/* Hero background image — slideshow */}
       <SlideshowMedia
         slotKey="store_header"
@@ -32,8 +32,8 @@ export default function SearchPageHeader() {
       />
       <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/30 via-brand-dark/60 to-brand-dark" />
       {/* Content */}
-      <div className="relative px-4 pb-8 pt-10 sm:pb-10 sm:pt-14" style={{ paddingTop: 56, paddingBottom: 40 }}>
-        <div className="mx-auto max-w-(--breakpoint-2xl) text-center">
+      <div className="relative px-4 pb-8 pt-10 sm:pb-10 sm:pt-14" style={{ position: "relative", paddingTop: 40, paddingBottom: 32 }}>
+        <div className="mx-auto max-w-(--breakpoint-2xl) text-center" style={{ textAlign: "center" }}>
           <SplitText
             key={title}
             text={title}

@@ -51,12 +51,11 @@ export function SplitText({
       : animationViewportMargins.normal,
   });
   const hiddenY = prefersReducedMotion ? 0 : isMobileViewport ? 16 : 24;
-  // Apply blur on all devices — blur(0.001px) end state prevents GPU compositing layer
-  // teardown on mobile (which blur(0px) would trigger). Don't gate on isMobileViewport:
+  // Apply blur on all devices. Don't gate on isMobileViewport:
   // that hook starts false on SSR then flips true after hydration, leaving characters
   // permanently stuck at blur(7px) mid-animation on mobile.
   const hiddenBlur = prefersReducedMotion ? undefined : "blur(7px)";
-  const visibleBlur = prefersReducedMotion ? undefined : "blur(0.001px)";
+  const visibleBlur = prefersReducedMotion ? undefined : "blur(0px)";
   const transitionDuration = prefersReducedMotion
     ? Math.min(duration, animationDurations.fast)
     : isMobileViewport
