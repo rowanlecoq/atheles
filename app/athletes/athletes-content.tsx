@@ -323,14 +323,14 @@ export function AthletesContent() {
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
           onClick={() => { setLightbox(null); setEmbedLoading(false); setZoom(false); }}
         >
-          {/* Close button — large, top-right */}
+          {/* Close button — matches pfp preview style */}
           <button
             type="button"
             onClick={() => { setLightbox(null); setEmbedLoading(false); setZoom(false); }}
-            className="absolute right-4 top-4 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-black/60 text-white/80 backdrop-blur-sm transition-colors hover:bg-black/80 hover:text-white sm:h-14 sm:w-14"
+            className="absolute right-4 top-4 z-10 text-white/70 transition-colors hover:text-white"
             aria-label="close"
           >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-5 w-5 sm:h-7 sm:w-7"><path d="M18 6L6 18M6 6l12 12" /></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-8 w-8"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
 
           {/* Prev button — tall panel on left edge */}

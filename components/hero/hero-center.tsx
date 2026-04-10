@@ -58,17 +58,17 @@ export function HeroCenter() {
         )}
       </div>
 
-      <FadeIn direction="up" delay={0.3} duration={0.45}>
+      <FadeIn direction="up" delay={0.3} duration={0.7}>
         <p className="mb-2 text-sm lowercase tracking-[0.06em] text-brand-grey sm:text-base sm:tracking-[0.08em]">
           welcome to atheles.
         </p>
       </FadeIn>
 
-      <FadeIn delay={0.45} direction="none" duration={0.45}>
+      <FadeIn delay={0.5} direction="none" duration={0.65}>
         <div className="mx-auto my-5 h-px w-28 bg-brand-dark-gold/40" />
       </FadeIn>
 
-      <FadeIn direction="up" delay={0.65} duration={0.5}>
+      <FadeIn direction="up" delay={0.75} duration={0.7}>
         <MagneticHover className="inline-block">
           <Link
             href="/search"
@@ -79,7 +79,7 @@ export function HeroCenter() {
         </MagneticHover>
       </FadeIn>
 
-      <FadeIn direction="up" delay={0.85} duration={0.45}>
+      <FadeIn direction="up" delay={1.0} duration={0.65}>
         <p className="mt-6 max-w-sm text-xs leading-relaxed tracking-wide text-brand-dark-gold animate-[beta-pulse_3s_ease-in-out_infinite] sm:text-[13px]">
           currently in beta. if there are any issues please send a message to{" "}
           <a
