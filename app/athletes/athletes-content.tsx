@@ -392,8 +392,8 @@ export function AthletesContent() {
               return (
                 <div
                   className={`relative inline-block overflow-hidden rounded-lg sm:${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`}
-                  onMouseDown={(e) => {
-                    // Desktop-only zoom — onMouseDown doesn't fire for touch
+                  onPointerDown={(e) => {
+                    if (e.pointerType === "touch") return; // touch devices: no zoom
                     if (!zoom) {
                       const rect = e.currentTarget.getBoundingClientRect();
                       setZoomOrigin({
@@ -403,15 +403,15 @@ export function AthletesContent() {
                     }
                     setZoom(z => !z);
                   }}
-                  onMouseMove={(e) => {
-                    if (!zoom) return;
+                  onPointerMove={(e) => {
+                    if (e.pointerType === "touch" || !zoom) return;
                     const rect = e.currentTarget.getBoundingClientRect();
                     setZoomOrigin({
                       x: ((e.clientX - rect.left) / rect.width) * 100,
                       y: ((e.clientY - rect.top) / rect.height) * 100,
                     });
                   }}
-                  onMouseLeave={() => { if (zoom) setZoom(false); }}
+                  onPointerLeave={(e) => { if (e.pointerType !== "touch" && zoom) setZoom(false); }}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
                   <img
