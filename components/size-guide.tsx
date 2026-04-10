@@ -3,6 +3,7 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { sizeCategories, fitGuide } from "lib/size-data";
 import { useEffect, useState } from "react";
+import { FadeIn } from "components/animations";
 
 export function SizeGuideButton() {
   const [open, setOpen] = useState(false);
@@ -159,13 +160,16 @@ export default function SizeGuidePage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
+      <FadeIn direction="up">
       <h1 className="mb-2 font-heading text-4xl text-brand-gold">Size Guide</h1>
       <p className="mb-8 text-sm text-brand-grey">
         All measurements are in inches. Find your perfect fit across our product
         categories.
       </p>
+      </FadeIn>
 
       {/* Fit Overview */}
+      <FadeIn direction="up" delay={0.05}>
       <div className="mb-10 grid grid-cols-1 gap-4 sm:grid-cols-2">
         {fitGuide.map((item) => (
           <div
@@ -182,7 +186,9 @@ export default function SizeGuidePage() {
           </div>
         ))}
       </div>
+      </FadeIn>
 
+      <FadeIn direction="up" delay={0.1}>
       {/* Tabs */}
       <div className="mb-6 flex overflow-x-auto border-b border-brand-dark-gold/20">
         {sizeCategories.map((cat, i) => (
@@ -234,6 +240,7 @@ export default function SizeGuidePage() {
           </li>
         </ul>
       </div>
+      </FadeIn>
     </div>
   );
 }

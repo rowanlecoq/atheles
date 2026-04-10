@@ -2,6 +2,9 @@
 
 import { useEffect, useState } from "react";
 import { createPortal } from "react-dom";
+import { motion } from "motion/react";
+import { useReducedMotion } from "lib/hooks/use-reduced-motion";
+import { FadeIn } from "components/animations";
 
 type Social = { platform: string; url: string };
 
@@ -111,6 +114,9 @@ export function AthletesContent() {
   const [loaded, setLoaded] = useState(false);
   const [lightbox, setLightbox] = useState<{ items: string[]; index: number } | null>(null);
   const [embedLoading, setEmbedLoading] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
+  const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
+  const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
 
   useEffect(() => {
     fetch("/api/admin/athletes")
@@ -153,12 +159,14 @@ export function AthletesContent() {
         );
       })}
 
+      <FadeIn direction="up">
       <h1 className="mb-2 text-center font-heading text-3xl tracking-wider text-brand-gold sm:text-4xl">
         our athletes
       </h1>
       <p className="mb-10 text-center text-sm text-brand-grey">
         atheles athletes are on the way. stay tuned.
       </p>
+      </FadeIn>
 
       {!loaded ? (
         <div className="mb-14 grid gap-6 sm:grid-cols-2">
@@ -177,8 +185,15 @@ export function AthletesContent() {
       ) : (
       <>
       <div className="mb-14 grid gap-6 sm:grid-cols-2">
-        {athletes.map((athlete) => (
-          <div key={athlete.name} className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
+        {athletes.map((athlete, index) => (
+          <motion.div
+            key={athlete.name}
+            className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
+            initial={{ opacity: 0, y: 16, ...(blurInitial ? { filter: blurInitial } : {}) }}
+            whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
+            viewport={{ once: true, margin: "0px" }}
+            transition={{ duration: 0.28, delay: Math.min(index, 3) * 0.07, ease: [0.22, 1, 0.36, 1] }}
+          >
             <div className="relative aspect-[4/5] w-full bg-brand-medium-grey/10 cursor-pointer" onClick={() => { if (athlete.image) { setEmbedLoading(false); setLightbox({ items: [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[], index: 0 }); } }}>
               {athlete.image ? (
                 // eslint-disable-next-line @next/next/no-img-element
@@ -263,12 +278,13 @@ export function AthletesContent() {
                 </div>
               )}
             </div>
-          </div>
+          </motion.div>
         ))}
       </div>
       </>
       )}
 
+      <FadeIn direction="up" delay={0.05}>
       <div className="mb-12 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6 sm:p-8">
         <h2 className="mb-1 font-heading text-xl text-brand-gold">want to become an atheles athlete?</h2>
         <p className="mb-6 text-sm text-brand-grey">
@@ -284,6 +300,7 @@ export function AthletesContent() {
           ))}
         </ul>
       </div>
+      </FadeIn>
 
       {/* Lightbox modal — portaled to cover navbar */}
       {lightbox && typeof document !== "undefined" && createPortal(
