@@ -199,6 +199,22 @@ export default function CartModal() {
       </button>
       <Transition show={isOpen}>
         <Dialog onClose={closeCart} className="relative z-50">
+          {/* Backdrop — tap/click outside the panel to close */}
+          <Transition.Child
+            as={Fragment}
+            enter="transition-opacity ease-in-out duration-300"
+            enterFrom="opacity-0"
+            enterTo="opacity-100"
+            leave="transition-opacity ease-in-out duration-200"
+            leaveFrom="opacity-100"
+            leaveTo="opacity-0"
+          >
+            <div
+              className="fixed inset-0 bg-black/50"
+              aria-hidden="true"
+              onClick={closeCart}
+            />
+          </Transition.Child>
           <Transition.Child
             as={Fragment}
             enter="transition-all ease-in-out duration-300"

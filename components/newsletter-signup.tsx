@@ -14,24 +14,38 @@ export function NewsletterSignup() {
 
   // Check if user is already subscribed (acceptsMarketing)
   useEffect(() => {
-    if (!document.cookie.includes("atheles-logged-in=1")) return;
+    // Use cache only if it has confirmed marketing subscription — avoids stale data
     try {
       const cached = sessionStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
-        setLoggedIn(true);
-        setUserEmail(u.email || "");
-        if (u.acceptsMarketing) setAlreadySubscribed(true);
-        return;
+        if (u.email && u.acceptsMarketing === true) {
+          setLoggedIn(true);
+          setUserEmail(u.email || "");
+          setAlreadySubscribed(true);
+          return; // Cache is complete, skip API call
+        }
       }
     } catch {}
+    // Always fetch fresh — handles: no cookie, stale cache, logged-in users who haven't subscribed yet
     fetch("/api/auth/session")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
         if (d?.user) {
           setLoggedIn(true);
           setUserEmail(d.user.email || "");
-          if (d.user.acceptsMarketing) setAlreadySubscribed(true);
+          if (d.user.acceptsMarketing) {
+            setAlreadySubscribed(true);
+            // Sync acceptsMarketing into session cache
+            try {
+              const cached = sessionStorage.getItem("atheles-session");
+              if (cached) {
+                const u = JSON.parse(cached);
+                u.acceptsMarketing = true;
+                sessionStorage.setItem("atheles-session", JSON.stringify(u));
+              }
+            } catch {}
+          }
         }
       })
       .catch(() => {});
