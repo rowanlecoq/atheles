@@ -544,7 +544,7 @@ export function AthletesContent() {
               // Image with zoom — matches product gallery (transform-scale with mouse tracking)
               return (
                 <div
-                  className={`relative inline-block overflow-hidden rounded-lg sm:${zoom ? "cursor-zoom-out" : "cursor-zoom-in"}`}
+                  className={`relative inline-block overflow-hidden rounded-lg ${zoom ? "cursor-zoom-minus" : "cursor-zoom-plus"}`}
                   onPointerDown={(e) => {
                     if (e.pointerType === "touch") return; // touch devices: no zoom
                     if (!zoom) {
