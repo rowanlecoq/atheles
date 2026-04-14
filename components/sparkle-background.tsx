@@ -1,77 +1,117 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useReducedMotion } from "lib/hooks/use-reduced-motion";
+import { useCallback, useEffect, useRef } from "react";
 
-// Grid: 12 cols × 10 rows = 120 stars, evenly spread across viewport
-const COLS = 12;
-const ROWS = 10;
-
-const STAR_CLIP =
-  "polygon(50% 0%, 64% 36%, 100% 50%, 64% 64%, 50% 100%, 36% 64%, 0% 50%, 36% 36%)";
-
-const VARIANTS = ["sparkle-drift-a", "sparkle-drift-b", "sparkle-drift-c"] as const;
-
-type Sparkle = {
-  id: number;
+type Star = {
   x: number;
   y: number;
-  size: number;
-  delay: number;
-  duration: number;
-  variant: string;
+  vx: number;
+  vy: number;
+  outerR: number;
+  alpha: number;
+  phase: number;
+  rotation: number;
+  rotSpeed: number;
 };
 
-function rand(min: number, max: number) {
-  return Math.random() * (max - min) + min;
+// 4-pointed star path — same shape as before but drawn on canvas
+function drawStar(
+  ctx: CanvasRenderingContext2D,
+  cx: number,
+  cy: number,
+  outerR: number,
+  rotation: number,
+) {
+  const innerR = outerR * 0.38;
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const r = i % 2 === 0 ? outerR : innerR;
+    const angle = (i * Math.PI) / 4 + rotation;
+    if (i === 0) ctx.moveTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+    else ctx.lineTo(cx + Math.cos(angle) * r, cy + Math.sin(angle) * r);
+  }
+  ctx.closePath();
 }
 
-function generateSparkles(): Sparkle[] {
-  const cellW = 100 / COLS;
-  const cellH = 100 / ROWS;
-  return Array.from({ length: COLS * ROWS }, (_, i) => {
-    const col = i % COLS;
-    const row = Math.floor(i / COLS);
-    return {
-      id: i,
-      x: col * cellW + rand(cellW * 0.05, cellW * 0.95),
-      y: row * cellH + rand(cellH * 0.05, cellH * 0.95),
-      size: rand(8, 20),
-      delay: rand(0, 16),
-      duration: rand(8, 18), // slow, flowy drift
-      variant: VARIANTS[Math.floor(Math.random() * VARIANTS.length)]!,
-    };
-  });
-}
+const COUNT = 90;
 
 export function SparkleBackground() {
-  const [sparkles, setSparkles] = useState<Sparkle[]>([]);
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const starsRef = useRef<Star[]>([]);
+  const animIdRef = useRef(0);
+  const prefersReducedMotion = useReducedMotion();
 
-  useEffect(() => {
-    setSparkles(generateSparkles());
+  const initStars = useCallback((width: number, height: number) => {
+    starsRef.current = Array.from({ length: COUNT }, () => ({
+      x: Math.random() * width,
+      y: Math.random() * height,
+      vx: (Math.random() - 0.5) * 0.22,     // slow horizontal drift
+      vy: (Math.random() - 0.5) * 0.10,     // slow vertical drift
+      outerR: 2.5 + Math.random() * 5.5,    // 2.5–8px → star diameter 5–16px
+      alpha: 0.04 + Math.random() * 0.05,   // 4–9% — always present, never blinks
+      phase: Math.random() * Math.PI * 2,   // offset for sine undulation
+      rotation: Math.random() * Math.PI,
+      rotSpeed: (Math.random() - 0.5) * 0.004, // very slow spin
+    }));
   }, []);
 
-  if (sparkles.length === 0) return null;
+  useEffect(() => {
+    if (prefersReducedMotion) return;
+
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      if (starsRef.current.length === 0) initStars(canvas.width, canvas.height);
+    };
+    resize();
+    window.addEventListener("resize", resize);
+
+    let time = 0;
+    const draw = () => {
+      animIdRef.current = requestAnimationFrame(draw);
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      time += 0.005; // slow time advance for gentle undulation
+
+      for (const s of starsRef.current) {
+        s.x += s.vx;
+        s.y += s.vy + Math.sin(time + s.phase) * 0.10; // sine wave sway
+        s.rotation += s.rotSpeed;
+
+        // Wrap around edges — stars never disappear
+        if (s.x < -20) s.x = w + 20;
+        if (s.x > w + 20) s.x = -20;
+        if (s.y < -20) s.y = h + 20;
+        if (s.y > h + 20) s.y = -20;
+
+        ctx.fillStyle = `rgba(204, 177, 115, ${s.alpha})`;
+        drawStar(ctx, s.x, s.y, s.outerR, s.rotation);
+        ctx.fill();
+      }
+    };
+    animIdRef.current = requestAnimationFrame(draw);
+
+    return () => {
+      cancelAnimationFrame(animIdRef.current);
+      window.removeEventListener("resize", resize);
+    };
+  }, [prefersReducedMotion, initStars]);
+
+  if (prefersReducedMotion) return null;
 
   return (
-    <div
+    <canvas
+      ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 overflow-hidden"
+      className="pointer-events-none fixed inset-0"
       style={{ zIndex: -1 }}
-    >
-      {sparkles.map((s) => (
-        <div
-          key={s.id}
-          className="sparkle-star absolute bg-brand-gold"
-          style={{
-            left: `${s.x}%`,
-            top: `${s.y}%`,
-            width: `${s.size}px`,
-            height: `${s.size}px`,
-            clipPath: STAR_CLIP,
-            animation: `${s.variant} ${s.duration}s ${s.delay}s ease-in-out infinite`,
-          }}
-        />
-      ))}
-    </div>
+    />
   );
 }
