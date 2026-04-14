@@ -60,7 +60,7 @@ export default async function RootLayout({
       className={`dark ${playfair.variable}`}
       style={{ colorScheme: "dark" }}
     >
-      <body className="bg-brand-dark text-white">
+      <body className="bg-brand-dark text-white isolate">
         {/* Inline scripts run synchronously before React hydrates — prevents
             flashing between SSR paint and client hydration.                  */}
         <script
@@ -96,12 +96,14 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
+        {/* Sparkle layer: direct child of body so z-index is in the root
+            stacking context — strictly behind all page content */}
+        <SparkleBackground />
         <SiteImagesProvider data={siteImages}>
           <CurrencyProvider>
             <CartProvider cartPromise={cart}>
               <SiteThemeProvider />
               <ProfileBackgroundApplier />
-              <SparkleBackground />
               <AnnouncementBar />
               <ScrollProgress />
               <KonamiLightning />
