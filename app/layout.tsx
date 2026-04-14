@@ -6,6 +6,7 @@ import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { SparkleBackground } from "components/sparkle-background";
 import { PageTransition } from "components/page-transition";
+import { ProfileBackgroundApplier } from "components/profile-background-applier";
 import { ScrollProgress } from "components/scroll-progress";
 import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";
@@ -60,7 +61,8 @@ export default async function RootLayout({
       style={{ colorScheme: "dark" }}
     >
       <body className="bg-brand-dark text-white isolate">
-        {/* Inline script to set theme colors before React hydrates */}
+        {/* Inline scripts run synchronously before React hydrates — prevents
+            flashing between SSR paint and client hydration.                  */}
         <script
           dangerouslySetInnerHTML={{
             __html: `try{
@@ -77,6 +79,23 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
+        {/* Profile background flash-prevention: set data-bg before first paint */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{
+              var _s=sessionStorage.getItem("atheles-session");
+              if(_s){
+                var _u=JSON.parse(_s);
+                var _t=_u.theme;
+                var _g=_u.globalTheme;
+                var _p=window.location.pathname;
+                if(_t&&_t!=="none"&&(_g||_p.startsWith("/profile"))){
+                  document.body.setAttribute("data-bg",_t);
+                }
+              }
+            }catch(e){}`,
+          }}
+        />
         {/* Sparkle layer: direct child of body so z-index:-1 is in the root
             stacking context — strictly behind all page content */}
         <SparkleBackground />
@@ -84,6 +103,7 @@ export default async function RootLayout({
           <CurrencyProvider>
             <CartProvider cartPromise={cart}>
               <SiteThemeProvider />
+              <ProfileBackgroundApplier />
               <AnnouncementBar />
               <ScrollProgress />
               <KonamiLightning />

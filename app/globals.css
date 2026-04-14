@@ -374,3 +374,55 @@ html.thunder-shake {
     stroke-dashoffset: 0;
   }
 }
+
+/* ─── Profile background themes ──────────────────────────────────────────── */
+/* body[data-bg] is set by the inline flash-prevention script and by
+   ProfileBackgroundApplier on each route change.
+   background-attachment: fixed makes the gradient viewport-fixed so it
+   looks seamless across scrolling pages.                                    */
+
+body[data-bg="gold"] {
+  background-image:
+    radial-gradient(ellipse 130% 80% at 15% 20%, rgba(127, 111, 76, 0.30) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 70% at 85% 80%, rgba(204, 177, 115, 0.18) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 90% at 50% 105%, rgba(61, 50, 32, 0.25) 0%, transparent 65%);
+  background-attachment: fixed;
+}
+
+body[data-bg="water"] {
+  background-image:
+    radial-gradient(ellipse 130% 80% at 15% 60%, rgba(13, 74, 122, 0.38) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 70% at 85% 25%, rgba(0, 45, 90, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 90% at 50% 105%, rgba(0, 20, 55, 0.30) 0%, transparent 65%);
+  background-attachment: fixed;
+}
+
+body[data-bg="tropical"] {
+  background-image:
+    radial-gradient(ellipse 130% 80% at 20% 65%, rgba(15, 92, 48, 0.35) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 70% at 80% 25%, rgba(8, 58, 30, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 90% at 50% 105%, rgba(4, 26, 14, 0.30) 0%, transparent 65%);
+  background-attachment: fixed;
+}
+
+body[data-bg="midnight"] {
+  background-image:
+    radial-gradient(ellipse 130% 80% at 25% 25%, rgba(46, 26, 92, 0.42) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 70% at 75% 75%, rgba(22, 10, 60, 0.32) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 90% at 50% 5%, rgba(60, 30, 110, 0.22) 0%, transparent 65%);
+  background-attachment: fixed;
+}
+
+body[data-bg="sunset"] {
+  background-image:
+    radial-gradient(ellipse 130% 80% at 25% 25%, rgba(122, 42, 16, 0.38) 0%, transparent 60%),
+    radial-gradient(ellipse 100% 70% at 75% 75%, rgba(80, 22, 8, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 90% 90% at 50% 5%, rgba(160, 60, 20, 0.22) 0%, transparent 65%);
+  background-attachment: fixed;
+}
+
+/* Make main transparent so the body gradient shows through.
+   Main still sits at z-index 1, fully above the sparkle canvas at z-index 0. */
+body[data-bg] main {
+  background-color: transparent !important;
+}
