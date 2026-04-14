@@ -88,7 +88,7 @@ export default async function RootLayout({
               <ScrollProgress />
               <KonamiLightning />
               <Navbar />
-              <main className="relative z-[1] w-full">
+              <main className="relative z-[1] w-full bg-brand-dark">
                 <PageTransition>{children}</PageTransition>
                 <Toaster closeButton />
               </main>
