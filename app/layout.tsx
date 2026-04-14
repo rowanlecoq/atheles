@@ -77,11 +77,13 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
+        {/* Sparkle layer: direct child of body so z-index:-1 is in the root
+            stacking context — strictly behind all page content */}
+        <SparkleBackground />
         <SiteImagesProvider data={siteImages}>
           <CurrencyProvider>
             <CartProvider cartPromise={cart}>
               <SiteThemeProvider />
-              <SparkleBackground />
               <AnnouncementBar />
               <ScrollProgress />
               <KonamiLightning />

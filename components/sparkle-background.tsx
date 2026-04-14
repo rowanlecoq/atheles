@@ -2,9 +2,11 @@
 
 import { useEffect, useState } from "react";
 
-const SPARKLE_COUNT = 90;
+// Grid-based distribution: 10 cols × 9 rows = 90 stars, evenly spread
+const COLS = 10;
+const ROWS = 9;
 
-// 4-pointed star via clip-path (inner radius ≈ 40% of outer)
+// 4-pointed star via clip-path
 const STAR_CLIP =
   "polygon(50% 0%, 64% 36%, 100% 50%, 64% 64%, 50% 100%, 36% 64%, 0% 50%, 36% 36%)";
 
@@ -25,23 +27,30 @@ function rand(min: number, max: number) {
 }
 
 function generateSparkles(): Sparkle[] {
-  return Array.from({ length: SPARKLE_COUNT }, (_, i) => ({
-    id: i,
-    x: Math.random() * 100,
-    y: Math.random() * 100,
-    size: rand(6, 15),
-    delay: rand(0, 12),
-    duration: rand(3, 8),
-    floatY: `-${Math.round(rand(10, 22))}px`,
-    spin: `${Math.round(rand(12, 28))}deg`,
-    bright: Math.random() > 0.62, // ~38% are brighter
-  }));
+  const cellW = 100 / COLS;
+  const cellH = 100 / ROWS;
+  return Array.from({ length: COLS * ROWS }, (_, i) => {
+    const col = i % COLS;
+    const row = Math.floor(i / COLS);
+    return {
+      id: i,
+      // Random position within the cell for organic feel, but guaranteed spread
+      x: col * cellW + rand(cellW * 0.1, cellW * 0.9),
+      y: row * cellH + rand(cellH * 0.1, cellH * 0.9),
+      size: rand(4, 10),
+      delay: rand(0, 14),
+      duration: rand(3, 9),
+      floatY: `-${Math.round(rand(8, 18))}px`,
+      spin: `${Math.round(rand(10, 26))}deg`,
+      bright: Math.random() > 0.75, // ~25% slightly brighter
+    };
+  });
 }
 
 export function SparkleBackground() {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
 
-  // Client-only to avoid hydration mismatch
+  // Client-only — avoids hydration mismatch from random values
   useEffect(() => {
     setSparkles(generateSparkles());
   }, []);
@@ -52,7 +61,9 @@ export function SparkleBackground() {
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 overflow-hidden"
-      style={{ zIndex: 0 }}
+      // z-index: -1 places sparkles above the body canvas background
+      // but strictly behind all page content (z ≥ 0)
+      style={{ zIndex: -1 }}
     >
       {sparkles.map((s) => (
         <div
