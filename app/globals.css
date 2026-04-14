@@ -280,27 +280,29 @@ html { scrollbar-width: none; }
   }
 }
 
-/* Sparkle background — 4-pointed star float animations */
-@keyframes sparkle-star-float {
-  0%, 100% {
-    opacity: 0.03;
-    transform: translateY(0) scale(0.55) rotate(calc(-1 * var(--spin, 15deg)));
-  }
-  50% {
-    opacity: 0.09;
-    transform: translateY(var(--float-y, -14px)) scale(1) rotate(var(--spin, 15deg));
-  }
+/* Sparkle background — flowy drift animations, three path variants */
+@keyframes sparkle-drift-a {
+  0%   { transform: translate(0, 0) scale(0.75) rotate(0deg);    opacity: 0.04; }
+  20%  { transform: translate(7px, -18px) scale(1.0) rotate(45deg);  opacity: 0.07; }
+  45%  { transform: translate(-5px, -32px) scale(0.85) rotate(95deg); opacity: 0.05; }
+  70%  { transform: translate(9px, -22px) scale(1.05) rotate(145deg); opacity: 0.08; }
+  85%  { transform: translate(3px, -10px) scale(0.9) rotate(170deg);  opacity: 0.05; }
+  100% { transform: translate(0, 0) scale(0.75) rotate(210deg);  opacity: 0.04; }
 }
 
-@keyframes sparkle-star-bright {
-  0%, 100% {
-    opacity: 0.05;
-    transform: translateY(0) scale(0.60) rotate(var(--spin, 15deg));
-  }
-  50% {
-    opacity: 0.14;
-    transform: translateY(var(--float-y, -14px)) scale(1.08) rotate(calc(-1 * var(--spin, 15deg)));
-  }
+@keyframes sparkle-drift-b {
+  0%   { transform: translate(0, 0) scale(0.8) rotate(0deg);      opacity: 0.05; }
+  25%  { transform: translate(-10px, -20px) scale(1.0) rotate(-55deg);  opacity: 0.08; }
+  55%  { transform: translate(7px, -36px) scale(0.9) rotate(-110deg);   opacity: 0.06; }
+  80%  { transform: translate(-6px, -16px) scale(1.1) rotate(-160deg);  opacity: 0.09; }
+  100% { transform: translate(0, 0) scale(0.8) rotate(-220deg);   opacity: 0.05; }
+}
+
+@keyframes sparkle-drift-c {
+  0%   { transform: translate(0, 0) scale(0.7) rotate(15deg);     opacity: 0.03; }
+  30%  { transform: translate(12px, -22px) scale(1.0) rotate(75deg);   opacity: 0.07; }
+  60%  { transform: translate(-8px, -28px) scale(0.85) rotate(135deg); opacity: 0.05; }
+  100% { transform: translate(0, 0) scale(0.7) rotate(225deg);    opacity: 0.03; }
 }
 
 .sparkle-star {
@@ -308,18 +310,16 @@ html { scrollbar-width: none; }
 }
 
 @media (prefers-reduced-motion: reduce) {
-  .sparkle-star {
-    display: none;
-  }
+  .sparkle-star { display: none; }
 }
 
-/* Custom zoom cursors — brand gold magnifying glass with + / - indicator */
+/* Custom zoom cursors — plain + and − in brand gold, no magnifying glass */
 .cursor-zoom-plus {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='9' cy='9' r='6.5' fill='none' stroke='%231a1a1a' stroke-width='3.5' opacity='0.7'/%3E%3Cline x1='9' y1='6' x2='9' y2='12' stroke='%231a1a1a' stroke-width='3.5' stroke-linecap='round' opacity='0.7'/%3E%3Cline x1='6' y1='9' x2='12' y2='9' stroke='%231a1a1a' stroke-width='3.5' stroke-linecap='round' opacity='0.7'/%3E%3Cline x1='14' y1='14' x2='19' y2='19' stroke='%231a1a1a' stroke-width='3.5' stroke-linecap='round' opacity='0.7'/%3E%3Ccircle cx='9' cy='9' r='6.5' fill='none' stroke='%23ccb173' stroke-width='1.6'/%3E%3Cline x1='9' y1='6' x2='9' y2='12' stroke='%23ccb173' stroke-width='1.6' stroke-linecap='round'/%3E%3Cline x1='6' y1='9' x2='12' y2='9' stroke='%23ccb173' stroke-width='1.6' stroke-linecap='round'/%3E%3Cline x1='14' y1='14' x2='19' y2='19' stroke='%23ccb173' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") 9 9, zoom-in;
+  cursor: url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='10' y1='3' x2='10' y2='17' stroke='%231a1a1a' stroke-width='3.5' stroke-linecap='round' opacity='0.65'/%3E%3Cline x1='3' y1='10' x2='17' y2='10' stroke='%231a1a1a' stroke-width='3.5' stroke-linecap='round' opacity='0.65'/%3E%3Cline x1='10' y1='3' x2='10' y2='17' stroke='%23ccb173' stroke-width='1.8' stroke-linecap='round'/%3E%3Cline x1='3' y1='10' x2='17' y2='10' stroke='%23ccb173' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 10 10, zoom-in;
 }
 
 .cursor-zoom-minus {
-  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='22' height='22'%3E%3Ccircle cx='9' cy='9' r='6.5' fill='none' stroke='%231a1a1a' stroke-width='3.5' opacity='0.7'/%3E%3Cline x1='6' y1='9' x2='12' y2='9' stroke='%231a1a1a' stroke-width='3.5' stroke-linecap='round' opacity='0.7'/%3E%3Cline x1='14' y1='14' x2='19' y2='19' stroke='%231a1a1a' stroke-width='3.5' stroke-linecap='round' opacity='0.7'/%3E%3Ccircle cx='9' cy='9' r='6.5' fill='none' stroke='%23ccb173' stroke-width='1.6'/%3E%3Cline x1='6' y1='9' x2='12' y2='9' stroke='%23ccb173' stroke-width='1.6' stroke-linecap='round'/%3E%3Cline x1='14' y1='14' x2='19' y2='19' stroke='%23ccb173' stroke-width='1.6' stroke-linecap='round'/%3E%3C/svg%3E") 9 9, zoom-out;
+  cursor: url("data:image/svg+xml,%3Csvg width='20' height='20' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='3' y1='10' x2='17' y2='10' stroke='%231a1a1a' stroke-width='3.5' stroke-linecap='round' opacity='0.65'/%3E%3Cline x1='3' y1='10' x2='17' y2='10' stroke='%23ccb173' stroke-width='1.8' stroke-linecap='round'/%3E%3C/svg%3E") 10 10, zoom-out;
 }
 
 /* Thunder shake easter egg */

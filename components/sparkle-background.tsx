@@ -2,13 +2,14 @@
 
 import { useEffect, useState } from "react";
 
-// Grid-based distribution: 10 cols × 9 rows = 90 stars, evenly spread
-const COLS = 10;
-const ROWS = 9;
+// Grid: 12 cols × 10 rows = 120 stars, evenly spread across viewport
+const COLS = 12;
+const ROWS = 10;
 
-// 4-pointed star via clip-path
 const STAR_CLIP =
   "polygon(50% 0%, 64% 36%, 100% 50%, 64% 64%, 50% 100%, 36% 64%, 0% 50%, 36% 36%)";
+
+const VARIANTS = ["sparkle-drift-a", "sparkle-drift-b", "sparkle-drift-c"] as const;
 
 type Sparkle = {
   id: number;
@@ -17,9 +18,7 @@ type Sparkle = {
   size: number;
   delay: number;
   duration: number;
-  floatY: string;
-  spin: string;
-  bright: boolean;
+  variant: string;
 };
 
 function rand(min: number, max: number) {
@@ -34,15 +33,12 @@ function generateSparkles(): Sparkle[] {
     const row = Math.floor(i / COLS);
     return {
       id: i,
-      // Random position within the cell for organic feel, but guaranteed spread
-      x: col * cellW + rand(cellW * 0.1, cellW * 0.9),
-      y: row * cellH + rand(cellH * 0.1, cellH * 0.9),
-      size: rand(4, 10),
-      delay: rand(0, 14),
-      duration: rand(3, 9),
-      floatY: `-${Math.round(rand(8, 18))}px`,
-      spin: `${Math.round(rand(10, 26))}deg`,
-      bright: Math.random() > 0.75, // ~25% slightly brighter
+      x: col * cellW + rand(cellW * 0.05, cellW * 0.95),
+      y: row * cellH + rand(cellH * 0.05, cellH * 0.95),
+      size: rand(8, 20),
+      delay: rand(0, 16),
+      duration: rand(8, 18), // slow, flowy drift
+      variant: VARIANTS[Math.floor(Math.random() * VARIANTS.length)]!,
     };
   });
 }
@@ -50,7 +46,6 @@ function generateSparkles(): Sparkle[] {
 export function SparkleBackground() {
   const [sparkles, setSparkles] = useState<Sparkle[]>([]);
 
-  // Client-only — avoids hydration mismatch from random values
   useEffect(() => {
     setSparkles(generateSparkles());
   }, []);
@@ -61,26 +56,20 @@ export function SparkleBackground() {
     <div
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 overflow-hidden"
-      // z-index: -1 places sparkles above the body canvas background
-      // but strictly behind all page content (z ≥ 0)
       style={{ zIndex: -1 }}
     >
       {sparkles.map((s) => (
         <div
           key={s.id}
           className="sparkle-star absolute bg-brand-gold"
-          style={
-            {
-              left: `${s.x}%`,
-              top: `${s.y}%`,
-              width: `${s.size}px`,
-              height: `${s.size}px`,
-              clipPath: STAR_CLIP,
-              "--float-y": s.floatY,
-              "--spin": s.spin,
-              animation: `${s.bright ? "sparkle-star-bright" : "sparkle-star-float"} ${s.duration}s ${s.delay}s ease-in-out infinite`,
-            } as React.CSSProperties
-          }
+          style={{
+            left: `${s.x}%`,
+            top: `${s.y}%`,
+            width: `${s.size}px`,
+            height: `${s.size}px`,
+            clipPath: STAR_CLIP,
+            animation: `${s.variant} ${s.duration}s ${s.delay}s ease-in-out infinite`,
+          }}
         />
       ))}
     </div>
