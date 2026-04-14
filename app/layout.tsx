@@ -59,7 +59,7 @@ export default async function RootLayout({
       className={`dark ${playfair.variable}`}
       style={{ colorScheme: "dark" }}
     >
-      <body className="bg-brand-dark text-white">
+      <body className="bg-brand-dark text-white isolate">
         {/* Inline script to set theme colors before React hydrates */}
         <script
           dangerouslySetInnerHTML={{

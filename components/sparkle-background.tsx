@@ -34,7 +34,9 @@ function drawStar(
   ctx.closePath();
 }
 
-const COUNT = 90;
+// Grid dimensions — guarantees even spread across the viewport
+const COLS = 10;
+const ROWS = 9;
 
 export function SparkleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
@@ -43,17 +45,24 @@ export function SparkleBackground() {
   const prefersReducedMotion = useReducedMotion();
 
   const initStars = useCallback((width: number, height: number) => {
-    starsRef.current = Array.from({ length: COUNT }, () => ({
-      x: Math.random() * width,
-      y: Math.random() * height,
-      vx: (Math.random() - 0.5) * 0.22,     // slow horizontal drift
-      vy: (Math.random() - 0.5) * 0.10,     // slow vertical drift
-      outerR: 2.5 + Math.random() * 5.5,    // 2.5–8px → star diameter 5–16px
-      alpha: 0.04 + Math.random() * 0.05,   // 4–9% — always present, never blinks
-      phase: Math.random() * Math.PI * 2,   // offset for sine undulation
-      rotation: Math.random() * Math.PI,
-      rotSpeed: (Math.random() - 0.5) * 0.004, // very slow spin
-    }));
+    const cellW = width / COLS;
+    const cellH = height / ROWS;
+    starsRef.current = Array.from({ length: COLS * ROWS }, (_, i) => {
+      const col = i % COLS;
+      const row = Math.floor(i / COLS);
+      return {
+        // Random position within cell — guaranteed spread, no clustering
+        x: col * cellW + Math.random() * cellW,
+        y: row * cellH + Math.random() * cellH,
+        vx: (Math.random() - 0.5) * 0.22,
+        vy: (Math.random() - 0.5) * 0.10,
+        outerR: 2.5 + Math.random() * 5.5,
+        alpha: 0.04 + Math.random() * 0.05,
+        phase: Math.random() * Math.PI * 2,
+        rotation: Math.random() * Math.PI,
+        rotSpeed: (Math.random() - 0.5) * 0.004,
+      };
+    });
   }, []);
 
   useEffect(() => {
