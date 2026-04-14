@@ -4,7 +4,6 @@ import { CartProvider } from "components/cart/cart-context";
 import { CurrencyProvider } from "components/currency-context";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
-import { SparkleBackground } from "components/sparkle-background";
 import { PageTransition } from "components/page-transition";
 import { ProfileBackgroundApplier } from "components/profile-background-applier";
 import { ScrollProgress } from "components/scroll-progress";
@@ -96,9 +95,6 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
-        {/* Sparkle layer: direct child of body so z-index:-1 is in the root
-            stacking context — strictly behind all page content */}
-        <SparkleBackground />
         <SiteImagesProvider data={siteImages}>
           <CurrencyProvider>
             <CartProvider cartPromise={cart}>
