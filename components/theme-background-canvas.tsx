@@ -79,11 +79,13 @@ export function ThemeBackgroundCanvas() {
 
   const buildParticles = useCallback((key: ThemeKey, w: number, h: number): Particle[] => {
     const cfg = THEMES[key];
-    const cols = Math.max(1, Math.ceil(Math.sqrt(cfg.count * (w / h))));
-    const rows = Math.ceil(cfg.count / cols);
+    // Use Math.round (not ceil) so cols*rows ≈ count with no partial last row
+    const cols = Math.max(1, Math.round(Math.sqrt(cfg.count * (w / h))));
+    const rows = Math.max(1, Math.round(cfg.count / cols));
+    const total = cols * rows; // exact fill — no sparse last row
     const cellW = w / cols;
     const cellH = h / rows;
-    return Array.from({ length: cfg.count }, (_, i) => {
+    return Array.from({ length: total }, (_, i) => {
       const col = i % cols;
       const row = Math.floor(i / cols);
       const color = cfg.colors[i % cfg.colors.length]!;
@@ -113,7 +115,18 @@ export function ThemeBackgroundCanvas() {
     if (!ctx) return;
     const state = stateRef.current;
 
-    const resize = () => { canvas.width = window.innerWidth; canvas.height = window.innerHeight; };
+    let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      // Debounced rebuild so address-bar show/hide on mobile doesn't leave sparse areas
+      if (resizeTimer) clearTimeout(resizeTimer);
+      resizeTimer = setTimeout(() => {
+        if (state.theme && state.theme in THEMES) {
+          state.particles = buildParticles(state.theme as ThemeKey, canvas.width, canvas.height);
+        }
+      }, 250);
+    };
     resize();
     window.addEventListener("resize", resize);
 
@@ -180,6 +193,7 @@ export function ThemeBackgroundCanvas() {
 
     return () => {
       cancelAnimationFrame(state.animId);
+      if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
     };
