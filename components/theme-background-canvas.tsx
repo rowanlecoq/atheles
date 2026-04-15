@@ -169,7 +169,9 @@ export function ThemeBackgroundCanvas() {
 
     const onBgChange = () => {
       const t = getTheme();
-      state.theme = null;
+      // Skip expensive particle rebuild if theme hasn't actually changed
+      if (t === state.theme) return;
+      state.theme = t;
       state.particles = t && t in THEMES
         ? buildParticles(t as ThemeKey, canvas.width, canvas.height)
         : [];
