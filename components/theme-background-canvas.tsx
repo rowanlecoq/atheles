@@ -14,14 +14,14 @@ type Particle = {
   phase: number;
 };
 
-// Per-theme particle config — all non-star themes use the same size range for consistency
+// Per-theme particle config — gold, midnight, sunset use star shapes for sparkle
 const THEMES = {
   gold: {
-    count: 50,
-    colors: [[215, 175, 55], [245, 225, 145], [255, 210, 80], [190, 155, 60], [255, 240, 160]] as [number,number,number][],
+    count: 55,
+    colors: [[245, 228, 162], [218, 188, 68], [255, 245, 200], [232, 205, 110], [255, 235, 150]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
-    minAlpha: 0.06, maxAlpha: 0.26,
-    speed: 0.10, isStar: false,
+    minAlpha: 0.06, maxAlpha: 0.72,
+    speed: 0.06, isStar: true,
   },
   water: {
     count: 50,
@@ -45,11 +45,11 @@ const THEMES = {
     speed: 0.04, isStar: true,
   },
   sunset: {
-    count: 50,
-    colors: [[255, 80, 140], [255, 130, 45], [185, 65, 215], [255, 100, 80], [255, 160, 80]] as [number,number,number][],
+    count: 55,
+    colors: [[255, 160, 180], [255, 178, 100], [200, 148, 255], [255, 142, 80], [238, 185, 220]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
-    minAlpha: 0.06, maxAlpha: 0.26,
-    speed: 0.10, isStar: false,
+    minAlpha: 0.06, maxAlpha: 0.72,
+    speed: 0.07, isStar: true,
   },
 } as const;
 
