@@ -1307,79 +1307,68 @@ export default function ProfileContent() {
 
       {/* Background Theme */}
       <FadeIn direction="up" delay={0.16} duration={0.35}>
-      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
-        <div className="mb-4 flex items-center justify-between">
-          <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">
-            background
-          </h2>
+      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
+        <div className="mb-1 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">background</h2>
+            <span className="rounded border border-brand-dark-gold/30 px-1.5 py-px text-[9px] font-mono tracking-widest text-brand-grey/50 uppercase">beta</span>
+          </div>
           {themeSaving && (
             <span className="text-xs text-brand-grey/60">saving...</span>
           )}
         </div>
-        <p className="mb-4 text-xs text-brand-grey">
-          choose a subtle colour wash for your profile — or across the whole store.
+        <p className="mb-6 text-xs text-brand-grey/60">
+          personalise your profile with a colour theme.
         </p>
 
-        {/* Swatch picker */}
-        <div className="mb-3 flex flex-wrap gap-4">
+        {/* Swatch picker — centered */}
+        <div className="mb-5 flex justify-center gap-5">
           {/* None / default */}
-          <div className="flex flex-col items-center gap-1.5">
+          <div className="flex flex-col items-center gap-2">
             <button
               type="button"
               onClick={() => handleThemeChange(null, themeGlobal)}
-              className={`relative h-14 w-14 overflow-hidden rounded-full border-2 transition-all ${
+              className={`flex h-14 w-14 items-center justify-center rounded-full transition-all duration-200 ${
                 !selectedTheme
-                  ? "border-brand-gold shadow-[0_0_0_3px_rgba(204,177,115,0.25)]"
-                  : "border-brand-dark-gold/30 hover:border-brand-dark-gold/60"
+                  ? "shadow-[0_0_0_2px_#ccb173,0_0_0_4px_rgba(204,177,115,0.22)]"
+                  : "shadow-[0_0_0_1px_rgba(127,111,76,0.18)] hover:shadow-[0_0_0_1px_rgba(127,111,76,0.45)]"
               }`}
-              style={{ background: "#1a1a1a" }}
-              title="none"
+              style={{ background: "radial-gradient(circle at 38% 36%, #2d2d2d 0%, #1a1a1a 55%, #101010 100%)" }}
               aria-label="No background"
             >
-              <svg viewBox="0 0 24 24" className="absolute inset-0 h-full w-full p-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
-                <line x1="6" y1="6" x2="18" y2="18" className="text-brand-grey/50" />
-                <line x1="18" y1="6" x2="6" y2="18" className="text-brand-grey/50" />
+              <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="rgba(127,111,76,0.55)" strokeWidth={1.5} strokeLinecap="round">
+                <line x1="3" y1="3" x2="11" y2="11" />
+                <line x1="11" y1="3" x2="3" y2="11" />
               </svg>
             </button>
-            <span className={`text-xs ${!selectedTheme ? "text-brand-gold" : "text-brand-grey/50"}`}>none</span>
+            <span className={`text-[11px] tracking-wide ${!selectedTheme ? "text-brand-gold" : "text-brand-grey/40"}`}>none</span>
           </div>
 
           {/* Theme swatches */}
           {PROFILE_BACKGROUNDS.map((bg) => (
-            <div key={bg.id} className="flex flex-col items-center gap-1.5">
+            <div key={bg.id} className="flex flex-col items-center gap-2">
               <button
                 type="button"
                 onClick={() => handleThemeChange(bg.id, themeGlobal)}
-                className={`relative h-14 w-14 overflow-hidden rounded-full border-2 transition-all ${
+                className={`h-14 w-14 rounded-full transition-all duration-200 ${
                   selectedTheme === bg.id
-                    ? "border-brand-gold shadow-[0_0_0_3px_rgba(204,177,115,0.25)]"
-                    : "border-brand-dark-gold/30 hover:border-brand-dark-gold/60"
+                    ? "scale-110 shadow-[0_0_0_2px_#ccb173,0_0_0_4px_rgba(204,177,115,0.22)]"
+                    : "shadow-[0_0_0_1px_rgba(255,255,255,0.08)] hover:scale-105 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.22)]"
                 }`}
                 style={{ background: bg.swatch }}
-                title={bg.label}
                 aria-label={`${bg.label} background`}
-              >
-                {selectedTheme === bg.id && (
-                  <span className="absolute inset-0 flex items-center justify-center">
-                    <svg viewBox="0 0 16 16" className="h-5 w-5" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                      <polyline points="3 8 6.5 11.5 13 5" />
-                    </svg>
-                  </span>
-                )}
-              </button>
-              <span className={`text-xs ${selectedTheme === bg.id ? "text-brand-gold" : "text-brand-grey/50"}`}>{bg.label}</span>
+              />
+              <span className={`text-[11px] tracking-wide ${selectedTheme === bg.id ? "text-brand-gold" : "text-brand-grey/40"}`}>{bg.label}</span>
             </div>
           ))}
         </div>
 
         {/* Scope toggle — only visible when a theme is active */}
         {selectedTheme && (
-          <div className="flex items-center justify-between rounded border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-3">
+          <div className="flex items-center justify-between pt-2">
             <div>
-              <p className="text-sm text-white">use across entire store</p>
-              <p className="text-xs text-brand-grey">
-                show on every page, not just your profile
-              </p>
+              <p className="text-sm text-white/80">show across entire store</p>
+              <p className="text-xs text-brand-grey/50">not just your profile</p>
             </div>
             <button
               type="button"
