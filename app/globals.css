@@ -477,6 +477,11 @@ body[data-bg] .announcement-bar-root {
   background-color: transparent !important;
 }
 
+/* Smooth transition so the dark→gradient switch on initial load isn't jarring. */
+main {
+  transition: background-color 0.18s ease;
+}
+
 /* Body gradient shows through the page when a theme is active. */
 body[data-bg] main {
   background-color: transparent !important;
