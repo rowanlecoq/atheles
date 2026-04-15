@@ -299,6 +299,9 @@ export default function ProfileContent() {
       if (key && key.startsWith("atheles-")) keysToRemove.push(key);
     }
     keysToRemove.forEach((k) => sessionStorage.removeItem(k));
+    // Clear persisted theme so another user on this device starts fresh
+    try { localStorage.removeItem("atheles-bg-theme"); } catch {}
+    document.body.removeAttribute("data-bg");
     document.cookie = "atheles-logged-in=; max-age=0; path=/";
     // Notify all components to clear cached user data
     window.dispatchEvent(new Event("user-logout"));
@@ -448,7 +451,12 @@ export default function ProfileContent() {
       document.body.removeAttribute("data-bg");
     }
 
-    // Update cached session so the applier picks it up on next navigation
+    // Persist theme to localStorage so it survives browser close
+    try {
+      localStorage.setItem("atheles-bg-theme", JSON.stringify({ theme: theme || "none", globalTheme: global }));
+    } catch {}
+
+    // Also update sessionStorage so in-session reads stay consistent
     try {
       const cached = sessionStorage.getItem("atheles-session");
       if (cached) {

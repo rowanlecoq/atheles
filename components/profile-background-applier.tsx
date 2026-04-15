@@ -3,65 +3,61 @@
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 
+const LS_KEY = "atheles-bg-theme";
+
+function applyFromStorage() {
+  try {
+    const pathname = window.location.pathname;
+    // localStorage persists across browser close — primary source
+    const stored = localStorage.getItem(LS_KEY);
+    if (stored) {
+      const { theme, globalTheme } = JSON.parse(stored) as { theme?: string; globalTheme?: boolean };
+      if (theme && theme !== "none" && (globalTheme || pathname.startsWith("/profile"))) {
+        document.body.setAttribute("data-bg", theme);
+      } else {
+        document.body.removeAttribute("data-bg");
+      }
+      return;
+    }
+  } catch {}
+  document.body.removeAttribute("data-bg");
+}
+
 /**
- * Reads the cached session (and optionally fetches a fresh one) to set/clear
+ * Reads localStorage (persists across browser close) and sets/clears
  * the `data-bg` attribute on <body> so CSS gradients apply.
  *
- * On every pathname change it re-evaluates from sessionStorage.
- * On mount it also fetches /api/auth/session so the theme picked on Device A
- * is immediately visible on Device B without a manual profile visit.
+ * Also fetches a fresh session on mount for cross-device sync:
+ * if the user saved a theme on Device A, Device B picks it up on the
+ * next page load without a manual profile visit.
  */
 export function ProfileBackgroundApplier() {
   const pathname = usePathname();
 
-  // Apply background from whatever is currently in sessionStorage
+  // Re-apply on every route change
   useEffect(() => {
-    const apply = () => {
-      try {
-        const cached = sessionStorage.getItem("atheles-session");
-        if (!cached) {
-          document.body.removeAttribute("data-bg");
-          return;
-        }
-        const user = JSON.parse(cached) as { theme?: string | null; globalTheme?: boolean };
-        const theme = user.theme;
-        const globalTheme = user.globalTheme ?? false;
-        const isProfilePage = window.location.pathname.startsWith("/profile");
-
-        if (theme && theme !== "none" && (globalTheme || isProfilePage)) {
-          document.body.setAttribute("data-bg", theme);
-        } else {
-          document.body.removeAttribute("data-bg");
-        }
-      } catch {
-        document.body.removeAttribute("data-bg");
-      }
-    };
-
-    apply();
-
-    window.addEventListener("atheles-bg-change", apply);
-    return () => window.removeEventListener("atheles-bg-change", apply);
+    applyFromStorage();
+    window.addEventListener("atheles-bg-change", applyFromStorage);
+    return () => window.removeEventListener("atheles-bg-change", applyFromStorage);
   }, [pathname]);
 
-  // Cross-device sync: fetch fresh session once per mount so a theme saved on
-  // another device is picked up immediately on first page load here.
+  // Cross-device sync: fetch fresh session once per mount
   useEffect(() => {
-    // Only run for authenticated users (presence of the login cookie)
     if (!document.cookie.includes("atheles-logged-in")) return;
 
     fetch("/api/auth/session")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
         if (!data?.user) return;
-        // Merge theme fields into the cached session
+        const { theme, globalTheme } = data.user as { theme?: string | null; globalTheme?: boolean };
         try {
-          const cached = sessionStorage.getItem("atheles-session");
-          const base = cached ? JSON.parse(cached) : {};
-          const updated = { ...base, theme: data.user.theme, globalTheme: data.user.globalTheme };
-          sessionStorage.setItem("atheles-session", JSON.stringify(updated));
+          localStorage.setItem(LS_KEY, JSON.stringify({
+            theme: theme || "none",
+            globalTheme: globalTheme ?? false,
+          }));
         } catch {}
-        // Re-apply with the fresh data
+        // Re-apply with server-fresh data
+        applyFromStorage();
         window.dispatchEvent(new Event("atheles-bg-change"));
       })
       .catch(() => {});
