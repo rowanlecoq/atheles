@@ -4,9 +4,9 @@ import { CartProvider } from "components/cart/cart-context";
 import { CurrencyProvider } from "components/currency-context";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
-import { SparkleBackground } from "components/sparkle-background";
 import { PageTransition } from "components/page-transition";
 import { ProfileBackgroundApplier } from "components/profile-background-applier";
+import { ThemeBackgroundCanvas } from "components/theme-background-canvas";
 import { ScrollProgress } from "components/scroll-progress";
 import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";
@@ -79,15 +79,15 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
-        {/* Profile background flash-prevention: set data-bg before first paint */}
+        {/* Profile background flash-prevention: reads localStorage so it
+            persists across browser close/reopen (sessionStorage does not).  */}
         <script
           dangerouslySetInnerHTML={{
             __html: `try{
-              var _s=sessionStorage.getItem("atheles-session");
-              if(_s){
-                var _u=JSON.parse(_s);
-                var _t=_u.theme;
-                var _g=_u.globalTheme;
+              var _bg=localStorage.getItem("atheles-bg-theme");
+              if(_bg){
+                var _bgd=JSON.parse(_bg);
+                var _t=_bgd.theme;var _g=_bgd.globalTheme;
                 var _p=window.location.pathname;
                 if(_t&&_t!=="none"&&(_g||_p.startsWith("/profile"))){
                   document.body.setAttribute("data-bg",_t);
@@ -96,14 +96,12 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
-        {/* Sparkle layer: direct child of body so z-index:-1 is in the root
-            stacking context — strictly behind all page content */}
-        <SparkleBackground />
         <SiteImagesProvider data={siteImages}>
           <CurrencyProvider>
             <CartProvider cartPromise={cart}>
               <SiteThemeProvider />
               <ProfileBackgroundApplier />
+              <ThemeBackgroundCanvas />
               <AnnouncementBar />
               <ScrollProgress />
               <KonamiLightning />

@@ -299,6 +299,9 @@ export default function ProfileContent() {
       if (key && key.startsWith("atheles-")) keysToRemove.push(key);
     }
     keysToRemove.forEach((k) => sessionStorage.removeItem(k));
+    // Clear persisted theme so another user on this device starts fresh
+    try { localStorage.removeItem("atheles-bg-theme"); } catch {}
+    document.body.removeAttribute("data-bg");
     document.cookie = "atheles-logged-in=; max-age=0; path=/";
     // Notify all components to clear cached user data
     window.dispatchEvent(new Event("user-logout"));
@@ -448,7 +451,12 @@ export default function ProfileContent() {
       document.body.removeAttribute("data-bg");
     }
 
-    // Update cached session so the applier picks it up on next navigation
+    // Persist theme to localStorage so it survives browser close
+    try {
+      localStorage.setItem("atheles-bg-theme", JSON.stringify({ theme: theme || "none", globalTheme: global }));
+    } catch {}
+
+    // Also update sessionStorage so in-session reads stay consistent
     try {
       const cached = sessionStorage.getItem("atheles-session");
       if (cached) {
@@ -1313,63 +1321,54 @@ export default function ProfileContent() {
         </p>
 
         {/* Swatch picker */}
-        <div className="mb-4 flex flex-wrap gap-3">
+        <div className="mb-3 flex flex-wrap gap-4">
           {/* None / default */}
-          <button
-            type="button"
-            onClick={() => handleThemeChange(null, themeGlobal)}
-            className={`relative h-10 w-10 overflow-hidden rounded-full border-2 transition-all ${
-              !selectedTheme
-                ? "border-brand-gold shadow-[0_0_0_2px_rgba(204,177,115,0.3)]"
-                : "border-brand-dark-gold/30 hover:border-brand-dark-gold/60"
-            }`}
-            style={{ background: "#1a1a1a" }}
-            title="none"
-            aria-label="No background"
-          >
-            {/* X mark */}
-            <svg viewBox="0 0 20 20" className="absolute inset-0 h-full w-full p-2.5" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round">
-              <line x1="5" y1="5" x2="15" y2="15" className="text-brand-grey/40" />
-              <line x1="15" y1="5" x2="5" y2="15" className="text-brand-grey/40" />
-            </svg>
-          </button>
+          <div className="flex flex-col items-center gap-1.5">
+            <button
+              type="button"
+              onClick={() => handleThemeChange(null, themeGlobal)}
+              className={`relative h-14 w-14 overflow-hidden rounded-full border-2 transition-all ${
+                !selectedTheme
+                  ? "border-brand-gold shadow-[0_0_0_3px_rgba(204,177,115,0.25)]"
+                  : "border-brand-dark-gold/30 hover:border-brand-dark-gold/60"
+              }`}
+              style={{ background: "#1a1a1a" }}
+              title="none"
+              aria-label="No background"
+            >
+              <svg viewBox="0 0 24 24" className="absolute inset-0 h-full w-full p-4" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round">
+                <line x1="6" y1="6" x2="18" y2="18" className="text-brand-grey/50" />
+                <line x1="18" y1="6" x2="6" y2="18" className="text-brand-grey/50" />
+              </svg>
+            </button>
+            <span className={`text-xs ${!selectedTheme ? "text-brand-gold" : "text-brand-grey/50"}`}>none</span>
+          </div>
 
           {/* Theme swatches */}
           {PROFILE_BACKGROUNDS.map((bg) => (
-            <button
-              key={bg.id}
-              type="button"
-              onClick={() => handleThemeChange(bg.id, themeGlobal)}
-              className={`relative h-10 w-10 overflow-hidden rounded-full border-2 transition-all ${
-                selectedTheme === bg.id
-                  ? "border-brand-gold shadow-[0_0_0_2px_rgba(204,177,115,0.3)]"
-                  : "border-brand-dark-gold/30 hover:border-brand-dark-gold/60"
-              }`}
-              style={{ background: bg.swatch }}
-              title={bg.label}
-              aria-label={`${bg.label} background`}
-            >
-              {selectedTheme === bg.id && (
-                <span className="absolute inset-0 flex items-center justify-center">
-                  <svg viewBox="0 0 16 16" className="h-4 w-4" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
-                    <polyline points="3 8 6.5 11.5 13 5" />
-                  </svg>
-                </span>
-              )}
-            </button>
-          ))}
-        </div>
-
-        {/* Swatch labels */}
-        <div className="mb-5 flex flex-wrap gap-x-3 gap-y-1">
-          <span className={`text-xs ${!selectedTheme ? "text-brand-gold" : "text-brand-grey/50"}`}>none</span>
-          {PROFILE_BACKGROUNDS.map((bg) => (
-            <span
-              key={bg.id}
-              className={`text-xs ${selectedTheme === bg.id ? "text-brand-gold" : "text-brand-grey/50"}`}
-            >
-              {bg.label}
-            </span>
+            <div key={bg.id} className="flex flex-col items-center gap-1.5">
+              <button
+                type="button"
+                onClick={() => handleThemeChange(bg.id, themeGlobal)}
+                className={`relative h-14 w-14 overflow-hidden rounded-full border-2 transition-all ${
+                  selectedTheme === bg.id
+                    ? "border-brand-gold shadow-[0_0_0_3px_rgba(204,177,115,0.25)]"
+                    : "border-brand-dark-gold/30 hover:border-brand-dark-gold/60"
+                }`}
+                style={{ background: bg.swatch }}
+                title={bg.label}
+                aria-label={`${bg.label} background`}
+              >
+                {selectedTheme === bg.id && (
+                  <span className="absolute inset-0 flex items-center justify-center">
+                    <svg viewBox="0 0 16 16" className="h-5 w-5" fill="none" stroke="white" strokeWidth={2.5} strokeLinecap="round" strokeLinejoin="round">
+                      <polyline points="3 8 6.5 11.5 13 5" />
+                    </svg>
+                  </span>
+                )}
+              </button>
+              <span className={`text-xs ${selectedTheme === bg.id ? "text-brand-gold" : "text-brand-grey/50"}`}>{bg.label}</span>
+            </div>
           ))}
         </div>
 
