@@ -14,42 +14,42 @@ type Particle = {
   phase: number;
 };
 
-// Per-theme particle config
+// Per-theme particle config — all non-star themes use the same size range for consistency
 const THEMES = {
   gold: {
-    count: 60,
-    colors: [[215, 175, 55], [190, 155, 75], [245, 225, 145], [165, 135, 55]] as [number,number,number][],
-    minR: 1.0, maxR: 4.0,
-    minAlpha: 0.04, maxAlpha: 0.18,
-    speed: 0.12, isStar: false,
+    count: 50,
+    colors: [[215, 175, 55], [245, 225, 145], [255, 210, 80], [190, 155, 60], [255, 240, 160]] as [number,number,number][],
+    minR: 1.0, maxR: 3.5,
+    minAlpha: 0.06, maxAlpha: 0.26,
+    speed: 0.10, isStar: false,
   },
   water: {
-    count: 65,
-    colors: [[0, 200, 218], [0, 140, 208], [95, 225, 242], [0, 172, 198]] as [number,number,number][],
-    minR: 1.0, maxR: 4.5,
-    minAlpha: 0.04, maxAlpha: 0.20,
-    speed: 0.15, isStar: false,
+    count: 50,
+    colors: [[0, 200, 218], [40, 220, 248], [95, 225, 242], [0, 172, 198], [120, 240, 255]] as [number,number,number][],
+    minR: 1.0, maxR: 3.5,
+    minAlpha: 0.06, maxAlpha: 0.26,
+    speed: 0.12, isStar: false,
   },
   tropical: {
-    count: 65,
-    colors: [[15, 192, 90], [0, 158, 205], [228, 135, 22], [60, 208, 122]] as [number,number,number][],
-    minR: 1.0, maxR: 4.5,
-    minAlpha: 0.04, maxAlpha: 0.20,
-    speed: 0.13, isStar: false,
+    count: 50,
+    colors: [[28, 202, 80], [0, 168, 60], [228, 135, 22], [18, 170, 235], [100, 220, 130]] as [number,number,number][],
+    minR: 1.0, maxR: 3.5,
+    minAlpha: 0.06, maxAlpha: 0.26,
+    speed: 0.11, isStar: false,
   },
   midnight: {
-    count: 120,
-    colors: [[255, 255, 255], [218, 178, 255], [255, 178, 218], [198, 158, 255]] as [number,number,number][],
-    minR: 0.6, maxR: 3.8,
-    minAlpha: 0.05, maxAlpha: 0.75,
-    speed: 0.05, isStar: true,
+    count: 130,
+    colors: [[255, 255, 255], [220, 185, 255], [255, 185, 225], [200, 160, 255], [255, 220, 255]] as [number,number,number][],
+    minR: 1.0, maxR: 3.5,
+    minAlpha: 0.06, maxAlpha: 0.80,
+    speed: 0.04, isStar: true,
   },
   sunset: {
-    count: 60,
-    colors: [[215, 68, 125], [215, 125, 42], [168, 58, 200], [215, 98, 78]] as [number,number,number][],
-    minR: 1.0, maxR: 4.0,
-    minAlpha: 0.04, maxAlpha: 0.18,
-    speed: 0.12, isStar: false,
+    count: 50,
+    colors: [[255, 80, 140], [255, 130, 45], [185, 65, 215], [255, 100, 80], [255, 160, 80]] as [number,number,number][],
+    minR: 1.0, maxR: 3.5,
+    minAlpha: 0.06, maxAlpha: 0.26,
+    speed: 0.10, isStar: false,
   },
 } as const;
 
