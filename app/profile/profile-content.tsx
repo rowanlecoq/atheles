@@ -1308,7 +1308,7 @@ export default function ProfileContent() {
       {/* Background Theme */}
       <FadeIn direction="up" delay={0.16} duration={0.35}>
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
-        <div className="mb-1 flex items-center justify-between">
+        <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">background</h2>
             <span className="rounded border border-brand-dark-gold/30 px-1.5 py-px text-[9px] font-mono tracking-widest text-brand-grey/50 uppercase">beta</span>
@@ -1317,12 +1317,9 @@ export default function ProfileContent() {
             <span className="text-xs text-brand-grey/60">saving...</span>
           )}
         </div>
-        <p className="mb-6 text-xs text-brand-grey/60">
-          personalise your profile with a colour theme.
-        </p>
 
-        {/* Swatch picker — centered */}
-        <div className="mb-5 flex flex-wrap justify-center gap-3 sm:gap-5">
+        {/* Swatch picker — 3 per row on mobile, all 6 in one row on sm+ */}
+        <div className="mb-5 grid grid-cols-3 justify-items-center gap-4 sm:grid-cols-6 sm:gap-5">
           {/* None / default */}
           <div className="flex flex-col items-center gap-2">
             <button
@@ -1333,7 +1330,7 @@ export default function ProfileContent() {
                   ? "shadow-[0_0_0_2px_#ccb173,0_0_0_4px_rgba(204,177,115,0.22)]"
                   : "shadow-[0_0_0_1px_rgba(127,111,76,0.18)] hover:shadow-[0_0_0_1px_rgba(127,111,76,0.45)]"
               }`}
-              style={{ background: "radial-gradient(circle at 38% 36%, #2d2d2d 0%, #1a1a1a 55%, #101010 100%)" }}
+              style={{ background: "linear-gradient(135deg, #242424 0%, #141414 100%)" }}
               aria-label="No background"
             >
               <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="rgba(127,111,76,0.55)" strokeWidth={1.5} strokeLinecap="round">
