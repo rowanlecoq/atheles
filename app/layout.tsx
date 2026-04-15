@@ -91,6 +91,9 @@ export default async function RootLayout({
                 var _p=window.location.pathname;
                 if(_t&&_t!=="none"&&(_g||_p.startsWith("/profile"))){
                   document.body.setAttribute("data-bg",_t);
+                  var _s=document.createElement("style");
+                  _s.textContent="main{background-color:transparent!important}";
+                  document.head.appendChild(_s);
                 }
               }
             }catch(e){}`,
