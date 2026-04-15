@@ -380,6 +380,7 @@ html.thunder-shake {
 /* Gold — warm sun, amber depths, white-gold shimmer, cool grey midtones */
 body[data-bg="gold"] {
   background:
+    linear-gradient(rgba(10, 8, 5, 0.50), rgba(10, 8, 5, 0.50)),
     radial-gradient(ellipse  65%  45% at 18%  2%,  rgba(255, 240, 160, 0.41) 0%, transparent 60%),
     radial-gradient(ellipse 130% 110% at  5% 12%,  rgba(230, 180,  35, 0.38) 0%, transparent 55%),
     radial-gradient(ellipse 130% 110% at 98% 30%,  rgba(205, 145,  25, 0.34) 0%, transparent 55%),
@@ -396,6 +397,7 @@ body[data-bg="gold"] {
 /* Ocean — sun glare on surface, teal shallows, navy depths, cyan shimmer */
 body[data-bg="water"] {
   background:
+    linear-gradient(rgba(10, 8, 5, 0.50), rgba(10, 8, 5, 0.50)),
     radial-gradient(ellipse  58%  38% at 72%  2%,  rgba(190, 255, 255, 0.39) 0%, transparent 65%),
     radial-gradient(ellipse 210%  95% at 42% 10%,  rgba( 10, 205, 225, 0.35) 0%, transparent 55%),
     radial-gradient(ellipse 145% 135% at -5% 65%,  rgba(  0, 160, 178, 0.38) 0%, transparent 55%),
@@ -412,6 +414,7 @@ body[data-bg="water"] {
 /* Tropical — canopy light, lush green, sky blue, warm orange sunset */
 body[data-bg="tropical"] {
   background:
+    linear-gradient(rgba(10, 8, 5, 0.50), rgba(10, 8, 5, 0.50)),
     radial-gradient(ellipse  62%  42% at 58%  2%,  rgba(195, 255, 140, 0.38) 0%, transparent 62%),
     radial-gradient(ellipse 210%  88% at 48%  8%,  rgba(  0, 160, 215, 0.32) 0%, transparent 55%),
     radial-gradient(ellipse 148% 140% at -5% 72%,  rgba(  5, 175,  72, 0.38) 0%, transparent 55%),
@@ -428,6 +431,7 @@ body[data-bg="tropical"] {
 /* Midnight — purple nebula, hot-pink clouds, near-black star field */
 body[data-bg="midnight"] {
   background:
+    linear-gradient(rgba(10, 8, 5, 0.50), rgba(10, 8, 5, 0.50)),
     radial-gradient(ellipse 132% 112% at  8%  8%,  rgba(168,  25, 228, 0.41) 0%, transparent 55%),
     radial-gradient(ellipse 122% 102% at 92% 88%,  rgba(228,  25, 158, 0.38) 0%, transparent 55%),
     radial-gradient(ellipse  92%  72% at 90%  6%,  rgba(255,  72, 205, 0.32) 0%, transparent 55%),
@@ -444,6 +448,7 @@ body[data-bg="midnight"] {
 /* Sunset — coral-pink sun, warm amber, violet dusk, rose accents */
 body[data-bg="sunset"] {
   background:
+    linear-gradient(rgba(10, 8, 5, 0.50), rgba(10, 8, 5, 0.50)),
     radial-gradient(ellipse 150% 100% at 32%  4%,  rgba(248,  45, 128, 0.41) 0%, transparent 55%),
     radial-gradient(ellipse 132% 112% at 100% 28%,  rgba(248, 112,  15, 0.38) 0%, transparent 55%),
     radial-gradient(ellipse 142% 125% at  0%  82%,  rgba(162,  28, 208, 0.38) 0%, transparent 55%),
