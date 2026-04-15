@@ -1322,7 +1322,7 @@ export default function ProfileContent() {
         </p>
 
         {/* Swatch picker — centered */}
-        <div className="mb-5 flex justify-center gap-5">
+        <div className="mb-5 flex flex-wrap justify-center gap-3 sm:gap-5">
           {/* None / default */}
           <div className="flex flex-col items-center gap-2">
             <button
