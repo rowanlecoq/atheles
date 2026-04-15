@@ -442,11 +442,18 @@ body[data-bg="sunset"] {
   background-attachment: fixed;
 }
 
-/* Navbar and announcement bar: semi-transparent dark so gradient tints them
-   without flooding the bar entirely. Main stays fully opaque.              */
-body[data-bg] nav,
+/* Sticky header nav bars + announcement bar: semi-transparent dark so the
+   body gradient tints them. Only targets the site header — not hero nav,
+   footer, or filter navs.                                                  */
+body[data-bg] .site-header-root nav,
 body[data-bg] .announcement-bar-root {
   background-color: rgba(15, 12, 8, 0.62) !important;
+}
+
+/* Let the body gradient show through the page content area when a theme is
+   active. Individual section/card backgrounds keep their own opaque colors. */
+body[data-bg] main {
+  background-color: transparent !important;
 }
 
 /* iOS Safari does not support background-attachment: fixed on body */
