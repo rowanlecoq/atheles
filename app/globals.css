@@ -376,77 +376,77 @@ html.thunder-shake {
 }
 
 /* ─── Profile background themes ──────────────────────────────────────────── */
-/* body[data-bg] is set by the inline flash-prevention script (localStorage)
-   and by ProfileBackgroundApplier on each route change.
-   background-attachment: fixed keeps the gradient viewport-fixed so it looks
-   seamless across scrolling. A warm/themed dark base replaces pure black.   */
 
-/* Gold — gold, warm grey, white shimmer */
+/* Gold — warm gold glow, white shimmer, slate-grey midtones */
 body[data-bg="gold"] {
   background:
-    radial-gradient(ellipse 220% 200% at 10%  5%,  rgba(255, 210,  60, 0.60) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 90% 95%,  rgba(210, 165,  50, 0.55) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at  5% 80%,  rgba(235, 210, 140, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 140% 140% at 60% 15%,  rgba(255, 255, 200, 0.28) 0%, transparent 55%),
-    radial-gradient(ellipse 180% 180% at 80% 50%,  rgba(180, 145,  60, 0.25) 0%, transparent 60%),
-    #110e04;
+    radial-gradient(ellipse 240% 220% at  8%  4%,  rgba(200, 160,  35, 0.32) 0%, transparent 52%),
+    radial-gradient(ellipse 200% 200% at 92% 96%,  rgba(170, 125,  28, 0.26) 0%, transparent 52%),
+    radial-gradient(ellipse 180% 180% at  4% 82%,  rgba(210, 185, 110, 0.18) 0%, transparent 56%),
+    radial-gradient(ellipse 160% 140% at 65% 12%,  rgba(240, 220, 160, 0.14) 0%, transparent 56%),
+    radial-gradient(ellipse 200% 180% at 82% 48%,  rgba(140, 115,  45, 0.14) 0%, transparent 62%),
+    radial-gradient(ellipse 300% 300% at 50% 50%,  rgba( 80,  65,  20, 0.18) 0%, transparent 80%),
+    #0f0c04;
   background-attachment: fixed;
 }
 
-/* Ocean — teal, blue, bright shine */
+/* Ocean — deep teal and navy, mid-ocean glow */
 body[data-bg="water"] {
   background:
-    radial-gradient(ellipse 220% 200% at  5% 90%,  rgba(  0, 220, 230, 0.62) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 95% 10%,  rgba(  0, 120, 230, 0.55) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at 35% 40%,  rgba(100, 240, 255, 0.32) 0%, transparent 50%),
-    radial-gradient(ellipse 140% 140% at 70% 65%,  rgba(  0, 180, 210, 0.38) 0%, transparent 55%),
-    radial-gradient(ellipse 120% 120% at 50% 20%,  rgba(180, 250, 255, 0.22) 0%, transparent 50%),
-    #020a10;
+    radial-gradient(ellipse 240% 220% at  4% 88%,  rgba(  0, 170, 180, 0.36) 0%, transparent 52%),
+    radial-gradient(ellipse 200% 200% at 96%  8%,  rgba(  0,  90, 185, 0.30) 0%, transparent 52%),
+    radial-gradient(ellipse 180% 180% at 32% 38%,  rgba( 60, 195, 210, 0.18) 0%, transparent 52%),
+    radial-gradient(ellipse 160% 140% at 72% 62%,  rgba(  0, 140, 170, 0.20) 0%, transparent 56%),
+    radial-gradient(ellipse 200% 160% at 52% 18%,  rgba(130, 220, 235, 0.12) 0%, transparent 52%),
+    radial-gradient(ellipse 300% 300% at 50% 50%,  rgba(  0,  40,  70, 0.22) 0%, transparent 80%),
+    #010810;
   background-attachment: fixed;
 }
 
-/* Tropical — green, orange, sky blue */
+/* Tropical — jungle green, warm orange, sky blue */
 body[data-bg="tropical"] {
   background:
-    radial-gradient(ellipse 220% 200% at  5% 85%,  rgba( 15, 210,  95, 0.58) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 90% 10%,  rgba(  0, 165, 225, 0.52) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at 55% 60%,  rgba(255, 150,  25, 0.38) 0%, transparent 55%),
-    radial-gradient(ellipse 140% 140% at 20% 25%,  rgba( 60, 230, 130, 0.30) 0%, transparent 55%),
-    radial-gradient(ellipse 120% 120% at 75% 80%,  rgba(255, 200,  60, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse 240% 220% at  4% 84%,  rgba( 10, 165,  72, 0.32) 0%, transparent 52%),
+    radial-gradient(ellipse 200% 200% at 92%  8%,  rgba(  0, 128, 180, 0.28) 0%, transparent 52%),
+    radial-gradient(ellipse 180% 160% at 58% 60%,  rgba(210, 115,  15, 0.22) 0%, transparent 56%),
+    radial-gradient(ellipse 160% 140% at 18% 22%,  rgba( 40, 185, 100, 0.16) 0%, transparent 56%),
+    radial-gradient(ellipse 200% 160% at 78% 80%,  rgba(200, 160,  30, 0.13) 0%, transparent 52%),
+    radial-gradient(ellipse 300% 300% at 50% 50%,  rgba(  5,  40,  12, 0.20) 0%, transparent 80%),
     #020b05;
   background-attachment: fixed;
 }
 
-/* Midnight — purple, pink, deep space */
+/* Midnight — deep purple, rose-pink accents, star-field black */
 body[data-bg="midnight"] {
   background:
-    radial-gradient(ellipse 220% 200% at 25%  5%,  rgba(185,  55, 255, 0.65) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 75% 95%,  rgba(255,  55, 185, 0.58) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at  5% 55%,  rgba(130,  25, 210, 0.40) 0%, transparent 55%),
-    radial-gradient(ellipse 140% 140% at 90% 40%,  rgba(210,  80, 255, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 180% 180% at 50% 50%,  rgba( 80,  10, 140, 0.28) 0%, transparent 70%),
-    #040009;
+    radial-gradient(ellipse 240% 220% at 22%  4%,  rgba(140,  35, 200, 0.38) 0%, transparent 52%),
+    radial-gradient(ellipse 200% 200% at 78% 96%,  rgba(200,  35, 140, 0.30) 0%, transparent 52%),
+    radial-gradient(ellipse 180% 160% at  4% 52%,  rgba( 95,  15, 165, 0.22) 0%, transparent 56%),
+    radial-gradient(ellipse 160% 140% at 92% 38%,  rgba(165,  55, 210, 0.20) 0%, transparent 56%),
+    radial-gradient(ellipse 200% 180% at 50% 50%,  rgba( 55,   5, 105, 0.20) 0%, transparent 72%),
+    radial-gradient(ellipse 300% 300% at 50% 50%,  rgba( 20,   0,  45, 0.25) 0%, transparent 80%),
+    #03000a;
   background-attachment: fixed;
 }
 
-/* Sunset — pink, orange, violet */
+/* Sunset — rose-pink, warm amber, violet dusk */
 body[data-bg="sunset"] {
   background:
-    radial-gradient(ellipse 220% 200% at 25%  0%,  rgba(255,  70, 140, 0.65) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 80% 90%,  rgba(255, 135,  40, 0.60) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at  5% 65%,  rgba(185,  55, 225, 0.42) 0%, transparent 55%),
-    radial-gradient(ellipse 140% 140% at 65% 25%,  rgba(255, 100,  80, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 180% 180% at 90% 55%,  rgba(230,  80, 160, 0.28) 0%, transparent 65%),
-    #0e0206;
+    radial-gradient(ellipse 240% 220% at 22%  2%,  rgba(210,  50, 110, 0.36) 0%, transparent 52%),
+    radial-gradient(ellipse 200% 200% at 82% 92%,  rgba(210, 105,  25, 0.32) 0%, transparent 52%),
+    radial-gradient(ellipse 180% 160% at  4% 62%,  rgba(145,  38, 180, 0.24) 0%, transparent 56%),
+    radial-gradient(ellipse 160% 140% at 68% 22%,  rgba(210,  75,  60, 0.20) 0%, transparent 56%),
+    radial-gradient(ellipse 200% 180% at 92% 52%,  rgba(185,  55, 130, 0.18) 0%, transparent 66%),
+    radial-gradient(ellipse 300% 300% at 50% 50%,  rgba( 55,   5,  22, 0.22) 0%, transparent 80%),
+    #0c0205;
   background-attachment: fixed;
 }
 
-/* Transparent backgrounds so the body gradient shows everywhere:
-   navbar, category nav, announcement bar, and main content area   */
-body[data-bg] main,
+/* Navbar and announcement bar: semi-transparent dark so gradient tints them
+   without flooding the bar entirely. Main stays fully opaque.              */
 body[data-bg] nav,
 body[data-bg] .announcement-bar-root {
-  background-color: transparent !important;
+  background-color: rgba(15, 12, 8, 0.62) !important;
 }
 
 /* iOS Safari does not support background-attachment: fixed on body */
