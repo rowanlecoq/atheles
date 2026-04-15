@@ -514,6 +514,12 @@ body[data-bg] main {
   background-color: transparent !important;
 }
 
+/* Let the body gradient show through the page content area when a theme is
+   active. Individual section/card backgrounds keep their own opaque colors. */
+body[data-bg] main {
+  background-color: transparent !important;
+}
+
 /* iOS Safari does not support background-attachment: fixed on body */
 @supports (-webkit-touch-callout: none) {
   body[data-bg] { background-attachment: scroll; }
