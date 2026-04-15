@@ -14,44 +14,42 @@ type Particle = {
   phase: number;
 };
 
-type ShineState = { pos: number; wait: number };
-
-// Per-theme config — opacities intentionally subtle to match site aesthetic
+// Per-theme particle config
 const THEMES = {
   gold: {
-    count: 55,
-    colors: [[210, 170, 50], [185, 155, 75], [240, 220, 140], [160, 130, 55]] as [number,number,number][],
-    minR: 1.0, maxR: 3.8,
-    minAlpha: 0.02, maxAlpha: 0.11,
-    speed: 0.12, isStar: false, shine: false,
+    count: 60,
+    colors: [[215, 175, 55], [190, 155, 75], [245, 225, 145], [165, 135, 55]] as [number,number,number][],
+    minR: 1.0, maxR: 4.0,
+    minAlpha: 0.04, maxAlpha: 0.18,
+    speed: 0.12, isStar: false,
   },
   water: {
-    count: 55,
-    colors: [[0, 190, 205], [0, 130, 200], [90, 215, 230], [0, 165, 190]] as [number,number,number][],
-    minR: 1.0, maxR: 4.2,
-    minAlpha: 0.02, maxAlpha: 0.14,
-    speed: 0.15, isStar: false, shine: true,
+    count: 65,
+    colors: [[0, 200, 218], [0, 140, 208], [95, 225, 242], [0, 172, 198]] as [number,number,number][],
+    minR: 1.0, maxR: 4.5,
+    minAlpha: 0.04, maxAlpha: 0.20,
+    speed: 0.15, isStar: false,
   },
   tropical: {
-    count: 58,
-    colors: [[12, 185, 85], [0, 150, 195], [220, 130, 20], [55, 200, 115]] as [number,number,number][],
-    minR: 1.0, maxR: 4.2,
-    minAlpha: 0.02, maxAlpha: 0.14,
-    speed: 0.13, isStar: false, shine: true,
+    count: 65,
+    colors: [[15, 192, 90], [0, 158, 205], [228, 135, 22], [60, 208, 122]] as [number,number,number][],
+    minR: 1.0, maxR: 4.5,
+    minAlpha: 0.04, maxAlpha: 0.20,
+    speed: 0.13, isStar: false,
   },
   midnight: {
-    count: 100,
-    colors: [[255, 255, 255], [215, 175, 255], [255, 175, 215], [195, 155, 255]] as [number,number,number][],
-    minR: 0.7, maxR: 3.5,
-    minAlpha: 0.03, maxAlpha: 0.65,
-    speed: 0.05, isStar: true, shine: false,
+    count: 120,
+    colors: [[255, 255, 255], [218, 178, 255], [255, 178, 218], [198, 158, 255]] as [number,number,number][],
+    minR: 0.6, maxR: 3.8,
+    minAlpha: 0.05, maxAlpha: 0.75,
+    speed: 0.05, isStar: true,
   },
   sunset: {
-    count: 55,
-    colors: [[210, 65, 120], [210, 120, 40], [165, 55, 195], [210, 95, 75]] as [number,number,number][],
-    minR: 1.0, maxR: 3.8,
-    minAlpha: 0.02, maxAlpha: 0.12,
-    speed: 0.12, isStar: false, shine: false,
+    count: 60,
+    colors: [[215, 68, 125], [215, 125, 42], [168, 58, 200], [215, 98, 78]] as [number,number,number][],
+    minR: 1.0, maxR: 4.0,
+    minAlpha: 0.04, maxAlpha: 0.18,
+    speed: 0.12, isStar: false,
   },
 } as const;
 
@@ -76,8 +74,7 @@ export function ThemeBackgroundCanvas() {
     animId: number;
     theme: string | null;
     time: number;
-    shine: ShineState | null;
-  }>({ particles: [], animId: 0, theme: null, time: 0, shine: null });
+  }>({ particles: [], animId: 0, theme: null, time: 0 });
   const prefersReducedMotion = useReducedMotion();
 
   const buildParticles = useCallback((key: ThemeKey, w: number, h: number): Particle[] => {
@@ -128,7 +125,6 @@ export function ThemeBackgroundCanvas() {
 
       if (theme !== state.theme) {
         state.theme = theme;
-        state.shine = null;
         state.particles = theme && theme in THEMES
           ? buildParticles(theme as ThemeKey, canvas.width, canvas.height)
           : [];
@@ -142,7 +138,6 @@ export function ThemeBackgroundCanvas() {
       state.time += 0.007;
       const cfg = THEMES[theme as ThemeKey];
 
-      // Draw particles
       for (const p of state.particles) {
         p.x += p.vx;
         p.y += p.vy + Math.sin(state.time + p.phase) * 0.08;
@@ -168,49 +163,6 @@ export function ThemeBackgroundCanvas() {
         }
         ctx.fill();
       }
-
-      // Shine sweep for ocean and tropical
-      if (cfg.shine) {
-        if (!state.shine) state.shine = { pos: -0.15, wait: 220 };
-        const s = state.shine;
-
-        if (s.wait > 0) {
-          s.wait--;
-        } else {
-          s.pos += 0.0012;
-
-          // Fade envelope: ramp in over first 15%, full through middle, ramp out last 15%
-          const norm = (s.pos + 0.15) / 1.45;
-          const env = norm < 0.15 ? norm / 0.15 : norm > 0.85 ? (1 - norm) / 0.15 : 1;
-          const opacity = Math.max(0, Math.min(1, env)) * 0.22;
-
-          if (opacity > 0.002) {
-            const cx = s.pos * w;
-            const beamW = w * 0.12;
-            const shineRGB = theme === "water" ? "145,235,245" : "160,245,185";
-
-            ctx.save();
-            ctx.translate(cx, h * 0.5);
-            ctx.rotate(-Math.PI / 7); // ~26° tilt
-            const grad = ctx.createLinearGradient(-beamW, 0, beamW, 0);
-            grad.addColorStop(0,   `rgba(${shineRGB},0)`);
-            grad.addColorStop(0.35, `rgba(${shineRGB},${(opacity * 0.5).toFixed(3)})`);
-            grad.addColorStop(0.5,  `rgba(${shineRGB},${opacity.toFixed(3)})`);
-            grad.addColorStop(0.65, `rgba(${shineRGB},${(opacity * 0.5).toFixed(3)})`);
-            grad.addColorStop(1,   `rgba(${shineRGB},0)`);
-            ctx.fillStyle = grad;
-            ctx.fillRect(-beamW, -h * 1.5, beamW * 2, h * 3);
-            ctx.restore();
-          }
-
-          if (s.pos > 1.3) {
-            s.pos = -0.15;
-            s.wait = 280 + Math.floor(Math.random() * 220); // ~5–8 s cooldown at 60fps
-          }
-        }
-      } else {
-        state.shine = null;
-      }
     };
 
     state.animId = requestAnimationFrame(draw);
@@ -218,7 +170,6 @@ export function ThemeBackgroundCanvas() {
     const onBgChange = () => {
       const t = getTheme();
       state.theme = null;
-      state.shine = null;
       state.particles = t && t in THEMES
         ? buildParticles(t as ThemeKey, canvas.width, canvas.height)
         : [];
