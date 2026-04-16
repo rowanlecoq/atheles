@@ -169,12 +169,21 @@ export function ThemeBackgroundCanvas() {
 
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     let firstResize = true;
+    let lastW = 0;
+    let lastH = 0;
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      // Skip debounce on initial call — draw loop handles the first particle build
-      if (firstResize) { firstResize = false; return; }
-      // Debounced rebuild so address-bar show/hide on mobile doesn't leave sparse areas
+      // Skip rebuild entirely on initial call — draw loop handles the first particle build
+      if (firstResize) { firstResize = false; lastW = canvas.width; lastH = canvas.height; return; }
+      // Ignore height-only changes < 150px (iOS address-bar show/hide adds ~50px).
+      // Canvas dimensions still update so drawing isn't distorted, but we don't
+      // restart the particle animation — no glitch, no expand flash.
+      const wDelta = Math.abs(canvas.width - lastW);
+      const hDelta = Math.abs(canvas.height - lastH);
+      if (wDelta < 30 && hDelta < 150) return;
+      lastW = canvas.width;
+      lastH = canvas.height;
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         if (state.theme && state.theme in THEMES) {
