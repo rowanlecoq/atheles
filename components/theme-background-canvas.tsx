@@ -211,16 +211,24 @@ export function ThemeBackgroundCanvas() {
     let lastW = 0;
     let lastH = 0;
     const resize = () => {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      // Skip rebuild entirely on initial call — prime draw handles the first particle build
-      if (firstResize) { firstResize = false; lastW = canvas.width; lastH = canvas.height; return; }
-      // Ignore height-only changes < 150px (iOS address-bar show/hide adds ~50px).
-      const wDelta = Math.abs(canvas.width - lastW);
-      const hDelta = Math.abs(canvas.height - lastH);
+      const newW = window.innerWidth;
+      const newH = window.innerHeight;
+      // Initial call: set dimensions and bail — prime draw handles first particle build.
+      if (firstResize) {
+        canvas.width = newW;
+        canvas.height = newH;
+        firstResize = false; lastW = newW; lastH = newH; return;
+      }
+      // Delta check BEFORE touching canvas dimensions. Setting canvas.width/height
+      // always clears the canvas even when the value is unchanged — so iOS address-bar
+      // show/hide (±50px height change) was blanking the canvas every scroll event.
+      const wDelta = Math.abs(newW - lastW);
+      const hDelta = Math.abs(newH - lastH);
       if (wDelta < 30 && hDelta < 150) return;
-      lastW = canvas.width;
-      lastH = canvas.height;
+      canvas.width = newW;
+      canvas.height = newH;
+      lastW = newW;
+      lastH = newH;
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         if (state.theme && state.theme in THEMES) {
