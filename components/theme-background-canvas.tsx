@@ -116,9 +116,12 @@ export function ThemeBackgroundCanvas() {
     const state = stateRef.current;
 
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
+    let firstResize = true;
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
+      // Skip debounce on initial call — draw loop handles the first particle build
+      if (firstResize) { firstResize = false; return; }
       // Debounced rebuild so address-bar show/hide on mobile doesn't leave sparse areas
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
