@@ -64,66 +64,86 @@ type ThemeKey = keyof typeof THEMES;
 // ctx.filter blur is applied on supporting browsers (Chrome 47+, Safari 18+,
 // FF 49+) for extra softness. On older iOS Safari (no ctx.filter) the wide
 // overlapping strips already look hazy and diffuse at these low opacities.
-function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
-  const hasFilter = "filter" in ctx;
+// Gaussian-like weights for 7-pass blur simulation on mobile.
+const BLUR_OFFSETS  = [-18, -12, -6,  0,  6, 12, 18] as const;
+const BLUR_WEIGHTS  = [0.25, 0.55, 0.82, 1.0, 0.82, 0.55, 0.25] as const;
+const BLUR_WEIGHT_SUM = BLUR_WEIGHTS.reduce((s, w) => s + w, 0); // ≈ 4.24
 
-  // Desktop (hasFilter): narrow strips (28-38px) + ctx.filter blur → soft sunbeams.
-  // Mobile/old-Safari (no filter): wider strips (140-200px) at lower opacity so
-  // they blend atmospherically without appearing as hard lines.
-  const stripBase = hasFilter ? 30 : 160;
-  const stripVar  = hasFilter ? 10 : 40;
-  const blurPx    = hasFilter ? 20 : 0;
-
-  if (theme === "water") {
-    if (hasFilter) ctx.filter = `blur(${blurPx}px)`;
-    for (let i = 0; i < 8; i++) {
-      const angle   = (-10 + i * 3) * (Math.PI / 180);
-      const stripH  = stripBase + (i % 4) * stripVar;
-      const opacity = hasFilter
-        ? 0.055 + (i % 3) * 0.018   // 0.055–0.091  narrow + blur = delicate
-        : 0.014 + (i % 3) * 0.005;  // 0.014–0.024  wide, very faint
-      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
+function drawBeam(
+  ctx: CanvasRenderingContext2D,
+  w: number,
+  cy: number, angle: number, stripH: number, opacity: number,
+  rgbaEdge: (o: number) => string,
+  rgbaMid:  (o: number) => string,
+  hasFilter: boolean,
+) {
+  if (hasFilter) {
+    ctx.save();
+    ctx.translate(w / 2, cy);
+    ctx.rotate(angle);
+    const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
+    g.addColorStop(0,   "transparent");
+    g.addColorStop(0.1, rgbaEdge(opacity));
+    g.addColorStop(0.5, rgbaMid(opacity * 1.35));
+    g.addColorStop(0.9, rgbaEdge(opacity));
+    g.addColorStop(1,   "transparent");
+    ctx.fillStyle = g;
+    ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
+    ctx.restore();
+  } else {
+    // Stack 7 thin strips at Gaussian-weighted offsets to simulate blur.
+    // Each strip contributes (weight / weightSum) of the total opacity so
+    // the centre — where all strips overlap — equals the target opacity.
+    for (let p = 0; p < 7; p++) {
+      const o = opacity * (BLUR_WEIGHTS[p]! / BLUR_WEIGHT_SUM);
       ctx.save();
-      ctx.translate(w / 2, cy);
-      ctx.rotate(angle);
-      const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
-      g.addColorStop(0,    "transparent");
-      g.addColorStop(0.1,  `rgba(34,211,238,${opacity})`);
-      g.addColorStop(0.5,  `rgba(6,182,212,${(opacity * 1.35).toFixed(4)})`);
-      g.addColorStop(0.9,  `rgba(34,211,238,${opacity})`);
-      g.addColorStop(1,    "transparent");
-      ctx.fillStyle = g;
-      ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
-      ctx.restore();
-    }
-    if (hasFilter) ctx.filter = "none";
-  }
-
-  if (theme === "tropical") {
-    if (hasFilter) ctx.filter = `blur(${blurPx}px)`;
-    for (let i = 0; i < 5; i++) {
-      const angle   = (25 + i * 3) * (Math.PI / 180);
-      const stripH  = stripBase + i * stripVar;
-      const opacity = hasFilter
-        ? 0.060 + i * 0.015          // 0.060–0.120
-        : 0.015 + i * 0.004;         // 0.015–0.031
-      const cy = h * (0.08 + i * 0.18) + Math.sin(time * 0.35 + i * 1.5) * 15;
-      const rgb = i % 2 === 1 ? "245,158,11" : "16,185,129";
-      ctx.save();
-      ctx.translate(w / 2, cy);
+      ctx.translate(w / 2, cy + BLUR_OFFSETS[p]!);
       ctx.rotate(angle);
       const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
       g.addColorStop(0,   "transparent");
-      g.addColorStop(0.1, `rgba(${rgb},${opacity})`);
-      g.addColorStop(0.5, `rgba(${rgb},${(opacity * 1.4).toFixed(4)})`);
-      g.addColorStop(0.9, `rgba(${rgb},${opacity})`);
+      g.addColorStop(0.1, rgbaEdge(o));
+      g.addColorStop(0.5, rgbaMid(o * 1.35));
+      g.addColorStop(0.9, rgbaEdge(o));
       g.addColorStop(1,   "transparent");
       ctx.fillStyle = g;
       ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
       ctx.restore();
     }
-    if (hasFilter) ctx.filter = "none";
   }
+}
+
+function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
+  const hasFilter = "filter" in ctx;
+  if (hasFilter) ctx.filter = "blur(20px)";
+
+  if (theme === "water") {
+    for (let i = 0; i < 8; i++) {
+      const angle   = (-10 + i * 3) * (Math.PI / 180);
+      const stripH  = 30 + (i % 4) * 10;   // 30–60 px — narrow
+      const opacity = 0.055 + (i % 3) * 0.018;
+      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
+      drawBeam(ctx, w, cy, angle, stripH, opacity,
+        (o) => `rgba(34,211,238,${o.toFixed(4)})`,
+        (o) => `rgba(6,182,212,${o.toFixed(4)})`,
+        hasFilter);
+    }
+  }
+
+  if (theme === "tropical") {
+    for (let i = 0; i < 5; i++) {
+      const angle   = (25 + i * 3) * (Math.PI / 180);
+      const stripH  = 30 + i * 10;          // 30–70 px
+      const opacity = 0.060 + i * 0.015;
+      const cy = h * (0.08 + i * 0.18) + Math.sin(time * 0.35 + i * 1.5) * 15;
+      const rgb = i % 2 === 1 ? "245,158,11" : "16,185,129";
+      drawBeam(ctx, w, cy, angle, stripH, opacity,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        hasFilter);
+    }
+  }
+
+  if (hasFilter) ctx.filter = "none";
 }
 
 function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, outerR: number, rotation: number) {

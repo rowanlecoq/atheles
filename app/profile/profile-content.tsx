@@ -1,6 +1,5 @@
 "use client";
 
-import { FadeIn } from "components/animations";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
@@ -615,14 +614,17 @@ export default function ProfileContent() {
         document.body,
       )}
 
-      {/* Avatar & Name — no FadeIn opacity here; opacity:0→1 briefly shows the
-          bright themed background behind the section, causing a "light flash".
-          Use a translate-only entrance instead. */}
+      {/* Avatar & Name — translate-only entrance, no opacity animation */}
       <div className="mb-10 flex flex-col items-center text-center animate-hero-section-enter">
         <div className="group relative mb-4">
           <div
-            className={`flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
-            style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" } as React.CSSProperties}
+            className={`flex h-40 w-40 items-center justify-center sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
+            style={{
+              clipPath: "circle(50%)",
+              WebkitClipPath: "circle(50%)",
+              transform: "translateZ(0)",
+              WebkitTransform: "translateZ(0)",
+            } as React.CSSProperties}
             onClick={() => avatar && setShowAvatarPreview(true)}
           >
             {avatar ? (
@@ -703,7 +705,7 @@ export default function ProfileContent() {
       </div>
 
       {/* Points & Tier Progress */}
-      <FadeIn direction="up" delay={0.08} duration={0.35}>
+      <div className="animate-hero-section-enter" style={{ animationDelay: "0.08s" }}>
       <div className="relative mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/5 via-transparent to-brand-gold/3" />
@@ -968,7 +970,7 @@ export default function ProfileContent() {
         `}</style>
       </div>
 
-      </FadeIn>
+      </div>
 
       {/* Monthly Discount Code */}
       {user.discountCode && tier.discountPercent && (
@@ -1310,7 +1312,7 @@ export default function ProfileContent() {
       </div>
 
       {/* Background Theme */}
-      <FadeIn direction="up" delay={0.16} duration={0.35}>
+      <div className="animate-hero-section-enter" style={{ animationDelay: "0.16s" }}>
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -1388,7 +1390,7 @@ export default function ProfileContent() {
           </div>
         )}
       </div>
-      </FadeIn>
+      </div>
 
       {/* Quick Links */}
       <div className="space-y-3">
