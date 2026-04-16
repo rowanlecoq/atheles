@@ -437,10 +437,9 @@ body[data-bg] .announcement-bar-root {
   background-color: transparent !important;
 }
 
-/* Body gradient shows through the page when a theme is active. */
-body[data-bg] main {
-  background-color: transparent !important;
-}
+/* main has no background-color — body/canvas show through on all pages.
+   Canvas draws nothing when no theme is active (empty particle array),
+   so unthemed pages naturally show only the body dark background. */
 
 /* Profile hero text — lift secondary text to white so it reads on any
    coloured background without adding a visible box */
