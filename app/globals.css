@@ -377,62 +377,57 @@ html.thunder-shake {
 
 /* ─── Profile background themes ──────────────────────────────────────────── */
 
-/* Gold — warm gold from opposite corners, white shimmer */
+/* Gold — warm muted amber orbs, upper-left + lower-right */
 body[data-bg="gold"] {
   background:
-    radial-gradient(ellipse 220% 200% at 10%  5%,  rgba(255, 210,  60, 0.60) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 90% 95%,  rgba(210, 165,  50, 0.55) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at  5% 80%,  rgba(235, 210, 140, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 140% 140% at 60% 15%,  rgba(255, 255, 200, 0.28) 0%, transparent 55%),
-    radial-gradient(ellipse 180% 180% at 80% 50%,  rgba(180, 145,  60, 0.25) 0%, transparent 60%),
+    radial-gradient(ellipse 140% 120% at 30% 35%,  rgba(193, 163, 104, 0.55) 0%, transparent 60%),
+    radial-gradient(ellipse 120% 140% at 70% 65%,  rgba(180, 140,  60, 0.42) 0%, transparent 60%),
+    radial-gradient(ellipse 110% 110% at 50% 50%,  rgba(220, 200, 140, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse 130% 100% at 60% 30%,  rgba(220, 200, 140, 0.28) 0%, transparent 55%),
     #110e04;
   background-attachment: fixed;
 }
 
-/* Ocean — teal shallows, deep navy, bright surface shine */
+/* Ocean — teal upper-left, navy lower-right, cyan shimmer */
 body[data-bg="water"] {
   background:
-    radial-gradient(ellipse 220% 200% at  5% 90%,  rgba(  0, 220, 230, 0.62) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 95% 10%,  rgba(  0, 120, 230, 0.55) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at 35% 40%,  rgba(100, 240, 255, 0.32) 0%, transparent 50%),
-    radial-gradient(ellipse 140% 140% at 70% 65%,  rgba(  0, 180, 210, 0.38) 0%, transparent 55%),
-    radial-gradient(ellipse 120% 120% at 50% 20%,  rgba(180, 250, 255, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse 140% 120% at 30% 35%,  rgba( 30, 180, 220, 0.50) 0%, transparent 60%),
+    radial-gradient(ellipse 120% 140% at 70% 65%,  rgba( 20, 100, 200, 0.44) 0%, transparent 60%),
+    radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 40, 210, 240, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse 130% 100% at 15% 75%,  rgba(  0, 160, 200, 0.28) 0%, transparent 55%),
     #020a10;
   background-attachment: fixed;
 }
 
-/* Tropical — jungle green, sky blue, warm orange */
+/* Tropical — emerald lower-left, amber upper-right, teal shimmer */
 body[data-bg="tropical"] {
   background:
-    radial-gradient(ellipse 220% 200% at  5% 85%,  rgba( 15, 210,  95, 0.58) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 90% 10%,  rgba(  0, 165, 225, 0.52) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at 55% 60%,  rgba(255, 150,  25, 0.38) 0%, transparent 55%),
-    radial-gradient(ellipse 140% 140% at 20% 25%,  rgba( 60, 230, 130, 0.30) 0%, transparent 55%),
-    radial-gradient(ellipse 120% 120% at 75% 80%,  rgba(255, 200,  60, 0.22) 0%, transparent 50%),
+    radial-gradient(ellipse 140% 120% at 25% 70%,  rgba( 16, 185, 129, 0.52) 0%, transparent 60%),
+    radial-gradient(ellipse 120% 140% at 75% 25%,  rgba(245, 158,  11, 0.40) 0%, transparent 60%),
+    radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 20, 200, 160, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 130% 100% at 80% 80%,  rgba(250, 180,  50, 0.22) 0%, transparent 55%),
     #020b05;
   background-attachment: fixed;
 }
 
-/* Midnight — purple, pink, deep space */
+/* Midnight — deep indigo upper-left, violet lower-right */
 body[data-bg="midnight"] {
   background:
-    radial-gradient(ellipse 220% 200% at 25%  5%,  rgba(185,  55, 255, 0.65) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 75% 95%,  rgba(255,  55, 185, 0.58) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at  5% 55%,  rgba(130,  25, 210, 0.40) 0%, transparent 55%),
-    radial-gradient(ellipse 140% 140% at 90% 40%,  rgba(210,  80, 255, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 180% 180% at 50% 50%,  rgba( 80,  10, 140, 0.28) 0%, transparent 70%),
-    #040009;
+    radial-gradient(ellipse 140% 120% at 30% 35%,  rgba( 30,  30,  80, 0.65) 0%, transparent 60%),
+    radial-gradient(ellipse 120% 140% at 70% 65%,  rgba( 60,  60, 160, 0.44) 0%, transparent 60%),
+    radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 90,  50, 200, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse  90%  80% at 20%  5%,  rgba( 80,  20, 160, 0.35) 0%, transparent 55%),
+    #04000a;
   background-attachment: fixed;
 }
 
-/* Sunset — pink, orange, violet */
+/* Sunset — orange/pink/purple atmosphere top-to-bottom */
 body[data-bg="sunset"] {
   background:
-    radial-gradient(ellipse 220% 200% at 25%  0%,  rgba(255,  70, 140, 0.65) 0%, transparent 50%),
-    radial-gradient(ellipse 200% 180% at 80% 90%,  rgba(255, 135,  40, 0.60) 0%, transparent 50%),
-    radial-gradient(ellipse 160% 160% at  5% 65%,  rgba(185,  55, 225, 0.42) 0%, transparent 55%),
-    radial-gradient(ellipse 140% 140% at 65% 25%,  rgba(255, 100,  80, 0.35) 0%, transparent 55%),
-    radial-gradient(ellipse 180% 180% at 90% 55%,  rgba(230,  80, 160, 0.28) 0%, transparent 65%),
+    linear-gradient(180deg, rgba(147, 51, 234, 0.38) 0%, rgba(219, 39, 119, 0.32) 30%, rgba(249, 115, 22, 0.44) 60%, rgba(251, 146, 60, 0.32) 100%),
+    radial-gradient(ellipse 200%  50% at 50% 55%,  rgba(249, 115,  22, 0.38) 0%, transparent 55%),
+    radial-gradient(ellipse 110% 110% at 20% 30%,  rgba(147,  51, 234, 0.32) 0%, transparent 55%),
+    radial-gradient(ellipse 110% 110% at 80% 70%,  rgba(219,  39, 119, 0.32) 0%, transparent 55%),
     #0e0206;
   background-attachment: fixed;
 }
