@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useLayoutEffect, useRef } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 
 type Particle = {
@@ -167,6 +167,10 @@ export function ThemeBackgroundCanvas() {
     time: number;
   }>({ particles: [], animId: 0, theme: null, time: 0 });
   const prefersReducedMotion = useReducedMotion();
+  const [isTouch, setIsTouch] = useState(false);
+  useEffect(() => {
+    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
+  }, []);
 
   const buildParticles = useCallback((key: ThemeKey, w: number, h: number): Particle[] => {
     const cfg = THEMES[key];
@@ -199,7 +203,7 @@ export function ThemeBackgroundCanvas() {
   }, []);
 
   useLayoutEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || isTouch) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -318,9 +322,9 @@ export function ThemeBackgroundCanvas() {
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
     };
-  }, [prefersReducedMotion, buildParticles]);
+  }, [prefersReducedMotion, isTouch, buildParticles]);
 
-  if (prefersReducedMotion) return null;
+  if (prefersReducedMotion || isTouch) return null;
 
   return (
     <canvas
