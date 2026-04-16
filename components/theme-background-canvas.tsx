@@ -58,7 +58,8 @@ type ThemeKey = keyof typeof THEMES;
 // Diagonal light rays — water caustics for ocean, sun rays for tropical
 function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
   if (theme === "water") {
-    // 8 water-caustic strips, slight angles (-10° → +11°)
+    // 8 water-caustic strips, slight angles (-10° → +11°), blurred for softness
+    ctx.filter = "blur(18px)";
     for (let i = 0; i < 8; i++) {
       const angle = (-10 + i * 3) * (Math.PI / 180);
       const stripH = 30 + (i % 4) * 15;
@@ -77,10 +78,12 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
       ctx.restore();
     }
+    ctx.filter = "none";
   }
 
   if (theme === "tropical") {
-    // 5 sun rays, steeper diagonal (25° → 37°), alternating green/amber
+    // 5 sun rays, steeper diagonal (25° → 37°), alternating green/amber, blurred for softness
+    ctx.filter = "blur(12px)";
     for (let i = 0; i < 5; i++) {
       const angle = (25 + i * 3) * (Math.PI / 180);
       const stripH = 25 + i * 10;
@@ -100,6 +103,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
       ctx.restore();
     }
+    ctx.filter = "none";
   }
 }
 
