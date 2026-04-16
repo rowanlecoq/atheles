@@ -457,13 +457,11 @@ body[data-bg] .profile-hero-text p {
   animation: canvas-reveal 0.8s ease 0.05s both;
 }
 
-/* Mobile: background-attachment:fixed is buggy on iOS — the gradient repaints
-   and visually shifts every time the address bar shows/hides (±50px viewport
-   change), making the background look like it's "adjusting its lighting".
-   Use scroll on narrow viewports; the gradient is viewport-sized so it looks
-   essentially the same whether fixed or scroll. */
-@media (max-width: 767px) {
-  body[data-bg] {
-    background-attachment: scroll;
-  }
+.animate-beta-pulse {
+  animation: beta-pulse 2.4s ease-in-out infinite;
 }
+
+/* NOTE: background-attachment:scroll was tried on mobile but caused the CSS
+   gradient to move with page scroll while the canvas (position:fixed) stayed
+   put — the mismatch made rays appear to jump and lighting to shift on scroll.
+   Keep background-attachment:fixed everywhere so gradient and canvas stay in sync. */
