@@ -620,7 +620,7 @@ export default function ProfileContent() {
       <div className="mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
           <div
-            className={`flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : ""} bg-brand-dark-gold/10`}
+            className={`avatar-bg flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : ""} bg-brand-dark-gold/10`}
             onClick={() => avatar && setShowAvatarPreview(true)}
           >
             {avatar ? (
@@ -688,13 +688,15 @@ export default function ProfileContent() {
         {avatarError && (
           <p className="mt-1 text-xs text-red-400">{avatarError}</p>
         )}
-        <h1 className="font-heading text-2xl text-brand-gold sm:text-3xl">
-          {user.name}
-        </h1>
-        <p className="mt-1 text-base text-brand-grey sm:text-sm">{user.email}</p>
-        <p className="mt-1 text-sm uppercase tracking-wider text-brand-dark-gold sm:text-xs">
-          member since {memberSince}
-        </p>
+        <div className="profile-hero-text">
+          <h1 className="font-heading text-2xl text-brand-gold sm:text-3xl">
+            {user.name}
+          </h1>
+          <p className="mt-1 text-base text-brand-grey sm:text-sm">{user.email}</p>
+          <p className="mt-1 text-sm uppercase tracking-wider text-brand-dark-gold sm:text-xs">
+            member since {memberSince}
+          </p>
+        </div>
       </div>
       </FadeIn>
 
