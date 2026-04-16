@@ -432,6 +432,18 @@ body[data-bg="sunset"] {
   background-attachment: fixed;
 }
 
+/* On touch devices the canvas is disabled, so use scroll attachment — fixed
+   is broken on iOS when zooming/scrolling and causes the gradient to vanish. */
+@media (pointer: coarse) {
+  body[data-bg="gold"],
+  body[data-bg="water"],
+  body[data-bg="tropical"],
+  body[data-bg="midnight"],
+  body[data-bg="sunset"] {
+    background-attachment: scroll;
+  }
+}
+
 /* Announcement bar transparent when theme active — shows the same gradient as body. */
 body[data-bg] .announcement-bar-root {
   background-color: transparent !important;
