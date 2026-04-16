@@ -2,27 +2,27 @@ export const PROFILE_BACKGROUNDS = [
   {
     id: "gold",
     label: "gold",
-    swatch: "linear-gradient(135deg, #ffe480 0%, #d4a820 50%, #7a5800 100%)",
+    swatch: "linear-gradient(135deg, #ffda2a 0%, #e8b61c 45%, #7a4a00 100%)",
   },
   {
     id: "water",
     label: "ocean",
-    swatch: "linear-gradient(135deg, #7aeef8 0%, #0090cc 50%, #011840 100%)",
+    swatch: "linear-gradient(135deg, #aff8ff 0%, #00c8e8 35%, #0055b0 70%, #000c1a 100%)",
   },
   {
     id: "tropical",
     label: "tropical",
-    swatch: "linear-gradient(135deg, #80e88a 0%, #22a8e8 38%, #d88220 72%, #021505 100%)",
+    swatch: "linear-gradient(135deg, #00cdf5 0%, #0cbf60 40%, #fc9b1c 72%, #01090a 100%)",
   },
   {
     id: "midnight",
     label: "midnight",
-    swatch: "linear-gradient(135deg, #c058ff 0%, #ff3ec8 50%, #080015 100%)",
+    swatch: "linear-gradient(135deg, #b63ef8 0%, #f826af 50%, #010006 100%)",
   },
   {
     id: "sunset",
     label: "sunset",
-    swatch: "linear-gradient(135deg, #ff4888 0%, #ff8820 45%, #c03ae0 75%, #0e0208 100%)",
+    swatch: "linear-gradient(135deg, #ff4888 0%, #ffda3e 40%, #c03ae0 75%, #050002 100%)",
   },
 ] as const;
 
