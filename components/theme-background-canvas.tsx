@@ -57,64 +57,72 @@ type ThemeKey = keyof typeof THEMES;
 
 // Diagonal light rays — water caustics for ocean, sun rays for tropical.
 //
-// Uses ctx.shadowBlur (supported in Safari 1.2+, Chrome 4+, all browsers)
-// to create a genuine Gaussian glow around a thin core strip. This produces
-// the same blurry soft-beam look on every device including old iOS Safari,
-// unlike ctx.filter which was only added to Safari in iOS 18 (Sep 2024).
+// Each ray is a SINGLE very wide strip (180–300 px) at very low opacity.
+// Adjacent strips overlap, blending into each other rather than appearing
+// as distinct bands. The result is atmospheric diagonal tinting, not lines.
 //
-// Each ray: thin fill (the beam core) + shadow glow (the soft halo).
-// The fill gradient fades at the ends so shadow naturally fades too — no
-// sharp edges anywhere.
+// ctx.filter blur is applied on supporting browsers (Chrome 47+, Safari 18+,
+// FF 49+) for extra softness. On older iOS Safari (no ctx.filter) the wide
+// overlapping strips already look hazy and diffuse at these low opacities.
 function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
+  const hasFilter = "filter" in ctx;
+
+  // Desktop (hasFilter): narrow strips (28-38px) + ctx.filter blur → soft sunbeams.
+  // Mobile/old-Safari (no filter): wider strips (140-200px) at lower opacity so
+  // they blend atmospherically without appearing as hard lines.
+  const stripBase = hasFilter ? 30 : 160;
+  const stripVar  = hasFilter ? 10 : 40;
+  const blurPx    = hasFilter ? 20 : 0;
+
   if (theme === "water") {
+    if (hasFilter) ctx.filter = `blur(${blurPx}px)`;
     for (let i = 0; i < 8; i++) {
-      const angle  = (-10 + i * 3) * (Math.PI / 180);
-      const coreH  = 5 + (i % 4) * 3;               // 5–14 px thin core
-      const fillOp = 0.045 + (i % 3) * 0.018;        // core fill opacity
-      const glowOp = 0.13  + (i % 3) * 0.04;         // shadow glow opacity
-      const blur   = 20    + (i % 4) * 7;             // 20–41 px glow radius
+      const angle   = (-10 + i * 3) * (Math.PI / 180);
+      const stripH  = stripBase + (i % 4) * stripVar;
+      const opacity = hasFilter
+        ? 0.055 + (i % 3) * 0.018   // 0.055–0.091  narrow + blur = delicate
+        : 0.014 + (i % 3) * 0.005;  // 0.014–0.024  wide, very faint
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
       ctx.save();
       ctx.translate(w / 2, cy);
       ctx.rotate(angle);
-      ctx.shadowBlur  = blur;
-      ctx.shadowColor = `rgba(34,211,238,${glowOp})`;
       const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
-      g.addColorStop(0,   "transparent");
-      g.addColorStop(0.1, `rgba(34,211,238,${fillOp})`);
-      g.addColorStop(0.5, `rgba(6,182,212,${(fillOp * 1.5).toFixed(4)})`);
-      g.addColorStop(0.9, `rgba(34,211,238,${fillOp})`);
-      g.addColorStop(1,   "transparent");
+      g.addColorStop(0,    "transparent");
+      g.addColorStop(0.1,  `rgba(34,211,238,${opacity})`);
+      g.addColorStop(0.5,  `rgba(6,182,212,${(opacity * 1.35).toFixed(4)})`);
+      g.addColorStop(0.9,  `rgba(34,211,238,${opacity})`);
+      g.addColorStop(1,    "transparent");
       ctx.fillStyle = g;
-      ctx.fillRect(-w * 1.5, -coreH / 2, w * 3, coreH);
-      ctx.restore(); // resets shadowBlur / shadowColor
+      ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
+      ctx.restore();
     }
+    if (hasFilter) ctx.filter = "none";
   }
 
   if (theme === "tropical") {
+    if (hasFilter) ctx.filter = `blur(${blurPx}px)`;
     for (let i = 0; i < 5; i++) {
-      const angle  = (25 + i * 3) * (Math.PI / 180);
-      const coreH  = 5 + i * 3;
-      const fillOp = 0.05  + i * 0.008;
-      const glowOp = 0.14  + i * 0.02;
-      const blur   = 18    + i * 5;
+      const angle   = (25 + i * 3) * (Math.PI / 180);
+      const stripH  = stripBase + i * stripVar;
+      const opacity = hasFilter
+        ? 0.060 + i * 0.015          // 0.060–0.120
+        : 0.015 + i * 0.004;         // 0.015–0.031
       const cy = h * (0.08 + i * 0.18) + Math.sin(time * 0.35 + i * 1.5) * 15;
       const rgb = i % 2 === 1 ? "245,158,11" : "16,185,129";
       ctx.save();
       ctx.translate(w / 2, cy);
       ctx.rotate(angle);
-      ctx.shadowBlur  = blur;
-      ctx.shadowColor = `rgba(${rgb},${glowOp})`;
       const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
       g.addColorStop(0,   "transparent");
-      g.addColorStop(0.1, `rgba(${rgb},${fillOp})`);
-      g.addColorStop(0.5, `rgba(${rgb},${(fillOp * 1.5).toFixed(4)})`);
-      g.addColorStop(0.9, `rgba(${rgb},${fillOp})`);
+      g.addColorStop(0.1, `rgba(${rgb},${opacity})`);
+      g.addColorStop(0.5, `rgba(${rgb},${(opacity * 1.4).toFixed(4)})`);
+      g.addColorStop(0.9, `rgba(${rgb},${opacity})`);
       g.addColorStop(1,   "transparent");
       ctx.fillStyle = g;
-      ctx.fillRect(-w * 1.5, -coreH / 2, w * 3, coreH);
+      ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
       ctx.restore();
     }
+    if (hasFilter) ctx.filter = "none";
   }
 }
 
