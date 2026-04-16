@@ -55,6 +55,54 @@ const THEMES = {
 
 type ThemeKey = keyof typeof THEMES;
 
+// Diagonal light rays — water caustics for ocean, sun rays for tropical
+function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
+  if (theme === "water") {
+    // 8 water-caustic strips, slight angles (-10° → +11°)
+    for (let i = 0; i < 8; i++) {
+      const angle = (-10 + i * 3) * (Math.PI / 180);
+      const stripH = 30 + (i % 4) * 15;
+      const opacity = 0.03 + (i % 3) * 0.02;
+      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
+      ctx.save();
+      ctx.translate(w / 2, cy);
+      ctx.rotate(angle);
+      const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
+      g.addColorStop(0,    "transparent");
+      g.addColorStop(0.15, `rgba(34,211,238,${opacity})`);
+      g.addColorStop(0.5,  `rgba(6,182,212,${(opacity * 1.4).toFixed(3)})`);
+      g.addColorStop(0.85, `rgba(34,211,238,${opacity})`);
+      g.addColorStop(1,    "transparent");
+      ctx.fillStyle = g;
+      ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
+      ctx.restore();
+    }
+  }
+
+  if (theme === "tropical") {
+    // 5 sun rays, steeper diagonal (25° → 37°), alternating green/amber
+    for (let i = 0; i < 5; i++) {
+      const angle = (25 + i * 3) * (Math.PI / 180);
+      const stripH = 25 + i * 10;
+      const opacity = 0.04 + i * 0.012;
+      const cy = h * (0.08 + i * 0.18) + Math.sin(time * 0.35 + i * 1.5) * 15;
+      const rgb = i % 2 === 1 ? "245,158,11" : "16,185,129";
+      ctx.save();
+      ctx.translate(w / 2, cy);
+      ctx.rotate(angle);
+      const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
+      g.addColorStop(0,   "transparent");
+      g.addColorStop(0.2, `rgba(${rgb},${opacity})`);
+      g.addColorStop(0.5, `rgba(${rgb},${(opacity * 1.5).toFixed(3)})`);
+      g.addColorStop(0.8, `rgba(${rgb},${opacity})`);
+      g.addColorStop(1,   "transparent");
+      ctx.fillStyle = g;
+      ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
+      ctx.restore();
+    }
+  }
+}
+
 function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, outerR: number, rotation: number) {
   const innerR = outerR * 0.35;
   ctx.beginPath();
@@ -153,6 +201,9 @@ export function ThemeBackgroundCanvas() {
 
       state.time += 0.007;
       const cfg = THEMES[theme as ThemeKey];
+
+      // Draw diagonal light rays beneath the particles (ocean + tropical)
+      drawRays(ctx, w, h, theme as ThemeKey, state.time);
 
       for (const p of state.particles) {
         p.x += p.vx;
