@@ -55,15 +55,22 @@ const THEMES = {
 
 type ThemeKey = keyof typeof THEMES;
 
-// Diagonal light rays — water caustics for ocean, sun rays for tropical
+// Diagonal light rays — water caustics for ocean, sun rays for tropical.
+// Strips are intentionally wide (100–200px) with low opacity so they look
+// soft/diffused on every browser. ctx.filter blur is applied as an
+// enhancement on browsers that support it (Chrome 47+, Safari 18+, FF 49+);
+// on older iOS Safari it is silently ignored and the wide strips still look hazy.
 function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
+  const hasFilter = "filter" in ctx;
+
   if (theme === "water") {
-    // 8 water-caustic strips, slight angles (-10° → +11°), blurred for softness
-    ctx.filter = "blur(18px)";
+    if (hasFilter) ctx.filter = "blur(16px)";
+    // 8 water-caustic strips, slight angles (-10° → +11°)
     for (let i = 0; i < 8; i++) {
       const angle = (-10 + i * 3) * (Math.PI / 180);
-      const stripH = 30 + (i % 4) * 15;
-      const opacity = 0.03 + (i % 3) * 0.02;
+      // Wide strips create inherent softness even without filter
+      const stripH = 100 + (i % 4) * 50;
+      const opacity = 0.012 + (i % 3) * 0.008;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
       ctx.save();
       ctx.translate(w / 2, cy);
@@ -78,16 +85,16 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
       ctx.restore();
     }
-    ctx.filter = "none";
+    if (hasFilter) ctx.filter = "none";
   }
 
   if (theme === "tropical") {
-    // 5 sun rays, steeper diagonal (25° → 37°), alternating green/amber, blurred for softness
-    ctx.filter = "blur(12px)";
+    if (hasFilter) ctx.filter = "blur(10px)";
+    // 5 sun rays, steeper diagonal (25° → 37°), alternating green/amber
     for (let i = 0; i < 5; i++) {
       const angle = (25 + i * 3) * (Math.PI / 180);
-      const stripH = 25 + i * 10;
-      const opacity = 0.04 + i * 0.012;
+      const stripH = 90 + i * 35;
+      const opacity = 0.014 + i * 0.006;
       const cy = h * (0.08 + i * 0.18) + Math.sin(time * 0.35 + i * 1.5) * 15;
       const rgb = i % 2 === 1 ? "245,158,11" : "16,185,129";
       ctx.save();
@@ -103,7 +110,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
       ctx.restore();
     }
-    ctx.filter = "none";
+    if (hasFilter) ctx.filter = "none";
   }
 }
 
