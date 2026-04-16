@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 
 const LS_KEY = "atheles-bg-theme";
 
@@ -34,8 +34,10 @@ function applyFromStorage() {
 export function ProfileBackgroundApplier() {
   const pathname = usePathname();
 
-  // Re-apply on every route change
-  useEffect(() => {
+  // Re-apply on every route change — useLayoutEffect runs before the browser
+  // paints so data-bg is set before the first frame, eliminating the dark flash
+  // on client-side navigation (useEffect would fire after paint).
+  useLayoutEffect(() => {
     applyFromStorage();
     window.addEventListener("atheles-bg-change", applyFromStorage);
     return () => window.removeEventListener("atheles-bg-change", applyFromStorage);
