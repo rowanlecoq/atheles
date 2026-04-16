@@ -52,15 +52,26 @@ export function ProfileBackgroundApplier() {
       .then((data) => {
         if (!data?.user) return;
         const { theme, globalTheme } = data.user as { theme?: string | null; globalTheme?: boolean };
+        const newTheme = theme || "none";
+        // Read what's currently in localStorage before overwriting
+        let prevTheme = "none";
+        try {
+          const prev = localStorage.getItem(LS_KEY);
+          if (prev) prevTheme = (JSON.parse(prev) as { theme?: string }).theme ?? "none";
+        } catch {}
         try {
           localStorage.setItem(LS_KEY, JSON.stringify({
-            theme: theme || "none",
+            theme: newTheme,
             globalTheme: globalTheme ?? false,
           }));
         } catch {}
-        // Re-apply with server-fresh data
-        applyFromStorage();
-        window.dispatchEvent(new Event("atheles-bg-change"));
+        // Only trigger a visible re-apply when a new theme is being added (cross-
+        // device sync). Silently write for removals or same-theme so the session
+        // fetch never causes a background flash or canvas rebuild.
+        if (newTheme !== "none" && newTheme !== prevTheme) {
+          applyFromStorage();
+          window.dispatchEvent(new Event("atheles-bg-change"));
+        }
       })
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps

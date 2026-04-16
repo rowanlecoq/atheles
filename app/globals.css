@@ -447,5 +447,13 @@ body[data-bg] .profile-hero-text p {
   color: rgba(255, 255, 255, 0.65);
 }
 
-/* iOS Safari: keep background-attachment: fixed so the gradient stays
-   viewport-anchored and doesn't shift when the address bar hides/shows */
+/* Mobile: background-attachment:fixed is buggy on iOS — the gradient repaints
+   and visually shifts every time the address bar shows/hides (±50px viewport
+   change), making the background look like it's "adjusting its lighting".
+   Use scroll on narrow viewports; the gradient is viewport-sized so it looks
+   essentially the same whether fixed or scroll. */
+@media (max-width: 767px) {
+  body[data-bg] {
+    background-attachment: scroll;
+  }
+}

@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 
 type Particle = {
@@ -198,7 +198,7 @@ export function ThemeBackgroundCanvas() {
     });
   }, []);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (prefersReducedMotion) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -213,11 +213,9 @@ export function ThemeBackgroundCanvas() {
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      // Skip rebuild entirely on initial call — draw loop handles the first particle build
+      // Skip rebuild entirely on initial call — prime draw handles the first particle build
       if (firstResize) { firstResize = false; lastW = canvas.width; lastH = canvas.height; return; }
       // Ignore height-only changes < 150px (iOS address-bar show/hide adds ~50px).
-      // Canvas dimensions still update so drawing isn't distorted, but we don't
-      // restart the particle animation — no glitch, no expand flash.
       const wDelta = Math.abs(canvas.width - lastW);
       const hDelta = Math.abs(canvas.height - lastH);
       if (wDelta < 30 && hDelta < 150) return;
@@ -235,8 +233,10 @@ export function ThemeBackgroundCanvas() {
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
 
-    const draw = () => {
-      state.animId = requestAnimationFrame(draw);
+    // Rendering logic separated from loop scheduling so it can be called once
+    // synchronously (prime draw) before the browser's first paint, eliminating
+    // the brief flash where the canvas is blank.
+    const renderFrame = () => {
       const theme = getTheme();
 
       if (theme !== state.theme) {
@@ -254,7 +254,6 @@ export function ThemeBackgroundCanvas() {
       state.time += 0.007;
       const cfg = THEMES[theme as ThemeKey];
 
-      // Draw diagonal light rays beneath the particles (ocean + tropical)
       drawRays(ctx, w, h, theme as ThemeKey, state.time);
 
       for (const p of state.particles) {
@@ -284,7 +283,15 @@ export function ThemeBackgroundCanvas() {
       }
     };
 
-    state.animId = requestAnimationFrame(draw);
+    const loop = () => {
+      state.animId = requestAnimationFrame(loop);
+      renderFrame();
+    };
+
+    // Prime the canvas synchronously — fires before first browser paint so there
+    // is never a frame where the canvas is blank on top of the CSS gradient.
+    renderFrame();
+    state.animId = requestAnimationFrame(loop);
 
     const onBgChange = () => {
       const t = getTheme();
