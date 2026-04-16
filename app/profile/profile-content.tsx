@@ -620,7 +620,8 @@ export default function ProfileContent() {
       <div className="mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
           <div
-            className={`flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
+            className={`relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
+            style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" } as React.CSSProperties}
             onClick={() => avatar && setShowAvatarPreview(true)}
           >
             {avatar ? (
@@ -630,12 +631,17 @@ export default function ProfileContent() {
                 alt="Profile photo"
                 width={144}
                 height={144}
+                style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" } as React.CSSProperties}
                 className="h-full w-full object-cover transition-transform group-hover:scale-105"
               />
             ) : (
               <span className="font-heading text-2xl text-brand-gold">
                 {initials}
               </span>
+            )}
+            {/* inset vignette to hide iOS Safari subpixel ring and darken image edges */}
+            {avatar && (
+              <div className="pointer-events-none absolute inset-0 rounded-full" style={{ boxShadow: "inset 0 0 0 2px rgba(0,0,0,0.25)" }} />
             )}
           </div>
           <button
