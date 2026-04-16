@@ -705,7 +705,6 @@ export default function ProfileContent() {
       </div>
 
       {/* Points & Tier Progress */}
-      <div className="animate-hero-section-enter" style={{ animationDelay: "0.08s" }}>
       <div className="relative mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/5 via-transparent to-brand-gold/3" />
@@ -968,8 +967,6 @@ export default function ProfileContent() {
             }
           }
         `}</style>
-      </div>
-
       </div>
 
       {/* Monthly Discount Code */}
@@ -1312,7 +1309,6 @@ export default function ProfileContent() {
       </div>
 
       {/* Background Theme */}
-      <div className="animate-hero-section-enter" style={{ animationDelay: "0.16s" }}>
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
@@ -1389,7 +1385,6 @@ export default function ProfileContent() {
             </button>
           </div>
         )}
-      </div>
       </div>
 
       {/* Quick Links */}
