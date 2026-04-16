@@ -56,33 +56,45 @@ const THEMES = {
 type ThemeKey = keyof typeof THEMES;
 
 // Diagonal light rays — water caustics for ocean, sun rays for tropical.
-// Strips are intentionally wide (100–200px) with low opacity so they look
-// soft/diffused on every browser. ctx.filter blur is applied as an
-// enhancement on browsers that support it (Chrome 47+, Safari 18+, FF 49+);
-// on older iOS Safari it is silently ignored and the wide strips still look hazy.
+//
+// Each ray is drawn as 4 layered strips (tight core → wide halo) to create
+// a Gaussian-like soft falloff on every browser. This means old iOS Safari
+// (which ignores ctx.filter entirely) still sees blurry-looking beams.
+// On supporting browsers (Chrome 47+, Safari 18+, FF 49+) ctx.filter adds
+// extra blur on top for an even softer result.
 function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
   const hasFilter = "filter" in ctx;
+  // hMult=strip height multiplier, opMult=opacity multiplier per layer
+  // Together these form a bell-curve profile in the vertical direction
+  const layers = [
+    { hMult: 0.25, opMult: 1.00 },
+    { hMult: 0.60, opMult: 0.45 },
+    { hMult: 1.40, opMult: 0.18 },
+    { hMult: 2.80, opMult: 0.06 },
+  ] as const;
 
   if (theme === "water") {
-    if (hasFilter) ctx.filter = "blur(16px)";
-    // 8 water-caustic strips, slight angles (-10° → +11°)
+    if (hasFilter) ctx.filter = "blur(14px)";
     for (let i = 0; i < 8; i++) {
       const angle = (-10 + i * 3) * (Math.PI / 180);
-      // Wide strips create inherent softness even without filter
-      const stripH = 100 + (i % 4) * 50;
-      const opacity = 0.012 + (i % 3) * 0.008;
+      const baseH = 35 + (i % 4) * 12;
+      const baseOp = 0.048 + (i % 3) * 0.016;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
       ctx.save();
       ctx.translate(w / 2, cy);
       ctx.rotate(angle);
-      const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
-      g.addColorStop(0,    "transparent");
-      g.addColorStop(0.15, `rgba(34,211,238,${opacity})`);
-      g.addColorStop(0.5,  `rgba(6,182,212,${(opacity * 1.4).toFixed(3)})`);
-      g.addColorStop(0.85, `rgba(34,211,238,${opacity})`);
-      g.addColorStop(1,    "transparent");
-      ctx.fillStyle = g;
-      ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
+      for (const { hMult, opMult } of layers) {
+        const lh = baseH * hMult;
+        const op = baseOp * opMult;
+        const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
+        g.addColorStop(0,    "transparent");
+        g.addColorStop(0.15, `rgba(34,211,238,${op.toFixed(4)})`);
+        g.addColorStop(0.5,  `rgba(6,182,212,${(op * 1.4).toFixed(4)})`);
+        g.addColorStop(0.85, `rgba(34,211,238,${op.toFixed(4)})`);
+        g.addColorStop(1,    "transparent");
+        ctx.fillStyle = g;
+        ctx.fillRect(-w * 1.5, -lh / 2, w * 3, lh);
+      }
       ctx.restore();
     }
     if (hasFilter) ctx.filter = "none";
@@ -90,24 +102,27 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
 
   if (theme === "tropical") {
     if (hasFilter) ctx.filter = "blur(10px)";
-    // 5 sun rays, steeper diagonal (25° → 37°), alternating green/amber
     for (let i = 0; i < 5; i++) {
       const angle = (25 + i * 3) * (Math.PI / 180);
-      const stripH = 90 + i * 35;
-      const opacity = 0.014 + i * 0.006;
+      const baseH = 30 + i * 10;
+      const baseOp = 0.055 + i * 0.008;
       const cy = h * (0.08 + i * 0.18) + Math.sin(time * 0.35 + i * 1.5) * 15;
       const rgb = i % 2 === 1 ? "245,158,11" : "16,185,129";
       ctx.save();
       ctx.translate(w / 2, cy);
       ctx.rotate(angle);
-      const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
-      g.addColorStop(0,   "transparent");
-      g.addColorStop(0.2, `rgba(${rgb},${opacity})`);
-      g.addColorStop(0.5, `rgba(${rgb},${(opacity * 1.5).toFixed(3)})`);
-      g.addColorStop(0.8, `rgba(${rgb},${opacity})`);
-      g.addColorStop(1,   "transparent");
-      ctx.fillStyle = g;
-      ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
+      for (const { hMult, opMult } of layers) {
+        const lh = baseH * hMult;
+        const op = baseOp * opMult;
+        const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
+        g.addColorStop(0,   "transparent");
+        g.addColorStop(0.2, `rgba(${rgb},${op.toFixed(4)})`);
+        g.addColorStop(0.5, `rgba(${rgb},${(op * 1.5).toFixed(4)})`);
+        g.addColorStop(0.8, `rgba(${rgb},${op.toFixed(4)})`);
+        g.addColorStop(1,   "transparent");
+        ctx.fillStyle = g;
+        ctx.fillRect(-w * 1.5, -lh / 2, w * 3, lh);
+      }
       ctx.restore();
     }
     if (hasFilter) ctx.filter = "none";
