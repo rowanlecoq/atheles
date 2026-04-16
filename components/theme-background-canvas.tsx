@@ -318,7 +318,7 @@ export function ThemeBackgroundCanvas() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0"
+      className="pointer-events-none fixed inset-0 animate-canvas-reveal"
       style={{ zIndex: 0 }}
     />
   );

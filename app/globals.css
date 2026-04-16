@@ -447,6 +447,16 @@ body[data-bg] .profile-hero-text p {
   color: rgba(255, 255, 255, 0.65);
 }
 
+/* Canvas fade-in: particles appear gradually instead of popping on at full
+   brightness after React hydration, which looked like a jarring flash. */
+@keyframes canvas-reveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-canvas-reveal {
+  animation: canvas-reveal 0.8s ease 0.05s both;
+}
+
 /* Mobile: background-attachment:fixed is buggy on iOS — the gradient repaints
    and visually shifts every time the address bar shows/hides (±50px viewport
    change), making the background look like it's "adjusting its lighting".
