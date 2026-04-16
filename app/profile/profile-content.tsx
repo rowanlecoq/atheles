@@ -615,12 +615,13 @@ export default function ProfileContent() {
         document.body,
       )}
 
-      {/* Avatar & Name */}
-      <FadeIn direction="up" duration={0.35}>
-      <div className="mb-10 flex flex-col items-center text-center">
+      {/* Avatar & Name — no FadeIn opacity here; opacity:0→1 briefly shows the
+          bright themed background behind the section, causing a "light flash".
+          Use a translate-only entrance instead. */}
+      <div className="mb-10 flex flex-col items-center text-center animate-hero-section-enter">
         <div className="group relative mb-4">
           <div
-            className={`relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
+            className={`flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
             style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" } as React.CSSProperties}
             onClick={() => avatar && setShowAvatarPreview(true)}
           >
@@ -638,10 +639,6 @@ export default function ProfileContent() {
               <span className="font-heading text-2xl text-brand-gold">
                 {initials}
               </span>
-            )}
-            {/* inset vignette to hide iOS Safari subpixel ring and darken image edges */}
-            {avatar && (
-              <div className="pointer-events-none absolute inset-0 rounded-full" style={{ boxShadow: "inset 0 0 0 2px rgba(0,0,0,0.25)" }} />
             )}
           </div>
           <button
@@ -704,7 +701,6 @@ export default function ProfileContent() {
           </p>
         </div>
       </div>
-      </FadeIn>
 
       {/* Points & Tier Progress */}
       <FadeIn direction="up" delay={0.08} duration={0.35}>
