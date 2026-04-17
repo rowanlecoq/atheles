@@ -203,13 +203,58 @@ export function ThemeBackgroundCanvas() {
   }, []);
 
   useLayoutEffect(() => {
-    if (prefersReducedMotion || isTouch) return;
+    if (prefersReducedMotion) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const state = stateRef.current;
 
+    const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
+
+    const drawStatic = () => {
+      const theme = getTheme();
+      if (theme !== state.theme) {
+        state.theme = theme;
+        state.particles = theme && theme in THEMES
+          ? buildParticles(theme as ThemeKey, canvas.width, canvas.height)
+          : [];
+      }
+      const w = canvas.width;
+      const h = canvas.height;
+      ctx.clearRect(0, 0, w, h);
+      if (state.particles.length === 0) return;
+      drawRays(ctx, w, h, theme as ThemeKey, 0.5);
+      for (const p of state.particles) {
+        const [r, g, b] = p.color;
+        ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha.toFixed(3)})`;
+        if (p.isStar) {
+          drawStar(ctx, p.x, p.y, p.r, p.rotation);
+        } else {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+        }
+        ctx.fill();
+      }
+    };
+
+    // Touch devices: draw a single static frame — all the visual detail with
+    // none of the RAF loop that conflicts with iOS scroll and zoom.
+    if (isTouch) {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+      drawStatic();
+      const onBgChange = () => {
+        state.theme = null; // force re-build on next draw
+        canvas.width = window.innerWidth;
+        canvas.height = window.innerHeight;
+        drawStatic();
+      };
+      window.addEventListener("atheles-bg-change", onBgChange);
+      return () => window.removeEventListener("atheles-bg-change", onBgChange);
+    }
+
+    // Animated path (desktop)
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     let firstResize = true;
     let lastW = 0;
@@ -242,8 +287,6 @@ export function ThemeBackgroundCanvas() {
     };
     resize();
     window.addEventListener("resize", resize);
-
-    const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
 
     // Rendering logic separated from loop scheduling so it can be called once
     // synchronously (prime draw) before the browser's first paint, eliminating
@@ -324,7 +367,7 @@ export function ThemeBackgroundCanvas() {
     };
   }, [prefersReducedMotion, isTouch, buildParticles]);
 
-  if (prefersReducedMotion || isTouch) return null;
+  if (prefersReducedMotion) return null;
 
   return (
     <canvas
