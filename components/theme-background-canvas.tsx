@@ -167,6 +167,9 @@ export function ThemeBackgroundCanvas() {
     time: number;
   }>({ particles: [], animId: 0, theme: null, time: 0 });
   const prefersReducedMotion = useReducedMotion();
+  // isTouch state is only used for the className — the useLayoutEffect checks
+  // matchMedia directly so the correct draw path runs from the very first layout,
+  // without waiting for this useEffect to fire after paint.
   const [isTouch, setIsTouch] = useState(false);
   useEffect(() => {
     setIsTouch(window.matchMedia("(pointer: coarse)").matches);
@@ -209,6 +212,9 @@ export function ThemeBackgroundCanvas() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const state = stateRef.current;
+    // Read matchMedia directly — don't rely on isTouch state which only updates
+    // after paint (useEffect), causing the animated desktop path to briefly run.
+    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
 
@@ -240,7 +246,7 @@ export function ThemeBackgroundCanvas() {
 
     // Touch devices: draw a single static frame — all the visual detail with
     // none of the RAF loop that conflicts with iOS scroll and zoom.
-    if (isTouch) {
+    if (isTouchDevice) {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
       drawStatic();
@@ -365,7 +371,7 @@ export function ThemeBackgroundCanvas() {
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
     };
-  }, [prefersReducedMotion, isTouch, buildParticles]);
+  }, [prefersReducedMotion, buildParticles]);
 
   if (prefersReducedMotion) return null;
 
@@ -373,7 +379,7 @@ export function ThemeBackgroundCanvas() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className="pointer-events-none fixed inset-0 animate-canvas-reveal"
+      className={`pointer-events-none fixed inset-0${isTouch ? "" : " animate-canvas-reveal"}`}
       style={{ zIndex: 0 }}
     />
   );
