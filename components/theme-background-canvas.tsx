@@ -218,8 +218,11 @@ export function ThemeBackgroundCanvas() {
     let lastW = 0;
     let lastH = 0;
     const resize = () => {
-      const newW = window.innerWidth;
-      const newH = window.innerHeight;
+      // Use visualViewport when available so pinch-zoom on iOS updates the canvas
+      // buffer to match the actual visible area (window.innerWidth doesn't change on zoom).
+      const vvp = window.visualViewport;
+      const newW = Math.round(vvp ? vvp.width : window.innerWidth);
+      const newH = Math.round(vvp ? vvp.height : window.innerHeight);
       // Initial call: set dimensions and bail — prime draw handles first particle build.
       if (firstResize) {
         canvas.width = newW;
@@ -245,6 +248,7 @@ export function ThemeBackgroundCanvas() {
     };
     resize();
     window.addEventListener("resize", resize);
+    window.visualViewport?.addEventListener("resize", resize);
 
     // Rendering logic separated from loop scheduling so it can be called once
     // synchronously (prime draw) before the browser's first paint, eliminating
@@ -321,6 +325,7 @@ export function ThemeBackgroundCanvas() {
       cancelAnimationFrame(state.animId);
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener("resize", resize);
+      window.visualViewport?.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
     };
   }, [prefersReducedMotion, buildParticles]);
@@ -332,7 +337,7 @@ export function ThemeBackgroundCanvas() {
       ref={canvasRef}
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 animate-canvas-reveal"
-      style={{ zIndex: 0 }}
+      style={{ zIndex: 2, mixBlendMode: "screen" }}
     />
   );
 }
