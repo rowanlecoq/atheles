@@ -271,6 +271,15 @@ html { scrollbar-width: none; }
   animation: footer-enter 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) both;
 }
 
+@media (max-width: 767px) {
+  body {
+    background-size:
+      100% 100%,
+      100% 100%,
+      1500px 1500px;
+    background-attachment: scroll, scroll, scroll;
+  }
+}
 
 
 /* Custom zoom cursors — thin elegant + and − in white */
@@ -371,65 +380,60 @@ html.thunder-shake {
 
 /* Gold — warm muted amber orbs, upper-left + lower-right */
 body[data-bg="gold"] {
-  --theme-gradient:
+  background:
     radial-gradient(ellipse 140% 120% at 30% 35%,  rgba(193, 163, 104, 0.34) 0%, transparent 60%),
     radial-gradient(ellipse 120% 140% at 70% 65%,  rgba(180, 140,  60, 0.26) 0%, transparent 60%),
     radial-gradient(ellipse 110% 110% at 50% 50%,  rgba(220, 200, 140, 0.18) 0%, transparent 55%),
     radial-gradient(ellipse 130% 100% at 60% 30%,  rgba(220, 200, 140, 0.16) 0%, transparent 55%),
     radial-gradient(ellipse 180%  70% at 50% 100%, rgba(180, 140,  60, 0.20) 0%, transparent 65%),
     #110e04;
-  background: var(--theme-gradient);
   background-attachment: fixed;
 }
 
 /* Ocean — teal upper-left, navy lower-right, cyan shimmer */
 body[data-bg="water"] {
-  --theme-gradient:
+  background:
     radial-gradient(ellipse 140% 120% at 30% 35%,  rgba( 30, 180, 220, 0.30) 0%, transparent 60%),
     radial-gradient(ellipse 120% 140% at 70% 65%,  rgba( 20, 100, 200, 0.26) 0%, transparent 60%),
     radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 40, 210, 240, 0.18) 0%, transparent 55%),
     radial-gradient(ellipse 130% 100% at 15% 75%,  rgba(  0, 160, 200, 0.16) 0%, transparent 55%),
     radial-gradient(ellipse 180%  70% at 50% 100%, rgba( 20, 100, 200, 0.22) 0%, transparent 65%),
     #020a10;
-  background: var(--theme-gradient);
   background-attachment: fixed;
 }
 
 /* Tropical — emerald lower-left, amber upper-right, teal shimmer */
 body[data-bg="tropical"] {
-  --theme-gradient:
+  background:
     radial-gradient(ellipse 140% 120% at 25% 70%,  rgba( 16, 185, 129, 0.32) 0%, transparent 60%),
     radial-gradient(ellipse 120% 140% at 75% 25%,  rgba(245, 158,  11, 0.24) 0%, transparent 60%),
     radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 20, 200, 160, 0.16) 0%, transparent 55%),
     radial-gradient(ellipse 130% 100% at 80% 80%,  rgba(250, 180,  50, 0.13) 0%, transparent 55%),
     radial-gradient(ellipse 180%  70% at 50% 100%, rgba( 16, 185, 129, 0.20) 0%, transparent 65%),
     #020b05;
-  background: var(--theme-gradient);
   background-attachment: fixed;
 }
 
 /* Midnight — deep indigo upper-left, violet lower-right */
 body[data-bg="midnight"] {
-  --theme-gradient:
+  background:
     radial-gradient(ellipse 140% 120% at 30% 35%,  rgba( 30,  30,  80, 0.42) 0%, transparent 60%),
     radial-gradient(ellipse 120% 140% at 70% 65%,  rgba( 60,  60, 160, 0.28) 0%, transparent 60%),
     radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 90,  50, 200, 0.18) 0%, transparent 55%),
     radial-gradient(ellipse  90%  80% at 20%  5%,  rgba( 80,  20, 160, 0.22) 0%, transparent 55%),
     radial-gradient(ellipse 180%  70% at 50% 100%, rgba( 60,  60, 160, 0.24) 0%, transparent 65%),
     #04000a;
-  background: var(--theme-gradient);
   background-attachment: fixed;
 }
 
 /* Sunset — orange/pink/purple atmosphere top-to-bottom */
 body[data-bg="sunset"] {
-  --theme-gradient:
+  background:
     linear-gradient(180deg, rgba(147, 51, 234, 0.22) 0%, rgba(219, 39, 119, 0.19) 30%, rgba(249, 115, 22, 0.27) 60%, rgba(251, 146, 60, 0.19) 100%),
     radial-gradient(ellipse 200%  50% at 50% 55%,  rgba(249, 115,  22, 0.23) 0%, transparent 55%),
     radial-gradient(ellipse 110% 110% at 20% 30%,  rgba(147,  51, 234, 0.19) 0%, transparent 55%),
     radial-gradient(ellipse 110% 110% at 80% 70%,  rgba(219,  39, 119, 0.19) 0%, transparent 55%),
     #0e0206;
-  background: var(--theme-gradient);
   background-attachment: fixed;
 }
 
@@ -443,29 +447,19 @@ body[data-bg="sunset"] {
   animation: canvas-reveal 0.8s ease 0.05s both;
 }
 
-/* On touch devices, background-attachment:fixed is broken on iOS Safari
-   (gradient vanishes or jumps during scroll/zoom). Instead, move the gradient
-   to a position:fixed ::before pseudo-element so it stays viewport-locked
-   just like the canvas, without triggering the iOS fixed-background bug. */
+/* On touch devices use scroll attachment — fixed is broken on iOS when
+   zooming/scrolling and causes the gradient to vanish. Also disable the
+   canvas fade-in animation so the static frame appears at full opacity
+   immediately without any JS state needed (avoids the isTouch useState
+   starting as false and causing a flash on the first render). */
 @media (pointer: coarse) {
   body[data-bg="gold"],
   body[data-bg="water"],
   body[data-bg="tropical"],
   body[data-bg="midnight"],
   body[data-bg="sunset"] {
-    background-image: none;
-  }
-  body[data-bg="gold"]::before,
-  body[data-bg="water"]::before,
-  body[data-bg="tropical"]::before,
-  body[data-bg="midnight"]::before,
-  body[data-bg="sunset"]::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background: var(--theme-gradient);
-    pointer-events: none;
+    background-attachment: scroll;
+    background-size: 100% 100%;
   }
   .animate-canvas-reveal {
     animation: none;
@@ -500,3 +494,7 @@ body[data-bg] .announcement-bar-root {
   background-color: transparent !important;
 }
 
+/* NOTE: background-attachment:scroll was tried on mobile but caused the CSS
+   gradient to move with page scroll while the canvas (position:fixed) stayed
+   put — the mismatch made rays appear to jump and lighting to shift on scroll.
+   Keep background-attachment:fixed everywhere so gradient and canvas stay in sync. */
