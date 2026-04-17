@@ -8,7 +8,7 @@ export function AdminIcon() {
 
   useEffect(() => {
     try {
-      const cached = sessionStorage.getItem("atheles-session");
+      const cached = localStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
         if (u.isAdmin) setIsAdmin(true);

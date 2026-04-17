@@ -247,7 +247,7 @@ export default function ProfileContent() {
 
     // Show cached session instantly while fetching fresh data
     try {
-      const cached = sessionStorage.getItem("atheles-session");
+      const cached = localStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached) as User;
         applyUser(u);
@@ -260,12 +260,12 @@ export default function ProfileContent() {
       .then((data) => {
         if (data.user) {
           applyUser(data.user);
-          sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+          localStorage.setItem("atheles-session", JSON.stringify(data.user));
           setLoading(false);
         } else {
           // Session returned null — use cache if available
           try {
-            const fallback = sessionStorage.getItem("atheles-session");
+            const fallback = localStorage.getItem("atheles-session");
             if (fallback) { applyUser(JSON.parse(fallback)); setLoading(false); return; }
           } catch {}
           document.cookie = "atheles-logged-in=; max-age=0; path=/";
@@ -278,7 +278,7 @@ export default function ProfileContent() {
       .catch(() => {
         // Network error — use cache
         try {
-          const fallback = sessionStorage.getItem("atheles-session");
+          const fallback = localStorage.getItem("atheles-session");
           if (fallback) { applyUser(JSON.parse(fallback)); }
         } catch {}
         setLoading(false);
@@ -298,8 +298,9 @@ export default function ProfileContent() {
       if (key && key.startsWith("atheles-")) keysToRemove.push(key);
     }
     keysToRemove.forEach((k) => sessionStorage.removeItem(k));
-    // Clear persisted theme so another user on this device starts fresh
+    // Clear persisted theme and session so another user on this device starts fresh
     try { localStorage.removeItem("atheles-bg-theme"); } catch {}
+    try { localStorage.removeItem("atheles-session"); } catch {}
     document.body.removeAttribute("data-bg");
     document.cookie = "atheles-logged-in=; max-age=0; path=/";
     // Notify all components to clear cached user data
@@ -401,7 +402,7 @@ export default function ProfileContent() {
           setDobMonth(m ? String(parseInt(m)) : "");
           setDobDay(d ? String(parseInt(d)) : "");
         }
-        sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+        localStorage.setItem("atheles-session", JSON.stringify(data.user));
         setEditing(false);
         setSaveMessage("profile updated.");
         setTimeout(() => setSaveMessage(""), 3000);
@@ -457,12 +458,12 @@ export default function ProfileContent() {
 
     // Also update sessionStorage so in-session reads stay consistent
     try {
-      const cached = sessionStorage.getItem("atheles-session");
+      const cached = localStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
         u.theme = theme || "none";
         u.globalTheme = global;
-        sessionStorage.setItem("atheles-session", JSON.stringify(u));
+        localStorage.setItem("atheles-session", JSON.stringify(u));
       }
     } catch {}
 

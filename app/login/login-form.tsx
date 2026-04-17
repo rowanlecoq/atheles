@@ -35,10 +35,11 @@ export default function LoginForm() {
           }
         }
         keysToRemove.forEach((k) => sessionStorage.removeItem(k));
+        localStorage.removeItem("atheles-session");
 
         // Cache new session
         if (data.user) {
-          sessionStorage.setItem("atheles-session", JSON.stringify(data.user));
+          localStorage.setItem("atheles-session", JSON.stringify(data.user));
         }
         // Full reload to clear all React state from previous account
         window.location.href = "/profile";

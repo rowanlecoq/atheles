@@ -15,7 +15,7 @@ export function AccountIcon() {
   useEffect(() => {
     if (!document.cookie.includes("atheles-logged-in=1")) return;
     try {
-      const cached = sessionStorage.getItem("atheles-session");
+      const cached = localStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
         const key = `atheles-avatar-${u.email}`;

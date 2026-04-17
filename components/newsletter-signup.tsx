@@ -17,7 +17,7 @@ export function NewsletterSignup() {
     // Gate: guests never need to call the session API
     if (!document.cookie.includes("atheles-logged-in=1")) return;
     try {
-      const cached = sessionStorage.getItem("atheles-session");
+      const cached = localStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
         setLoggedIn(true);
@@ -39,11 +39,11 @@ export function NewsletterSignup() {
             setAlreadySubscribed(true);
             // Sync into cache so next visit skips the API
             try {
-              const cached = sessionStorage.getItem("atheles-session");
+              const cached = localStorage.getItem("atheles-session");
               if (cached) {
                 const u = JSON.parse(cached);
                 u.acceptsMarketing = true;
-                sessionStorage.setItem("atheles-session", JSON.stringify(u));
+                localStorage.setItem("atheles-session", JSON.stringify(u));
               }
             } catch {}
           }
@@ -72,11 +72,11 @@ export function NewsletterSignup() {
         setEmail("");
         // Update session cache so it persists
         try {
-          const cached = sessionStorage.getItem("atheles-session");
+          const cached = localStorage.getItem("atheles-session");
           if (cached) {
             const u = JSON.parse(cached);
             u.acceptsMarketing = true;
-            sessionStorage.setItem("atheles-session", JSON.stringify(u));
+            localStorage.setItem("atheles-session", JSON.stringify(u));
           }
         } catch {}
       } else {

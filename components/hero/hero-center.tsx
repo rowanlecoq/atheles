@@ -24,7 +24,7 @@ export function HeroCenter() {
     // Check if logged in
     if (!document.cookie.includes("atheles-logged-in=1")) return;
     try {
-      const cached = sessionStorage.getItem("atheles-session");
+      const cached = localStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
         if (u.firstName || u.name) {

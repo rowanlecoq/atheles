@@ -128,7 +128,7 @@ export default function CartModal() {
     };
     // Try cache first
     try {
-      const cached = sessionStorage.getItem("atheles-session");
+      const cached = localStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
         applyTier(u.totalSpent, u.isAthlete);
