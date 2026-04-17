@@ -465,6 +465,11 @@ body[data-bg="sunset"] {
   animation: beta-pulse 2.4s ease-in-out infinite;
 }
 
+/* Announcement bar transparent when theme active — shows same gradient as body. */
+body[data-bg] .announcement-bar-root {
+  background-color: transparent !important;
+}
+
 /* NOTE: background-attachment:scroll was tried on mobile but caused the CSS
    gradient to move with page scroll while the canvas (position:fixed) stayed
    put — the mismatch made rays appear to jump and lighting to shift on scroll.
