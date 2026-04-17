@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import ImageCropModal from "components/image-crop-modal";
 import { PROFILE_BACKGROUNDS } from "lib/profile-backgrounds";
@@ -199,6 +199,29 @@ export default function ProfileContent() {
   const [themeSaving, setThemeSaving] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
+
+  // Read cache synchronously before first paint — no skeleton flash on navigation
+  useLayoutEffect(() => {
+    try {
+      const cached = localStorage.getItem("atheles-session");
+      if (!cached) return;
+      const u = JSON.parse(cached) as User;
+      setUser(u);
+      setFirstName(u.firstName || "");
+      setLastName(u.lastName || "");
+      setPhone(u.phone ? formatPhoneDisplay(u.phone) : "");
+      setNewsletter(u.acceptsMarketing || false);
+      if (u.dob) {
+        const [y, m, d] = u.dob.split("-");
+        setDobYear(y || "");
+        setDobMonth(m ? String(parseInt(m)) : "");
+        setDobDay(d ? String(parseInt(d)) : "");
+      }
+      setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
+      setThemeGlobal(u.globalTheme || false);
+      setLoading(false);
+    } catch {}
+  }, []);
 
   useEffect(() => {
     const prefsLoaded = { current: false };
