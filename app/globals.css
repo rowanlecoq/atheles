@@ -452,10 +452,9 @@ body[data-bg="sunset"] {
   animation: canvas-reveal 0.8s ease 0.05s both;
 }
 
-/* On touch devices, background-attachment:fixed is broken on iOS Safari —
-   gradient vanishes or repaints late after scroll/zoom. Instead, strip the
-   gradient off the body and paint it on a position:fixed ::before pseudo-element
-   that behaves the same as the canvas: locked to the visual viewport always. */
+/* On touch devices, background-attachment:fixed is broken on iOS Safari.
+   The JS ThemeGradientOverlay component renders a fixed <div> instead,
+   which correctly tracks the visual viewport including on pinch-zoom. */
 @media (pointer: coarse) {
   body[data-bg="gold"],
   body[data-bg="water"],
@@ -463,18 +462,6 @@ body[data-bg="sunset"] {
   body[data-bg="midnight"],
   body[data-bg="sunset"] {
     background-image: none;
-  }
-  body[data-bg="gold"]::before,
-  body[data-bg="water"]::before,
-  body[data-bg="tropical"]::before,
-  body[data-bg="midnight"]::before,
-  body[data-bg="sunset"]::before {
-    content: "";
-    position: fixed;
-    inset: 0;
-    z-index: -1;
-    background: var(--theme-gradient);
-    pointer-events: none;
   }
   .animate-canvas-reveal {
     animation: none;
@@ -508,4 +495,12 @@ body[data-bg="sunset"] {
 body[data-bg] .announcement-bar-root {
   background-color: transparent !important;
 }
+
+/* Mobile gradient overlay — painted by ThemeGradientOverlay React component on
+   touch devices so it always tracks the visual viewport (incl. pinch-zoom). */
+body[data-bg="gold"]    .theme-gradient-overlay { background: var(--theme-gradient); }
+body[data-bg="water"]   .theme-gradient-overlay { background: var(--theme-gradient); }
+body[data-bg="tropical"].theme-gradient-overlay { background: var(--theme-gradient); }
+body[data-bg="midnight"].theme-gradient-overlay { background: var(--theme-gradient); }
+body[data-bg="sunset"]  .theme-gradient-overlay { background: var(--theme-gradient); }
 

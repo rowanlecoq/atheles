@@ -337,7 +337,7 @@ export function ThemeBackgroundCanvas() {
       ref={canvasRef}
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 animate-canvas-reveal"
-      style={{ zIndex: 2, mixBlendMode: "screen" }}
+      style={{ zIndex: 0 }}
     />
   );
 }
