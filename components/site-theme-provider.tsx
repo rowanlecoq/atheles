@@ -58,9 +58,6 @@ export function SiteThemeProvider() {
         root.style.setProperty("--color-brand-light-gold", lighten(t.brandGold, 0.2));
         root.style.setProperty("--color-brand-gold-wash", darken(t.brandGold, 0.05));
 
-        // Body background
-        document.body.style.backgroundColor = t.brandDark;
-
         // Gradient heading support — inject a style tag for gradient text
         let gradientStyle = document.getElementById("atheles-heading-gradient");
         if (!gradientStyle) {

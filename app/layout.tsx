@@ -69,7 +69,7 @@ export default async function RootLayout({
               var st=sessionStorage.getItem("atheles-site-theme");
               if(st){
                 var th=JSON.parse(st),r=document.documentElement;
-                if(th.brandGold){r.style.setProperty("--color-brand-gold",th.brandGold);r.style.setProperty("--color-brand-dark-gold",th.brandDarkGold);r.style.setProperty("--color-brand-dark",th.brandDark);document.body.style.backgroundColor=th.brandDark}
+                if(th.brandGold){r.style.setProperty("--color-brand-gold",th.brandGold);r.style.setProperty("--color-brand-dark-gold",th.brandDarkGold);r.style.setProperty("--color-brand-dark",th.brandDark)}
                 if(th.headingStyle==="gradient"&&th.headingGradientFrom){
                   var gs=document.createElement("style");gs.id="atheles-heading-gradient";
                   gs.textContent=".text-brand-gold,.text-brand-dark-gold,.text-brand-pale-gold,.text-brand-light-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+","+th.headingGradientTo+") !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;background-clip:text !important}.text-brand-dark-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+"99,"+th.headingGradientTo+"99) !important}";
