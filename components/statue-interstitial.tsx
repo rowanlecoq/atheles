@@ -5,7 +5,7 @@ import Image from "next/image";
 
 export function StatueInterstitial() {
   return (
-    <section className="relative flex h-[180px] items-center justify-center overflow-hidden bg-brand-dark sm:h-[220px]">
+    <section className="relative flex h-[180px] items-center justify-center overflow-hidden sm:h-[220px]">
       <Image
         src="/statues/hadrian-cuirassed.jpg"
         alt=""
