@@ -432,8 +432,11 @@ body[data-bg="sunset"] {
   background-attachment: fixed;
 }
 
-/* On touch devices the canvas is disabled, so use scroll attachment — fixed
-   is broken on iOS when zooming/scrolling and causes the gradient to vanish. */
+/* On touch devices use scroll attachment — fixed is broken on iOS when
+   zooming/scrolling and causes the gradient to vanish. Also disable the
+   canvas fade-in animation so the static frame appears at full opacity
+   immediately without any JS state needed (avoids the isTouch useState
+   starting as false and causing a flash on the first render). */
 @media (pointer: coarse) {
   body[data-bg="gold"],
   body[data-bg="water"],
@@ -441,6 +444,10 @@ body[data-bg="sunset"] {
   body[data-bg="midnight"],
   body[data-bg="sunset"] {
     background-attachment: scroll;
+  }
+  .animate-canvas-reveal {
+    animation: none;
+    opacity: 1;
   }
 }
 
