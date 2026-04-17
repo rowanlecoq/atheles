@@ -31,7 +31,7 @@ export default async function Footer() {
   const menu = await getMenu("next-js-frontend-footer-menu");
 
   return (
-    <footer className="animate-footer-enter border-t border-brand-dark-gold/20 bg-brand-dark text-sm text-brand-grey">
+    <footer className="animate-footer-enter border-t border-brand-dark-gold/20 text-sm text-brand-grey">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 md:px-4 min-[1320px]:px-0">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Column 1: Logo + Tagline */}
