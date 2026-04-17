@@ -90,14 +90,14 @@ export function NewsletterSignup() {
   };
 
   return (
-    <section className="relative overflow-hidden border-t border-brand-dark-gold/20 bg-brand-dark py-20">
+    <section className="relative overflow-hidden border-t border-brand-dark-gold/20 py-20">
       <SlideshowMedia
         slotKey="newsletter"
         className="object-cover object-center"
         iframeClass="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] pointer-events-none"
         sizes="100vw"
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/60 via-transparent to-brand-dark/60" />
+      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/40 via-transparent to-brand-dark/40" />
       <div className="relative z-10 mx-auto max-w-2xl px-4 text-center">
         {alreadySubscribed ? (
           <>
