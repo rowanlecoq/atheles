@@ -6,10 +6,20 @@ import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ProfileBackgroundApplier } from "components/profile-background-applier";
-import { ThemeBackgroundCanvas } from "components/theme-background-canvas";
+import dynamic from "next/dynamic";
 import { ScrollProgress } from "components/scroll-progress";
 import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";
+
+// Never SSR the canvas — it's empty in the initial HTML anyway (canvas can only
+// be drawn into by JS), and the empty element's CSS fade-in animation was causing
+// a visible lighting change on mobile even when we skipped drawing.
+// With ssr:false the canvas is absent from the initial HTML entirely; on mobile
+// the component returns null, on desktop it fades in after hydration.
+const ThemeBackgroundCanvas = dynamic(
+  () => import("components/theme-background-canvas").then((m) => m.ThemeBackgroundCanvas),
+  { ssr: false },
+);
 import { getCart } from "lib/shopify";
 import { getSiteImagesData } from "lib/site-images-server";
 import localFont from "next/font/local";

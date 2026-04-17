@@ -159,6 +159,9 @@ function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, outerR:
 }
 
 export function ThemeBackgroundCanvas() {
+  // This component is loaded with next/dynamic ssr:false so window is always
+  // available here. Check touch synchronously — no state, no re-render, no flash.
+  const isTouch = window.matchMedia("(pointer: coarse)").matches;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef<{
     particles: Particle[];
@@ -205,17 +208,8 @@ export function ThemeBackgroundCanvas() {
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
     const state = stateRef.current;
-    // Read matchMedia directly — don't rely on isTouch state which only updates
-    // after paint (useEffect), causing the animated desktop path to briefly run.
-    const isTouchDevice = window.matchMedia("(pointer: coarse)").matches;
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
-
-    // Touch devices: the canvas is server-rendered as an empty transparent element.
-    // The browser paints before JS runs, so any drawing we do here appears AFTER
-    // the initial paint — visible as a lighting change. Skip all drawing on touch
-    // so the CSS gradient is the sole background with no transition.
-    if (isTouchDevice) return;
 
     // Animated path (desktop)
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -330,7 +324,7 @@ export function ThemeBackgroundCanvas() {
     };
   }, [prefersReducedMotion, buildParticles]);
 
-  if (prefersReducedMotion) return null;
+  if (prefersReducedMotion || isTouch) return null;
 
   return (
     <canvas
