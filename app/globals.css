@@ -105,6 +105,7 @@ body {
   background-color: var(--color-brand-dark);
   color: #ffffff;
   min-width: 320px;
+  min-height: 100dvh;
   width: 100%;
   overflow-x: hidden;
   text-transform: lowercase;
@@ -454,6 +455,7 @@ body[data-bg="sunset"] {
   body[data-bg="midnight"],
   body[data-bg="sunset"] {
     background-attachment: scroll;
+    background-size: 100% 100%;
   }
   .animate-canvas-reveal {
     animation: none;
