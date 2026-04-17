@@ -211,47 +211,11 @@ export function ThemeBackgroundCanvas() {
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
 
-    const drawStatic = () => {
-      const theme = getTheme();
-      if (theme !== state.theme) {
-        state.theme = theme;
-        state.particles = theme && theme in THEMES
-          ? buildParticles(theme as ThemeKey, canvas.width, canvas.height)
-          : [];
-      }
-      const w = canvas.width;
-      const h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
-      if (state.particles.length === 0) return;
-      drawRays(ctx, w, h, theme as ThemeKey, 0.5);
-      for (const p of state.particles) {
-        const [r, g, b] = p.color;
-        ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha.toFixed(3)})`;
-        if (p.isStar) {
-          drawStar(ctx, p.x, p.y, p.r, p.rotation);
-        } else {
-          ctx.beginPath();
-          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
-        }
-        ctx.fill();
-      }
-    };
-
-    // Touch devices: draw a single static frame — all the visual detail with
-    // none of the RAF loop that conflicts with iOS scroll and zoom.
-    if (isTouchDevice) {
-      canvas.width = window.innerWidth;
-      canvas.height = window.innerHeight;
-      drawStatic();
-      const onBgChange = () => {
-        state.theme = null; // force re-build on next draw
-        canvas.width = window.innerWidth;
-        canvas.height = window.innerHeight;
-        drawStatic();
-      };
-      window.addEventListener("atheles-bg-change", onBgChange);
-      return () => window.removeEventListener("atheles-bg-change", onBgChange);
-    }
+    // Touch devices: the canvas is server-rendered as an empty transparent element.
+    // The browser paints before JS runs, so any drawing we do here appears AFTER
+    // the initial paint — visible as a lighting change. Skip all drawing on touch
+    // so the CSS gradient is the sole background with no transition.
+    if (isTouchDevice) return;
 
     // Animated path (desktop)
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
