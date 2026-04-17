@@ -173,9 +173,10 @@ export function ThemeBackgroundCanvas() {
 
   const buildParticles = useCallback((key: ThemeKey, w: number, h: number): Particle[] => {
     const cfg = THEMES[key];
+    const count = isTouch ? Math.round(cfg.count * 0.5) : cfg.count;
     // Use Math.round (not ceil) so cols*rows ≈ count with no partial last row
-    const cols = Math.max(1, Math.round(Math.sqrt(cfg.count * (w / h))));
-    const rows = Math.max(1, Math.round(cfg.count / cols));
+    const cols = Math.max(1, Math.round(Math.sqrt(count * (w / h))));
+    const rows = Math.max(1, Math.round(count / cols));
     const total = cols * rows; // exact fill — no sparse last row
     const cellW = w / cols;
     const cellH = h / rows;
@@ -324,7 +325,7 @@ export function ThemeBackgroundCanvas() {
     };
   }, [prefersReducedMotion, buildParticles]);
 
-  if (prefersReducedMotion || isTouch) return null;
+  if (prefersReducedMotion) return null;
 
   return (
     <canvas
