@@ -442,6 +442,20 @@ body[data-bg="sunset"] {
   animation: canvas-reveal 0.8s ease 0.05s both;
 }
 
+/* Transform-only animation variants for mobile (no opacity changes = no flash) */
+@keyframes fade-in-mobile {
+  from { transform: translateY(6px); }
+  to { transform: translateY(0); }
+}
+@keyframes slide-up-mobile {
+  from { transform: translateY(8px); }
+  to { transform: translateY(0); }
+}
+@keyframes footer-enter-mobile {
+  from { transform: translateY(10px); }
+  to { transform: translateY(0); }
+}
+
 /* On touch devices use scroll attachment — fixed is broken on iOS when
    zooming/scrolling and causes the gradient to vanish. Also disable the
    canvas fade-in animation so the static frame appears at full opacity
@@ -464,18 +478,24 @@ body[data-bg="sunset"] {
   .animate-navbar-enter {
     animation: none;
   }
-  /* Opacity-based content animations: on mobile, content starts at opacity:0
-     then fades in after React hydrates. The gap between SSR paint and
-     hydration makes the gradient visible then suddenly covered — looks like
-     a lighting switch. Show content immediately on mobile instead. */
-  .animate-fade-in,
-  .animate-slide-up,
-  .animate-slide-up-delay,
-  .animate-footer-enter,
+  /* Replace opacity-based animations with transform-only equivalents.
+     Opacity: 0 start states cause a brightness flash on mobile (SSR paints
+     content visible, then CSS kicks in and snaps to invisible). Using only
+     translateY keeps content at opacity:1 throughout — no flash, still polished. */
+  .animate-fade-in {
+    animation: fade-in-mobile 0.6s ease both;
+  }
+  .animate-slide-up {
+    animation: slide-up-mobile 0.5s cubic-bezier(0.22, 1, 0.36, 1) both;
+  }
+  .animate-slide-up-delay {
+    animation: slide-up-mobile 0.55s cubic-bezier(0.22, 1, 0.36, 1) 0.08s both;
+  }
+  .animate-footer-enter {
+    animation: footer-enter-mobile 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) both;
+  }
   .animate-hero-section-enter {
-    animation: none;
-    opacity: 1;
-    transform: none;
+    animation: hero-section-enter 0.7s cubic-bezier(0.22, 1, 0.36, 1) both;
   }
 }
 
