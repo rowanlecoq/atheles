@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useCallback, useLayoutEffect, useRef } from "react";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 
 type Particle = {
@@ -167,13 +167,6 @@ export function ThemeBackgroundCanvas() {
     time: number;
   }>({ particles: [], animId: 0, theme: null, time: 0 });
   const prefersReducedMotion = useReducedMotion();
-  // isTouch state is only used for the className — the useLayoutEffect checks
-  // matchMedia directly so the correct draw path runs from the very first layout,
-  // without waiting for this useEffect to fire after paint.
-  const [isTouch, setIsTouch] = useState(false);
-  useEffect(() => {
-    setIsTouch(window.matchMedia("(pointer: coarse)").matches);
-  }, []);
 
   const buildParticles = useCallback((key: ThemeKey, w: number, h: number): Particle[] => {
     const cfg = THEMES[key];
@@ -379,7 +372,7 @@ export function ThemeBackgroundCanvas() {
     <canvas
       ref={canvasRef}
       aria-hidden="true"
-      className={`pointer-events-none fixed inset-0${isTouch ? "" : " animate-canvas-reveal"}`}
+      className="pointer-events-none fixed inset-0 animate-canvas-reveal"
       style={{ zIndex: 0 }}
     />
   );
