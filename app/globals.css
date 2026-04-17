@@ -459,6 +459,11 @@ body[data-bg="sunset"] {
     animation: none;
     opacity: 1;
   }
+  /* Navbar slide-in covers the gradient on mobile — disable it so the
+     dark bar doesn't sweep over the background and look like a brightness shift. */
+  .animate-navbar-enter {
+    animation: none;
+  }
 }
 
 .animate-beta-pulse {
