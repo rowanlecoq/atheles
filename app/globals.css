@@ -464,6 +464,19 @@ body[data-bg="sunset"] {
   .animate-navbar-enter {
     animation: none;
   }
+  /* Opacity-based content animations: on mobile, content starts at opacity:0
+     then fades in after React hydrates. The gap between SSR paint and
+     hydration makes the gradient visible then suddenly covered — looks like
+     a lighting switch. Show content immediately on mobile instead. */
+  .animate-fade-in,
+  .animate-slide-up,
+  .animate-slide-up-delay,
+  .animate-footer-enter,
+  .animate-hero-section-enter {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }
 
 .animate-beta-pulse {

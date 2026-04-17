@@ -66,7 +66,7 @@ export default async function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `try{
-              var st=sessionStorage.getItem("atheles-site-theme");
+              var st=localStorage.getItem("atheles-site-theme");
               if(st){
                 var th=JSON.parse(st),r=document.documentElement;
                 if(th.brandGold){r.style.setProperty("--color-brand-gold",th.brandGold);r.style.setProperty("--color-brand-dark-gold",th.brandDarkGold);r.style.setProperty("--color-brand-dark",th.brandDark)}

@@ -86,7 +86,7 @@ export function SiteThemeProvider() {
 
         // Store for logo component
         try {
-          sessionStorage.setItem("atheles-site-theme", JSON.stringify(t));
+          localStorage.setItem("atheles-site-theme", JSON.stringify(t));
         } catch {}
       })
       .catch(() => {});
