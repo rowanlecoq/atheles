@@ -432,6 +432,16 @@ body[data-bg="sunset"] {
   background-attachment: fixed;
 }
 
+/* Canvas fade-in: particles appear gradually instead of popping on at full
+   brightness after React hydration, which looked like a jarring flash. */
+@keyframes canvas-reveal {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-canvas-reveal {
+  animation: canvas-reveal 0.8s ease 0.05s both;
+}
+
 /* On touch devices use scroll attachment — fixed is broken on iOS when
    zooming/scrolling and causes the gradient to vanish. Also disable the
    canvas fade-in animation so the static frame appears at full opacity
@@ -449,31 +459,6 @@ body[data-bg="sunset"] {
     animation: none;
     opacity: 1;
   }
-}
-
-/* Announcement bar transparent when theme active — shows the same gradient as body. */
-body[data-bg] .announcement-bar-root {
-  background-color: transparent !important;
-}
-
-/* main has no background-color — body/canvas show through on all pages.
-   Canvas draws nothing when no theme is active (empty particle array),
-   so unthemed pages naturally show only the body dark background. */
-
-/* Profile hero text — lift secondary text to white so it reads on any
-   coloured background without adding a visible box */
-body[data-bg] .profile-hero-text p {
-  color: rgba(255, 255, 255, 0.65);
-}
-
-/* Canvas fade-in: particles appear gradually instead of popping on at full
-   brightness after React hydration, which looked like a jarring flash. */
-@keyframes canvas-reveal {
-  from { opacity: 0; }
-  to   { opacity: 1; }
-}
-.animate-canvas-reveal {
-  animation: canvas-reveal 0.8s ease 0.05s both;
 }
 
 .animate-beta-pulse {
