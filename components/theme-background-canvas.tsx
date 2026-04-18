@@ -286,7 +286,11 @@ export function ThemeBackgroundCanvas() {
     let lastH = 0;
     const resize = () => {
       const newW = document.documentElement.clientWidth;
-      const newH = document.documentElement.clientHeight;
+      // Use max of innerHeight and clientHeight: clientHeight is the layout
+      // viewport (stable during pinch-zoom), innerHeight is the visual viewport
+      // (grows when the iOS URL bar hides). Taking the max ensures the canvas
+      // always covers the full visual viewport without resizing during pinch-zoom.
+      const newH = Math.max(window.innerHeight, document.documentElement.clientHeight);
       if (firstResize) {
         canvas.width = newW;
         canvas.height = newH;
@@ -322,13 +326,12 @@ export function ThemeBackgroundCanvas() {
       const w = canvas.width;
       const h = canvas.height;
 
-      if (isTouch && theme && theme in THEMES) {
-        // Mobile: canvas is the single background layer — draw gradient + particles.
+      if (theme && theme in THEMES) {
+        // Canvas is the single background layer on all devices — draw gradient
+        // + particles together so there is never a separate CSS layer fighting it.
         drawGradientBg(ctx, w, h, theme as ThemeKey);
       } else {
-        // Desktop: canvas is transparent; CSS body gradient shows through.
         ctx.clearRect(0, 0, w, h);
-        if (state.particles.length === 0) return;
       }
 
       if (state.particles.length === 0) return;
