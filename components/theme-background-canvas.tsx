@@ -119,15 +119,16 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
   ]},
   sunset: { base: '#0e0206', radial: [
     [0.50, 1.00, 1.00, 0.50, 249, 115,  22, 0.45, 0.60],  // orange bottom
-    [0.75, 0.25, 0.65, 0.55, 255,  80, 150, 0.55, 0.60],  // hot pink upper-right
-    [0.20, 0.40, 0.60, 0.55, 219,  39, 119, 0.48, 0.55],  // deep pink upper-left
-    [0.80, 0.70, 0.55, 0.55, 255, 100, 160, 0.40, 0.55],  // pink lower-right
-    [0.50, 0.55, 1.00, 0.30, 249, 115,  22, 0.28, 0.55],  // orange center wash
+    [0.20, 0.12, 0.55, 0.52, 147,  51, 234, 0.50, 0.60],  // violet upper-left
+    [0.78, 0.28, 0.65, 0.55, 255,  80, 150, 0.52, 0.60],  // hot pink upper-right
+    [0.15, 0.52, 0.60, 0.55, 219,  39, 119, 0.44, 0.55],  // deep pink mid-left
+    [0.80, 0.68, 0.55, 0.55, 255, 100, 160, 0.36, 0.55],  // pink lower-right
+    [0.50, 0.55, 1.00, 0.28, 249, 115,  22, 0.26, 0.55],  // orange center wash
   ], linear: [
-    [219,  39, 119, 0.30, 0.00],  // deep pink at top
-    [255,  80, 150, 0.24, 0.30],  // hot pink upper-mid
-    [249, 115,  22, 0.28, 0.65],  // orange lower
-    [251, 146,  60, 0.22, 1.00],  // amber bottom
+    [147,  51, 234, 0.28, 0.00],  // violet at top
+    [147,  51, 234, 0.00, 0.35],  // fade to transparent
+    [249, 115,  22, 0.00, 0.68],  // transparent
+    [249, 115,  22, 0.24, 1.00],  // orange at bottom
   ]},
 };
 
@@ -241,7 +242,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       const stripH  = 28 + i * 7;
       const opacity = 0.048 + i * 0.010;
       const cy = h * (0.06 + i * 0.16) + Math.sin(time * 0.28 + i * 1.3) * 14;
-      const rgb = i % 2 === 0 ? "255,80,150" : "255,130,60";
+      const rgb = i % 3 === 0 ? "147,51,234" : i % 3 === 1 ? "255,80,150" : "255,130,60";
       drawBeam(ctx, w, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,

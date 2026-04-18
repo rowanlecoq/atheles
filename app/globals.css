@@ -435,14 +435,15 @@ body[data-bg="midnight"] {
   background-attachment: fixed;
 }
 
-/* Sunset — hot pink upper, orange lower, warm rays */
+/* Sunset — violet upper, pink middle, orange lower */
 body[data-bg="sunset"] {
   --theme-gradient:
-    linear-gradient(180deg, rgba(219, 39, 119, 0.30) 0%, rgba(255, 80, 150, 0.24) 30%, rgba(249, 115, 22, 0.28) 65%, rgba(251, 146, 60, 0.22) 100%),
-    radial-gradient(ellipse 130% 110% at 75% 25%,  rgba(255,  80, 150, 0.55) 0%, transparent 60%),
-    radial-gradient(ellipse 120% 110% at 20% 40%,  rgba(219,  39, 119, 0.48) 0%, transparent 55%),
-    radial-gradient(ellipse 110% 110% at 80% 70%,  rgba(255, 100, 160, 0.40) 0%, transparent 55%),
-    radial-gradient(ellipse 200%  55% at 50% 55%,  rgba(249, 115,  22, 0.28) 0%, transparent 55%),
+    linear-gradient(180deg, rgba(147, 51, 234, 0.28) 0%, transparent 35%, transparent 68%, rgba(249, 115, 22, 0.24) 100%),
+    radial-gradient(ellipse 110% 104% at 20% 12%,  rgba(147,  51, 234, 0.50) 0%, transparent 60%),
+    radial-gradient(ellipse 130% 110% at 78% 28%,  rgba(255,  80, 150, 0.52) 0%, transparent 60%),
+    radial-gradient(ellipse 120% 110% at 15% 52%,  rgba(219,  39, 119, 0.44) 0%, transparent 55%),
+    radial-gradient(ellipse 110% 110% at 80% 68%,  rgba(255, 100, 160, 0.36) 0%, transparent 55%),
+    radial-gradient(ellipse 200%  56% at 50% 55%,  rgba(249, 115,  22, 0.26) 0%, transparent 55%),
     radial-gradient(ellipse 200% 100% at 50% 100%, rgba(249, 115,  22, 0.45) 0%, transparent 60%),
     #0e0206;
   background: var(--theme-gradient);
