@@ -55,19 +55,93 @@ const THEMES = {
 
 type ThemeKey = keyof typeof THEMES;
 
+// Mobile gradient background data — mirrors CSS --theme-gradient values.
+// On touch devices the canvas paints its own background so there is a single
+// composited layer instead of a CSS div + canvas fighting each other.
+//
+// Layers are listed bottom-to-top (reverse of CSS stack order).
+// Radial entry: [cx, cy, rx, ry,  r,   g,   b,   alpha, fadeStop]
+//   cx/cy = center as fraction of canvas w/h
+//   rx/ry = half-radii as fractions (CSS size 140% → rx = 0.70)
+//   fadeStop = gradient stop where color reaches 0 (matches "transparent N%")
+type RLayer = readonly [number,number,number,number,number,number,number,number,number];
+type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
+const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
+  gold: { base: '#110e04', radial: [
+    [0.50, 1.00, 1.00, 0.50, 180, 140,  60, 0.40, 0.60],
+    [0.60, 0.30, 0.65, 0.50, 220, 200, 140, 0.16, 0.55],
+    [0.50, 0.50, 0.55, 0.55, 220, 200, 140, 0.18, 0.55],
+    [0.70, 0.65, 0.60, 0.70, 180, 140,  60, 0.26, 0.60],
+    [0.30, 0.35, 0.70, 0.60, 193, 163, 104, 0.34, 0.60],
+  ]},
+  water: { base: '#020a10', radial: [
+    [0.50, 1.00, 1.00, 0.50,  20, 100, 200, 0.40, 0.60],
+    [0.15, 0.75, 0.65, 0.50,   0, 160, 200, 0.16, 0.55],
+    [0.50, 0.50, 0.55, 0.55,  40, 210, 240, 0.18, 0.55],
+    [0.70, 0.65, 0.60, 0.70,  20, 100, 200, 0.26, 0.60],
+    [0.30, 0.35, 0.70, 0.60,  30, 180, 220, 0.30, 0.60],
+  ]},
+  // Tropical — brighter values so emerald/amber read clearly on mobile
+  tropical: { base: '#020b05', radial: [
+    [0.50, 1.00, 1.00, 0.50,  16, 185, 129, 0.50, 0.60],
+    [0.80, 0.80, 0.65, 0.50, 250, 180,  50, 0.30, 0.55],
+    [0.50, 0.50, 0.55, 0.55,  20, 200, 160, 0.38, 0.55],
+    [0.75, 0.25, 0.60, 0.70, 245, 158,  11, 0.55, 0.60],
+    [0.25, 0.70, 0.70, 0.60,  16, 185, 129, 0.70, 0.60],
+  ]},
+  // Midnight — shifted to richer violet/indigo so it reads as purple not just black
+  midnight: { base: '#04000a', radial: [
+    [0.50, 1.00, 1.00, 0.50,  70,  50, 200, 0.50, 0.60],
+    [0.20, 0.05, 0.45, 0.40, 100,  30, 200, 0.45, 0.55],
+    [0.50, 0.50, 0.55, 0.55, 110,  60, 240, 0.42, 0.55],
+    [0.70, 0.65, 0.60, 0.70,  80,  80, 220, 0.55, 0.60],
+    [0.30, 0.35, 0.70, 0.60,  50,  30, 140, 0.70, 0.60],
+  ]},
+  sunset: { base: '#0e0206', radial: [
+    [0.50, 1.00, 1.00, 0.50, 249, 115,  22, 0.35, 0.60],
+    [0.80, 0.70, 0.55, 0.55, 219,  39, 119, 0.19, 0.55],
+    [0.20, 0.30, 0.55, 0.55, 147,  51, 234, 0.19, 0.55],
+    [0.50, 0.55, 1.00, 0.25, 249, 115,  22, 0.23, 0.55],
+  ], linear: [
+    [147,  51, 234, 0.22, 0.00],
+    [219,  39, 119, 0.19, 0.30],
+    [249, 115,  22, 0.27, 0.60],
+    [251, 146,  60, 0.25, 1.00],
+  ]},
+};
+
+// Draw the theme gradient directly onto the canvas (used on mobile so the
+// gradient + particles are a single composited layer with no CSS overlay fighting it).
+function drawGradientBg(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey) {
+  const T = MOBILE_BG[theme];
+  ctx.fillStyle = T.base;
+  ctx.fillRect(0, 0, w, h);
+  for (const [cx, cy, rx, ry, r, g, b, a, fade] of T.radial) {
+    const px = cx * w, py = cy * h;
+    const prx = rx * w, pry = ry * h;
+    ctx.save();
+    ctx.translate(px, py);
+    ctx.scale(prx, pry);
+    const gr = ctx.createRadialGradient(0, 0, 0, 0, 0, 1);
+    gr.addColorStop(0,    `rgba(${r},${g},${b},${a})`);
+    gr.addColorStop(fade, `rgba(${r},${g},${b},0)`);
+    if (fade < 1) gr.addColorStop(1, `rgba(${r},${g},${b},0)`);
+    ctx.fillStyle = gr;
+    ctx.fillRect(-1, -1, 2, 2);
+    ctx.restore();
+  }
+  if (T.linear) {
+    const lg = ctx.createLinearGradient(0, 0, 0, h);
+    for (const [r, g, b, a, pos] of T.linear) lg.addColorStop(pos, `rgba(${r},${g},${b},${a})`);
+    ctx.fillStyle = lg;
+    ctx.fillRect(0, 0, w, h);
+  }
+}
+
 // Diagonal light rays — water caustics for ocean, sun rays for tropical.
-//
-// Each ray is a SINGLE very wide strip (180–300 px) at very low opacity.
-// Adjacent strips overlap, blending into each other rather than appearing
-// as distinct bands. The result is atmospheric diagonal tinting, not lines.
-//
-// ctx.filter blur is applied on supporting browsers (Chrome 47+, Safari 18+,
-// FF 49+) for extra softness. On older iOS Safari (no ctx.filter) the wide
-// overlapping strips already look hazy and diffuse at these low opacities.
-// Gaussian-like weights for 7-pass blur simulation on mobile.
 const BLUR_OFFSETS  = [-18, -12, -6,  0,  6, 12, 18] as const;
 const BLUR_WEIGHTS  = [0.25, 0.55, 0.82, 1.0, 0.82, 0.55, 0.25] as const;
-const BLUR_WEIGHT_SUM = BLUR_WEIGHTS.reduce((s, w) => s + w, 0); // ≈ 4.24
+const BLUR_WEIGHT_SUM = BLUR_WEIGHTS.reduce((s, w) => s + w, 0);
 
 function drawBeam(
   ctx: CanvasRenderingContext2D,
@@ -91,9 +165,6 @@ function drawBeam(
     ctx.fillRect(-w * 1.5, -stripH / 2, w * 3, stripH);
     ctx.restore();
   } else {
-    // Stack 7 thin strips at Gaussian-weighted offsets to simulate blur.
-    // Each strip contributes (weight / weightSum) of the total opacity so
-    // the centre — where all strips overlap — equals the target opacity.
     for (let p = 0; p < 7; p++) {
       const o = opacity * (BLUR_WEIGHTS[p]! / BLUR_WEIGHT_SUM);
       ctx.save();
@@ -119,7 +190,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   if (theme === "water") {
     for (let i = 0; i < 8; i++) {
       const angle   = (-10 + i * 3) * (Math.PI / 180);
-      const stripH  = 30 + (i % 4) * 10;   // 30–60 px — narrow
+      const stripH  = 30 + (i % 4) * 10;
       const opacity = 0.055 + (i % 3) * 0.018;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
       drawBeam(ctx, w, cy, angle, stripH, opacity,
@@ -132,7 +203,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   if (theme === "tropical") {
     for (let i = 0; i < 5; i++) {
       const angle   = (25 + i * 3) * (Math.PI / 180);
-      const stripH  = 30 + i * 10;          // 30–70 px
+      const stripH  = 30 + i * 10;
       const opacity = 0.060 + i * 0.015;
       const cy = h * (0.08 + i * 0.18) + Math.sin(time * 0.35 + i * 1.5) * 15;
       const rgb = i % 2 === 1 ? "245,158,11" : "16,185,129";
@@ -159,8 +230,6 @@ function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, outerR:
 }
 
 export function ThemeBackgroundCanvas() {
-  // This component is loaded with next/dynamic ssr:false so window is always
-  // available here. Check touch synchronously — no state, no re-render, no flash.
   const isTouch = window.matchMedia("(pointer: coarse)").matches;
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const stateRef = useRef<{
@@ -174,10 +243,9 @@ export function ThemeBackgroundCanvas() {
   const buildParticles = useCallback((key: ThemeKey, w: number, h: number): Particle[] => {
     const cfg = THEMES[key];
     const count = isTouch ? Math.round(cfg.count * 0.5) : cfg.count;
-    // Use Math.round (not ceil) so cols*rows ≈ count with no partial last row
     const cols = Math.max(1, Math.round(Math.sqrt(count * (w / h))));
     const rows = Math.max(1, Math.round(count / cols));
-    const total = cols * rows; // exact fill — no sparse last row
+    const total = cols * rows;
     const cellW = w / cols;
     const cellH = h / rows;
     return Array.from({ length: total }, (_, i) => {
@@ -200,7 +268,7 @@ export function ThemeBackgroundCanvas() {
         phase: Math.random() * Math.PI * 2,
       };
     });
-  }, []);
+  }, [isTouch]);
 
   useLayoutEffect(() => {
     if (prefersReducedMotion) return;
@@ -212,7 +280,6 @@ export function ThemeBackgroundCanvas() {
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
 
-    // Animated path (desktop)
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     let firstResize = true;
     let lastW = 0;
@@ -220,15 +287,11 @@ export function ThemeBackgroundCanvas() {
     const resize = () => {
       const newW = window.innerWidth;
       const newH = window.innerHeight;
-      // Initial call: set dimensions and bail — prime draw handles first particle build.
       if (firstResize) {
         canvas.width = newW;
         canvas.height = newH;
         firstResize = false; lastW = newW; lastH = newH; return;
       }
-      // Delta check BEFORE touching canvas dimensions. Setting canvas.width/height
-      // always clears the canvas even when the value is unchanged — so iOS address-bar
-      // show/hide (±50px height change) was blanking the canvas every scroll event.
       const wDelta = Math.abs(newW - lastW);
       const hDelta = Math.abs(newH - lastH);
       if (wDelta < 30 && hDelta < 150) return;
@@ -246,9 +309,6 @@ export function ThemeBackgroundCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    // Rendering logic separated from loop scheduling so it can be called once
-    // synchronously (prime draw) before the browser's first paint, eliminating
-    // the brief flash where the canvas is blank.
     const renderFrame = () => {
       const theme = getTheme();
 
@@ -261,7 +321,16 @@ export function ThemeBackgroundCanvas() {
 
       const w = canvas.width;
       const h = canvas.height;
-      ctx.clearRect(0, 0, w, h);
+
+      if (isTouch && theme && theme in THEMES) {
+        // Mobile: canvas is the single background layer — draw gradient + particles.
+        drawGradientBg(ctx, w, h, theme as ThemeKey);
+      } else {
+        // Desktop: canvas is transparent; CSS body gradient shows through.
+        ctx.clearRect(0, 0, w, h);
+        if (state.particles.length === 0) return;
+      }
+
       if (state.particles.length === 0) return;
 
       state.time += 0.007;
@@ -301,14 +370,11 @@ export function ThemeBackgroundCanvas() {
       renderFrame();
     };
 
-    // Prime the canvas synchronously — fires before first browser paint so there
-    // is never a frame where the canvas is blank on top of the CSS gradient.
     renderFrame();
     state.animId = requestAnimationFrame(loop);
 
     const onBgChange = () => {
       const t = getTheme();
-      // Skip expensive particle rebuild if theme hasn't actually changed
       if (t === state.theme) return;
       state.theme = t;
       state.particles = t && t in THEMES
@@ -321,19 +387,18 @@ export function ThemeBackgroundCanvas() {
       cancelAnimationFrame(state.animId);
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener("resize", resize);
-      window.visualViewport?.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
     };
-  }, [prefersReducedMotion, buildParticles]);
+  }, [prefersReducedMotion, isTouch, buildParticles]);
 
-  if (prefersReducedMotion || isTouch) return null;
+  if (prefersReducedMotion) return null;
 
   return (
     <canvas
       ref={canvasRef}
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 animate-canvas-reveal"
-      style={{ zIndex: 0 }}
+      style={{ zIndex: 0, willChange: "transform" }}
     />
   );
 }
