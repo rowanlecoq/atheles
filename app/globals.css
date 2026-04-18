@@ -497,10 +497,13 @@ body[data-bg] .announcement-bar-root {
 }
 
 /* Mobile gradient overlay — painted by ThemeGradientOverlay React component on
-   touch devices so it always tracks the visual viewport (incl. pinch-zoom). */
-body[data-bg="gold"]    .theme-gradient-overlay { background: var(--theme-gradient); }
-body[data-bg="water"]   .theme-gradient-overlay { background: var(--theme-gradient); }
-body[data-bg="tropical"].theme-gradient-overlay { background: var(--theme-gradient); }
-body[data-bg="midnight"].theme-gradient-overlay { background: var(--theme-gradient); }
-body[data-bg="sunset"]  .theme-gradient-overlay { background: var(--theme-gradient); }
+   touch devices so it always tracks the visual viewport (incl. pinch-zoom).
+   Scoped to pointer:coarse so it doesn't double the gradient on desktop. */
+@media (pointer: coarse) {
+  body[data-bg="gold"]    .theme-gradient-overlay { background: var(--theme-gradient); }
+  body[data-bg="water"]   .theme-gradient-overlay { background: var(--theme-gradient); }
+  body[data-bg="tropical"].theme-gradient-overlay { background: var(--theme-gradient); }
+  body[data-bg="midnight"].theme-gradient-overlay { background: var(--theme-gradient); }
+  body[data-bg="sunset"]  .theme-gradient-overlay { background: var(--theme-gradient); }
+}
 
