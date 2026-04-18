@@ -504,6 +504,12 @@ body[data-bg] .announcement-bar-root {
   background-color: transparent !important;
 }
 
+/* Hero, newsletter, and quote sections transparent when theme active —
+   lets the gradient canvas show through instead of the solid dark backgrounds. */
+body[data-bg] .theme-section {
+  background-color: transparent;
+}
+
 /* Gradient overlay div — force onto its own GPU compositing layer so iOS
    doesn't drop or stutter it during scroll. The actual gradient is only
    applied on touch/mobile via the media query below. */
