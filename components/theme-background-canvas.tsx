@@ -285,8 +285,8 @@ export function ThemeBackgroundCanvas() {
     let lastW = 0;
     let lastH = 0;
     const resize = () => {
-      const newW = window.innerWidth;
-      const newH = window.innerHeight;
+      const newW = document.documentElement.clientWidth;
+      const newH = document.documentElement.clientHeight;
       if (firstResize) {
         canvas.width = newW;
         canvas.height = newH;
