@@ -362,10 +362,14 @@ export function ThemeBackgroundCanvas() {
       const w = canvas.width;
       const h = canvas.height;
 
-      // CSS body gradient handles the background on all devices
-      // (background-attachment:fixed on desktop, scroll on mobile).
-      // Canvas is transparent — only particles and rays are drawn here.
-      ctx.clearRect(0, 0, w, h);
+      if (!isTouch && theme && theme in THEMES) {
+        // Desktop: canvas is the gradient layer (covers the CSS body gradient).
+        drawGradientBg(ctx, w, h, theme as ThemeKey);
+      } else {
+        // Mobile: CSS body gradient (scroll-attached) covers the full document.
+        // Canvas is transparent here — only particles are drawn on top.
+        ctx.clearRect(0, 0, w, h);
+      }
 
       if (state.particles.length === 0) return;
 
