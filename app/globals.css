@@ -407,10 +407,10 @@ body[data-bg="water"] {
 /* Tropical — emerald lower-left, amber upper-right, teal shimmer */
 body[data-bg="tropical"] {
   --theme-gradient:
-    radial-gradient(ellipse 140% 120% at 25% 70%,  rgba( 16, 185, 129, 0.32) 0%, transparent 60%),
-    radial-gradient(ellipse 120% 140% at 75% 25%,  rgba(245, 158,  11, 0.24) 0%, transparent 60%),
-    radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 20, 200, 160, 0.16) 0%, transparent 55%),
-    radial-gradient(ellipse 130% 100% at 80% 80%,  rgba(250, 180,  50, 0.13) 0%, transparent 55%),
+    radial-gradient(ellipse 140% 120% at 25% 70%,  rgba( 16, 185, 129, 0.52) 0%, transparent 60%),
+    radial-gradient(ellipse 120% 140% at 75% 25%,  rgba(245, 158,  11, 0.40) 0%, transparent 60%),
+    radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 20, 200, 160, 0.28) 0%, transparent 55%),
+    radial-gradient(ellipse 130% 100% at 80% 80%,  rgba(250, 180,  50, 0.22) 0%, transparent 55%),
     radial-gradient(ellipse 180%  70% at 50% 100%, rgba( 16, 185, 129, 0.20) 0%, transparent 65%),
     #020b05;
   background: var(--theme-gradient);
@@ -420,10 +420,10 @@ body[data-bg="tropical"] {
 /* Midnight — deep indigo upper-left, violet lower-right */
 body[data-bg="midnight"] {
   --theme-gradient:
-    radial-gradient(ellipse 140% 120% at 30% 35%,  rgba( 30,  30,  80, 0.42) 0%, transparent 60%),
-    radial-gradient(ellipse 120% 140% at 70% 65%,  rgba( 60,  60, 160, 0.28) 0%, transparent 60%),
-    radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 90,  50, 200, 0.18) 0%, transparent 55%),
-    radial-gradient(ellipse  90%  80% at 20%  5%,  rgba( 80,  20, 160, 0.22) 0%, transparent 55%),
+    radial-gradient(ellipse 140% 120% at 30% 35%,  rgba( 30,  30,  80, 0.65) 0%, transparent 60%),
+    radial-gradient(ellipse 120% 140% at 70% 65%,  rgba( 60,  60, 160, 0.44) 0%, transparent 60%),
+    radial-gradient(ellipse 110% 110% at 50% 50%,  rgba( 90,  50, 200, 0.30) 0%, transparent 55%),
+    radial-gradient(ellipse  90%  80% at 20%  5%,  rgba( 80,  20, 160, 0.35) 0%, transparent 55%),
     radial-gradient(ellipse 180%  70% at 50% 100%, rgba( 60,  60, 160, 0.24) 0%, transparent 65%),
     #04000a;
   background: var(--theme-gradient);
