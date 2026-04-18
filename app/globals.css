@@ -504,6 +504,11 @@ body[data-bg] .announcement-bar-root {
   background-color: transparent !important;
 }
 
+/* Footer transparent when theme active — lets gradient extend to bottom of page. */
+body[data-bg] footer {
+  background-color: transparent;
+}
+
 /* Gradient overlay div — force onto its own GPU compositing layer so iOS
    doesn't drop or stutter it during scroll. The actual gradient is only
    applied on touch/mobile via the media query below. */
