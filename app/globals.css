@@ -460,16 +460,17 @@ body[data-bg="sunset"] {
   animation: canvas-reveal 0.8s ease 0.05s both;
 }
 
-/* On touch devices, background-attachment:fixed is broken on iOS Safari.
-   The JS ThemeGradientOverlay component renders a fixed <div> instead,
-   which correctly tracks the visual viewport including on pinch-zoom. */
+/* On touch devices, background-attachment:fixed is broken on iOS Safari —
+   the gradient jumps or disappears during scroll/zoom. Switch to scroll so
+   the gradient covers the full document height and scrolls naturally with
+   the page. The canvas handles particles on top. */
 @media (pointer: coarse) {
   body[data-bg="gold"],
   body[data-bg="water"],
   body[data-bg="tropical"],
   body[data-bg="midnight"],
   body[data-bg="sunset"] {
-    background-image: none;
+    background-attachment: scroll;
   }
   .animate-canvas-reveal {
     animation: none;
