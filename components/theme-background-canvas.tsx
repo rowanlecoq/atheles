@@ -73,11 +73,6 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.50, 0.50, 0.55, 0.55, 220, 200, 140, 0.18, 0.55],
     [0.70, 0.65, 0.60, 0.70, 180, 140,  60, 0.26, 0.60],
     [0.30, 0.35, 0.70, 0.60, 193, 163, 104, 0.34, 0.60],
-  ], linear: [
-    [193, 163, 104, 0.22, 0.00],
-    [193, 163, 104, 0.00, 0.35],
-    [180, 140,  60, 0.00, 0.68],
-    [180, 140,  60, 0.20, 1.00],
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.00, 1.00, 0.50,  20, 100, 200, 0.40, 0.60],
@@ -85,37 +80,20 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.50, 0.50, 0.55, 0.55,  40, 210, 240, 0.18, 0.55],
     [0.70, 0.65, 0.60, 0.70,  20, 100, 200, 0.26, 0.60],
     [0.30, 0.35, 0.70, 0.60,  30, 180, 220, 0.30, 0.60],
-  ], linear: [
-    [ 30, 100, 200, 0.22, 0.00],
-    [ 30, 100, 200, 0.00, 0.35],
-    [ 20, 100, 200, 0.00, 0.68],
-    [ 20, 100, 200, 0.22, 1.00],
   ]},
-  // Tropical — brighter values so emerald/amber read clearly on mobile
   tropical: { base: '#020b05', radial: [
     [0.50, 1.00, 1.00, 0.50,  16, 185, 129, 0.50, 0.60],
     [0.80, 0.80, 0.65, 0.50, 250, 180,  50, 0.30, 0.55],
     [0.50, 0.50, 0.55, 0.55,  20, 200, 160, 0.38, 0.55],
     [0.75, 0.25, 0.60, 0.70, 245, 158,  11, 0.55, 0.60],
     [0.25, 0.70, 0.70, 0.60,  16, 185, 129, 0.70, 0.60],
-  ], linear: [
-    [ 16, 185, 129, 0.26, 0.00],
-    [ 16, 185, 129, 0.00, 0.32],
-    [245, 158,  11, 0.00, 0.68],
-    [ 16, 185, 129, 0.24, 1.00],
   ]},
-  // Midnight — shifted to richer violet/indigo so it reads as purple not just black
   midnight: { base: '#04000a', radial: [
     [0.50, 1.00, 1.00, 0.50,  70,  50, 200, 0.50, 0.60],
     [0.20, 0.05, 0.45, 0.40, 100,  30, 200, 0.45, 0.55],
     [0.50, 0.50, 0.55, 0.55, 110,  60, 240, 0.42, 0.55],
     [0.70, 0.65, 0.60, 0.70,  80,  80, 220, 0.55, 0.60],
     [0.30, 0.35, 0.70, 0.60,  50,  30, 140, 0.70, 0.60],
-  ], linear: [
-    [ 80,  50, 200, 0.30, 0.00],
-    [ 80,  50, 200, 0.00, 0.35],
-    [ 50,  30, 140, 0.00, 0.68],
-    [ 50,  30, 140, 0.28, 1.00],
   ]},
   sunset: { base: '#0e0206', radial: [
     [0.50, 1.00, 1.00, 0.50, 249, 115,  22, 0.45, 0.60],  // orange bottom
@@ -362,12 +340,11 @@ export function ThemeBackgroundCanvas() {
       const w = canvas.width;
       const h = canvas.height;
 
-      if (!isTouch && theme && theme in THEMES) {
-        // Desktop: canvas is the gradient layer (covers the CSS body gradient).
+      if (isTouch && theme && theme in THEMES) {
+        // Mobile: single fixed canvas layer — gradient + particles + rays together.
         drawGradientBg(ctx, w, h, theme as ThemeKey);
       } else {
-        // Mobile: CSS body gradient (scroll-attached) covers the full document.
-        // Canvas is transparent here — only particles are drawn on top.
+        // Desktop: CSS body gradient (background-attachment:fixed) handles background.
         ctx.clearRect(0, 0, w, h);
       }
 
