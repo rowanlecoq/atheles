@@ -326,14 +326,14 @@ export function ThemeBackgroundCanvas() {
     };
   }, [prefersReducedMotion, buildParticles]);
 
-  if (prefersReducedMotion) return null;
+  if (prefersReducedMotion || isTouch) return null;
 
   return (
     <canvas
       ref={canvasRef}
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 animate-canvas-reveal"
-      style={{ zIndex: 0, willChange: "transform" }}
+      style={{ zIndex: 0 }}
     />
   );
 }
