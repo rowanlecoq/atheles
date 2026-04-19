@@ -529,5 +529,12 @@ body[data-bg] .announcement-bar-root {
   body[data-bg] .theme-section {
     background-color: transparent;
   }
+
+  /* Fade the entire page content in so the gradient overlay is visible
+     during the brief skeleton/loading window — mirrors the canvas-reveal
+     fade that desktop uses but applied to main instead of the canvas. */
+  body[data-bg] main {
+    animation: canvas-reveal 0.6s ease both;
+  }
 }
 
