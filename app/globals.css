@@ -512,14 +512,22 @@ body[data-bg] .announcement-bar-root {
   will-change: transform;
 }
 
-/* Mobile: strip the desktop gradient + background-attachment:fixed from body
-   (both are broken on iOS Safari) and replace with a solid base colour that
-   matches the canvas gradient edges. The canvas draws the full gradient. */
+/* Mobile: body solid base colour so the canvas gradient edges blend in.
+   The gradient and fixed-attachment are already stripped by background-image:none
+   above; this just ensures the colour fallback is correct. */
 @media (pointer: coarse) {
-  body[data-bg="gold"]     { background: #110e04; }
-  body[data-bg="water"]    { background: #020a10; }
-  body[data-bg="tropical"] { background: #020b05; }
-  body[data-bg="midnight"] { background: #04000a; }
-  body[data-bg="sunset"]   { background: #0e0206; }
+  body[data-bg="gold"]     { background-color: #110e04; }
+  body[data-bg="water"]    { background-color: #020a10; }
+  body[data-bg="tropical"] { background-color: #020b05; }
+  body[data-bg="midnight"] { background-color: #04000a; }
+  body[data-bg="sunset"]   { background-color: #0e0206; }
+
+  /* CSS-gradient fallback on the fixed overlay div so the gradient is always
+     painted by the browser engine even when the canvas layer is momentarily
+     dropped during iOS scroll compositing. The canvas (rendered after this in
+     DOM order) draws on top normally; the overlay only shows on canvas blink. */
+  body[data-bg] #theme-gradient-overlay {
+    background: var(--theme-gradient);
+  }
 }
 
