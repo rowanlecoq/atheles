@@ -504,12 +504,6 @@ body[data-bg] .announcement-bar-root {
   background-color: transparent !important;
 }
 
-/* Hero, newsletter, and quote sections transparent when theme active —
-   lets the gradient canvas show through instead of the solid dark backgrounds. */
-body[data-bg] .theme-section {
-  background-color: transparent;
-}
-
 /* Gradient overlay div — force onto its own GPU compositing layer so iOS
    doesn't drop or stutter it during scroll. The actual gradient is only
    applied on touch/mobile via the media query below. */
@@ -519,12 +513,17 @@ body[data-bg] .theme-section {
 }
 
 /* Mobile: body background-color exactly matches each theme's canvas base so
-   dark edges of the canvas gradient blend seamlessly with the body. */
+   dark edges of the canvas gradient blend seamlessly with the body.
+   Also make theme sections transparent so the fixed canvas shows through. */
 @media (pointer: coarse) {
   body[data-bg="gold"]     { background-color: #110e04; }
   body[data-bg="water"]    { background-color: #020a10; }
   body[data-bg="tropical"] { background-color: #020b05; }
   body[data-bg="midnight"] { background-color: #04000a; }
   body[data-bg="sunset"]   { background-color: #0e0206; }
+
+  body[data-bg] .theme-section {
+    background-color: transparent;
+  }
 }
 
