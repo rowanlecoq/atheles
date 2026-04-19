@@ -112,7 +112,7 @@ body {
   min-width: 320px;
   min-height: 100dvh;
   width: 100%;
-  overflow-x: clip;
+  overflow-x: hidden;
   text-transform: lowercase;
 }
 
@@ -512,20 +512,18 @@ body[data-bg] .announcement-bar-root {
   will-change: transform;
 }
 
-/* Mobile: body solid base colour so the canvas gradient edges blend in.
-   The gradient and fixed-attachment are already stripped by background-image:none
-   above; this just ensures the colour fallback is correct. */
+/* Mobile: canvas draws only particles/rays — the fixed overlay div renders
+   the gradient via CSS so it is always painted by the browser engine and
+   never dropped during iOS scroll compositing.
+   Set body background-color to a mid-tone of each theme so if both GPU
+   layers briefly drop during pinch-zoom, the flash matches the theme. */
 @media (pointer: coarse) {
-  body[data-bg="gold"]     { background-color: #110e04; }
-  body[data-bg="water"]    { background-color: #020a10; }
-  body[data-bg="tropical"] { background-color: #020b05; }
-  body[data-bg="midnight"] { background-color: #04000a; }
-  body[data-bg="sunset"]   { background-color: #0e0206; }
+  body[data-bg="gold"]     { background-color: #1a1306; }
+  body[data-bg="water"]    { background-color: #040e1a; }
+  body[data-bg="tropical"] { background-color: #061a0b; }
+  body[data-bg="midnight"] { background-color: #0a0020; }
+  body[data-bg="sunset"]   { background-color: #1a0510; }
 
-  /* CSS-gradient fallback on the fixed overlay div so the gradient is always
-     painted by the browser engine even when the canvas layer is momentarily
-     dropped during iOS scroll compositing. The canvas (rendered after this in
-     DOM order) draws on top normally; the overlay only shows on canvas blink. */
   body[data-bg] #theme-gradient-overlay {
     background: var(--theme-gradient);
   }

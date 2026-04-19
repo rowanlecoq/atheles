@@ -340,13 +340,10 @@ export function ThemeBackgroundCanvas() {
       const w = canvas.width;
       const h = canvas.height;
 
-      if (isTouch && theme && theme in THEMES) {
-        // Mobile: single fixed canvas layer — gradient + particles + rays together.
-        drawGradientBg(ctx, w, h, theme as ThemeKey);
-      } else {
-        // Desktop: CSS body gradient (background-attachment:fixed) handles background.
-        ctx.clearRect(0, 0, w, h);
-      }
+      // CSS handles the gradient on all platforms (body on desktop,
+      // #theme-gradient-overlay on mobile). Canvas is always transparent —
+      // it only draws particles and rays on top.
+      ctx.clearRect(0, 0, w, h);
 
       if (state.particles.length === 0) return;
 
