@@ -512,11 +512,9 @@ body[data-bg] .announcement-bar-root {
   will-change: transform;
 }
 
-/* Mobile: canvas draws only particles/rays — the fixed overlay div renders
-   the gradient via CSS so it is always painted by the browser engine and
-   never dropped during iOS scroll compositing.
-   Set body background-color to a mid-tone of each theme so if both GPU
-   layers briefly drop during pinch-zoom, the flash matches the theme. */
+/* Mobile body base colour + CSS-gradient overlay fallback.
+   Section backgrounds stripped so the canvas gradient shows through even
+   during skeleton/loading states before slideshow images load. */
 @media (pointer: coarse) {
   body[data-bg="gold"]     { background-color: #1a1306; }
   body[data-bg="water"]    { background-color: #040e1a; }
@@ -526,6 +524,10 @@ body[data-bg] .announcement-bar-root {
 
   body[data-bg] #theme-gradient-overlay {
     background: var(--theme-gradient);
+  }
+
+  body[data-bg] .theme-section {
+    background-color: transparent;
   }
 }
 

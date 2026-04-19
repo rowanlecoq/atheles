@@ -90,7 +90,7 @@ export function NewsletterSignup() {
   };
 
   return (
-    <section className="relative overflow-hidden border-t border-brand-dark-gold/20 bg-brand-dark/75 py-20">
+    <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 bg-brand-dark/75 py-20">
       <SlideshowMedia
         slotKey="newsletter"
         className="object-cover object-center"
