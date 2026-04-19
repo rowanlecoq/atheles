@@ -512,13 +512,14 @@ body[data-bg] .announcement-bar-root {
   will-change: transform;
 }
 
-/* Mobile: body background-color exactly matches each theme's canvas base so
-   dark edges of the canvas gradient blend seamlessly with the body. */
+/* Mobile: strip the desktop gradient + background-attachment:fixed from body
+   (both are broken on iOS Safari) and replace with a solid base colour that
+   matches the canvas gradient edges. The canvas draws the full gradient. */
 @media (pointer: coarse) {
-  body[data-bg="gold"]     { background-color: #110e04; }
-  body[data-bg="water"]    { background-color: #020a10; }
-  body[data-bg="tropical"] { background-color: #020b05; }
-  body[data-bg="midnight"] { background-color: #04000a; }
-  body[data-bg="sunset"]   { background-color: #0e0206; }
+  body[data-bg="gold"]     { background: #110e04; }
+  body[data-bg="water"]    { background: #020a10; }
+  body[data-bg="tropical"] { background: #020b05; }
+  body[data-bg="midnight"] { background: #04000a; }
+  body[data-bg="sunset"]   { background: #0e0206; }
 }
 
