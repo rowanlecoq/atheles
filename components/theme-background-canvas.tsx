@@ -340,10 +340,16 @@ export function ThemeBackgroundCanvas() {
       const w = canvas.width;
       const h = canvas.height;
 
-      // CSS handles the gradient on all platforms (body on desktop,
-      // #theme-gradient-overlay on mobile). Canvas is always transparent —
-      // it only draws particles and rays on top.
-      ctx.clearRect(0, 0, w, h);
+      if (!isTouch && theme && theme in THEMES) {
+        // Desktop: canvas draws the gradient so it shows through semi-transparent
+        // sections (bg-brand-dark/75). Body CSS gradient handles the very back.
+        drawGradientBg(ctx, w, h, theme as ThemeKey);
+      } else {
+        // Mobile: CSS overlay (#theme-gradient-overlay) renders var(--theme-gradient)
+        // via the browser engine — never dropped by iOS compositing. Canvas stays
+        // transparent and only draws particles + rays on top.
+        ctx.clearRect(0, 0, w, h);
+      }
 
       if (state.particles.length === 0) return;
 
