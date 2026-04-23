@@ -1412,6 +1412,13 @@ export default function ProfileContent() {
           quick links
         </h2>
         <Link
+          href="/account"
+          className="flex items-center justify-between rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 transition-colors hover:border-brand-gold/30"
+        >
+          <span className="text-sm text-white">orders</span>
+          <span className="text-xs text-brand-grey">&rarr;</span>
+        </Link>
+        <Link
           href="/favorites"
           className="flex items-center justify-between rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 transition-colors hover:border-brand-gold/30"
         >
