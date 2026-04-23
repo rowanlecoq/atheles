@@ -642,13 +642,8 @@ export default function ProfileContent() {
       <div className="mb-10 flex flex-col items-center text-center animate-hero-section-enter">
         <div className="group relative mb-4">
           <div
-            className={`flex h-40 w-40 items-center justify-center sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
-            style={{
-              clipPath: "circle(50%)",
-              WebkitClipPath: "circle(50%)",
-              transform: "translateZ(0)",
-              WebkitTransform: "translateZ(0)",
-            } as React.CSSProperties}
+            className={`flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
+            style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" } as React.CSSProperties}
             onClick={() => avatar && setShowAvatarPreview(true)}
           >
             {avatar ? (

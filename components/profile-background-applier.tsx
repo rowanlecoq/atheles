@@ -55,10 +55,18 @@ export function ProfileBackgroundApplier() {
         const newTheme = theme || "none";
         // Read what's currently in localStorage before overwriting
         let prevTheme = "none";
+        let hasLocal = false;
         try {
           const prev = localStorage.getItem(LS_KEY);
-          if (prev) prevTheme = (JSON.parse(prev) as { theme?: string }).theme ?? "none";
+          if (prev) {
+            hasLocal = true;
+            prevTheme = (JSON.parse(prev) as { theme?: string }).theme ?? "none";
+          }
         } catch {}
+        // If the user explicitly cleared the theme locally (set to "none") but the
+        // server still has the old theme (e.g. update request in flight or failed),
+        // don't overwrite — trust the local choice to avoid a re-flash.
+        if (hasLocal && prevTheme === "none" && newTheme !== "none") return;
         try {
           localStorage.setItem(LS_KEY, JSON.stringify({
             theme: newTheme,

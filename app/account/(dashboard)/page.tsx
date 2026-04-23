@@ -43,6 +43,7 @@ export default function AccountDashboard() {
           <InfoCard
             title="how do i track my order?"
             description="once your order ships, you'll receive a confirmation email with a tracking link. you can also check your order status here."
+            link={{ href: "/account/order-help", label: "order help" }}
           />
           <InfoCard
             title="i want to change my order or address"
