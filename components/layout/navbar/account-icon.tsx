@@ -19,7 +19,7 @@ export function AccountIcon() {
       if (cached) {
         const u = JSON.parse(cached);
         const key = `atheles-avatar-${u.email}`;
-        const av = sessionStorage.getItem(key);
+        const av = localStorage.getItem(key);
         if (av) setAvatar(av);
         setLoggedIn(true);
         const n = u.name || u.email || "A";
@@ -46,7 +46,7 @@ export function AccountIcon() {
           // Per-user avatar cache for instant display
           const avatarKey = `atheles-avatar-${data.user.email}`;
           try {
-            const cached = sessionStorage.getItem(avatarKey);
+            const cached = localStorage.getItem(avatarKey);
             if (cached) setAvatar(cached);
           } catch {}
           fetch("/api/auth/avatar")
@@ -54,10 +54,10 @@ export function AccountIcon() {
             .then((d) => {
               if (d?.avatar) {
                 setAvatar(d.avatar);
-                try { sessionStorage.setItem(avatarKey, d.avatar); } catch {}
+                try { localStorage.setItem(avatarKey, d.avatar); } catch {}
               } else {
                 setAvatar(null);
-                try { sessionStorage.removeItem(avatarKey); } catch {}
+                try { localStorage.removeItem(avatarKey); } catch {}
               }
             })
             .catch(() => {});
@@ -111,14 +111,10 @@ export function AccountIcon() {
       aria-label="Account"
     >
       {loggedIn && avatar ? (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
-          src={avatar}
-          alt="Profile"
-          width={36}
-          height={36}
-          className="h-9 w-9 rounded-full object-cover transition-transform duration-200 hover:scale-110"
-        />
+        <div className="h-9 w-9 overflow-hidden rounded-full transition-transform duration-200 hover:scale-110">
+          {/* eslint-disable-next-line @next/next/no-img-element */}
+          <img src={avatar} alt="Profile" width={36} height={36} className="h-full w-full object-cover" />
+        </div>
       ) : loggedIn && initials ? (
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold transition-transform duration-200 hover:scale-110">
           {initials}

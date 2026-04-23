@@ -250,7 +250,7 @@ export default function ProfileContent() {
       // Avatar: use per-user cache key so account switch shows correct data
       const cacheKey = `atheles-avatar-${u.email}`;
       try {
-        const cached = sessionStorage.getItem(cacheKey);
+        const cached = localStorage.getItem(cacheKey);
         if (cached) setAvatar(cached);
       } catch {}
       fetch("/api/auth/avatar")
@@ -258,10 +258,10 @@ export default function ProfileContent() {
         .then((d) => {
           if (d?.avatar) {
             setAvatar(d.avatar);
-            try { sessionStorage.setItem(cacheKey, d.avatar); } catch {}
+            try { localStorage.setItem(cacheKey, d.avatar); } catch {}
           } else {
             setAvatar(null);
-            try { sessionStorage.removeItem(cacheKey); } catch {}
+            try { localStorage.removeItem(cacheKey); } catch {}
           }
         })
         .catch(() => {});
@@ -321,8 +321,12 @@ export default function ProfileContent() {
       if (key && key.startsWith("atheles-")) keysToRemove.push(key);
     }
     keysToRemove.forEach((k) => sessionStorage.removeItem(k));
-    // Clear persisted theme and session so another user on this device starts fresh
+    // Clear persisted theme, session and avatar so another user on this device starts fresh
     try { localStorage.removeItem("atheles-bg-theme"); } catch {}
+    try {
+      const s = localStorage.getItem("atheles-session");
+      if (s) { const u = JSON.parse(s); if (u.email) localStorage.removeItem(`atheles-avatar-${u.email}`); }
+    } catch {}
     try { localStorage.removeItem("atheles-session"); } catch {}
     document.body.removeAttribute("data-bg");
     document.cookie = "atheles-logged-in=; max-age=0; path=/";

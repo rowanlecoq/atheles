@@ -124,6 +124,21 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
 
+  // Show cached avatar instantly before session loads
+  useEffect(() => {
+    if (!document.cookie.includes("atheles-logged-in=1")) return;
+    try {
+      const cached = localStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        setLoggedIn(true);
+        setUserName(u.name || u.firstName || "");
+        const av = localStorage.getItem(`atheles-avatar-${u.email}`);
+        if (av) setAvatar(av);
+      }
+    } catch {}
+  }, []);
+
   const refreshSession = useCallback(() => {
     fetch("/api/auth/session")
       .then((res) => res.json())
@@ -134,7 +149,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           // Per-user avatar cache
           const avatarKey = `atheles-avatar-${data.user.email}`;
           try {
-            const cached = sessionStorage.getItem(avatarKey);
+            const cached = localStorage.getItem(avatarKey);
             if (cached) setAvatar(cached);
           } catch {}
           fetch("/api/auth/avatar")
@@ -142,7 +157,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
             .then((d) => {
               if (d?.avatar) {
                 setAvatar(d.avatar);
-                try { sessionStorage.setItem(avatarKey, d.avatar); } catch {}
+                try { localStorage.setItem(avatarKey, d.avatar); } catch {}
               } else setAvatar(null);
             })
             .catch(() => setAvatar(null));
@@ -251,14 +266,10 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     className="tap-target mb-1 flex min-h-[48px] items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-dark-gold/10"
                   >
                     {avatar ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={avatar}
-                        alt="Profile"
-                        width={36}
-                        height={36}
-                        className="h-9 w-9 rounded-full object-cover"
-                      />
+                      <div className="h-9 w-9 overflow-hidden rounded-full">
+                        {/* eslint-disable-next-line @next/next/no-img-element */}
+                        <img src={avatar} alt="Profile" width={36} height={36} className="h-full w-full object-cover" />
+                      </div>
                     ) : loggedIn && initials ? (
                       <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
                         {initials}
