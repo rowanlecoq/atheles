@@ -208,10 +208,10 @@ function AthleteCard({
   return (
     <motion.div
       className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
-      initial={{ opacity: 0, y: 16, ...(blurInitial ? { filter: blurInitial } : {}) }}
+      initial={{ opacity: 0, y: 20, ...(blurInitial ? { filter: blurInitial } : {}) }}
       whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
       viewport={{ once: true, margin: "0px" }}
-      transition={{ duration: 0.28, delay: Math.min(index, 3) * 0.07, ease: [0.22, 1, 0.36, 1] }}
+      transition={{ duration: 0.28, delay: Math.min(index, 5) * 0.03, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Mobile: horizontal scroll snap gallery — swipe to navigate, tap to open lightbox */}
       <div
@@ -353,7 +353,7 @@ export function AthletesContent() {
   const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
   const prefersReducedMotion = useReducedMotion();
   const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
-  const blurFinal = prefersReducedMotion ? undefined : "blur(0px)";
+  const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
 
   // Keyboard navigation
   useEffect(() => {
