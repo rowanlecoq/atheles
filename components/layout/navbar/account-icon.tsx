@@ -111,9 +111,9 @@ export function AccountIcon() {
       aria-label="Account"
     >
       {loggedIn && avatar ? (
-        <div className="h-9 w-9 overflow-hidden rounded-full transition-transform duration-200 hover:scale-110" style={{ WebkitMaskImage: "-webkit-radial-gradient(circle, white 100%, black 100%)" }}>
+        <div className="relative h-9 w-9 overflow-hidden rounded-full transition-transform duration-200 hover:scale-110" style={{ clipPath: "circle(50%)" }}>
           {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src={avatar} alt="Profile" width={36} height={36} className="h-full w-full scale-[1.01] object-cover" />
+          <img src={avatar} alt="Profile" width={36} height={36} className="absolute inset-0 h-full w-full scale-[1.02] object-cover" />
         </div>
       ) : loggedIn && initials ? (
         <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold transition-transform duration-200 hover:scale-110">

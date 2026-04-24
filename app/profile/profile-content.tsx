@@ -672,8 +672,8 @@ export default function ProfileContent() {
       <div className="mb-10 flex flex-col items-center text-center animate-hero-section-enter">
         <div className="group relative mb-4">
           <div
-            className={`flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
-            style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)", WebkitMaskImage: "-webkit-radial-gradient(circle, white 100%, black 100%)" } as React.CSSProperties}
+            className={`relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
+            style={{ clipPath: "circle(50%)" } as React.CSSProperties}
             onClick={() => avatar && setShowAvatarPreview(true)}
           >
             {avatar ? (
@@ -683,7 +683,7 @@ export default function ProfileContent() {
                 alt="Profile photo"
                 width={144}
                 height={144}
-                className="h-full w-full scale-[1.01] object-cover transition-transform group-hover:scale-110"
+                className="absolute inset-0 h-full w-full scale-[1.02] object-cover transition-transform group-hover:scale-110"
               />
             ) : (
               <span className="font-heading text-2xl text-brand-gold">
