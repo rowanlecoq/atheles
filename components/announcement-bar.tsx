@@ -51,7 +51,7 @@ export function AnnouncementBar() {
   };
 
   return (
-    <div className="announcement-bar-root relative flex h-8 items-center justify-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
+    <div className="announcement-bar-root sticky top-0 z-[51] relative flex h-8 items-center justify-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
       <AnimatePresence mode="wait">
         <motion.p
           key={index}

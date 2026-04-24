@@ -1,6 +1,7 @@
 "use client";
 
-import { HeartIcon } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartOutline } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolid } from "@heroicons/react/24/solid";
 import { useFavorites } from "lib/hooks/use-favorites";
 import Link from "next/link";
 
@@ -10,10 +11,11 @@ export function FavoritesIcon() {
   return (
     <Link
       href="/favorites"
-      className="relative flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold"
+      className="group relative flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold"
       aria-label="Favorites"
     >
-      <HeartIcon className="h-6 w-6" />
+      <HeartOutline className="h-6 w-6 group-hover:hidden" />
+      <HeartSolid className="hidden h-6 w-6 group-hover:block" />
       {count > 0 && (
         <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-xs font-bold text-brand-dark">
           {count > 9 ? "9+" : count}
