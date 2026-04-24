@@ -1,5 +1,6 @@
 "use client";
 
+import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
 import { useEffect } from "react";
 import type { ReactNode } from "react";
@@ -18,9 +19,14 @@ export function PageTransition({ children }: { children: ReactNode }) {
     window.scrollTo(0, 0);
   }, [pathname]);
 
-  // No wrapper animation — individual sections/cards handle their own entrances.
-  // A wrapper opacity/y transition causes a full-screen black flash on every
-  // navigation (the body background shows through opacity:0, and even y-only
-  // causes a visible jump when the key remounts the entire tree).
-  return <>{children}</>;
+  return (
+    <motion.div
+      key={pathname}
+      initial={{ opacity: 0.6, y: 8 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+    >
+      {children}
+    </motion.div>
+  );
 }
