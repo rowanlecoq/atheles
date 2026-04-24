@@ -217,8 +217,22 @@ export default function ProfileContent() {
         setDobMonth(m ? String(parseInt(m)) : "");
         setDobDay(d ? String(parseInt(d)) : "");
       }
-      setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
-      setThemeGlobal(u.globalTheme || false);
+      // Prefer atheles-bg-theme for UI state — it's only written by the user's
+      // explicit swatch clicks and never overwritten by a stale session fetch.
+      try {
+        const bg = localStorage.getItem("atheles-bg-theme");
+        if (bg) {
+          const { theme: t, globalTheme: g } = JSON.parse(bg) as { theme?: string; globalTheme?: boolean };
+          setSelectedTheme(t && t !== "none" ? t : null);
+          setThemeGlobal(g || false);
+        } else {
+          setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
+          setThemeGlobal(u.globalTheme || false);
+        }
+      } catch {
+        setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
+        setThemeGlobal(u.globalTheme || false);
+      }
       setLoading(false);
     } catch {}
   }, []);
@@ -243,9 +257,21 @@ export default function ProfileContent() {
       if (prefsLoaded.current) return;
       prefsLoaded.current = true;
 
-      // Restore background theme state
-      setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
-      setThemeGlobal(u.globalTheme || false);
+      // Restore background theme state — prefer local storage over stale session
+      try {
+        const bg = localStorage.getItem("atheles-bg-theme");
+        if (bg) {
+          const { theme: t, globalTheme: g } = JSON.parse(bg) as { theme?: string; globalTheme?: boolean };
+          setSelectedTheme(t && t !== "none" ? t : null);
+          setThemeGlobal(g || false);
+        } else {
+          setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
+          setThemeGlobal(u.globalTheme || false);
+        }
+      } catch {
+        setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
+        setThemeGlobal(u.globalTheme || false);
+      }
 
       // Avatar: use per-user cache key so account switch shows correct data
       const cacheKey = `atheles-avatar-${u.email}`;
