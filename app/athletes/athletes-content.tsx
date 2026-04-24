@@ -472,7 +472,10 @@ export function AthletesContent() {
 
       {/* Lightbox modal — portaled to cover navbar */}
       {lightbox && typeof document !== "undefined" && createPortal(
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.18 }}
           className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
           onClick={() => { setLightbox(null); setEmbedLoading(false); setZoom(false); }}
         >
@@ -499,7 +502,11 @@ export function AthletesContent() {
           )}
 
           {/* Content — swipe to navigate on mobile */}
-          <div
+          <motion.div
+            key={lightbox.index}
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            transition={{ duration: 0.22, ease: [0.22, 1, 0.36, 1] }}
             onClick={(e) => e.stopPropagation()}
             className="relative flex items-center justify-center"
             onTouchStart={(e) => {
@@ -587,7 +594,7 @@ export function AthletesContent() {
                 </div>
               );
             })()}
-          </div>
+          </motion.div>
 
           {/* Next button — tall panel on right edge */}
           {lightbox.items.length > 1 && (
@@ -605,7 +612,7 @@ export function AthletesContent() {
           {lightbox.items.length > 1 && (
             <p className="absolute bottom-4 left-1/2 -translate-x-1/2 rounded-full bg-black/50 px-3 py-1 text-xs text-white/60 backdrop-blur-sm">{lightbox.index + 1} / {lightbox.items.length}</p>
           )}
-        </div>,
+        </motion.div>,
         document.body,
       )}
     </div>

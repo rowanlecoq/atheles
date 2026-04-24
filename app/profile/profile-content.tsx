@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -637,7 +638,10 @@ export default function ProfileContent() {
 
       {/* Avatar Preview Modal — portaled to cover everything including navbar */}
       {showAvatarPreview && avatar && typeof document !== "undefined" && createPortal(
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/90 p-4"
           onClick={() => setShowAvatarPreview(false)}
         >
@@ -652,7 +656,13 @@ export default function ProfileContent() {
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          <div className="flex flex-col items-center gap-4" onClick={(e) => e.stopPropagation()}>
+          <motion.div
+            initial={{ scale: 0.88, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+            className="flex flex-col items-center gap-4"
+            onClick={(e) => e.stopPropagation()}
+          >
             <div className="overflow-hidden rounded-full">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -663,8 +673,8 @@ export default function ProfileContent() {
             </div>
             <p className="font-heading text-xl text-brand-gold">{user.name}</p>
             <p className="text-sm text-brand-grey">{user.email}</p>
-          </div>
-        </div>,
+          </motion.div>
+        </motion.div>,
         document.body,
       )}
 
@@ -694,7 +704,7 @@ export default function ProfileContent() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="absolute -bottom-1 -right-1 flex h-8 w-8 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+            className="absolute -bottom-4 -right-4 flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
             aria-label="Change profile photo"
           >
             <svg
