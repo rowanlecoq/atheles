@@ -673,7 +673,7 @@ export default function ProfileContent() {
         <div className="group relative mb-4">
           <div
             className={`flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
-            style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" } as React.CSSProperties}
+            style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)", WebkitMaskImage: "-webkit-radial-gradient(circle, white 100%, black 100%)" } as React.CSSProperties}
             onClick={() => avatar && setShowAvatarPreview(true)}
           >
             {avatar ? (
@@ -683,7 +683,6 @@ export default function ProfileContent() {
                 alt="Profile photo"
                 width={144}
                 height={144}
-                style={{ transform: "translateZ(0)", WebkitTransform: "translateZ(0)" } as React.CSSProperties}
                 className="h-full w-full object-cover transition-transform group-hover:scale-105"
               />
             ) : (
