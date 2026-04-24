@@ -683,7 +683,7 @@ export default function ProfileContent() {
                 alt="Profile photo"
                 width={144}
                 height={144}
-                className="h-full w-full object-cover transition-transform group-hover:scale-105"
+                className="h-full w-full scale-[1.01] object-cover transition-transform group-hover:scale-110"
               />
             ) : (
               <span className="font-heading text-2xl text-brand-gold">
