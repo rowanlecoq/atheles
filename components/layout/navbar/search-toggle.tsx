@@ -220,7 +220,7 @@ export function SearchToggle() {
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="search..."
                 autoFocus
-                className="h-10 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0"
+                className="h-10 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-[16px] text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0 md:text-sm"
               />
             </form>
             <button
