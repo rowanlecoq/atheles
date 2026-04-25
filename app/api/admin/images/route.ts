@@ -20,6 +20,7 @@ async function adminFetch(query: string, variables: Record<string, unknown> = {}
     headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": adminToken },
     body: JSON.stringify({ query, variables }),
   });
+  if (!res.ok) throw new Error(`Admin API ${res.status}`);
   return res.json();
 }
 
