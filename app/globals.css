@@ -530,8 +530,7 @@ body[data-bg] .announcement-bar-root {
     background: var(--theme-gradient);
   }
 
-  body[data-bg] .theme-section,
-  body[data-bg] footer {
+  body[data-bg] .theme-section {
     background-color: transparent;
   }
 
