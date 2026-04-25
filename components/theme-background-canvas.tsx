@@ -317,10 +317,14 @@ export function ThemeBackgroundCanvas() {
       canvas.height = newH;
       lastW = newW;
       lastH = newH;
+      // Repaint immediately so the canvas is never blank between resize and the
+      // next scheduled 30fps frame — this is what causes the visible flash/line.
+      renderFrame();
       if (resizeTimer) clearTimeout(resizeTimer);
       resizeTimer = setTimeout(() => {
         if (state.theme && state.theme in THEMES) {
           state.particles = buildParticles(state.theme as ThemeKey, canvas.width, canvas.height);
+          renderFrame();
         }
       }, 250);
     };
