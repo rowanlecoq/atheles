@@ -520,11 +520,11 @@ body[data-bg] .announcement-bar-root {
    Section backgrounds stripped so the canvas gradient shows through even
    during skeleton/loading states before slideshow images load. */
 @media (pointer: coarse) {
-  body[data-bg="gold"]     { background-color: #1a1306; }
-  body[data-bg="water"]    { background-color: #040e1a; }
-  body[data-bg="tropical"] { background-color: #061a0b; }
-  body[data-bg="midnight"] { background-color: #0a0020; }
-  body[data-bg="sunset"]   { background-color: #1a0510; }
+  body[data-bg="gold"]     { background-color: #110e04; }
+  body[data-bg="water"]    { background-color: #020a10; }
+  body[data-bg="tropical"] { background-color: #020b05; }
+  body[data-bg="midnight"] { background-color: #04000a; }
+  body[data-bg="sunset"]   { background-color: #0e0206; }
 
   body[data-bg] #theme-gradient-overlay {
     background: var(--theme-gradient);
