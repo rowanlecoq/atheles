@@ -300,11 +300,13 @@ export function ThemeBackgroundCanvas() {
     let lastH = 0;
     const resize = () => {
       const newW = document.documentElement.clientWidth;
-      // Use max of innerHeight and clientHeight: clientHeight is the layout
-      // viewport (stable during pinch-zoom), innerHeight is the visual viewport
-      // (grows when the iOS URL bar hides). Taking the max ensures the canvas
-      // always covers the full visual viewport without resizing during pinch-zoom.
-      const newH = Math.max(window.innerHeight, document.documentElement.clientHeight);
+      // On touch devices, use screen.height so the canvas is pre-sized to the
+      // full physical screen — the URL bar appearing/disappearing never triggers
+      // a canvas clear because the pixel height is always >= the visual viewport.
+      // On desktop, max(innerHeight, clientHeight) is correct.
+      const newH = isTouch
+        ? Math.max(window.innerHeight, document.documentElement.clientHeight, window.screen?.height ?? 0)
+        : Math.max(window.innerHeight, document.documentElement.clientHeight);
       if (firstResize) {
         canvas.width = newW;
         canvas.height = newH;
@@ -427,7 +429,7 @@ export function ThemeBackgroundCanvas() {
       ref={canvasRef}
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 animate-canvas-reveal"
-      style={{ zIndex: 0, willChange: "transform", height: "100dvh" }}
+      style={{ zIndex: 0, willChange: "transform" }}
     />
   );
 }
