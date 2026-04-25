@@ -41,8 +41,8 @@ export async function POST(request: Request) {
       }),
     );
 
-    return NextResponse.json({
-      products: results.filter(Boolean),
+    return NextResponse.json({ products: results.filter(Boolean) }, {
+      headers: { "Cache-Control": "s-maxage=30, stale-while-revalidate=15" },
     });
   } catch {
     return NextResponse.json({ products: [] });

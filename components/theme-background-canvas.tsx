@@ -382,8 +382,14 @@ export function ThemeBackgroundCanvas() {
       }
     };
 
-    const loop = () => {
+    const TARGET_MS = 1000 / 30; // 30fps cap
+    let lastFrameTime = 0;
+
+    const loop = (ts: number) => {
       state.animId = requestAnimationFrame(loop);
+      if (document.hidden) return;
+      if (ts - lastFrameTime < TARGET_MS) return;
+      lastFrameTime = ts;
       renderFrame();
     };
 

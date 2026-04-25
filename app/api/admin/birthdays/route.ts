@@ -22,6 +22,7 @@ async function adminFetch(query: string, variables: Record<string, unknown> = {}
     },
     body: JSON.stringify({ query, variables }),
   });
+  if (!res.ok) throw new Error(`Admin API ${res.status}`);
   return res.json();
 }
 
@@ -33,24 +34,29 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  // Fetch all customers
-  const data = await adminFetch(`
-    query {
-      customers(first: 100) {
-        edges {
-          node {
-            email
-            firstName
-            lastName
-            tags
-            orders(first: 1) {
-              edges { node { totalPriceSet { shopMoney { amount } } } }
+  let data: Awaited<ReturnType<typeof adminFetch>>;
+  try {
+    data = await adminFetch(`
+      query {
+        customers(first: 100) {
+          edges {
+            node {
+              email
+              firstName
+              lastName
+              tags
+              orders(first: 1) {
+                edges { node { totalPriceSet { shopMoney { amount } } } }
+              }
             }
           }
         }
       }
-    }
-  `);
+    `);
+  } catch (err) {
+    console.error("[admin/birthdays] Error:", err);
+    return NextResponse.json({ error: "failed to fetch customers" }, { status: 500 });
+  }
 
   const customers = data.data?.customers?.edges?.map((e: { node: Record<string, unknown> }) => e.node) || [];
   const today = new Date();

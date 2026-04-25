@@ -21,6 +21,7 @@ async function adminFetch(query: string, variables: Record<string, unknown> = {}
     },
     body: JSON.stringify({ query, variables }),
   });
+  if (!res.ok) throw new Error(`Admin API ${res.status}`);
   return res.json();
 }
 
@@ -38,56 +39,61 @@ export async function GET() {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  const data = await adminFetch(`
-    query {
-      customers(first: 100, sortKey: CREATED_AT, reverse: true) {
-        edges {
-          node {
-            id
-            email
-            firstName
-            lastName
-            tags
-            createdAt
-            numberOfOrders
+  try {
+    const data = await adminFetch(`
+      query {
+        customers(first: 100, sortKey: CREATED_AT, reverse: true) {
+          edges {
+            node {
+              id
+              email
+              firstName
+              lastName
+              tags
+              createdAt
+              numberOfOrders
+            }
           }
         }
       }
+    `);
+
+    if (data.errors) {
+      console.error("[admin/members] GraphQL errors:", JSON.stringify(data.errors));
+      return NextResponse.json({ error: "failed to fetch customers", details: data.errors }, { status: 500 });
     }
-  `);
 
-  if (data.errors) {
-    console.error("[admin/members] GraphQL errors:", JSON.stringify(data.errors));
-    return NextResponse.json({ error: "failed to fetch customers", details: data.errors }, { status: 500 });
+    const customers = (data.data?.customers?.edges || []).map(
+      (e: { node: Record<string, unknown> }) => {
+        const c = e.node as {
+          id: string;
+          email: string;
+          firstName: string;
+          lastName: string;
+          tags: string[];
+          createdAt: string;
+          numberOfOrders: string;
+        };
+        const tierTag = c.tags?.find((t) => t.startsWith("tier:"));
+        const dobTag = c.tags?.find((t) => t.startsWith("dob:"));
+        return {
+          id: c.id,
+          email: c.email,
+          name: `${c.firstName || ""} ${c.lastName || ""}`.trim() || c.email,
+          tier: tierTag ? tierTag.replace("tier:", "") : "bronze",
+          dob: dobTag ? dobTag.replace("dob:", "") : null,
+          createdAt: c.createdAt,
+          orders: c.numberOfOrders || "0",
+          tags: c.tags,
+        };
+      },
+    );
+
+    return NextResponse.json({ customers });
+  } catch (err) {
+    console.error("[admin/members] Error:", err);
+    return NextResponse.json({ error: "failed to fetch customers" }, { status: 500 });
   }
-
-  const customers = (data.data?.customers?.edges || []).map(
-    (e: { node: Record<string, unknown> }) => {
-      const c = e.node as {
-        id: string;
-        email: string;
-        firstName: string;
-        lastName: string;
-        tags: string[];
-        createdAt: string;
-        numberOfOrders: string;
-      };
-      const tierTag = c.tags?.find((t) => t.startsWith("tier:"));
-      const dobTag = c.tags?.find((t) => t.startsWith("dob:"));
-      return {
-        id: c.id,
-        email: c.email,
-        name: `${c.firstName || ""} ${c.lastName || ""}`.trim() || c.email,
-        tier: tierTag ? tierTag.replace("tier:", "") : "bronze",
-        dob: dobTag ? dobTag.replace("dob:", "") : null,
-        createdAt: c.createdAt,
-        orders: c.numberOfOrders || "0",
-        tags: c.tags,
-      };
-    },
-  );
-
-  return NextResponse.json({ customers });
 }
 
 // POST: update a customer's tier tag

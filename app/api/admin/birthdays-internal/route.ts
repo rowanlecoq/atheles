@@ -23,6 +23,7 @@ async function adminFetch(query: string, variables: Record<string, unknown> = {}
     },
     body: JSON.stringify({ query, variables }),
   });
+  if (!res.ok) throw new Error(`Admin API ${res.status}`);
   return res.json();
 }
 

@@ -19,6 +19,7 @@ async function adminFetch(query: string, variables: Record<string, unknown> = {}
     },
     body: JSON.stringify({ query, variables }),
   });
+  if (!res.ok) throw new Error(`Admin API ${res.status}`);
   return res.json();
 }
 
@@ -32,44 +33,48 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
-  // Fetch all customers with their tags
-  const data = await adminFetch(`
-    query {
-      customers(first: 50) {
-        edges {
-          node {
-            id
-            email
-            firstName
-            lastName
-            tags
+  try {
+    const data = await adminFetch(`
+      query {
+        customers(first: 50) {
+          edges {
+            node {
+              id
+              email
+              firstName
+              lastName
+              tags
+            }
           }
         }
       }
-    }
-  `);
+    `);
 
-  const customers = data.data?.customers?.edges?.map((e: { node: Record<string, unknown> }) => e.node) || [];
+    const customers = data.data?.customers?.edges?.map((e: { node: Record<string, unknown> }) => e.node) || [];
 
-  const result = customers.map((c: { id: string; email: string; firstName: string; lastName: string; tags: string[] }) => {
-    const dobTag = c.tags?.find((t: string) => t.startsWith("dob:"));
-    const tierTag = c.tags?.find((t: string) => t.startsWith("tier:"));
-    return {
-      email: c.email,
-      name: `${c.firstName || ""} ${c.lastName || ""}`.trim(),
-      dob: dobTag ? dobTag.replace("dob:", "") : null,
-      tier: tierTag ? tierTag.replace("tier:", "") : null,
-      allTags: c.tags,
-      shopifyId: c.id,
-    };
-  });
+    const result = customers.map((c: { id: string; email: string; firstName: string; lastName: string; tags: string[] }) => {
+      const dobTag = c.tags?.find((t: string) => t.startsWith("dob:"));
+      const tierTag = c.tags?.find((t: string) => t.startsWith("tier:"));
+      return {
+        email: c.email,
+        name: `${c.firstName || ""} ${c.lastName || ""}`.trim(),
+        dob: dobTag ? dobTag.replace("dob:", "") : null,
+        tier: tierTag ? tierTag.replace("tier:", "") : null,
+        allTags: c.tags,
+        shopifyId: c.id,
+      };
+    });
 
-  return NextResponse.json({
-    total: result.length,
-    withDob: result.filter((c: { dob: string | null }) => c.dob).length,
-    withoutDob: result.filter((c: { dob: string | null }) => !c.dob).length,
-    customers: result,
-  });
+    return NextResponse.json({
+      total: result.length,
+      withDob: result.filter((c: { dob: string | null }) => c.dob).length,
+      withoutDob: result.filter((c: { dob: string | null }) => !c.dob).length,
+      customers: result,
+    });
+  } catch (err) {
+    console.error("[admin/customers] Error:", err);
+    return NextResponse.json({ error: "failed to fetch customers" }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {

@@ -26,7 +26,9 @@ export async function GET(request: Request) {
       },
     }));
 
-    return NextResponse.json({ products: results });
+    return NextResponse.json({ products: results }, {
+      headers: { "Cache-Control": "s-maxage=60, stale-while-revalidate=30" },
+    });
   } catch {
     return NextResponse.json({ products: [] });
   }
