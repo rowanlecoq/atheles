@@ -341,6 +341,14 @@ export function ThemeBackgroundCanvas() {
         state.particles = theme && theme in THEMES
           ? buildParticles(theme as ThemeKey, canvas.width, canvas.height)
           : [];
+        // Chrome Android shows the canvas element's CSS background-color when the
+        // compositor layer is briefly dropped during scroll. Match the theme base
+        // so any blank-canvas moment blends in instead of showing body bg (#1a1a1a).
+        if (isTouch) {
+          canvas.style.backgroundColor = (theme && theme in MOBILE_BG)
+            ? MOBILE_BG[theme as ThemeKey].base
+            : '';
+        }
       }
 
       const w = canvas.width;
@@ -411,6 +419,11 @@ export function ThemeBackgroundCanvas() {
       state.particles = t && t in THEMES
         ? buildParticles(t as ThemeKey, canvas.width, canvas.height)
         : [];
+      if (isTouch) {
+        canvas.style.backgroundColor = (t && t in MOBILE_BG)
+          ? MOBILE_BG[t as ThemeKey].base
+          : '';
+      }
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
