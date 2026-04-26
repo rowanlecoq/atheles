@@ -341,25 +341,21 @@ export function ThemeBackgroundCanvas() {
         state.particles = theme && theme in THEMES
           ? buildParticles(theme as ThemeKey, canvas.width, canvas.height)
           : [];
-        // Chrome Android shows the canvas element's CSS background-color when the
-        // compositor layer is briefly dropped during scroll. Match the theme base
-        // so any blank-canvas moment blends in instead of showing body bg (#1a1a1a).
-        if (isTouch) {
-          canvas.style.backgroundColor = (theme && theme in MOBILE_BG)
-            ? MOBILE_BG[theme as ThemeKey].base
-            : '';
-        }
       }
 
       const w = canvas.width;
       const h = canvas.height;
 
       if (theme && theme in THEMES) {
-        // Canvas draws the gradient on all devices so mobile and desktop match.
-        // On mobile the CSS overlay (#theme-gradient-overlay) holds the same
-        // gradient as a pure-CSS fallback for the rare frame the canvas layer
-        // is dropped by iOS compositing during scroll.
-        drawGradientBg(ctx, w, h, theme as ThemeKey);
+        if (isTouch) {
+          // On mobile the pure-CSS overlay (#theme-gradient-overlay) handles the
+          // static gradient — it stays on its own GPU compositor layer and never
+          // drops during scroll. Canvas is kept transparent so only particles and
+          // rays composite on top, eliminating the Chrome scroll repaint glitch.
+          ctx.clearRect(0, 0, w, h);
+        } else {
+          drawGradientBg(ctx, w, h, theme as ThemeKey);
+        }
       } else {
         ctx.clearRect(0, 0, w, h);
       }
@@ -419,11 +415,6 @@ export function ThemeBackgroundCanvas() {
       state.particles = t && t in THEMES
         ? buildParticles(t as ThemeKey, canvas.width, canvas.height)
         : [];
-      if (isTouch) {
-        canvas.style.backgroundColor = (t && t in MOBILE_BG)
-          ? MOBILE_BG[t as ThemeKey].base
-          : '';
-      }
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
@@ -442,7 +433,7 @@ export function ThemeBackgroundCanvas() {
       ref={canvasRef}
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 animate-canvas-reveal"
-      style={{ zIndex: 0, willChange: "transform", transform: "translateZ(0)", height: "100dvh" }}
+      style={{ zIndex: 0, willChange: "transform", transform: "translateZ(0)" }}
     />
   );
 }
