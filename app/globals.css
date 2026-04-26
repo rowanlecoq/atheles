@@ -541,3 +541,27 @@ body[data-bg] .announcement-bar-root {
 
 }
 
+/* Chrome Android: re-enable body gradient with fixed attachment.
+   @supports (-webkit-touch-callout: none) matches iOS/WebKit only.
+   Negating it targets Chrome Android (and other non-iOS touch browsers) where
+   background-attachment:fixed on the document body is natively GPU-composited
+   as part of the page render layer — it never drops during scroll unlike a
+   separate position:fixed overlay div. The overlay is cleared to avoid doubling.
+   This block must come after the (pointer:coarse) block above so same-specificity
+   rules resolve in source order correctly. */
+@media (pointer: coarse) {
+  @supports not (-webkit-touch-callout: none) {
+    body[data-bg="gold"],
+    body[data-bg="water"],
+    body[data-bg="tropical"],
+    body[data-bg="midnight"],
+    body[data-bg="sunset"] {
+      background: var(--theme-gradient);
+      background-attachment: fixed;
+    }
+    body[data-bg] #theme-gradient-overlay {
+      background: none;
+    }
+  }
+}
+
