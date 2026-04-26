@@ -508,6 +508,13 @@ body[data-bg] .announcement-bar-root {
   background-color: transparent !important;
 }
 
+/* Footer transparent when theme active — gradient shows through on all devices.
+   footer has bg-brand-dark + border-t which otherwise appears as a solid block
+   with a visible line, especially on mobile where the gradient is behind it. */
+body[data-bg] footer {
+  background-color: transparent;
+}
+
 /* Gradient overlay div — force onto its own GPU compositing layer so iOS
    doesn't drop or stutter it during scroll. The actual gradient is only
    applied on touch/mobile via the media query below. */
