@@ -387,6 +387,22 @@ html.thunder-shake {
 
 /* ─── Profile background themes ──────────────────────────────────────────── */
 
+/* Set html viewport background so Chrome's compositor fallback matches the theme.
+   When the canvas layer is dropped briefly during scroll, the viewport background
+   shows instead of a mismatched color. */
+html:has(body[data-bg="gold"])     { background-color: #110e04; }
+html:has(body[data-bg="water"])    { background-color: #020a10; }
+html:has(body[data-bg="tropical"]) { background-color: #020b05; }
+html:has(body[data-bg="midnight"]) { background-color: #04000a; }
+html:has(body[data-bg="sunset"])   { background-color: #0e0206; }
+
+/* Make theme-section elements transparent on ALL devices (not just mobile) so
+   the canvas gradient always shows through regardless of pointer type. On desktop
+   the canvas (z-index 0, position fixed) is what shows through. */
+body[data-bg] .theme-section {
+  background-color: transparent;
+}
+
 /* Gold — warm muted amber orbs, upper-left + lower-right */
 body[data-bg="gold"] {
   --theme-gradient:
@@ -529,16 +545,6 @@ body[data-bg] .announcement-bar-root {
   body[data-bg] #theme-gradient-overlay {
     background: var(--theme-gradient);
   }
-
-  body[data-bg] .theme-section {
-    background-color: transparent;
-  }
-
-  /* Fade main in so the gradient is visible during the skeleton/loading window */
-  body[data-bg] main {
-    animation: canvas-reveal 0.6s ease both;
-  }
-
 
 }
 
