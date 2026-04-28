@@ -294,16 +294,33 @@ export function ThemeBackgroundCanvas() {
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
 
+    // Detect Chrome Android: will-change causes compositor thrash on Chrome but
+    // is needed on iOS Safari to keep fixed-canvas from scrolling with the page.
+    const ua = navigator.userAgent;
+    const isChromeAndroid = isTouch &&
+      /Chrome\//.test(ua) && /Android/.test(ua) &&
+      !/EdgA\/|OPR\/|SamsungBrowser\//.test(ua);
+
+    // Apply will-change only on iOS Safari — on Chrome Android it causes the
+    // GPU layer to re-upload every frame during scroll, producing the "line" jank.
+    if (!isChromeAndroid) {
+      canvas.style.willChange = "transform";
+    }
+
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     let firstResize = true;
     let lastW = 0;
     let lastH = 0;
     const resize = () => {
       const newW = document.documentElement.clientWidth;
-      // Match the bitmap to the CSS display height (100lvh). canvas.offsetHeight
-      // forces a layout flush and returns the exact pixel value of 100lvh on every
-      // browser, so the bitmap is never stretched or zoomed relative to the display.
-      const newH = canvas.offsetHeight || Math.max(window.innerHeight, document.documentElement.clientHeight);
+      // canvas.offsetHeight returns the CSS-rendered height (100lvh) after layout.
+      // If it returns 0 (CSS not yet resolved, can happen on Chrome Android at
+      // mount time), force a layout flush then re-read.
+      let newH = canvas.offsetHeight;
+      if (!newH) {
+        void document.body.offsetHeight; // force layout
+        newH = canvas.offsetHeight || screen.height;
+      }
       if (firstResize) {
         canvas.width = newW;
         canvas.height = newH;
@@ -325,6 +342,19 @@ export function ThemeBackgroundCanvas() {
     };
     resize();
     window.addEventListener("resize", resize);
+
+    // Chrome Android: pause canvas animation during scroll so the GPU layer
+    // isn't re-uploaded every 33ms while the compositor is running. The last
+    // painted frame stays visible; the CSS gradient overlay behind it serves
+    // as a seamless backup. Animation resumes 150ms after scroll ends.
+    let isScrolling = false;
+    let scrollTimer: ReturnType<typeof setTimeout> | null = null;
+    const onScroll = () => {
+      isScrolling = true;
+      if (scrollTimer) clearTimeout(scrollTimer);
+      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
+    };
+    if (isChromeAndroid) window.addEventListener("scroll", onScroll, { passive: true });
 
     const renderFrame = () => {
       const theme = getTheme();
@@ -389,6 +419,9 @@ export function ThemeBackgroundCanvas() {
     const loop = (ts: number) => {
       state.animId = requestAnimationFrame(loop);
       if (document.hidden) return;
+      // Chrome Android: skip frame during scroll — keeps the GPU layer stable
+      // so the compositor doesn't show a stale or empty texture (the "line").
+      if (isChromeAndroid && isScrolling) return;
       if (ts - lastFrameTime < TARGET_MS) return;
       lastFrameTime = ts;
       renderFrame();
@@ -410,8 +443,10 @@ export function ThemeBackgroundCanvas() {
     return () => {
       cancelAnimationFrame(state.animId);
       if (resizeTimer) clearTimeout(resizeTimer);
+      if (scrollTimer) clearTimeout(scrollTimer);
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
+      if (isChromeAndroid) window.removeEventListener("scroll", onScroll);
     };
   }, [prefersReducedMotion, isTouch, buildParticles]);
 
@@ -422,7 +457,7 @@ export function ThemeBackgroundCanvas() {
       ref={canvasRef}
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 animate-canvas-reveal"
-      style={{ zIndex: 0, willChange: "transform", transform: "translateZ(0)", WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden", height: "100lvh" }}
+      style={{ zIndex: 0, transform: "translateZ(0)", WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden", height: "100lvh" }}
     />
   );
 }
