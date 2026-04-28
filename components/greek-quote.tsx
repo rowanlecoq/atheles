@@ -31,13 +31,13 @@ export function GreekQuote() {
 
   return (
     <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 py-12 sm:py-16">
-      <div className="absolute inset-0 bg-brand-dark/60" />
       <SlideshowMedia
         slotKey="interstitial"
         className="object-cover object-center"
         iframeClass="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] pointer-events-none"
         sizes="100vw"
       />
+      <div className="absolute inset-0 bg-brand-dark/60" />
       <FadeIn className="relative z-10 mx-auto max-w-2xl px-4 text-center">
         <p className="mb-3 font-heading text-sm italic leading-relaxed text-brand-pale-gold sm:text-base">
           &ldquo;{quote.text}&rdquo;

@@ -98,7 +98,7 @@ export function NewsletterSignup() {
         sizes="100vw"
       />
       <div className="absolute inset-0 bg-brand-dark/60" />
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/30 via-transparent to-brand-dark/30" />
+      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/30 via-transparent to-transparent" />
       <div className="relative z-10 mx-auto max-w-2xl px-4 text-center">
         {alreadySubscribed ? (
           <>
