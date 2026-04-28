@@ -300,11 +300,10 @@ export function ThemeBackgroundCanvas() {
     let lastH = 0;
     const resize = () => {
       const newW = document.documentElement.clientWidth;
-      // Use max of innerHeight and clientHeight: clientHeight is the layout
-      // viewport (stable during pinch-zoom), innerHeight is the visual viewport
-      // (grows when the iOS URL bar hides). Taking the max ensures the canvas
-      // always covers the full visual viewport without resizing during pinch-zoom.
-      const newH = Math.max(window.innerHeight, document.documentElement.clientHeight);
+      // Match the bitmap to the CSS display height (100lvh). canvas.offsetHeight
+      // forces a layout flush and returns the exact pixel value of 100lvh on every
+      // browser, so the bitmap is never stretched or zoomed relative to the display.
+      const newH = canvas.offsetHeight || Math.max(window.innerHeight, document.documentElement.clientHeight);
       if (firstResize) {
         canvas.width = newW;
         canvas.height = newH;
