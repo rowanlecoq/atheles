@@ -302,27 +302,25 @@ export function ThemeBackgroundCanvas() {
       /Chrome\//.test(ua) && /Android/.test(ua) &&
       !/EdgA\/|OPR\/|SamsungBrowser\//.test(ua);
 
-    if (!isChromeAndroid) {
-      canvas.style.willChange = "transform";
-    }
+    // Always promote the canvas to its own GPU compositing layer. Without it,
+    // Chrome Android defers main-thread canvas repaints during fast scroll,
+    // briefly showing blank (body bg) behind the transparent canvas.
+    canvas.style.willChange = "transform";
 
     let vvTimer: ReturnType<typeof setTimeout> | null = null;
     let onVVResize: (() => void) | null = null;
 
     if (isChromeAndroid) {
       // Fix for Chrome Android:
-      // 1. Draw the gradient on the canvas (same as iOS) — one composited layer,
-      //    no separate CSS overlay to desync from the canvas.
+      // 1. Draw the gradient on the canvas (same as iOS) — one composited layer.
       // 2. Canvas CSS height = calc(100svh + 80px). 100svh is a CONSTANT — it
-      //    never changes when the URL bar shows/hides — so the bitmap is never
-      //    stretched (no zoom). The +80px buffer extends the canvas past the
-      //    ~56px gap that appears when the URL bar hides, so body bg is never
-      //    exposed below the gradient.
-      // 3. No GPU compositing layer on canvas. The JSX inline style sets
-      //    transform:translateZ(0) which promotes to a GPU layer that desyncs
-      //    from scroll on Chrome Android. Overriding it here keeps the canvas
-      //    on the main-thread render path — no layer timing mismatch.
-      canvas.style.transform = "none";
+      //    never changes when the URL bar shows/hides — so the GPU texture is
+      //    never stretched (no zoom). The +80px buffer covers the ~56px gap that
+      //    appears when the URL bar hides so body bg is never exposed.
+      // 3. GPU compositing layer kept (transform:translateZ(0) from JSX). The
+      //    previous "desync" was caused by the bitmap being stretched when 100lvh
+      //    changed. With a constant height the GPU texture is stable — no stretch,
+      //    no slide, no blank during scroll.
       canvas.style.height = "calc(100svh + 80px)";
 
       const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
