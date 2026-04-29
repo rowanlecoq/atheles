@@ -3,7 +3,6 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { PROFILE_BACKGROUNDS } from "lib/profile-backgrounds";
 
-export const dynamic = "force-dynamic";
 
 const VALID_THEMES = PROFILE_BACKGROUNDS.map((b) => b.id);
 

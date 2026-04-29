@@ -6,7 +6,6 @@ import {
 } from "lib/auth/shopify-customer";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
 
 export async function POST(request: Request) {
   try {

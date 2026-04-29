@@ -2,7 +2,6 @@ import { getCustomerByToken, updateCustomerTier } from "lib/auth/shopify-custome
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
 
 const TIERS = [
   { name: "bronze", min: 0, max: 5000 },

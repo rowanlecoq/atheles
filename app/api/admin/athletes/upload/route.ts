@@ -3,7 +3,6 @@ import { getCustomerByToken } from "lib/auth/shopify-customer";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
 
 async function verifyAdmin() {
   const cookieStore = await cookies();

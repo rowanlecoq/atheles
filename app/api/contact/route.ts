@@ -1,7 +1,6 @@
 import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
 
 function escapeHtml(str: string): string {
   return str

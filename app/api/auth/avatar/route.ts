@@ -7,7 +7,6 @@ import {
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
-export const dynamic = "force-dynamic";
 
 const blobToken = process.env.BLOB_READ_WRITE_TOKEN;
 

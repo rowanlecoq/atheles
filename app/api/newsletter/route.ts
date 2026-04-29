@@ -3,7 +3,6 @@ import { updateCustomer } from "lib/auth/shopify-customer";
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
 
-export const dynamic = "force-dynamic";
 
 const domain = process.env.SHOPIFY_STORE_DOMAIN
   ? process.env.SHOPIFY_STORE_DOMAIN.startsWith("https://")
