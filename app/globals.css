@@ -543,11 +543,11 @@ body[data-bg] .announcement-bar-root {
     inset: 0;
     pointer-events: none;
   }
-  body[data-bg="gold"]     #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #1a1306 100%); }
-  body[data-bg="water"]    #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #040e1a 100%); }
-  body[data-bg="tropical"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #061a0b 100%); }
-  body[data-bg="midnight"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #0a0020 100%); }
-  body[data-bg="sunset"]   #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #1a0510 100%); }
+  body[data-bg="gold"]     #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #1a1306 100%); }
+  body[data-bg="water"]    #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #040e1a 100%); }
+  body[data-bg="tropical"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #061a0b 100%); }
+  body[data-bg="midnight"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #0a0020 100%); }
+  body[data-bg="sunset"]   #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #1a0510 100%); }
 
   body[data-bg] .theme-section {
     background-color: transparent;

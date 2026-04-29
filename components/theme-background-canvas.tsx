@@ -321,6 +321,14 @@ export function ThemeBackgroundCanvas() {
     let onVVResize: (() => void) | null = null;
 
     if (isChromeAndroid) {
+      // Pin the CSS overlay to the static small viewport height (URL bar always
+      // visible). This is constant — it never changes during URL bar animation —
+      // so the gradient proportions never change (no zoom) and the overlay never
+      // extends below the fold (no reveal / growing effect). The small gap when
+      // the URL bar hides is body bg, which matches the overlay's bottom color.
+      const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
+      if (overlay) overlay.style.height = "100svh";
+
       const vv = window.visualViewport;
 
       const setBitmapH = (h: number) => {
