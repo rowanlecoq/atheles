@@ -294,13 +294,9 @@ export function ThemeBackgroundCanvas() {
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
 
-    // Detect Chrome Android. On Chrome Android the canvas compositor layer
-    // de-syncs from scroll (causing the gradient to appear to slide rather than
-    // stay fixed) and the 100lvh bitmap calculation is unreliable (causing zoom).
-    // Fix: on Chrome Android, skip drawing the gradient on the canvas entirely —
-    // the pure-CSS ThemeGradientOverlay already holds the identical gradient and
-    // is handled natively by Chrome's CSS compositor. The canvas is only used for
-    // particles on Chrome Android.
+    // Detect Chrome Android. On Chrome Android 100lvh changes when the URL bar
+    // shows/hides, stretching any bitmap sized to it (zoom artefact). GPU canvas
+    // layers also desync from the scroll compositor, making the gradient slide.
     const ua = navigator.userAgent;
     const isChromeAndroid = isTouch &&
       /Chrome\//.test(ua) && /Android/.test(ua) &&
@@ -310,65 +306,57 @@ export function ThemeBackgroundCanvas() {
       canvas.style.willChange = "transform";
     }
 
-    // Chrome Android: position:fixed elements don't update in real-time during
-    // the URL-bar slide animation — so 100lvh reveals hidden gradient (growing
-    // effect) and bottom:0 leaves a gap. Fix: push the exact visualViewport
-    // height to both the CSS overlay and the canvas on every animation frame of
-    // the URL-bar transition. The overlay update is immediate so there is never
-    // a visible gap or reveal. The canvas bitmap update is debounced to avoid
-    // GPU re-uploads during scroll.
     let vvTimer: ReturnType<typeof setTimeout> | null = null;
     let onVVResize: (() => void) | null = null;
 
     if (isChromeAndroid) {
-      // position:fixed elements (both canvas and overlay) can briefly desync on
-      // Chrome Android during fast fling-scroll / overscroll, flashing body bg.
-      // Fix: paint the gradient on the <html> element instead. The browser renders
-      // html's background as the root viewport canvas — it is drawn first, before
-      // any composited layers, and is immune to scroll-compositor timing issues.
-      const applyHtmlBg = () => {
-        const g = getComputedStyle(document.body).getPropertyValue("--theme-gradient").trim();
-        if (g) {
-          document.documentElement.style.background = g;
-          document.body.style.backgroundColor = "transparent";
-        }
-      };
-      applyHtmlBg();
+      // Fix for Chrome Android:
+      // 1. Draw the gradient on the canvas (same as iOS) — one composited layer,
+      //    no separate CSS overlay to desync from the canvas.
+      // 2. Canvas CSS height = calc(100svh + 80px). 100svh is a CONSTANT — it
+      //    never changes when the URL bar shows/hides — so the bitmap is never
+      //    stretched (no zoom). The +80px buffer extends the canvas past the
+      //    ~56px gap that appears when the URL bar hides, so body bg is never
+      //    exposed below the gradient.
+      // 3. No GPU compositing layer on canvas. The JSX inline style sets
+      //    transform:translateZ(0) which promotes to a GPU layer that desyncs
+      //    from scroll on Chrome Android. Overriding it here keeps the canvas
+      //    on the main-thread render path — no layer timing mismatch.
+      canvas.style.transform = "none";
+      canvas.style.height = "calc(100svh + 80px)";
 
-      // Hide the CSS overlay — html element now provides the gradient.
       const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
       if (overlay) overlay.style.display = "none";
 
-      // Remove the GPU compositing layer from the canvas. The JSX inline style
-      // sets transform:translateZ(0) which promotes it to a GPU layer. Overriding
-      // it here keeps the canvas on the main-thread render path, in sync with the
-      // html background so there is no layer timing mismatch during scroll.
-      canvas.style.transform = "none";
-
       const vv = window.visualViewport;
 
-      const setBitmapH = (h: number) => {
-        const w = document.documentElement.clientWidth;
-        canvas.style.height = h + "px";
-        if (canvas.width !== w || canvas.height !== h) {
-          canvas.width = w;
-          canvas.height = h;
-          if (state.theme && state.theme in THEMES) {
-            state.particles = buildParticles(state.theme as ThemeKey, w, h);
-          }
-        }
-      };
+      // Bitmap height = 100svh in px + 80px buffer. On mount the URL bar is
+      // typically visible so vv.height ≈ 100svh.
+      const svhPx = Math.round(vv ? vv.height : window.innerHeight);
+      const initW = document.documentElement.clientWidth;
+      canvas.width = initW;
+      canvas.height = svhPx + 80;
+      if (state.theme && state.theme in THEMES) {
+        state.particles = buildParticles(state.theme as ThemeKey, initW, canvas.height);
+      }
 
-      let pendingH = 0;
+      // Only rebuild bitmap on genuine orientation change (width changes).
+      // URL-bar animation only changes height — ignoring it prevents zoom.
+      let lastVVWidth = initW;
       onVVResize = () => {
-        const h = Math.round(vv ? vv.height : window.innerHeight);
-        pendingH = h;
+        const newW = Math.round(vv ? vv.width : document.documentElement.clientWidth);
+        if (Math.abs(newW - lastVVWidth) < 20) return;
+        lastVVWidth = newW;
+        const newH = Math.round(vv ? vv.height : window.innerHeight) + 80;
         if (vvTimer) clearTimeout(vvTimer);
-        vvTimer = setTimeout(() => setBitmapH(pendingH), 300);
+        vvTimer = setTimeout(() => {
+          canvas.width = newW;
+          canvas.height = newH;
+          if (state.theme && state.theme in THEMES) {
+            state.particles = buildParticles(state.theme as ThemeKey, newW, newH);
+          }
+        }, 300);
       };
-
-      const initH = Math.round(vv ? vv.height : window.innerHeight);
-      setBitmapH(initH);
 
       if (vv) vv.addEventListener("resize", onVVResize, { passive: true });
     }
@@ -430,16 +418,9 @@ export function ThemeBackgroundCanvas() {
       const h = canvas.height;
 
       if (theme && theme in THEMES) {
-        if (isChromeAndroid) {
-          // On Chrome Android the CSS ThemeGradientOverlay handles the gradient
-          // background. Drawing it on the canvas causes the layer to desync from
-          // the scroll compositor (the gradient appears to slide instead of staying
-          // fixed) and produces a bitmap-zoom artefact. Clear the canvas so only
-          // particles are drawn on top of the CSS gradient.
-          ctx.clearRect(0, 0, w, h);
-        } else {
-          drawGradientBg(ctx, w, h, theme as ThemeKey);
-        }
+        // Both iOS and Chrome Android draw the gradient on canvas. Chrome Android
+        // has no GPU layer (transform overridden above) so no desync with scroll.
+        drawGradientBg(ctx, w, h, theme as ThemeKey);
       } else {
         ctx.clearRect(0, 0, w, h);
       }
@@ -502,10 +483,6 @@ export function ThemeBackgroundCanvas() {
       state.particles = t && t in THEMES
         ? buildParticles(t as ThemeKey, canvas.width, canvas.height)
         : [];
-      if (isChromeAndroid) {
-        const g = getComputedStyle(document.body).getPropertyValue("--theme-gradient").trim();
-        if (g) document.documentElement.style.background = g;
-      }
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
@@ -518,8 +495,6 @@ export function ThemeBackgroundCanvas() {
       if (isChromeAndroid) {
         window.removeEventListener("scroll", onScroll);
         if (onVVResize) window.visualViewport?.removeEventListener("resize", onVVResize);
-        document.documentElement.style.background = "";
-        document.body.style.backgroundColor = "";
       }
       if (vvTimer) clearTimeout(vvTimer);
     };

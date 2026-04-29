@@ -522,11 +522,14 @@ body[data-bg] .announcement-bar-root {
    Section backgrounds stripped so the canvas gradient shows through even
    during skeleton/loading states before slideshow images load. */
 @media (pointer: coarse) {
-  body[data-bg="gold"]     { background-color: #1a1306; }
-  body[data-bg="water"]    { background-color: #040e1a; }
-  body[data-bg="tropical"] { background-color: #061a0b; }
-  body[data-bg="midnight"] { background-color: #0a0020; }
-  body[data-bg="sunset"]   { background-color: #1a0510; }
+  /* Match the gradient base colours exactly (MOBILE_BG.*.base in theme-background-canvas)
+     so any gap not covered by the canvas (eg extreme overscroll) is the same colour
+     as the gradient bottom — no visible seam. */
+  body[data-bg="gold"]     { background-color: #110e04; }
+  body[data-bg="water"]    { background-color: #020a10; }
+  body[data-bg="tropical"] { background-color: #020b05; }
+  body[data-bg="midnight"] { background-color: #04000a; }
+  body[data-bg="sunset"]   { background-color: #0e0206; }
 
   body[data-bg] #theme-gradient-overlay {
     background: var(--theme-gradient);
@@ -543,11 +546,11 @@ body[data-bg] .announcement-bar-root {
     inset: 0;
     pointer-events: none;
   }
-  body[data-bg="gold"]     #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #1a1306 100%); }
-  body[data-bg="water"]    #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #040e1a 100%); }
-  body[data-bg="tropical"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #061a0b 100%); }
-  body[data-bg="midnight"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #0a0020 100%); }
-  body[data-bg="sunset"]   #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #1a0510 100%); }
+  body[data-bg="gold"]     #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #110e04 100%); }
+  body[data-bg="water"]    #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #020a10 100%); }
+  body[data-bg="tropical"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #020b05 100%); }
+  body[data-bg="midnight"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #04000a 100%); }
+  body[data-bg="sunset"]   #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #0e0206 100%); }
 
   body[data-bg] .theme-section {
     background-color: transparent;
