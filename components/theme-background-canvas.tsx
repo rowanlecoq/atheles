@@ -321,7 +321,6 @@ export function ThemeBackgroundCanvas() {
     let onVVResize: (() => void) | null = null;
 
     if (isChromeAndroid) {
-      const overlay = document.getElementById("theme-gradient-overlay");
       const vv = window.visualViewport;
 
       const setBitmapH = (h: number) => {
@@ -339,14 +338,12 @@ export function ThemeBackgroundCanvas() {
       let pendingH = 0;
       onVVResize = () => {
         const h = Math.round(vv ? vv.height : window.innerHeight);
-        if (overlay) overlay.style.height = h + "px";
         pendingH = h;
         if (vvTimer) clearTimeout(vvTimer);
         vvTimer = setTimeout(() => setBitmapH(pendingH), 300);
       };
 
       const initH = Math.round(vv ? vv.height : window.innerHeight);
-      if (overlay) overlay.style.height = initH + "px";
       setBitmapH(initH);
 
       if (vv) vv.addEventListener("resize", onVVResize, { passive: true });

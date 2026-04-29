@@ -532,6 +532,23 @@ body[data-bg] .announcement-bar-root {
     background: var(--theme-gradient);
   }
 
+  /* Fade the bottom ~10% of the gradient overlay to the body background colour.
+     The overlay is always height:100lvh. When the URL bar is visible the bottom
+     ~7% is hidden below the fold; when it slides away that area is revealed.
+     Fading it to the body base colour makes the reveal invisible — no growing
+     gradient edge, no solid bar. The ::after sits on top of the gradient. */
+  body[data-bg] #theme-gradient-overlay::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+  }
+  body[data-bg="gold"]     #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #1a1306 100%); }
+  body[data-bg="water"]    #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #040e1a 100%); }
+  body[data-bg="tropical"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #061a0b 100%); }
+  body[data-bg="midnight"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #0a0020 100%); }
+  body[data-bg="sunset"]   #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 90%, #1a0510 100%); }
+
   body[data-bg] .theme-section {
     background-color: transparent;
   }
