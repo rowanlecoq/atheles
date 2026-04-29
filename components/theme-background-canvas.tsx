@@ -328,7 +328,11 @@ export function ThemeBackgroundCanvas() {
       // the URL bar hides is body bg, which matches the overlay's bottom color.
       const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
       if (overlay) {
-        overlay.style.height = "100svh";
+        // 100svh is constant (never changes during URL-bar animation), so the
+        // gradient proportions stay fixed. The +120px buffer ensures the overlay
+        // always extends past the viewport bottom even when the URL bar hides
+        // and the viewport grows ~56px — body bg can never show through the gap.
+        overlay.style.height = "calc(100svh + 120px)";
         // Remove GPU compositing hints from the overlay on Chrome Android.
         // will-change:transform + translateZ(0) creates a GPU layer whose tiles
         // can briefly show blank during scroll, causing the gradient to flash.
