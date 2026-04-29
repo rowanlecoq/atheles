@@ -327,7 +327,16 @@ export function ThemeBackgroundCanvas() {
       // extends below the fold (no reveal / growing effect). The small gap when
       // the URL bar hides is body bg, which matches the overlay's bottom color.
       const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
-      if (overlay) overlay.style.height = "100svh";
+      if (overlay) {
+        overlay.style.height = "100svh";
+        // Remove GPU compositing hints from the overlay on Chrome Android.
+        // will-change:transform + translateZ(0) creates a GPU layer whose tiles
+        // can briefly show blank during scroll, causing the gradient to flash.
+        // Without these hints the overlay renders on the main thread, which is
+        // fine for a static background — no jank is noticeable.
+        overlay.style.transform = "none";
+        overlay.style.willChange = "auto";
+      }
 
       const vv = window.visualViewport;
 
