@@ -1,6 +1,6 @@
 export default {
   experimental: {
-    cacheComponents: true,
+    useCache: true,
     inlineCss: true,
   },
   redirects: async () => [
