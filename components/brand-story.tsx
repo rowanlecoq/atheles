@@ -41,7 +41,7 @@ export function BrandStory() {
 
         {/* Statue image — now supports slideshow */}
         <GradualBlur className="flex items-center justify-center">
-          <div className="theme-section relative h-[200px] w-full overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark sm:h-[240px] md:h-[280px]">
+          <div className="relative h-[200px] w-full overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark sm:h-[240px] md:h-[280px]">
             <SlideshowMedia
               slotKey="brand_story"
               className="object-cover object-[center_24%]"

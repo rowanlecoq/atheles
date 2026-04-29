@@ -37,7 +37,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group">
       {/* Image container */}
-      <div className="theme-section relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark">
         <Link href={`/product/${product.handle}`} prefetch={true}>
           {/* Primary image */}
           {product.featuredImage?.url && (
