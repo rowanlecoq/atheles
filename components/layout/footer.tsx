@@ -6,6 +6,10 @@ import { Suspense } from "react";
 import FooterMenu from "./footer-menu";
 
 const { SITE_NAME } = process.env;
+const copyrightDate = (() => {
+  const y = new Date().getFullYear();
+  return 2025 + (y > 2025 ? `-${y}` : "");
+})();
 
 const quickLinks = [
   { title: "Store", path: "/search" },
@@ -24,8 +28,6 @@ const helpLinks = [
 ];
 
 export default async function Footer() {
-  const currentYear = new Date().getFullYear();
-  const copyrightDate = 2025 + (currentYear > 2025 ? `-${currentYear}` : "");
   const skeleton =
     "w-full h-6 animate-pulse rounded-sm bg-brand-medium-grey/30";
   const menu = await getMenu("next-js-frontend-footer-menu");

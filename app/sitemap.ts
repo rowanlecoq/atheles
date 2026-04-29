@@ -9,6 +9,8 @@ type Route = {
 
 export const revalidate = 3600;
 
+const buildDate = new Date().toISOString();
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   validateEnvironmentVariables();
 
@@ -24,7 +26,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   const routesMap = staticPages.map((route) => ({
     url: `${baseUrl}${route}`,
-    lastModified: new Date().toISOString(),
+    lastModified: buildDate,
   }));
 
   const collectionsPromise = getCollections().then((collections) =>
