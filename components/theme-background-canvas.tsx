@@ -321,26 +321,29 @@ export function ThemeBackgroundCanvas() {
     let onVVResize: (() => void) | null = null;
 
     if (isChromeAndroid) {
-      // Pin the CSS overlay to the static small viewport height (URL bar always
-      // visible). This is constant — it never changes during URL bar animation —
-      // so the gradient proportions never change (no zoom) and the overlay never
-      // extends below the fold (no reveal / growing effect). The small gap when
-      // the URL bar hides is body bg, which matches the overlay's bottom color.
+      // position:fixed elements (both canvas and overlay) can briefly desync on
+      // Chrome Android during fast fling-scroll / overscroll, flashing body bg.
+      // Fix: paint the gradient on the <html> element instead. The browser renders
+      // html's background as the root viewport canvas — it is drawn first, before
+      // any composited layers, and is immune to scroll-compositor timing issues.
+      const applyHtmlBg = () => {
+        const g = getComputedStyle(document.body).getPropertyValue("--theme-gradient").trim();
+        if (g) {
+          document.documentElement.style.background = g;
+          document.body.style.backgroundColor = "transparent";
+        }
+      };
+      applyHtmlBg();
+
+      // Hide the CSS overlay — html element now provides the gradient.
       const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
-      if (overlay) {
-        // 100svh is constant (never changes during URL-bar animation), so the
-        // gradient proportions stay fixed. The +120px buffer ensures the overlay
-        // always extends past the viewport bottom even when the URL bar hides
-        // and the viewport grows ~56px — body bg can never show through the gap.
-        overlay.style.height = "calc(100svh + 120px)";
-        // Remove GPU compositing hints from the overlay on Chrome Android.
-        // will-change:transform + translateZ(0) creates a GPU layer whose tiles
-        // can briefly show blank during scroll, causing the gradient to flash.
-        // Without these hints the overlay renders on the main thread, which is
-        // fine for a static background — no jank is noticeable.
-        overlay.style.transform = "none";
-        overlay.style.willChange = "auto";
-      }
+      if (overlay) overlay.style.display = "none";
+
+      // Remove the GPU compositing layer from the canvas. The JSX inline style
+      // sets transform:translateZ(0) which promotes it to a GPU layer. Overriding
+      // it here keeps the canvas on the main-thread render path, in sync with the
+      // html background so there is no layer timing mismatch during scroll.
+      canvas.style.transform = "none";
 
       const vv = window.visualViewport;
 
@@ -499,6 +502,10 @@ export function ThemeBackgroundCanvas() {
       state.particles = t && t in THEMES
         ? buildParticles(t as ThemeKey, canvas.width, canvas.height)
         : [];
+      if (isChromeAndroid) {
+        const g = getComputedStyle(document.body).getPropertyValue("--theme-gradient").trim();
+        if (g) document.documentElement.style.background = g;
+      }
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
@@ -511,6 +518,8 @@ export function ThemeBackgroundCanvas() {
       if (isChromeAndroid) {
         window.removeEventListener("scroll", onScroll);
         if (onVVResize) window.visualViewport?.removeEventListener("resize", onVVResize);
+        document.documentElement.style.background = "";
+        document.body.style.backgroundColor = "";
       }
       if (vvTimer) clearTimeout(vvTimer);
     };
