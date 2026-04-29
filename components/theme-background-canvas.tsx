@@ -306,10 +306,50 @@ export function ThemeBackgroundCanvas() {
       /Chrome\//.test(ua) && /Android/.test(ua) &&
       !/EdgA\/|OPR\/|SamsungBrowser\//.test(ua);
 
-    // Apply will-change only on iOS Safari — not needed on Chrome Android since
-    // we're using CSS overlay for the background there.
     if (!isChromeAndroid) {
       canvas.style.willChange = "transform";
+    }
+
+    // Chrome Android: position:fixed elements don't update in real-time during
+    // the URL-bar slide animation — so 100lvh reveals hidden gradient (growing
+    // effect) and bottom:0 leaves a gap. Fix: push the exact visualViewport
+    // height to both the CSS overlay and the canvas on every animation frame of
+    // the URL-bar transition. The overlay update is immediate so there is never
+    // a visible gap or reveal. The canvas bitmap update is debounced to avoid
+    // GPU re-uploads during scroll.
+    let vvTimer: ReturnType<typeof setTimeout> | null = null;
+    let onVVResize: (() => void) | null = null;
+
+    if (isChromeAndroid) {
+      const overlay = document.getElementById("theme-gradient-overlay");
+      const vv = window.visualViewport;
+
+      const setBitmapH = (h: number) => {
+        const w = document.documentElement.clientWidth;
+        canvas.style.height = h + "px";
+        if (canvas.width !== w || canvas.height !== h) {
+          canvas.width = w;
+          canvas.height = h;
+          if (state.theme && state.theme in THEMES) {
+            state.particles = buildParticles(state.theme as ThemeKey, w, h);
+          }
+        }
+      };
+
+      let pendingH = 0;
+      onVVResize = () => {
+        const h = Math.round(vv ? vv.height : window.innerHeight);
+        if (overlay) overlay.style.height = h + "px";
+        pendingH = h;
+        if (vvTimer) clearTimeout(vvTimer);
+        vvTimer = setTimeout(() => setBitmapH(pendingH), 300);
+      };
+
+      const initH = Math.round(vv ? vv.height : window.innerHeight);
+      if (overlay) overlay.style.height = initH + "px";
+      setBitmapH(initH);
+
+      if (vv) vv.addEventListener("resize", onVVResize, { passive: true });
     }
 
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -317,6 +357,7 @@ export function ThemeBackgroundCanvas() {
     let lastW = 0;
     let lastH = 0;
     const resize = () => {
+      if (isChromeAndroid) return;
       const newW = document.documentElement.clientWidth;
       let newH = canvas.offsetHeight;
       if (!newH) {
@@ -345,10 +386,6 @@ export function ThemeBackgroundCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    // Chrome Android: pause canvas animation during scroll so the GPU layer
-    // isn't re-uploaded every 33ms while the compositor is running. The last
-    // painted frame stays visible; the CSS gradient overlay behind it serves
-    // as a seamless backup. Animation resumes 150ms after scroll ends.
     let isScrolling = false;
     let scrollTimer: ReturnType<typeof setTimeout> | null = null;
     const onScroll = () => {
@@ -453,7 +490,11 @@ export function ThemeBackgroundCanvas() {
       if (scrollTimer) clearTimeout(scrollTimer);
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
-      if (isChromeAndroid) window.removeEventListener("scroll", onScroll);
+      if (isChromeAndroid) {
+        window.removeEventListener("scroll", onScroll);
+        if (onVVResize) window.visualViewport?.removeEventListener("resize", onVVResize);
+      }
+      if (vvTimer) clearTimeout(vvTimer);
     };
   }, [prefersReducedMotion, isTouch, buildParticles]);
 
