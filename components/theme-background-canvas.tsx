@@ -294,17 +294,29 @@ export function ThemeBackgroundCanvas() {
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
 
-    // Detect Chrome Android: will-change causes compositor thrash on Chrome but
-    // is needed on iOS Safari to keep fixed-canvas from scrolling with the page.
+    // Detect Chrome Android. On Chrome Android the canvas compositor layer
+    // de-syncs from scroll (causing the gradient to appear to slide rather than
+    // stay fixed) and the 100lvh bitmap calculation is unreliable (causing zoom).
+    // Fix: on Chrome Android, skip drawing the gradient on the canvas entirely —
+    // the pure-CSS ThemeGradientOverlay already holds the identical gradient and
+    // is handled natively by Chrome's CSS compositor. The canvas is only used for
+    // particles on Chrome Android.
     const ua = navigator.userAgent;
     const isChromeAndroid = isTouch &&
       /Chrome\//.test(ua) && /Android/.test(ua) &&
       !/EdgA\/|OPR\/|SamsungBrowser\//.test(ua);
 
-    // Apply will-change only on iOS Safari — on Chrome Android it causes the
-    // GPU layer to re-upload every frame during scroll, producing the "line" jank.
+    // Apply will-change only on iOS Safari — not needed on Chrome Android since
+    // we're using CSS overlay for the background there.
     if (!isChromeAndroid) {
       canvas.style.willChange = "transform";
+    }
+
+    // On Chrome Android, pin canvas dimensions to screen.height to avoid the
+    // 100lvh calculation mismatch that causes particle-position zoom.
+    const chromeH = isChromeAndroid ? (screen?.height || window.innerHeight) : 0;
+    if (isChromeAndroid) {
+      canvas.style.height = chromeH + "px";
     }
 
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
@@ -313,13 +325,19 @@ export function ThemeBackgroundCanvas() {
     let lastH = 0;
     const resize = () => {
       const newW = document.documentElement.clientWidth;
-      // canvas.offsetHeight returns the CSS-rendered height (100lvh) after layout.
-      // If it returns 0 (CSS not yet resolved, can happen on Chrome Android at
-      // mount time), force a layout flush then re-read.
-      let newH = canvas.offsetHeight;
-      if (!newH) {
-        void document.body.offsetHeight; // force layout
-        newH = canvas.offsetHeight || screen.height;
+      // On Chrome Android use screen.height (stable, ≈ 100lvh) to avoid the
+      // 100lvh resolution race that produces a zoomed bitmap.
+      // On other browsers: canvas.offsetHeight forces layout and returns the
+      // exact CSS-rendered height (100lvh).
+      let newH: number;
+      if (isChromeAndroid) {
+        newH = chromeH;
+      } else {
+        newH = canvas.offsetHeight;
+        if (!newH) {
+          void document.body.offsetHeight; // force layout
+          newH = canvas.offsetHeight || screen.height;
+        }
       }
       if (firstResize) {
         canvas.width = newW;
@@ -370,11 +388,16 @@ export function ThemeBackgroundCanvas() {
       const h = canvas.height;
 
       if (theme && theme in THEMES) {
-        // Canvas draws the gradient on all devices so mobile and desktop match.
-        // On mobile the CSS overlay (#theme-gradient-overlay) holds the same
-        // gradient as a pure-CSS fallback for the rare frame the canvas layer
-        // is dropped by iOS compositing during scroll.
-        drawGradientBg(ctx, w, h, theme as ThemeKey);
+        if (isChromeAndroid) {
+          // On Chrome Android the CSS ThemeGradientOverlay handles the gradient
+          // background. Drawing it on the canvas causes the layer to desync from
+          // the scroll compositor (the gradient appears to slide instead of staying
+          // fixed) and produces a bitmap-zoom artefact. Clear the canvas so only
+          // particles are drawn on top of the CSS gradient.
+          ctx.clearRect(0, 0, w, h);
+        } else {
+          drawGradientBg(ctx, w, h, theme as ThemeKey);
+        }
       } else {
         ctx.clearRect(0, 0, w, h);
       }

@@ -536,6 +536,12 @@ body[data-bg] .announcement-bar-root {
     background-color: transparent;
   }
 
+  /* Footer has bg-brand-dark but is not a theme-section, so strip it on mobile
+     so the gradient shows through instead of a solid bar at the bottom. */
+  body[data-bg] footer {
+    background-color: transparent;
+  }
+
   /* Fade the entire page content in so the gradient overlay is visible
      during the brief skeleton/loading window — mirrors the canvas-reveal
      fade that desktop uses but applied to main instead of the canvas. */
