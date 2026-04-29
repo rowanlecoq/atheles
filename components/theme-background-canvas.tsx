@@ -312,32 +312,16 @@ export function ThemeBackgroundCanvas() {
       canvas.style.willChange = "transform";
     }
 
-    // On Chrome Android, pin canvas dimensions to screen.height to avoid the
-    // 100lvh calculation mismatch that causes particle-position zoom.
-    const chromeH = isChromeAndroid ? (screen?.height || window.innerHeight) : 0;
-    if (isChromeAndroid) {
-      canvas.style.height = chromeH + "px";
-    }
-
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
     let firstResize = true;
     let lastW = 0;
     let lastH = 0;
     const resize = () => {
       const newW = document.documentElement.clientWidth;
-      // On Chrome Android use screen.height (stable, ≈ 100lvh) to avoid the
-      // 100lvh resolution race that produces a zoomed bitmap.
-      // On other browsers: canvas.offsetHeight forces layout and returns the
-      // exact CSS-rendered height (100lvh).
-      let newH: number;
-      if (isChromeAndroid) {
-        newH = chromeH;
-      } else {
-        newH = canvas.offsetHeight;
-        if (!newH) {
-          void document.body.offsetHeight; // force layout
-          newH = canvas.offsetHeight || screen.height;
-        }
+      let newH = canvas.offsetHeight;
+      if (!newH) {
+        void document.body.offsetHeight;
+        newH = canvas.offsetHeight || window.innerHeight;
       }
       if (firstResize) {
         canvas.width = newW;
@@ -480,7 +464,7 @@ export function ThemeBackgroundCanvas() {
       ref={canvasRef}
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 animate-canvas-reveal"
-      style={{ zIndex: 0, transform: "translateZ(0)", WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden", height: "100lvh" }}
+      style={{ zIndex: 0, transform: "translateZ(0)", WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden" }}
     />
   );
 }
