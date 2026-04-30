@@ -312,23 +312,26 @@ export function ThemeBackgroundCanvas() {
 
     if (isChromeAndroid) {
       // Chrome Android fix:
-      // The canvas used to draw the gradient itself, but the GPU compositor
-      // can briefly show an empty canvas texture the instant a scroll gesture
-      // starts — one frame of solid body-bg instead of gradient.
-      // Solution: hand gradient duty back to the CSS overlay (which is handled
-      // natively by the compositor and never flashes). The canvas handles only
-      // particles/rays on a transparent background.
-      //
-      // Both canvas and overlay use calc(100svh + 80px) — 100svh is constant
-      // regardless of URL-bar animation so neither element ever zooms/stretches.
-      canvas.style.height = "calc(100svh + 80px)";
+      // Restore the body's gradient background that the mobile CSS removes
+      // (pointer:coarse sets background-image:none on body to let canvas handle it).
+      // background-attachment:fixed on the body is handled natively by Chrome Android's
+      // rendering engine — it is part of the base layer and NEVER flashes during scroll,
+      // unlike a canvas GPU layer which briefly shows an empty texture when the scroll
+      // compositor first takes over.
+      // The canvas layer (below) stays transparent; only particles/rays are drawn on it.
+      const currentTheme = getTheme();
+      if (currentTheme && currentTheme in THEMES) {
+        // Inline style overrides the author-stylesheet background-image:none.
+        // Set background shorthand first (parses gradient + base colour from var()),
+        // then re-set attachment (shorthand resets it to scroll).
+        document.body.style.background = "var(--theme-gradient)";
+        document.body.style.backgroundAttachment = "fixed";
+      }
 
       const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
-      if (overlay) {
-        // Keep visible — CSS gradient is stable. Lock to same constant height
-        // as the canvas so the gradient never rescales when URL bar moves.
-        overlay.style.height = "calc(100svh + 80px)";
-      }
+      if (overlay) overlay.style.display = "none";
+
+      canvas.style.height = "calc(100svh + 80px)";
 
       const vv = window.visualViewport;
 
@@ -487,6 +490,15 @@ export function ThemeBackgroundCanvas() {
       state.particles = t && t in THEMES
         ? buildParticles(t as ThemeKey, canvas.width, canvas.height)
         : [];
+      if (isChromeAndroid) {
+        if (t && t in THEMES) {
+          document.body.style.background = "var(--theme-gradient)";
+          document.body.style.backgroundAttachment = "fixed";
+        } else {
+          document.body.style.background = "";
+          document.body.style.backgroundAttachment = "";
+        }
+      }
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
@@ -499,6 +511,8 @@ export function ThemeBackgroundCanvas() {
       if (isChromeAndroid) {
         window.removeEventListener("scroll", onScroll);
         if (onVVResize) window.visualViewport?.removeEventListener("resize", onVVResize);
+        document.body.style.background = "";
+        document.body.style.backgroundAttachment = "";
       }
       if (vvTimer) clearTimeout(vvTimer);
     };
