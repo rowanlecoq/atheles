@@ -464,6 +464,15 @@ body[data-bg="sunset"] {
   animation: canvas-reveal 0.8s ease 0.05s both;
 }
 
+/* On touch, the CSS overlay is already showing the gradient before the canvas
+   hydrates — so the canvas reveal doesn't need a long fade. Cut it to 150ms
+   with no delay so body bg is never visibly exposed during the transition. */
+@media (pointer: coarse) {
+  .animate-canvas-reveal {
+    animation: canvas-reveal 0.15s ease both;
+  }
+}
+
 /* On touch devices, background-attachment:fixed is broken on iOS Safari.
    The canvas draws the gradient as a single position:fixed layer alongside
    particles/rays so nothing fights or disconnects during scroll/zoom. */
@@ -534,23 +543,6 @@ body[data-bg] .announcement-bar-root {
   body[data-bg] #theme-gradient-overlay {
     background: var(--theme-gradient);
   }
-
-  /* Fade the bottom ~10% of the gradient overlay to the body background colour.
-     The overlay is always height:100lvh. When the URL bar is visible the bottom
-     ~7% is hidden below the fold; when it slides away that area is revealed.
-     Fading it to the body base colour makes the reveal invisible — no growing
-     gradient edge, no solid bar. The ::after sits on top of the gradient. */
-  body[data-bg] #theme-gradient-overlay::after {
-    content: "";
-    position: absolute;
-    inset: 0;
-    pointer-events: none;
-  }
-  body[data-bg="gold"]     #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #110e04 100%); }
-  body[data-bg="water"]    #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #020a10 100%); }
-  body[data-bg="tropical"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #020b05 100%); }
-  body[data-bg="midnight"] #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #04000a 100%); }
-  body[data-bg="sunset"]   #theme-gradient-overlay::after { background: linear-gradient(to bottom, transparent 98%, #0e0206 100%); }
 
   body[data-bg] .theme-section {
     background-color: transparent;
