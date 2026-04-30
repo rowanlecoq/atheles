@@ -548,13 +548,10 @@ body[data-bg] .announcement-bar-root {
     background-color: transparent;
   }
 
-  /* All sections and the footer inside the page must be transparent on themed
-     pages so the canvas gradient is never blocked by a solid bg-brand-dark box.
-     This covers components that lack the theme-section class (carousel, etc.)
-     and the footer which explicitly carries bg-brand-dark. */
-  body[data-bg] main section,
-  body[data-bg] main footer,
-  body[data-bg] footer {
+  /* All sections inside the page must be transparent on themed pages so the
+     canvas gradient is never blocked by a solid bg-brand-dark box.
+     This covers components that lack the theme-section class (carousel, etc.). */
+  body[data-bg] main section {
     background-color: transparent;
   }
 
