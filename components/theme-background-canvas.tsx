@@ -311,20 +311,24 @@ export function ThemeBackgroundCanvas() {
     let onVVResize: (() => void) | null = null;
 
     if (isChromeAndroid) {
-      // Fix for Chrome Android:
-      // 1. Draw the gradient on the canvas (same as iOS) — one composited layer.
-      // 2. Canvas CSS height = calc(100svh + 80px). 100svh is a CONSTANT — it
-      //    never changes when the URL bar shows/hides — so the GPU texture is
-      //    never stretched (no zoom). The +80px buffer covers the ~56px gap that
-      //    appears when the URL bar hides so body bg is never exposed.
-      // 3. GPU compositing layer kept (transform:translateZ(0) from JSX). The
-      //    previous "desync" was caused by the bitmap being stretched when 100lvh
-      //    changed. With a constant height the GPU texture is stable — no stretch,
-      //    no slide, no blank during scroll.
+      // Chrome Android fix:
+      // The canvas used to draw the gradient itself, but the GPU compositor
+      // can briefly show an empty canvas texture the instant a scroll gesture
+      // starts — one frame of solid body-bg instead of gradient.
+      // Solution: hand gradient duty back to the CSS overlay (which is handled
+      // natively by the compositor and never flashes). The canvas handles only
+      // particles/rays on a transparent background.
+      //
+      // Both canvas and overlay use calc(100svh + 80px) — 100svh is constant
+      // regardless of URL-bar animation so neither element ever zooms/stretches.
       canvas.style.height = "calc(100svh + 80px)";
 
       const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
-      if (overlay) overlay.style.display = "none";
+      if (overlay) {
+        // Keep visible — CSS gradient is stable. Lock to same constant height
+        // as the canvas so the gradient never rescales when URL bar moves.
+        overlay.style.height = "calc(100svh + 80px)";
+      }
 
       const vv = window.visualViewport;
 
@@ -415,11 +419,13 @@ export function ThemeBackgroundCanvas() {
       const w = canvas.width;
       const h = canvas.height;
 
-      if (theme && theme in THEMES) {
-        // Both iOS and Chrome Android draw the gradient on canvas. Chrome Android
-        // has no GPU layer (transform overridden above) so no desync with scroll.
+      if (!isChromeAndroid && theme && theme in THEMES) {
+        // iOS: canvas draws the gradient (background-attachment:fixed is broken
+        // on iOS Safari so CSS alone can't do it correctly).
         drawGradientBg(ctx, w, h, theme as ThemeKey);
       } else {
+        // Chrome Android: CSS overlay handles the gradient; canvas is transparent
+        // so the overlay shows through. Only particles/rays are drawn here.
         ctx.clearRect(0, 0, w, h);
       }
 
