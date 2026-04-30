@@ -548,6 +548,22 @@ body[data-bg] .announcement-bar-root {
     background-color: transparent;
   }
 
+  /* All sections and the footer inside the page must be transparent on themed
+     pages so the canvas gradient is never blocked by a solid bg-brand-dark box.
+     This covers components that lack the theme-section class (carousel, etc.)
+     and the footer which explicitly carries bg-brand-dark. */
+  body[data-bg] main section,
+  body[data-bg] main footer,
+  body[data-bg] footer {
+    background-color: transparent;
+  }
+
+  /* Hero bottom-fade bar uses from-brand-dark — hide it on themed pages so
+     the gradient isn't blocked by a solid dark band as the hero scrolls out. */
+  body[data-bg] .hero-bottom-fade {
+    display: none;
+  }
+
   /* Fade the entire page content in so the gradient overlay is visible
      during the brief skeleton/loading window — mirrors the canvas-reveal
      fade that desktop uses but applied to main instead of the canvas. */
