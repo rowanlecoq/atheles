@@ -82,11 +82,11 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.50, 0.35, 0.70, 0.60,  30, 180, 220, 0.30, 0.60], // cx centred (was 0.30)
   ]},
   tropical: { base: '#020b05', radial: [
-    [0.50, 1.00, 1.00, 0.50,  16, 185, 129, 0.50, 0.60],
-    [0.80, 0.80, 0.65, 0.50, 250, 180,  50, 0.30, 0.55],
-    [0.50, 0.50, 0.55, 0.55,  20, 200, 160, 0.38, 0.55],
-    [0.50, 0.25, 0.60, 0.70, 245, 158,  11, 0.55, 0.60], // cx centred (was 0.75)
-    [0.25, 0.70, 0.70, 0.60,  16, 185, 129, 0.70, 0.60],
+    [0.50, 1.00, 1.20, 0.55,  16, 185, 129, 0.32, 0.65],  // bottom wide green wash
+    [0.78, 0.72, 0.72, 0.55, 250, 180,  50, 0.22, 0.58],  // lower-right amber haze
+    [0.50, 0.48, 0.68, 0.68,  20, 200, 160, 0.20, 0.58],  // centre teal (wider, softer)
+    [0.48, 0.22, 0.68, 0.72, 245, 158,  11, 0.24, 0.62],  // upper-centre amber (softer)
+    [0.18, 0.65, 0.82, 0.68,  16, 185, 129, 0.28, 0.62],  // left green (was 0.70 → 0.28)
   ]},
   midnight: { base: '#04000a', radial: [
     [0.50, 1.00, 1.00, 0.50,  70,  50, 200, 0.50, 0.60],
@@ -201,12 +201,12 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "tropical") {
-    for (let i = 0; i < 5; i++) {
-      const angle   = (25 + i * 3) * (Math.PI / 180);
-      const stripH  = 30 + i * 10;
-      const opacity = 0.060 + i * 0.015;
-      const cy = h * (0.08 + i * 0.18) + Math.sin(time * 0.35 + i * 1.5) * 15;
-      const rgb = i % 2 === 1 ? "245,158,11" : "16,185,129";
+    for (let i = 0; i < 9; i++) {
+      const angle   = (18 + i * 4.5) * (Math.PI / 180);
+      const stripH  = 22 + i * 8;
+      const opacity = 0.050 + i * 0.010;
+      const cy = h * (0.05 + i * 0.11) + Math.sin(time * 0.35 + i * 1.5) * 15;
+      const rgb = i % 3 === 0 ? "16,185,129" : i % 3 === 1 ? "245,158,11" : "0,210,175";
       drawBeam(ctx, w, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
