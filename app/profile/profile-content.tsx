@@ -1371,7 +1371,6 @@ export default function ProfileContent() {
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">background</h2>
-            <span className="text-[9px] font-mono tracking-widest text-brand-gold/60 uppercase animate-beta-pulse">beta</span>
           </div>
           {themeSaving && (
             <span className="text-xs text-brand-grey/60">saving...</span>
