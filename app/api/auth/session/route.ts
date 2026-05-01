@@ -69,6 +69,8 @@ export async function GET() {
         globalTheme: customer.globalTheme,
         isAthlete: customer.isAthlete,
         isAdmin: customer.isAdmin,
+        discordLinked: !!customer.discordId,
+        discordUsername: customer.discordUsername,
         discountCode: customer.isAthlete
           ? (process.env.DISCOUNT_ATHLETE || "athelesathlete")
           : (discountCodes[tierName] || null),

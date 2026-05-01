@@ -119,6 +119,17 @@ export async function updateCustomerTier(
     { input: { id: adminCustomer.id, tags: newTags } },
   );
 
+  // Sync Discord role if customer has linked their account
+  const discordTag = adminCustomer.tags.find(
+    (t) => t.startsWith("discord:") && !t.startsWith("discord_username:"),
+  );
+  if (discordTag) {
+    const discordId = discordTag.replace("discord:", "");
+    import("lib/discord").then(({ assignDiscordRole }) =>
+      assignDiscordRole(discordId, tier).catch(() => {}),
+    );
+  }
+
   return { success: true };
 }
 
@@ -546,6 +557,8 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   globalTheme: boolean;
   isAthlete: boolean;
   isAdmin: boolean;
+  discordId: string | null;
+  discordUsername: string | null;
 } | null> {
   if (!endpoint) return null;
 
@@ -591,6 +604,8 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   let globalTheme = false;
   let isAthlete = false;
   let isAdmin = false;
+  let discordId: string | null = null;
+  let discordUsername: string | null = null;
   if (adminEndpoint && adminToken) {
     try {
       const adminCustomer = await shopifyAdminFetch<{
@@ -611,6 +626,10 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       globalTheme = tags.includes("globaltheme:on");
       isAthlete = tags.includes("tier:athlete");
       isAdmin = tags.includes("tier:admin");
+      const discordTag = tags.find((t) => t.startsWith("discord:") && !t.startsWith("discord_username:"));
+      discordId = discordTag ? discordTag.replace("discord:", "") : null;
+      const discordUsernameTag = tags.find((t) => t.startsWith("discord_username:"));
+      discordUsername = discordUsernameTag ? discordUsernameTag.replace("discord_username:", "") : null;
     } catch {
       // Tags not available
     }
@@ -632,5 +651,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     globalTheme,
     isAthlete,
     isAdmin,
+    discordId,
+    discordUsername,
   };
 }
