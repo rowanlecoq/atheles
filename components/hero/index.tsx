@@ -9,14 +9,16 @@ export function Hero() {
   return (
     <section className="animate-hero-section-enter theme-section relative overflow-hidden bg-brand-dark">
       {/* Background — slideshow with crossfade */}
-      <SlideshowMedia
-        slotKey="hero_bg"
-        className="object-cover object-center"
-        iframeClass="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] pointer-events-none"
-        sizes="100vw"
-        priority
-      />
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/76 via-brand-dark/70 to-brand-dark/90" />
+      <div className="hero-bg-media">
+        <SlideshowMedia
+          slotKey="hero_bg"
+          className="object-cover object-center"
+          iframeClass="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] pointer-events-none"
+          sizes="100vw"
+          priority
+        />
+      </div>
+      <div className="hero-overlay absolute inset-0 bg-gradient-to-b from-brand-dark/76 via-brand-dark/70 to-brand-dark/90" />
       <GoldParticles count={16} />
 
       {/* 3-column grid: image | center | image */}
