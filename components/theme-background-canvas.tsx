@@ -328,20 +328,21 @@ export function ThemeBackgroundCanvas() {
       //    regardless of URL-bar animation so neither element ever zooms.
       const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
       if (overlay) {
-        // Keep overlay visible and lock to a constant height.
-        overlay.style.height = "calc(100svh + 80px)";
+        // Lock to small-viewport height — svh is constant regardless of URL-bar
+        // animation so the gradient never resizes or "grows" during scroll.
+        overlay.style.height = "100svh";
       }
 
-      canvas.style.height = "calc(100svh + 80px)";
+      canvas.style.height = "100svh";
 
       const vv = window.visualViewport;
 
-      // Bitmap height = 100svh in px + 80px buffer. On mount the URL bar is
-      // typically visible so vv.height ≈ 100svh.
+      // Bitmap height matches svh in px. URL-bar animation only changes the
+      // visual viewport height; ignoring it prevents the zoom/grow artefact.
       const svhPx = Math.round(vv ? vv.height : window.innerHeight);
       const initW = document.documentElement.clientWidth;
       canvas.width = initW;
-      canvas.height = svhPx + 80;
+      canvas.height = svhPx;
       if (state.theme && state.theme in THEMES) {
         state.particles = buildParticles(state.theme as ThemeKey, initW, canvas.height);
       }
@@ -353,7 +354,7 @@ export function ThemeBackgroundCanvas() {
         const newW = Math.round(vv ? vv.width : document.documentElement.clientWidth);
         if (Math.abs(newW - lastVVWidth) < 20) return;
         lastVVWidth = newW;
-        const newH = Math.round(vv ? vv.height : window.innerHeight) + 80;
+        const newH = Math.round(vv ? vv.height : window.innerHeight);
         if (vvTimer) clearTimeout(vvTimer);
         vvTimer = setTimeout(() => {
           canvas.width = newW;
@@ -515,7 +516,7 @@ export function ThemeBackgroundCanvas() {
       ref={canvasRef}
       aria-hidden="true"
       className="pointer-events-none fixed inset-0 animate-canvas-reveal"
-      style={{ zIndex: 0, transform: "translateZ(0)", WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden", height: "100lvh" }}
+      style={{ zIndex: 0, transform: "translateZ(0)", WebkitBackfaceVisibility: "hidden", backfaceVisibility: "hidden", height: "100svh" }}
     />
   );
 }

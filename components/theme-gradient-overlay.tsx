@@ -9,7 +9,7 @@ export function ThemeGradientOverlay() {
       id="theme-gradient-overlay"
       aria-hidden="true"
       className="theme-gradient-overlay pointer-events-none"
-      style={{ position: "fixed", top: 0, left: 0, right: 0, height: "100lvh", zIndex: 0 }}
+      style={{ position: "fixed", top: 0, left: 0, right: 0, height: "100svh", zIndex: 0 }}
     />
   );
 }

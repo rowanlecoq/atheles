@@ -561,17 +561,6 @@ body[data-bg] .announcement-bar-root {
     display: none;
   }
 
-  /* Hide the hero's internal slideshow background and dark gradient overlay on
-     themed pages — the canvas/overlay gradient shows through instead. Without
-     this, the hero_bg SlideshowMedia + its near-opaque dark overlay make the
-     entire hero area appear as a solid dark block, hiding the theme gradient. */
-  body[data-bg] .hero-bg-media {
-    display: none;
-  }
-  body[data-bg] .hero-overlay {
-    display: none;
-  }
-
   /* Fade the entire page content in so the gradient overlay is visible
      during the brief skeleton/loading window — mirrors the canvas-reveal
      fade that desktop uses but applied to main instead of the canvas. */
