@@ -29,7 +29,7 @@ const ROLE_IDS = {
 };
 
 const TIER_META = {
-  bronze:   { label: "Bronze",   color: 0xa09378, emoji: "🥉" }, // warm tan — base member color
+  bronze:   { label: "Bronze",   color: 0xb8916a, emoji: "🥉" }, // richer copper, one step above base member
   silver:   { label: "Silver",   color: 0x9ba5ad, emoji: "🥈" }, // cool blue-grey
   gold:     { label: "Gold",     color: 0xc9a96e, emoji: "🥇" }, // muted warm gold
   platinum: { label: "Platinum", color: 0x8ba8b5, emoji: "💎" }, // dusty steel blue
