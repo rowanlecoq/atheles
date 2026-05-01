@@ -671,8 +671,6 @@ export default function ProfileContent() {
                 className="h-64 w-64 object-cover sm:h-80 sm:w-80"
               />
             </div>
-            <p className="font-heading text-xl text-brand-gold">{user.name}</p>
-            <p className="text-sm text-brand-grey">{user.email}</p>
           </motion.div>
         </motion.div>,
         document.body,
@@ -704,7 +702,7 @@ export default function ProfileContent() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="absolute -bottom-4 -right-4 flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+            className="absolute -bottom-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
             aria-label="Change profile photo"
           >
             <svg
