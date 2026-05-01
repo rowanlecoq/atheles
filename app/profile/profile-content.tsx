@@ -198,6 +198,9 @@ export default function ProfileContent() {
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [themeGlobal, setThemeGlobal] = useState(false);
   const [themeSaving, setThemeSaving] = useState(false);
+  const [discordToken, setDiscordToken] = useState<string | null>(null);
+  const [discordLoading, setDiscordLoading] = useState(false);
+  const [discordCopied, setDiscordCopied] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -487,6 +490,18 @@ export default function ProfileContent() {
     }
     setEditing(false);
     setSaveMessage("");
+  };
+
+  const generateDiscordToken = async () => {
+    setDiscordLoading(true);
+    setDiscordToken(null);
+    try {
+      const res = await fetch("/api/discord/generate-token", { method: "POST" });
+      const data = await res.json();
+      if (data.token) setDiscordToken(data.token);
+    } finally {
+      setDiscordLoading(false);
+    }
   };
 
   const handleThemeChange = async (theme: string | null, global: boolean) => {
@@ -1437,6 +1452,59 @@ export default function ProfileContent() {
                   themeGlobal ? "translate-x-5" : "translate-x-0"
                 }`}
               />
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* Discord Link */}
+      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
+        <div className="mb-4 flex items-center gap-2">
+          <svg viewBox="0 0 24 24" className="h-4 w-4 fill-[#5865F2]" aria-hidden="true">
+            <path d="M20.317 4.37a19.791 19.791 0 0 0-4.885-1.515.074.074 0 0 0-.079.037c-.21.375-.444.864-.608 1.25a18.27 18.27 0 0 0-5.487 0 12.64 12.64 0 0 0-.617-1.25.077.077 0 0 0-.079-.037A19.736 19.736 0 0 0 3.677 4.37a.07.07 0 0 0-.032.027C.533 9.046-.32 13.58.099 18.057c.002.022.015.043.03.054a19.9 19.9 0 0 0 5.993 3.03.078.078 0 0 0 .084-.028c.462-.63.874-1.295 1.226-1.994a.076.076 0 0 0-.041-.106 13.107 13.107 0 0 1-1.872-.892.077.077 0 0 1-.008-.128 10.2 10.2 0 0 0 .372-.292.074.074 0 0 1 .077-.01c3.928 1.793 8.18 1.793 12.062 0a.074.074 0 0 1 .078.01c.12.098.246.198.373.292a.077.077 0 0 1-.006.127 12.299 12.299 0 0 1-1.873.892.077.077 0 0 0-.041.107c.36.698.772 1.362 1.225 1.993a.076.076 0 0 0 .084.028 19.839 19.839 0 0 0 6.002-3.03.077.077 0 0 0 .032-.054c.5-5.177-.838-9.674-3.549-13.66a.061.061 0 0 0-.031-.03z" />
+          </svg>
+          <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">discord</h2>
+        </div>
+        <p className="mb-4 text-sm text-brand-grey">
+          Link your Discord account to get your loyalty rank role automatically synced in our server.
+        </p>
+        {!discordToken ? (
+          <button
+            type="button"
+            onClick={generateDiscordToken}
+            disabled={discordLoading}
+            className="rounded-lg bg-[#5865F2]/20 px-4 py-2.5 text-sm text-[#7983F5] transition-colors hover:bg-[#5865F2]/30 disabled:opacity-50"
+          >
+            {discordLoading ? "generating…" : "get link token"}
+          </button>
+        ) : (
+          <div className="space-y-3">
+            <p className="text-xs text-brand-grey">
+              Copy this token and run <span className="font-mono text-brand-pale-gold">/link &lt;token&gt;</span> in the Discord server. Token expires in 10 minutes.
+            </p>
+            <div className="flex items-center gap-2">
+              <code className="flex-1 overflow-x-auto rounded bg-brand-medium-grey/20 px-3 py-2 font-mono text-xs text-brand-pale-gold">
+                {discordToken}
+              </code>
+              <button
+                type="button"
+                onClick={() => {
+                  navigator.clipboard.writeText(discordToken);
+                  setDiscordCopied(true);
+                  setTimeout(() => setDiscordCopied(false), 2000);
+                }}
+                className="shrink-0 rounded bg-brand-medium-grey/20 px-3 py-2 text-xs text-brand-grey transition-colors hover:text-white"
+              >
+                {discordCopied ? "copied!" : "copy"}
+              </button>
+            </div>
+            <button
+              type="button"
+              onClick={generateDiscordToken}
+              disabled={discordLoading}
+              className="text-xs text-brand-grey transition-colors hover:text-white disabled:opacity-50"
+            >
+              generate new token
             </button>
           </div>
         )}
