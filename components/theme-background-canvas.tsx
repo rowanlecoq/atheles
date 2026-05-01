@@ -146,6 +146,7 @@ const BLUR_WEIGHT_SUM = BLUR_WEIGHTS.reduce((s, w) => s + w, 0);
 function drawBeam(
   ctx: CanvasRenderingContext2D,
   w: number,
+  cx: number, // horizontal origin as fraction of width (0–1)
   cy: number, angle: number, stripH: number, opacity: number,
   rgbaEdge: (o: number) => string,
   rgbaMid:  (o: number) => string,
@@ -153,7 +154,7 @@ function drawBeam(
 ) {
   if (hasFilter) {
     ctx.save();
-    ctx.translate(w / 2, cy);
+    ctx.translate(w * cx, cy);
     ctx.rotate(angle);
     const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
     g.addColorStop(0,   "transparent");
@@ -168,7 +169,7 @@ function drawBeam(
     for (let p = 0; p < 7; p++) {
       const o = opacity * (BLUR_WEIGHTS[p]! / BLUR_WEIGHT_SUM);
       ctx.save();
-      ctx.translate(w / 2, cy + BLUR_OFFSETS[p]!);
+      ctx.translate(w * cx, cy + BLUR_OFFSETS[p]!);
       ctx.rotate(angle);
       const g = ctx.createLinearGradient(-w * 1.5, 0, w * 1.5, 0);
       g.addColorStop(0,   "transparent");
@@ -193,7 +194,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       const stripH  = 30 + (i % 4) * 10;
       const opacity = 0.055 + (i % 3) * 0.018;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
-      drawBeam(ctx, w, cy, angle, stripH, opacity,
+      drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(34,211,238,${o.toFixed(4)})`,
         (o) => `rgba(6,182,212,${o.toFixed(4)})`,
         hasFilter);
@@ -205,9 +206,9 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       const angle   = (18 + i * 4.5) * (Math.PI / 180);
       const stripH  = 22 + i * 8;
       const opacity = 0.050 + i * 0.010;
-      const cy = h * (0.05 + i * 0.11) + Math.sin(time * 0.35 + i * 1.5) * 15;
+      const cy = h * (0.32 + i * 0.08) + Math.sin(time * 0.35 + i * 1.5) * 15;
       const rgb = i % 3 === 0 ? "16,185,129" : i % 3 === 1 ? "245,158,11" : "0,210,175";
-      drawBeam(ctx, w, cy, angle, stripH, opacity,
+      drawBeam(ctx, w, 0.25, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
@@ -221,7 +222,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       const opacity = 0.048 + i * 0.010;
       const cy = h * (0.06 + i * 0.16) + Math.sin(time * 0.28 + i * 1.3) * 14;
       const rgb = i % 3 === 0 ? "147,51,234" : i % 3 === 1 ? "255,80,150" : "255,130,60";
-      drawBeam(ctx, w, cy, angle, stripH, opacity,
+      drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
