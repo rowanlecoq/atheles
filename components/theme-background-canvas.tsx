@@ -489,18 +489,14 @@ export function ThemeBackgroundCanvas() {
     const onBgChange = () => {
       const t = getTheme();
       if (t === state.theme) return;
-      const wasNone = !state.theme;
       state.theme = t;
       state.particles = t && t in THEMES
         ? buildParticles(t as ThemeKey, canvas.width, canvas.height)
         : [];
-      // Fade the canvas in when a theme is applied from default so the
-      // gradient appears gradually rather than flashing on instantly.
-      if (wasNone && t) {
-        canvas.style.transition = "opacity 0.7s ease";
-        canvas.style.opacity = "0";
-        requestAnimationFrame(() => { canvas.style.opacity = "1"; });
-      }
+      // Draw synchronously so the canvas has the gradient painted before
+      // the browser's next frame — prevents the body CSS gradient from
+      // flashing through the still-transparent canvas.
+      renderFrame();
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
