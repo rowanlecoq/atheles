@@ -285,7 +285,7 @@ export function ThemeBackgroundCanvas() {
   }, [isTouch]);
 
   useLayoutEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || isTouch) return;
     const canvas = canvasRef.current;
     if (!canvas) return;
     const ctx = canvas.getContext("2d");
@@ -509,7 +509,7 @@ export function ThemeBackgroundCanvas() {
     };
   }, [prefersReducedMotion, isTouch, buildParticles]);
 
-  if (prefersReducedMotion) return null;
+  if (prefersReducedMotion || isTouch) return null;
 
   return (
     <canvas

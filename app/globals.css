@@ -512,9 +512,11 @@ body[data-bg="sunset"] {
   animation: beta-pulse 2.4s ease-in-out infinite;
 }
 
-/* Announcement bar transparent when theme active — shows same gradient as body. */
-body[data-bg] .announcement-bar-root {
-  background-color: transparent !important;
+/* Announcement bar transparent when theme active on desktop. */
+@media (pointer: fine) {
+  body[data-bg] .announcement-bar-root {
+    background-color: transparent !important;
+  }
 }
 
 /* Gradient overlay div — force onto its own GPU compositing layer so iOS
@@ -527,45 +529,4 @@ body[data-bg] .announcement-bar-root {
   backface-visibility: hidden;
 }
 
-/* Mobile body base colour + CSS-gradient overlay fallback.
-   Section backgrounds stripped so the canvas gradient shows through even
-   during skeleton/loading states before slideshow images load. */
-@media (pointer: coarse) {
-  /* Match the gradient base colours exactly (MOBILE_BG.*.base in theme-background-canvas)
-     so any gap not covered by the canvas (eg extreme overscroll) is the same colour
-     as the gradient bottom — no visible seam. */
-  body[data-bg="gold"]     { background-color: #110e04; }
-  body[data-bg="water"]    { background-color: #020a10; }
-  body[data-bg="tropical"] { background-color: #020b05; }
-  body[data-bg="midnight"] { background-color: #04000a; }
-  body[data-bg="sunset"]   { background-color: #0e0206; }
-
-  body[data-bg] #theme-gradient-overlay {
-    background: var(--theme-gradient);
-  }
-
-  body[data-bg] .theme-section {
-    background-color: transparent;
-  }
-
-  /* All sections inside the page must be transparent on themed pages so the
-     canvas gradient is never blocked by a solid bg-brand-dark box.
-     This covers components that lack the theme-section class (carousel, etc.). */
-  body[data-bg] main section {
-    background-color: transparent;
-  }
-
-  /* Hero bottom-fade bar uses from-brand-dark — hide it on themed pages so
-     the gradient isn't blocked by a solid dark band as the hero scrolls out. */
-  body[data-bg] .hero-bottom-fade {
-    display: none;
-  }
-
-  /* Fade the entire page content in so the gradient overlay is visible
-     during the brief skeleton/loading window — mirrors the canvas-reveal
-     fade that desktop uses but applied to main instead of the canvas. */
-  body[data-bg] main {
-    animation: canvas-reveal 0.6s ease both;
-  }
-}
 
