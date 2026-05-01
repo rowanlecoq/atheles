@@ -1366,8 +1366,8 @@ export default function ProfileContent() {
         </div>
       </div>
 
-      {/* Background Theme */}
-      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
+      {/* Background Theme — desktop only */}
+      <div className="mb-8 hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6 md:block">
         <div className="mb-4 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">background</h2>
