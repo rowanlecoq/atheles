@@ -95,6 +95,7 @@ export function SlideshowMedia({
 }: {
   slotKey: string;
   className?: string;
+  sizes?: string;
   priority?: boolean;
   iframeClass?: string;
 }) {
