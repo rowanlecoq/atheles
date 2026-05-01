@@ -112,7 +112,6 @@ function SizeTable({
 
   return (
     <div>
-      <p className="mb-4 text-sm text-brand-grey">{category.description}</p>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
