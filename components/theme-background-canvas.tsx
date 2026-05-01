@@ -55,15 +55,11 @@ const THEMES = {
 
 type ThemeKey = keyof typeof THEMES;
 
-// Mobile gradient background data — mirrors CSS --theme-gradient values.
-// On touch devices the canvas paints its own background so there is a single
-// composited layer instead of a CSS div + canvas fighting each other.
-//
-// Layers are listed bottom-to-top (reverse of CSS stack order).
-// Radial entry: [cx, cy, rx, ry,  r,   g,   b,   alpha, fadeStop]
-//   cx/cy = center as fraction of canvas w/h
-//   rx/ry = half-radii as fractions (CSS size 140% → rx = 0.70)
-//   fadeStop = gradient stop where color reaches 0 (matches "transparent N%")
+// Gradient background data used by drawGradientBg on desktop.
+// Layers listed bottom-to-top. Radial entry: [cx, cy, rx, ry, r, g, b, alpha, fadeStop]
+//   cx/cy = centre as fraction of canvas w/h
+//   rx/ry = half-radii as fractions (CSS 140% → rx = 0.70)
+//   fadeStop = gradient stop where colour reaches 0
 type RLayer = readonly [number,number,number,number,number,number,number,number,number];
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
@@ -257,7 +253,7 @@ export function ThemeBackgroundCanvas() {
 
   const buildParticles = useCallback((key: ThemeKey, w: number, h: number): Particle[] => {
     const cfg = THEMES[key];
-    const count = isTouch ? Math.round(cfg.count * 0.5) : cfg.count;
+    const count = cfg.count;
     const cols = Math.max(1, Math.round(Math.sqrt(count * (w / h))));
     const rows = Math.max(1, Math.round(count / cols));
     const total = cols * rows;
@@ -283,7 +279,7 @@ export function ThemeBackgroundCanvas() {
         phase: Math.random() * Math.PI * 2,
       };
     });
-  }, [isTouch]);
+  }, []);
 
   useLayoutEffect(() => {
     if (prefersReducedMotion || isTouch) return;
@@ -295,100 +291,15 @@ export function ThemeBackgroundCanvas() {
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
 
-    // Detect Chrome Android. On Chrome Android 100lvh changes when the URL bar
-    // shows/hides, stretching any bitmap sized to it (zoom artefact). GPU canvas
-    // layers also desync from the scroll compositor, making the gradient slide.
-    const ua = navigator.userAgent;
-    const isChromeAndroid = isTouch &&
-      /Chrome\//.test(ua) && /Android/.test(ua) &&
-      !/EdgA\/|OPR\/|SamsungBrowser\//.test(ua);
-
-    // Promote the canvas to a GPU compositing layer on non-Android devices.
-    // On Chrome Android we deliberately skip this (see below) because
-    // will-change:transform creates an opaque GPU backing store that sits above
-    // the CSS gradient overlay and blocks it — even when the canvas pixels are
-    // transparent.
-    if (!isChromeAndroid) {
-      canvas.style.willChange = "transform";
-    }
-
-    let vvTimer: ReturnType<typeof setTimeout> | null = null;
-    let onVVResize: (() => void) | null = null;
-
-    if (isChromeAndroid) {
-      // Chrome Android fix:
-      // 1. CSS overlay provides the gradient — it uses CSS background on a
-      //    position:fixed element. CSS backgrounds in fixed elements are handled
-      //    natively by Chrome's compositor and NEVER flash during scroll, unlike
-      //    canvas GPU layers which briefly show an empty backing store.
-      // 2. Canvas has no will-change:transform so it is NOT a separate opaque
-      //    GPU layer. Without that layer the transparent canvas truly shows
-      //    the overlay gradient below instead of blocking it.
-      // 3. Canvas only draws particles/rays on a clearRect background.
-      // 4. Both overlay and canvas use calc(100svh + 80px) — svh is constant
-      //    regardless of URL-bar animation so neither element ever zooms.
-      const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
-      if (overlay) {
-        // Lock to small-viewport height — svh is constant regardless of URL-bar
-        // animation so the gradient never resizes or "grows" during scroll.
-        overlay.style.height = "100svh";
-      }
-
-      canvas.style.height = "100svh";
-
-      const vv = window.visualViewport;
-
-      // Bitmap height matches svh in px. URL-bar animation only changes the
-      // visual viewport height; ignoring it prevents the zoom/grow artefact.
-      const svhPx = Math.round(vv ? vv.height : window.innerHeight);
-      const initW = document.documentElement.clientWidth;
-      canvas.width = initW;
-      canvas.height = svhPx;
-      if (state.theme && state.theme in THEMES) {
-        state.particles = buildParticles(state.theme as ThemeKey, initW, canvas.height);
-      }
-
-      // Only rebuild bitmap on genuine orientation change (width changes).
-      // URL-bar animation only changes height — ignoring it prevents zoom.
-      let lastVVWidth = initW;
-      onVVResize = () => {
-        const newW = Math.round(vv ? vv.width : document.documentElement.clientWidth);
-        if (Math.abs(newW - lastVVWidth) < 20) return;
-        lastVVWidth = newW;
-        const newH = Math.round(vv ? vv.height : window.innerHeight);
-        if (vvTimer) clearTimeout(vvTimer);
-        vvTimer = setTimeout(() => {
-          canvas.width = newW;
-          canvas.height = newH;
-          if (state.theme && state.theme in THEMES) {
-            state.particles = buildParticles(state.theme as ThemeKey, newW, newH);
-          }
-        }, 300);
-      };
-
-      if (vv) vv.addEventListener("resize", onVVResize, { passive: true });
-    }
+    canvas.style.willChange = "transform";
 
     let resizeTimer: ReturnType<typeof setTimeout> | null = null;
-    let firstResize = true;
     let lastW = 0;
     let lastH = 0;
     const resize = () => {
-      if (isChromeAndroid) return;
       const newW = document.documentElement.clientWidth;
-      let newH = canvas.offsetHeight;
-      if (!newH) {
-        void document.body.offsetHeight;
-        newH = canvas.offsetHeight || window.innerHeight;
-      }
-      if (firstResize) {
-        canvas.width = newW;
-        canvas.height = newH;
-        firstResize = false; lastW = newW; lastH = newH; return;
-      }
-      const wDelta = Math.abs(newW - lastW);
-      const hDelta = Math.abs(newH - lastH);
-      if (wDelta < 30 && hDelta < 150) return;
+      const newH = canvas.offsetHeight || window.innerHeight;
+      if (Math.abs(newW - lastW) < 30 && Math.abs(newH - lastH) < 150) return;
       canvas.width = newW;
       canvas.height = newH;
       lastW = newW;
@@ -403,15 +314,6 @@ export function ThemeBackgroundCanvas() {
     resize();
     window.addEventListener("resize", resize);
 
-    let isScrolling = false;
-    let scrollTimer: ReturnType<typeof setTimeout> | null = null;
-    const onScroll = () => {
-      isScrolling = true;
-      if (scrollTimer) clearTimeout(scrollTimer);
-      scrollTimer = setTimeout(() => { isScrolling = false; }, 150);
-    };
-    if (isChromeAndroid) window.addEventListener("scroll", onScroll, { passive: true });
-
     const renderFrame = () => {
       const theme = getTheme();
 
@@ -425,13 +327,9 @@ export function ThemeBackgroundCanvas() {
       const w = canvas.width;
       const h = canvas.height;
 
-      if (!isChromeAndroid && theme && theme in THEMES) {
-        // iOS: canvas draws the gradient (background-attachment:fixed is broken
-        // on iOS Safari so CSS alone can't do it correctly).
+      if (theme && theme in THEMES) {
         drawGradientBg(ctx, w, h, theme as ThemeKey);
       } else {
-        // Chrome Android: CSS overlay handles the gradient; canvas is transparent
-        // so the overlay shows through. Only particles/rays are drawn here.
         ctx.clearRect(0, 0, w, h);
       }
 
@@ -469,15 +367,12 @@ export function ThemeBackgroundCanvas() {
       }
     };
 
-    const TARGET_MS = 1000 / 30; // 30fps cap
+    const TARGET_MS = 1000 / 30; // 30 fps cap
     let lastFrameTime = 0;
 
     const loop = (ts: number) => {
       state.animId = requestAnimationFrame(loop);
       if (document.hidden) return;
-      // Chrome Android: skip frame during scroll — keeps the GPU layer stable
-      // so the compositor doesn't show a stale or empty texture (the "line").
-      if (isChromeAndroid && isScrolling) return;
       if (ts - lastFrameTime < TARGET_MS) return;
       lastFrameTime = ts;
       renderFrame();
@@ -503,14 +398,8 @@ export function ThemeBackgroundCanvas() {
     return () => {
       cancelAnimationFrame(state.animId);
       if (resizeTimer) clearTimeout(resizeTimer);
-      if (scrollTimer) clearTimeout(scrollTimer);
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
-      if (isChromeAndroid) {
-        window.removeEventListener("scroll", onScroll);
-        if (onVVResize) window.visualViewport?.removeEventListener("resize", onVVResize);
-      }
-      if (vvTimer) clearTimeout(vvTimer);
     };
   }, [prefersReducedMotion, isTouch, buildParticles]);
 

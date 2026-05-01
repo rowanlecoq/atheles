@@ -2,7 +2,6 @@ import { Analytics } from "@vercel/analytics/next";
 import { AnnouncementBar } from "components/announcement-bar";
 import { CartProvider } from "components/cart/cart-context";
 import { ThemeBackgroundCanvas } from "components/canvas-loader";
-import { ThemeGradientOverlay } from "components/theme-gradient-overlay";
 import { CurrencyProvider } from "components/currency-context";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
@@ -102,7 +101,6 @@ export default async function RootLayout({
             <CartProvider cartPromise={cart}>
               <SiteThemeProvider />
               <ProfileBackgroundApplier />
-              <ThemeGradientOverlay />
               <ThemeBackgroundCanvas />
               <AnnouncementBar />
               <ScrollProgress />

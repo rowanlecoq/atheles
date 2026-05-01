@@ -165,29 +165,6 @@ html { scrollbar-width: none; }
   color: #ffffff;
 }
 
-@keyframes carousel-scroll {
-  0% {
-    transform: translate3d(0, 0, 0);
-  }
-  100% {
-    transform: translate3d(-33.333%, 0, 0);
-  }
-}
-
-.animate-carousel {
-  animation: carousel-scroll 42s linear infinite;
-  will-change: transform;
-}
-
-.animate-carousel:hover {
-  animation-play-state: paused;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .animate-carousel {
-    animation: none;
-  }
-}
 
 
 /* Sticky navbar slide-in — translateY only, no opacity to prevent flicker */
@@ -280,15 +257,6 @@ html { scrollbar-width: none; }
   animation: footer-enter 0.8s cubic-bezier(0.25, 0.1, 0.25, 1) both;
 }
 
-@media (max-width: 767px) {
-  body {
-    background-size:
-      100% 100%,
-      100% 100%,
-      1500px 1500px;
-    background-attachment: scroll, scroll, scroll;
-  }
-}
 
 
 /* Custom zoom cursors — thin elegant + and − in white */
@@ -469,14 +437,6 @@ body[data-bg="sunset"] {
   animation: canvas-reveal 0.8s ease 0.05s both;
 }
 
-/* On touch, the CSS overlay is already showing the gradient before the canvas
-   hydrates — so the canvas reveal doesn't need a long fade. Cut it to 150ms
-   with no delay so body bg is never visibly exposed during the transition. */
-@media (pointer: coarse) {
-  .animate-canvas-reveal {
-    animation: canvas-reveal 0.15s ease both;
-  }
-}
 
 @media (pointer: coarse) {
   .animate-canvas-reveal {
@@ -512,16 +472,6 @@ body[data-bg="sunset"] {
   body[data-bg] .announcement-bar-root {
     background-color: transparent !important;
   }
-}
-
-/* Gradient overlay div — force onto its own GPU compositing layer so iOS
-   doesn't drop or stutter it during scroll. The actual gradient is only
-   applied on touch/mobile via the media query below. */
-.theme-gradient-overlay {
-  transform: translateZ(0);
-  will-change: transform;
-  -webkit-backface-visibility: hidden;
-  backface-visibility: hidden;
 }
 
 

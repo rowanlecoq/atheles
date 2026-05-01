@@ -16,11 +16,13 @@ function MediaElement({
   className = "",
   iframeClass = "",
   objectPosition,
+  priority = false,
 }: {
   src: string;
   className?: string;
   iframeClass?: string;
   objectPosition?: string;
+  priority?: boolean;
 }) {
   const layoutStyle: React.CSSProperties = {
     position: "absolute",
@@ -64,6 +66,9 @@ function MediaElement({
       alt=""
       className={className}
       style={layoutStyle}
+      fetchPriority={priority ? "high" : "auto"}
+      loading={priority ? "eager" : "lazy"}
+      decoding={priority ? "sync" : "async"}
     />
   );
 }
@@ -86,10 +91,10 @@ export function SlideshowMedia({
   slotKey,
   className = "",
   iframeClass = "",
+  priority = false,
 }: {
   slotKey: string;
   className?: string;
-  sizes?: string;
   priority?: boolean;
   iframeClass?: string;
 }) {
@@ -118,7 +123,7 @@ export function SlideshowMedia({
   if (!isSlideshow) {
     return (
       <div style={wrapperStyle}>
-        <MediaElement src={currentSrc} className={cleanClass} iframeClass={cleanIframeClass} objectPosition={objPos} />
+        <MediaElement src={currentSrc} className={cleanClass} iframeClass={cleanIframeClass} objectPosition={objPos} priority={priority} />
       </div>
     );
   }
