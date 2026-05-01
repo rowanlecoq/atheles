@@ -28,15 +28,14 @@ const ROLE_IDS = {
   admin:    process.env.DISCORD_ROLE_ADMIN,
 };
 
-// Matching hex colors to the website gradients
 const TIER_META = {
-  bronze:   { label: "Bronze",   color: 0xf59e0b, emoji: "🥉" },
-  silver:   { label: "Silver",   color: 0x9ca3af, emoji: "🥈" },
-  gold:     { label: "Gold",     color: 0xeab308, emoji: "🥇" },
-  platinum: { label: "Platinum", color: 0x22d3ee, emoji: "💎" },
-  champion: { label: "Champion", color: 0xa855f7, emoji: "👑" },
-  athlete:  { label: "Athlete",  color: 0x38bdf8, emoji: "⚡" },
-  admin:    { label: "Admin",    color: 0xef4444, emoji: "🛡️" },
+  bronze:   { label: "Bronze",   color: 0xa09378, emoji: "🥉" }, // warm tan — base member color
+  silver:   { label: "Silver",   color: 0x9ba5ad, emoji: "🥈" }, // cool blue-grey
+  gold:     { label: "Gold",     color: 0xc9a96e, emoji: "🥇" }, // muted warm gold
+  platinum: { label: "Platinum", color: 0x8ba8b5, emoji: "💎" }, // dusty steel blue
+  champion: { label: "Champion", color: 0x9b85b5, emoji: "👑" }, // muted lavender
+  athlete:  { label: "Athlete",  color: 0x7aacbe, emoji: "⚡" }, // soft teal
+  admin:    { label: "Admin",    color: 0xb07070, emoji: "🛡️" }, // muted rose-red
 };
 
 // ── Slash commands ────────────────────────────────────────────────────────────
