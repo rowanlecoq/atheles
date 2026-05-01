@@ -388,6 +388,9 @@ html.thunder-shake {
 /* ─── Profile background themes ──────────────────────────────────────────── */
 
 /* Gold — warm muted amber orbs, upper-left + lower-right */
+/* Theme background gradients — desktop only. Mobile always uses the default dark background. */
+@media (pointer: fine) {
+
 body[data-bg="gold"] {
   --theme-gradient:
     radial-gradient(ellipse 140% 120% at 50% 35%,  rgba(193, 163, 104, 0.34) 0%, transparent 60%),
@@ -454,6 +457,8 @@ body[data-bg="sunset"] {
   background-attachment: fixed;
 }
 
+} /* end @media (pointer: fine) */
+
 /* Canvas fade-in: particles appear gradually instead of popping on at full
    brightness after React hydration, which looked like a jarring flash. */
 @keyframes canvas-reveal {
@@ -473,17 +478,7 @@ body[data-bg="sunset"] {
   }
 }
 
-/* On touch devices, background-attachment:fixed is broken on iOS Safari.
-   The canvas draws the gradient as a single position:fixed layer alongside
-   particles/rays so nothing fights or disconnects during scroll/zoom. */
 @media (pointer: coarse) {
-  body[data-bg="gold"],
-  body[data-bg="water"],
-  body[data-bg="tropical"],
-  body[data-bg="midnight"],
-  body[data-bg="sunset"] {
-    background-image: none;
-  }
   .animate-canvas-reveal {
     animation: none;
     opacity: 1;
