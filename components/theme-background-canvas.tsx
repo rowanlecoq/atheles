@@ -302,34 +302,35 @@ export function ThemeBackgroundCanvas() {
       /Chrome\//.test(ua) && /Android/.test(ua) &&
       !/EdgA\/|OPR\/|SamsungBrowser\//.test(ua);
 
-    // Always promote the canvas to its own GPU compositing layer. Without it,
-    // Chrome Android defers main-thread canvas repaints during fast scroll,
-    // briefly showing blank (body bg) behind the transparent canvas.
-    canvas.style.willChange = "transform";
+    // Promote the canvas to a GPU compositing layer on non-Android devices.
+    // On Chrome Android we deliberately skip this (see below) because
+    // will-change:transform creates an opaque GPU backing store that sits above
+    // the CSS gradient overlay and blocks it — even when the canvas pixels are
+    // transparent.
+    if (!isChromeAndroid) {
+      canvas.style.willChange = "transform";
+    }
 
     let vvTimer: ReturnType<typeof setTimeout> | null = null;
     let onVVResize: (() => void) | null = null;
 
     if (isChromeAndroid) {
       // Chrome Android fix:
-      // Restore the body's gradient background that the mobile CSS removes
-      // (pointer:coarse sets background-image:none on body to let canvas handle it).
-      // background-attachment:fixed on the body is handled natively by Chrome Android's
-      // rendering engine — it is part of the base layer and NEVER flashes during scroll,
-      // unlike a canvas GPU layer which briefly shows an empty texture when the scroll
-      // compositor first takes over.
-      // The canvas layer (below) stays transparent; only particles/rays are drawn on it.
-      const currentTheme = getTheme();
-      if (currentTheme && currentTheme in THEMES) {
-        // Inline style overrides the author-stylesheet background-image:none.
-        // Set background shorthand first (parses gradient + base colour from var()),
-        // then re-set attachment (shorthand resets it to scroll).
-        document.body.style.background = "var(--theme-gradient)";
-        document.body.style.backgroundAttachment = "fixed";
-      }
-
+      // 1. CSS overlay provides the gradient — it uses CSS background on a
+      //    position:fixed element. CSS backgrounds in fixed elements are handled
+      //    natively by Chrome's compositor and NEVER flash during scroll, unlike
+      //    canvas GPU layers which briefly show an empty backing store.
+      // 2. Canvas has no will-change:transform so it is NOT a separate opaque
+      //    GPU layer. Without that layer the transparent canvas truly shows
+      //    the overlay gradient below instead of blocking it.
+      // 3. Canvas only draws particles/rays on a clearRect background.
+      // 4. Both overlay and canvas use calc(100svh + 80px) — svh is constant
+      //    regardless of URL-bar animation so neither element ever zooms.
       const overlay = document.getElementById("theme-gradient-overlay") as HTMLElement | null;
-      if (overlay) overlay.style.display = "none";
+      if (overlay) {
+        // Keep overlay visible and lock to a constant height.
+        overlay.style.height = "calc(100svh + 80px)";
+      }
 
       canvas.style.height = "calc(100svh + 80px)";
 
@@ -490,15 +491,6 @@ export function ThemeBackgroundCanvas() {
       state.particles = t && t in THEMES
         ? buildParticles(t as ThemeKey, canvas.width, canvas.height)
         : [];
-      if (isChromeAndroid) {
-        if (t && t in THEMES) {
-          document.body.style.background = "var(--theme-gradient)";
-          document.body.style.backgroundAttachment = "fixed";
-        } else {
-          document.body.style.background = "";
-          document.body.style.backgroundAttachment = "";
-        }
-      }
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
@@ -511,8 +503,6 @@ export function ThemeBackgroundCanvas() {
       if (isChromeAndroid) {
         window.removeEventListener("scroll", onScroll);
         if (onVVResize) window.visualViewport?.removeEventListener("resize", onVVResize);
-        document.body.style.background = "";
-        document.body.style.backgroundAttachment = "";
       }
       if (vvTimer) clearTimeout(vvTimer);
     };
