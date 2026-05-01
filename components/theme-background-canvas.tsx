@@ -202,15 +202,13 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "tropical") {
-    // Spread rays horizontally across the canvas, all going same ~30° direction
-    for (let i = 0; i < 9; i++) {
-      const cx    = 0.03 + i * 0.115;   // evenly spaced 3% → 99% of width
-      const angle = (28 + i * 1.5) * (Math.PI / 180); // ~28°–41°, gentle variation
-      const stripH  = 38 + i * 10;
-      const opacity = 0.048 + (i % 3) * 0.018;
-      const cy = h * (0.48 + (i % 3) * 0.06) + Math.sin(time * 0.35 + i * 1.5) * 18;
+    for (let i = 0; i < 8; i++) {
+      const angle  = (-6 + i * 3.5) * (Math.PI / 180);
+      const stripH = 28 + (i % 4) * 12;
+      const opacity = 0.052 + (i % 3) * 0.018;
+      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.35 + i * 1.5) * 16;
       const rgb = i % 3 === 0 ? "16,185,129" : i % 3 === 1 ? "245,158,11" : "0,210,175";
-      drawBeam(ctx, w, cx, cy, angle, stripH, opacity,
+      drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
