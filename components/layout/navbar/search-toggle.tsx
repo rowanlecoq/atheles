@@ -64,8 +64,6 @@ export function SearchToggle() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
-  // dropdownTop: bottom edge of the full sticky header in px, used for fixed dropdown
-  const [dropdownTop, setDropdownTop] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
@@ -73,10 +71,32 @@ export function SearchToggle() {
   const scrollYRef = useRef(0);
   const router = useRouter();
 
+  // Restore body scroll (called by close and on unmount)
+  const unlockScroll = useCallback(() => {
+    if (document.body.style.position === "fixed") {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      window.scrollTo(0, scrollYRef.current);
+    }
+  }, []);
+
   const close = useCallback(() => {
     setOpen(false);
     setQuery("");
     setResults([]);
+    unlockScroll();
+  }, [unlockScroll]);
+
+  // Lock scroll synchronously in the click handler so:
+  // (a) the page doesn't scroll up as each character is typed (desktop + mobile)
+  // (b) iOS sees autoFocus as part of the same user-interaction → keyboard appears
+  const openSearch = useCallback(() => {
+    scrollYRef.current = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollYRef.current}px`;
+    document.body.style.width = "100%";
+    setOpen(true);
   }, []);
 
   // Fetch search results
@@ -135,42 +155,17 @@ export function SearchToggle() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open, close]);
 
-  // On open: measure full header height for dropdown, focus inputs, lock body scroll on mobile
+  // Focus desktop input on open (mobile uses autoFocus)
   useEffect(() => {
     if (!open) return;
-
-    // Measure the sticky header's total bottom edge so the dropdown anchors below it
-    const header = document.querySelector(".site-header-root") as HTMLElement | null;
-    if (header) {
-      setDropdownTop(header.getBoundingClientRect().bottom);
-    }
-
-    // Focus inputs without scrolling
     const t = setTimeout(() => {
       inputRef.current?.focus({ preventScroll: true });
-      mobileInputRef.current?.focus({ preventScroll: true });
     }, 50);
-
-    // iOS scroll lock: prevents the page from scrolling up as the keyboard appears
-    const isMobile = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
-    if (isMobile) {
-      scrollYRef.current = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollYRef.current}px`;
-      document.body.style.width = "100%";
-    }
-
-    return () => {
-      clearTimeout(t);
-      if (isMobile) {
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-        window.scrollTo(0, scrollYRef.current);
-      }
-    };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
+    return () => clearTimeout(t);
   }, [open]);
+
+  // Release scroll lock if component unmounts while open
+  useEffect(() => () => unlockScroll(), [unlockScroll]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -185,7 +180,7 @@ export function SearchToggle() {
 
   return (
     <div ref={containerRef} className="relative flex items-center">
-      {/* Desktop: inline expanding search */}
+      {/* Desktop: inline expanding search with dropdown */}
       <div className="hidden md:block">
         <div
           className={`absolute right-0 top-1/2 -translate-y-1/2 overflow-visible transition-all duration-300 ease-out ${
@@ -202,44 +197,40 @@ export function SearchToggle() {
               className="h-9 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0"
             />
           </form>
-        </div>
-      </div>
-
-      {/* Desktop dropdown — fixed so it always clears the full sticky header (nav row + category nav) */}
-      {showDropdown && (
-        <div
-          className="fixed right-4 z-[100] hidden w-[320px] overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-xl shadow-black/40 md:block lg:right-6"
-          style={{ top: dropdownTop + 4 }}
-        >
-          {loading && results.length === 0 ? (
-            <div className="px-4 py-3 text-xs text-brand-grey">
-              searching...
+          {/* Desktop dropdown */}
+          {showDropdown && (
+            <div className="absolute left-0 right-0 top-full z-[70] mt-1 overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-xl shadow-black/40">
+              {loading && results.length === 0 ? (
+                <div className="px-4 py-3 text-xs text-brand-grey">
+                  searching...
+                </div>
+              ) : (
+                <>
+                  {results.slice(0, 5).map((product) => (
+                    <ResultItem
+                      key={product.handle}
+                      product={product}
+                      onClose={close}
+                    />
+                  ))}
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push(
+                        `/search?q=${encodeURIComponent(query.trim())}`,
+                      );
+                      close();
+                    }}
+                    className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
+                  >
+                    view all results
+                  </button>
+                </>
+              )}
             </div>
-          ) : (
-            <>
-              {results.slice(0, 5).map((product) => (
-                <ResultItem
-                  key={product.handle}
-                  product={product}
-                  onClose={close}
-                />
-              ))}
-              <button
-                type="button"
-                onClick={() => {
-                  router.push(
-                    `/search?q=${encodeURIComponent(query.trim())}`,
-                  );
-                  close();
-                }}
-                className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
-              >
-                view all results
-              </button>
-            </>
           )}
         </div>
-      )}
+      </div>
 
       {/* Mobile: full-width overlay bar */}
       {open && (
@@ -252,6 +243,7 @@ export function SearchToggle() {
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
                 placeholder="search..."
+                autoFocus
                 className="h-10 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-[16px] text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0 md:text-sm"
               />
             </form>
@@ -311,7 +303,7 @@ export function SearchToggle() {
       {/* Toggle button */}
       <button
         type="button"
-        onClick={() => (open ? close() : setOpen(true))}
+        onClick={() => (open ? close() : openSearch())}
         aria-label={open ? "Close search" : "Open search"}
         className="relative z-10 flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold"
       >
