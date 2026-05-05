@@ -156,7 +156,7 @@ export function SearchToggle() {
 
   return (
     <div ref={containerRef} className="relative flex items-center">
-      {/* Desktop: inline expanding search with dropdown */}
+      {/* Desktop: inline expanding search */}
       <div className="hidden md:block">
         <div
           className={`absolute right-0 top-1/2 -translate-y-1/2 overflow-visible transition-all duration-300 ease-out ${
@@ -173,44 +173,45 @@ export function SearchToggle() {
               className="h-9 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0"
             />
           </form>
-          {/* Desktop dropdown */}
-          {showDropdown && (
-            <div className="absolute left-0 right-0 top-full z-[70] mt-1 overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-xl shadow-black/40">
-              {loading && results.length === 0 ? (
-                <div className="px-4 py-3 text-xs text-brand-grey">
-                  searching...
-                </div>
-              ) : (
-                <>
-                  {results.slice(0, 5).map((product) => (
-                    <ResultItem
-                      key={product.handle}
-                      product={product}
-                      onClose={close}
-                    />
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      router.push(
-                        `/search?q=${encodeURIComponent(query.trim())}`,
-                      );
-                      close();
-                    }}
-                    className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
-                  >
-                    view all results
-                  </button>
-                </>
-              )}
-            </div>
-          )}
         </div>
       </div>
 
+      {/* Desktop dropdown — anchored to containerRef so top-full = bottom of the full navbar row, not the input center */}
+      {showDropdown && (
+        <div className="absolute right-0 top-full z-[70] mt-1 hidden w-[320px] overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-xl shadow-black/40 md:block">
+          {loading && results.length === 0 ? (
+            <div className="px-4 py-3 text-xs text-brand-grey">
+              searching...
+            </div>
+          ) : (
+            <>
+              {results.slice(0, 5).map((product) => (
+                <ResultItem
+                  key={product.handle}
+                  product={product}
+                  onClose={close}
+                />
+              ))}
+              <button
+                type="button"
+                onClick={() => {
+                  router.push(
+                    `/search?q=${encodeURIComponent(query.trim())}`,
+                  );
+                  close();
+                }}
+                className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
+              >
+                view all results
+              </button>
+            </>
+          )}
+        </div>
+      )}
+
       {/* Mobile: full-width overlay bar */}
       {open && (
-        <div className="fixed inset-x-0 top-0 z-[60] bg-brand-dark md:hidden">
+        <div className="fixed inset-x-0 top-0 z-[80] bg-brand-dark md:hidden">
           <div className="flex items-center gap-2 px-4 py-3">
             <form onSubmit={handleSubmit} className="flex flex-1 items-center">
               <input
@@ -269,7 +270,7 @@ export function SearchToggle() {
       {/* Mobile: backdrop */}
       {open && (
         <div
-          className="fixed inset-0 z-[55] bg-black/50 md:hidden"
+          className="fixed inset-0 z-[75] bg-black/50 md:hidden"
           onClick={close}
           aria-hidden="true"
         />
