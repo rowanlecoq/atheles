@@ -64,10 +64,13 @@ export function SearchToggle() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
+  // dropdownTop: bottom edge of the full sticky header in px, used for fixed dropdown
+  const [dropdownTop, setDropdownTop] = useState(0);
   const inputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const scrollYRef = useRef(0);
   const router = useRouter();
 
   const close = useCallback(() => {
@@ -132,15 +135,41 @@ export function SearchToggle() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open, close]);
 
-  // Auto-focus input when opened — preventScroll stops iOS from jumping to top
+  // On open: measure full header height for dropdown, focus inputs, lock body scroll on mobile
   useEffect(() => {
-    if (open) {
-      const t = setTimeout(() => {
-        inputRef.current?.focus({ preventScroll: true });
-        mobileInputRef.current?.focus({ preventScroll: true });
-      }, 50);
-      return () => clearTimeout(t);
+    if (!open) return;
+
+    // Measure the sticky header's total bottom edge so the dropdown anchors below it
+    const header = document.querySelector(".site-header-root") as HTMLElement | null;
+    if (header) {
+      setDropdownTop(header.getBoundingClientRect().bottom);
     }
+
+    // Focus inputs without scrolling
+    const t = setTimeout(() => {
+      inputRef.current?.focus({ preventScroll: true });
+      mobileInputRef.current?.focus({ preventScroll: true });
+    }, 50);
+
+    // iOS scroll lock: prevents the page from scrolling up as the keyboard appears
+    const isMobile = window.matchMedia("(pointer: coarse)").matches || window.innerWidth < 768;
+    if (isMobile) {
+      scrollYRef.current = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollYRef.current}px`;
+      document.body.style.width = "100%";
+    }
+
+    return () => {
+      clearTimeout(t);
+      if (isMobile) {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, scrollYRef.current);
+      }
+    };
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [open]);
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -176,9 +205,12 @@ export function SearchToggle() {
         </div>
       </div>
 
-      {/* Desktop dropdown — anchored to containerRef so top-full = bottom of the full navbar row, not the input center */}
+      {/* Desktop dropdown — fixed so it always clears the full sticky header (nav row + category nav) */}
       {showDropdown && (
-        <div className="absolute right-0 top-full z-[70] mt-1 hidden w-[320px] overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-xl shadow-black/40 md:block">
+        <div
+          className="fixed right-4 z-[100] hidden w-[320px] overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-xl shadow-black/40 md:block lg:right-6"
+          style={{ top: dropdownTop + 4 }}
+        >
           {loading && results.length === 0 ? (
             <div className="px-4 py-3 text-xs text-brand-grey">
               searching...
