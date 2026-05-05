@@ -69,10 +69,16 @@ export function SearchToggle() {
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollYRef = useRef(0);
+  const touchLockRef = useRef<((e: TouchEvent) => void) | null>(null);
   const router = useRouter();
 
-  // Restore body scroll (called by close and on unmount)
   const unlockScroll = useCallback(() => {
+    // Mobile: remove touchmove lock
+    if (touchLockRef.current) {
+      document.removeEventListener("touchmove", touchLockRef.current);
+      touchLockRef.current = null;
+    }
+    // Desktop: restore body position
     if (document.body.style.position === "fixed") {
       document.body.style.position = "";
       document.body.style.top = "";
@@ -89,14 +95,22 @@ export function SearchToggle() {
     unlockScroll();
   }, [unlockScroll]);
 
-  // Lock scroll synchronously. overscroll-behavior:none kills iOS elastic bounce
-  // without setting overflow on <html>, which clips fixed children in Safari.
   const openSearch = useCallback(() => {
     scrollYRef.current = window.scrollY;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollYRef.current}px`;
-    document.body.style.width = "100%";
-    document.body.style.overscrollBehavior = "none";
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    if (isMobile) {
+      // Prevent touchmove instead of using position:fixed on body —
+      // position:fixed on body breaks fixed-position overlays in Chrome for Android
+      const handler = (e: TouchEvent) => e.preventDefault();
+      touchLockRef.current = handler;
+      document.addEventListener("touchmove", handler, { passive: false });
+    } else {
+      // Desktop: body lock stops per-keystroke scroll drift
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollYRef.current}px`;
+      document.body.style.width = "100%";
+      document.body.style.overscrollBehavior = "none";
+    }
     setOpen(true);
   }, []);
 
