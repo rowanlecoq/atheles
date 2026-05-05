@@ -88,14 +88,17 @@ export function SearchToggle() {
     unlockScroll();
   }, [unlockScroll]);
 
-  // Lock scroll synchronously in the click handler so:
-  // (a) the page doesn't scroll up as each character is typed (desktop + mobile)
-  // (b) iOS sees autoFocus as part of the same user-interaction → keyboard appears
+  // Lock scroll synchronously on desktop to stop per-keystroke scroll drift.
+  // Mobile is intentionally left unlocked so users can scroll while searching.
   const openSearch = useCallback(() => {
-    scrollYRef.current = window.scrollY;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollYRef.current}px`;
-    document.body.style.width = "100%";
+    const isDesktop =
+      !window.matchMedia("(pointer: coarse)").matches && window.innerWidth >= 768;
+    if (isDesktop) {
+      scrollYRef.current = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollYRef.current}px`;
+      document.body.style.width = "100%";
+    }
     setOpen(true);
   }, []);
 
