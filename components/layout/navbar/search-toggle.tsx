@@ -67,7 +67,6 @@ export function SearchToggle() {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
-  const mobileOverlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollYRef = useRef(0);
@@ -166,28 +165,6 @@ export function SearchToggle() {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [query]);
-
-  // Keep mobile overlay anchored to the top of the visual viewport.
-  // When the keyboard opens, iOS scrolls the layout viewport so fixed top:0
-  // ends up above what the user can see. visualViewport.offsetTop tells us
-  // exactly how far it shifted — we translate the overlay to compensate.
-  useEffect(() => {
-    if (!open || typeof window === "undefined" || !window.visualViewport) return;
-    const vv = window.visualViewport;
-    const update = () => {
-      if (isSnappingRef.current) return;
-      if (mobileOverlayRef.current) {
-        mobileOverlayRef.current.style.transform = `translateY(${vv.offsetTop}px)`;
-      }
-    };
-    vv.addEventListener("scroll", update);
-    vv.addEventListener("resize", update);
-    update();
-    return () => {
-      vv.removeEventListener("scroll", update);
-      vv.removeEventListener("resize", update);
-    };
-  }, [open]);
 
   // Close on Escape
   useEffect(() => {
@@ -293,7 +270,7 @@ export function SearchToggle() {
 
       {/* Mobile: full-width overlay bar */}
       {open && (
-        <div ref={mobileOverlayRef} className="fixed inset-x-0 top-0 z-[80] bg-brand-dark md:hidden">
+        <div className="fixed inset-x-0 top-0 z-[80] bg-brand-dark md:hidden">
           <div className="flex items-center gap-2 px-4 py-3">
             <form onSubmit={handleSubmit} className="flex flex-1 items-center">
               <input
