@@ -77,8 +77,7 @@ export function SearchToggle() {
       document.body.style.position = "";
       document.body.style.top = "";
       document.body.style.width = "";
-      document.body.style.overflow = "";
-      document.documentElement.style.overflow = "";
+      document.body.style.overscrollBehavior = "";
       window.scrollTo(0, scrollYRef.current);
     }
   }, []);
@@ -90,15 +89,14 @@ export function SearchToggle() {
     unlockScroll();
   }, [unlockScroll]);
 
-  // Lock scroll synchronously — overflow:hidden on both html+body stops iOS
-  // elastic/bounce scroll that position:fixed alone doesn't fully prevent.
+  // Lock scroll synchronously. overscroll-behavior:none kills iOS elastic bounce
+  // without setting overflow on <html>, which clips fixed children in Safari.
   const openSearch = useCallback(() => {
     scrollYRef.current = window.scrollY;
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollYRef.current}px`;
     document.body.style.width = "100%";
-    document.body.style.overflow = "hidden";
-    document.documentElement.style.overflow = "hidden";
+    document.body.style.overscrollBehavior = "none";
     setOpen(true);
   }, []);
 
