@@ -1485,14 +1485,6 @@ export default function ProfileContent() {
           <span className="text-sm text-white">store</span>
           <span className="text-xs text-brand-grey">&rarr;</span>
         </Link>
-        <button
-          type="button"
-          onClick={handleSignOut}
-          className="flex w-full items-center justify-between rounded-lg border border-red-900/30 bg-brand-dark px-4 py-3 transition-colors hover:border-red-700/50"
-        >
-          <span className="text-sm text-red-400">sign out</span>
-          <span className="text-xs text-red-400/50">&rarr;</span>
-        </button>
         {discordSuccess || user?.discordLinked ? (
           <button
             type="button"
@@ -1514,6 +1506,14 @@ export default function ProfileContent() {
             <span className="text-xs text-brand-grey">&rarr;</span>
           </a>
         )}
+        <button
+          type="button"
+          onClick={handleSignOut}
+          className="flex w-full items-center justify-between rounded-lg border border-red-900/30 bg-brand-dark px-4 py-3 transition-colors hover:border-red-700/50"
+        >
+          <span className="text-sm text-red-400">sign out</span>
+          <span className="text-xs text-red-400/50">&rarr;</span>
+        </button>
       </div>
       </div>
     </div>

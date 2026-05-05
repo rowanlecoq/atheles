@@ -32,9 +32,9 @@ const THEMES = {
   },
   tropical: {
     count: 70,
-    colors: [[20, 215, 100], [0, 175, 230], [255, 155, 30], [80, 235, 140]] as [number,number,number][],
+    colors: [[20, 230, 110], [0, 195, 255], [255, 175, 30], [80, 255, 160]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
-    minAlpha: 0.04, maxAlpha: 0.24,
+    minAlpha: 0.06, maxAlpha: 0.55,
     speed: 0.14, isStar: false,
   },
   midnight: {
@@ -77,12 +77,12 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.70, 0.65, 0.60, 0.70,  20, 100, 200, 0.26, 0.60],
     [0.50, 0.35, 0.70, 0.60,  30, 180, 220, 0.30, 0.60], // cx centred (was 0.30)
   ]},
-  tropical: { base: '#020b05', radial: [
-    [0.50, 1.00, 1.20, 0.55,  16, 185, 129, 0.32, 0.65],  // bottom wide green wash
-    [0.78, 0.72, 0.72, 0.55, 250, 180,  50, 0.22, 0.58],  // lower-right amber haze
-    [0.50, 0.48, 0.68, 0.68,  20, 200, 160, 0.20, 0.58],  // centre teal (wider, softer)
-    [0.48, 0.22, 0.68, 0.72, 245, 158,  11, 0.24, 0.62],  // upper-centre amber (softer)
-    [0.18, 0.65, 0.82, 0.68,  16, 185, 129, 0.28, 0.62],  // left green (was 0.70 → 0.28)
+  tropical: { base: '#020d06', radial: [
+    [0.50, 1.00, 1.20, 0.55,  16, 210, 140, 0.50, 0.65],  // bottom wide green wash
+    [0.78, 0.72, 0.72, 0.55, 255, 190,  50, 0.40, 0.58],  // lower-right amber haze
+    [0.50, 0.48, 0.68, 0.68,  20, 220, 175, 0.38, 0.58],  // centre teal
+    [0.48, 0.22, 0.68, 0.72, 255, 170,  11, 0.42, 0.62],  // upper-centre amber
+    [0.18, 0.65, 0.82, 0.68,  16, 210, 140, 0.45, 0.62],  // left green
   ]},
   midnight: { base: '#04000a', radial: [
     [0.50, 1.00, 1.00, 0.50,  70,  50, 200, 0.50, 0.60],
