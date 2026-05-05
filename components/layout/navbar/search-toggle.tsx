@@ -88,17 +88,13 @@ export function SearchToggle() {
     unlockScroll();
   }, [unlockScroll]);
 
-  // Lock scroll synchronously on desktop to stop per-keystroke scroll drift.
-  // Mobile is intentionally left unlocked so users can scroll while searching.
+  // Lock scroll synchronously on all devices to stop scroll drift while typing.
+  // On mobile the backdrop (rendered below the overlay) handles tap-outside-to-close.
   const openSearch = useCallback(() => {
-    const isDesktop =
-      !window.matchMedia("(pointer: coarse)").matches && window.innerWidth >= 768;
-    if (isDesktop) {
-      scrollYRef.current = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollYRef.current}px`;
-      document.body.style.width = "100%";
-    }
+    scrollYRef.current = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollYRef.current}px`;
+    document.body.style.width = "100%";
     setOpen(true);
   }, []);
 
