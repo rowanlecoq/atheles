@@ -77,6 +77,8 @@ export function SearchToggle() {
       document.body.style.position = "";
       document.body.style.top = "";
       document.body.style.width = "";
+      document.body.style.overflow = "";
+      document.documentElement.style.overflow = "";
       window.scrollTo(0, scrollYRef.current);
     }
   }, []);
@@ -88,13 +90,15 @@ export function SearchToggle() {
     unlockScroll();
   }, [unlockScroll]);
 
-  // Lock scroll synchronously on all devices to stop scroll drift while typing.
-  // On mobile the backdrop (rendered below the overlay) handles tap-outside-to-close.
+  // Lock scroll synchronously — overflow:hidden on both html+body stops iOS
+  // elastic/bounce scroll that position:fixed alone doesn't fully prevent.
   const openSearch = useCallback(() => {
     scrollYRef.current = window.scrollY;
     document.body.style.position = "fixed";
     document.body.style.top = `-${scrollYRef.current}px`;
     document.body.style.width = "100%";
+    document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     setOpen(true);
   }, []);
 
