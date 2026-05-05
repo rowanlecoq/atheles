@@ -92,6 +92,29 @@ export async function GET(request: Request) {
   // Assign Discord role based on current tier
   const tierTag = (node.tags as string[]).find((t: string) => t.startsWith("tier:"));
   const tier = tierTag ? tierTag.replace("tier:", "") : "bronze";
+
+  const ROLE_IDS: Record<string, string | undefined> = {
+    bronze:   process.env.DISCORD_ROLE_BRONZE,
+    silver:   process.env.DISCORD_ROLE_SILVER,
+    gold:     process.env.DISCORD_ROLE_GOLD,
+    platinum: process.env.DISCORD_ROLE_PLATINUM,
+    champion: process.env.DISCORD_ROLE_CHAMPION,
+    athlete:  process.env.DISCORD_ROLE_ATHLETE,
+    admin:    process.env.DISCORD_ROLE_ADMIN,
+  };
+  const guildId = process.env.DISCORD_GUILD_ID;
+  const botToken = process.env.DISCORD_BOT_TOKEN;
+
+  // Add user to the server (no-op if already a member) and give them their role in one call
+  if (guildId && botToken) {
+    await fetch(`https://discord.com/api/v10/guilds/${guildId}/members/${discordUser.id}`, {
+      method: "PUT",
+      headers: { Authorization: `Bot ${botToken}`, "Content-Type": "application/json" },
+      body: JSON.stringify({ access_token, roles: ROLE_IDS[tier] ? [ROLE_IDS[tier]] : [] }),
+    }).catch(() => {});
+  }
+
+  // Also sync role for users already in the server (PUT above skips existing members)
   await assignDiscordRole(discordUser.id, tier).catch(() => {});
 
   const res = NextResponse.redirect(`${profileUrl}?discord=linked`);
