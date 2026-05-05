@@ -42,6 +42,7 @@ function ResultItem({
             src={product.featuredImage.url}
             alt={product.title}
             fill
+            loading="eager"
             className="object-cover"
             sizes="40px"
           />
@@ -71,6 +72,8 @@ export function SearchToggle() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollYRef = useRef(0);
   const touchLockRef = useRef<((e: TouchEvent) => void) | null>(null);
+  const scrollHandlerRef = useRef<(() => void) | null>(null);
+  const isSnappingRef = useRef(false);
   const router = useRouter();
 
   const unlockScroll = useCallback(() => {
@@ -78,6 +81,11 @@ export function SearchToggle() {
     if (touchLockRef.current) {
       document.removeEventListener("touchmove", touchLockRef.current);
       touchLockRef.current = null;
+    }
+    // Mobile: remove scroll snap handler
+    if (scrollHandlerRef.current) {
+      window.removeEventListener("scroll", scrollHandlerRef.current);
+      scrollHandlerRef.current = null;
     }
     // Desktop: restore body position
     if (document.body.style.position === "fixed") {
@@ -105,6 +113,19 @@ export function SearchToggle() {
       const touchHandler = (e: TouchEvent) => e.preventDefault();
       touchLockRef.current = touchHandler;
       document.addEventListener("touchmove", touchHandler, { passive: false });
+      // scroll snap stops per-keystroke drift; isSnapping flag breaks the
+      // feedback loop that previously caused flickering with visualViewport
+      const scrollHandler = () => {
+        if (isSnappingRef.current) return;
+        if (window.scrollY === scrollYRef.current) return;
+        isSnappingRef.current = true;
+        window.scrollTo(0, scrollYRef.current);
+        requestAnimationFrame(() => {
+          isSnappingRef.current = false;
+        });
+      };
+      scrollHandlerRef.current = scrollHandler;
+      window.addEventListener("scroll", scrollHandler, { passive: true });
     } else {
       // Desktop: body lock stops per-keystroke scroll drift
       document.body.style.position = "fixed";
@@ -154,6 +175,7 @@ export function SearchToggle() {
     if (!open || typeof window === "undefined" || !window.visualViewport) return;
     const vv = window.visualViewport;
     const update = () => {
+      if (isSnappingRef.current) return;
       if (mobileOverlayRef.current) {
         mobileOverlayRef.current.style.transform = `translateY(${vv.offsetTop}px)`;
       }
