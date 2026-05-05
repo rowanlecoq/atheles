@@ -104,15 +104,12 @@ export function SearchToggle() {
     scrollYRef.current = window.scrollY;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      // Scroll to top instantly so the fixed overlay isn't hidden behind the
-      // browser URL bar (which reappears when the keyboard opens while scrolled down)
-      window.scrollTo({ top: 0, behavior: "instant" as ScrollBehavior });
       // touchmove lock stops finger-scroll
       const touchHandler = (e: TouchEvent) => e.preventDefault();
       touchLockRef.current = touchHandler;
       document.addEventListener("touchmove", touchHandler, { passive: false });
-      // scroll lock keeps position at 0 — keyboard can't drift the page
-      const scrollHandler = () => window.scrollTo(0, 0);
+      // scroll lock snaps back any keyboard-triggered scroll drift
+      const scrollHandler = () => window.scrollTo(0, scrollYRef.current);
       scrollLockRef.current = scrollHandler;
       window.addEventListener("scroll", scrollHandler, { passive: true });
     } else {
