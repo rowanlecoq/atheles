@@ -387,11 +387,11 @@ body[data-bg="water"] {
 /* Tropical — emerald lower-left, amber upper-right, teal shimmer */
 body[data-bg="tropical"] {
   --theme-gradient:
-    radial-gradient(ellipse 180% 130% at 18% 65%,  rgba( 16, 185, 129, 0.28) 0%, transparent 62%),
-    radial-gradient(ellipse 150% 140% at 78% 28%,  rgba(245, 158,  11, 0.24) 0%, transparent 62%),
-    radial-gradient(ellipse 140% 130% at 50% 50%,  rgba( 20, 200, 160, 0.20) 0%, transparent 58%),
-    radial-gradient(ellipse 140% 100% at 82% 78%,  rgba(250, 180,  50, 0.20) 0%, transparent 58%),
-    radial-gradient(ellipse 200% 100% at 50% 100%, rgba( 16, 185, 129, 0.32) 0%, transparent 62%),
+    radial-gradient(ellipse 180% 130% at 18% 65%,  rgba( 16, 185, 129, 0.18) 0%, transparent 62%),
+    radial-gradient(ellipse 150% 140% at 78% 28%,  rgba(245, 158,  11, 0.15) 0%, transparent 62%),
+    radial-gradient(ellipse 140% 130% at 50% 50%,  rgba( 20, 200, 160, 0.12) 0%, transparent 58%),
+    radial-gradient(ellipse 140% 100% at 82% 78%,  rgba(250, 180,  50, 0.12) 0%, transparent 58%),
+    radial-gradient(ellipse 200% 100% at 50% 100%, rgba( 16, 185, 129, 0.20) 0%, transparent 62%),
     #020b05;
   background: var(--theme-gradient);
   background-attachment: fixed;
