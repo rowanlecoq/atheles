@@ -67,6 +67,7 @@ export function SearchToggle() {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
+  const mobileOverlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollYRef = useRef(0);
@@ -81,10 +82,13 @@ export function SearchToggle() {
       document.removeEventListener("touchmove", touchLockRef.current);
       touchLockRef.current = null;
     }
-    // Mobile: remove scroll snap handler
+    // Mobile: remove scroll snap handler and clear overlay translation
     if (scrollHandlerRef.current) {
       window.removeEventListener("scroll", scrollHandlerRef.current);
       scrollHandlerRef.current = null;
+    }
+    if (mobileOverlayRef.current) {
+      mobileOverlayRef.current.style.transform = "";
     }
     // Desktop: restore body position
     if (document.body.style.position === "fixed") {
@@ -107,13 +111,18 @@ export function SearchToggle() {
     scrollYRef.current = window.scrollY;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      // touchmove lock stops finger-scroll; visualViewport effect handles
-      // keeping the overlay pinned when the keyboard shifts the layout viewport
+      // fixed top:0 sits at layout pixel 0, but visual viewport starts at
+      // scrollY — translate overlay down by scrollY so it sits at the top
+      // of what the user can actually see. the scroll snap keeps scrollY
+      // locked at this value, so the static translation stays correct.
+      if (mobileOverlayRef.current) {
+        mobileOverlayRef.current.style.transform = `translateY(${scrollYRef.current}px)`;
+      }
       const touchHandler = (e: TouchEvent) => e.preventDefault();
       touchLockRef.current = touchHandler;
       document.addEventListener("touchmove", touchHandler, { passive: false });
-      // scroll snap stops per-keystroke drift; isSnapping flag breaks the
-      // feedback loop that previously caused flickering with visualViewport
+      // scroll snap prevents per-keystroke drift; isSnapping flag prevents
+      // re-entry that would cause a feedback loop
       const scrollHandler = () => {
         if (isSnappingRef.current) return;
         if (window.scrollY === scrollYRef.current) return;
@@ -270,7 +279,7 @@ export function SearchToggle() {
 
       {/* Mobile: full-width overlay bar */}
       {open && (
-        <div className="fixed inset-x-0 top-0 z-[80] bg-brand-dark md:hidden">
+        <div ref={mobileOverlayRef} className="fixed inset-x-0 top-0 z-[80] bg-brand-dark md:hidden">
           <div className="flex items-center gap-2 px-4 py-3">
             <form onSubmit={handleSubmit} className="flex flex-1 items-center">
               <input
