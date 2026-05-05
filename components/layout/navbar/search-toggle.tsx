@@ -71,18 +71,13 @@ export function SearchToggle() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollYRef = useRef(0);
   const touchLockRef = useRef<((e: TouchEvent) => void) | null>(null);
-  const scrollLockRef = useRef<(() => void) | null>(null);
   const router = useRouter();
 
   const unlockScroll = useCallback(() => {
-    // Mobile: remove touchmove + scroll locks
+    // Mobile: remove touchmove lock
     if (touchLockRef.current) {
       document.removeEventListener("touchmove", touchLockRef.current);
       touchLockRef.current = null;
-    }
-    if (scrollLockRef.current) {
-      window.removeEventListener("scroll", scrollLockRef.current);
-      scrollLockRef.current = null;
     }
     // Desktop: restore body position
     if (document.body.style.position === "fixed") {
@@ -105,14 +100,11 @@ export function SearchToggle() {
     scrollYRef.current = window.scrollY;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      // touchmove lock stops finger-scroll
+      // touchmove lock stops finger-scroll; visualViewport effect handles
+      // keeping the overlay pinned when the keyboard shifts the layout viewport
       const touchHandler = (e: TouchEvent) => e.preventDefault();
       touchLockRef.current = touchHandler;
       document.addEventListener("touchmove", touchHandler, { passive: false });
-      // scroll lock snaps back any keyboard-triggered scroll drift
-      const scrollHandler = () => window.scrollTo(0, scrollYRef.current);
-      scrollLockRef.current = scrollHandler;
-      window.addEventListener("scroll", scrollHandler, { passive: true });
     } else {
       // Desktop: body lock stops per-keystroke scroll drift
       document.body.style.position = "fixed";
