@@ -276,13 +276,15 @@ function AthleteCard({
                 onClick={() => goToImage(idx)}
                 aria-label={`View image ${idx + 1}`}
                 className={`relative h-16 w-16 flex-none overflow-hidden rounded transition-all duration-200 ${
-                  idx === imageIndex ? "opacity-100 ring-1 ring-brand-gold" : "opacity-50 hover:opacity-80"
+                  idx === imageIndex
+                    ? "border-2 border-brand-gold opacity-100"
+                    : "border border-brand-dark-gold/20 opacity-70 hover:border-brand-gold/40 hover:opacity-100"
                 }`}
               >
                 {ytThumb ? (
                   <div className="relative h-full w-full">
                     {/* eslint-disable-next-line @next/next/no-img-element */}
-                    <img src={ytThumb} alt="" className="h-full w-full object-cover" />
+                    <img src={ytThumb} alt="" className="h-full w-full object-cover object-top" />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
                       <span className="text-white">▶</span>
                     </div>
@@ -291,7 +293,7 @@ function AthleteCard({
                   <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-brand-grey">▶</div>
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item} alt={`${athlete.name} ${idx + 1}`} className="h-full w-full object-cover" />
+                  <img src={item} alt={`${athlete.name} ${idx + 1}`} className="h-full w-full object-cover object-top" />
                 )}
               </button>
             );
