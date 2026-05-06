@@ -425,15 +425,7 @@ export function AthletesContent() {
       {!loaded ? (
         <div className="mb-14 grid gap-6 sm:grid-cols-2">
           {[0, 1].map((i) => (
-            <div key={i} className="animate-pulse overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
-              <div className="aspect-[4/5] w-full bg-white/[0.04]" />
-              <div className="p-5 space-y-3">
-                <div className="h-4 w-32 rounded bg-white/[0.06]" />
-                <div className="h-3 w-20 rounded bg-white/[0.04]" />
-                <div className="h-3 w-full rounded bg-white/[0.04]" />
-                <div className="h-3 w-3/4 rounded bg-white/[0.04]" />
-              </div>
-            </div>
+            <div key={i} className="aspect-[4/5] rounded-lg bg-white/[0.04]" />
           ))}
         </div>
       ) : (
