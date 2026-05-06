@@ -1,6 +1,7 @@
 "use client";
 
 import { UserIcon } from "@heroicons/react/24/outline";
+import { fetchSession, invalidateSessionCache } from "lib/session-cache";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
@@ -29,12 +30,12 @@ export function AccountIcon() {
   }, []);
 
   const refreshSession = useCallback(() => {
-    fetch("/api/auth/session")
-      .then((res) => res.json())
+    fetchSession()
       .then((data) => {
-        if (data?.user) {
+        if ((data as { user?: unknown } | null)?.user) {
+          const user = (data as { user: Record<string, string> }).user;
           setLoggedIn(true);
-          const name = data.user.name || data.user.email || "A";
+          const name = user.name || user.email || "A";
           setInitials(
             name
               .split(" ")
@@ -44,7 +45,7 @@ export function AccountIcon() {
               .slice(0, 2),
           );
           // Per-user avatar cache for instant display
-          const avatarKey = `atheles-avatar-${data.user.email}`;
+          const avatarKey = `atheles-avatar-${user.email}`;
           try {
             const cached = localStorage.getItem(avatarKey);
             if (cached) setAvatar(cached);
@@ -71,7 +72,6 @@ export function AccountIcon() {
         setLoggedIn(false);
         setInitials(null);
         setAvatar(null);
-        try { sessionStorage.removeItem("atheles-avatar"); } catch {}
       });
   }, []);
 

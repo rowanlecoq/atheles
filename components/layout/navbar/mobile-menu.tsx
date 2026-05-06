@@ -13,6 +13,7 @@ import {
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import LogoSquare from "components/logo-square";
+import { fetchSession } from "lib/session-cache";
 import type { Menu } from "lib/shopify/types";
 import Search, { SearchSkeleton } from "./search";
 
@@ -29,7 +30,7 @@ const categoryLinks: CategoryLink[] = [
     path: "/search/mens",
     subcategories: [
       { title: "Compressions", path: "/search/compressions" },
-      { title: "Tees", path: "/search/t-shirts" },
+      { title: "Tees", path: "/search/tees" },
       { title: "Sweatpants", path: "/search/sweatpants" },
     ],
   },
@@ -140,14 +141,14 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   }, []);
 
   const refreshSession = useCallback(() => {
-    fetch("/api/auth/session")
-      .then((res) => res.json())
+    fetchSession()
       .then((data) => {
-        if (data?.user) {
+        if ((data as { user?: unknown } | null)?.user) {
+          const user = (data as { user: Record<string, string> }).user;
           setLoggedIn(true);
-          setUserName(data.user.name || data.user.firstName || "");
+          setUserName(user.name || user.firstName || "");
           // Per-user avatar cache
-          const avatarKey = `atheles-avatar-${data.user.email}`;
+          const avatarKey = `atheles-avatar-${user.email}`;
           try {
             const cached = localStorage.getItem(avatarKey);
             if (cached) setAvatar(cached);
@@ -165,7 +166,6 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           setLoggedIn(false);
           setUserName("");
           setAvatar(null);
-          // Session cache keys are cleared by the logout flow
         }
       })
       .catch(() => {});
