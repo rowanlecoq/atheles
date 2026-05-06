@@ -2,18 +2,18 @@
 
 import { motion, useScroll, useTransform } from "motion/react";
 
-// Invisible 2px-tall fixed element that maintains a GPU compositor layer at the
-// top of the page. Without a non-zero-area promoted layer here, the sticky
-// navbar + backdrop-blur combination jitters on scroll. No bg color = invisible.
 export function ScrollProgress() {
   const { scrollYProgress } = useScroll();
+  // opacity permanently 0 — bar is invisible but the motion value keeps
+  // will-change: transform, opacity active, which is what stabilises the
+  // sticky backdrop-blur navbar during scroll
+  const opacity = useTransform(scrollYProgress, [0, 1], [0, 0]);
   const x = useTransform(scrollYProgress, [0, 1], ["-100%", "0%"]);
 
   return (
     <motion.div
-      aria-hidden="true"
-      className="pointer-events-none fixed left-0 top-0 z-40 h-[2px] w-full opacity-0"
-      style={{ x }}
+      className="fixed left-0 top-0 z-40 h-[2px] w-full bg-brand-gold"
+      style={{ x, opacity }}
     />
   );
 }
