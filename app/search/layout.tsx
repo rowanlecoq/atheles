@@ -38,7 +38,7 @@ export default function SearchLayout({
           <div className="animate-slide-up relative z-10 hidden md:block">
             <div className="sticky top-20 pr-4">
               <div className="mb-4 flex items-center justify-between">
-                <h2 className="text-sm font-medium uppercase tracking-wider text-brand-pale-gold">
+                <h2 className="text-sm font-medium lowercase text-brand-pale-gold">
                   filter & sort
                 </h2>
                 <Suspense fallback={null}>

@@ -72,7 +72,7 @@ function SortFilterListItem({ item, onSelect, optimisticSlug }: { item: SortFilt
       {active ? (
         <span className={className}>{radio}{item.title}</span>
       ) : (
-        <Link href={href} prefetch={true} onClick={() => onSelect?.(item.slug || "")} className={className}>
+        <Link href={href} onClick={() => onSelect?.(item.slug || "")} className={className}>
           {radio}{item.title}
         </Link>
       )}
