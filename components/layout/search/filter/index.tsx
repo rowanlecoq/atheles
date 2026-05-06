@@ -2,7 +2,8 @@
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { SortFilterItem } from "lib/constants";
-import { Suspense, useState } from "react";
+import { Suspense, useEffect, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import FilterItemDropdown from "./dropdown";
 import { FilterItem } from "./item";
 
@@ -63,12 +64,25 @@ export function CollectionFilter({ list }: { list: ListItem[] }) {
 }
 
 export function SortFilter({ list, title }: { list: ListItem[]; title?: string }) {
+  const searchParams = useSearchParams();
+  const [optimisticSlug, setOptimisticSlug] = useState<string | null>(null);
+
+  // Reset when navigation settles
+  useEffect(() => {
+    setOptimisticSlug(null);
+  }, [searchParams]);
+
   return (
     <CollapsibleSection title={title || "Sort By"}>
       <ul className="space-y-1">
         <Suspense fallback={null}>
           {list.map((item: ListItem, i) => (
-            <FilterItem key={i} item={item} />
+            <FilterItem
+              key={i}
+              item={item}
+              optimisticSlug={optimisticSlug}
+              onSelect={(slug) => setOptimisticSlug(slug ?? null)}
+            />
           ))}
         </Suspense>
       </ul>
