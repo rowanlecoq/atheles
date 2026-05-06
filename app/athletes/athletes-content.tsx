@@ -58,7 +58,7 @@ function socialUrl(s: Social): string {
 }
 
 function SocialIcon({ platform }: { platform: string }) {
-  const cls = "h-4 w-4";
+  const cls = "h-5 w-5";
   switch (platform.toLowerCase()) {
     case "tiktok":
       return <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className={cls}><path d="M9 12a4 4 0 1 0 4 4V4a5 5 0 0 0 5 5" /></svg>;
@@ -325,14 +325,14 @@ function AthleteCard({
         )}
 
         {normalizeSocials(athlete.socials).length > 0 && (
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap gap-1">
             {normalizeSocials(athlete.socials).map((s) => (
               <a
                 key={s.platform + s.url}
                 href={socialUrl(s)}
                 target={socialUrl(s).startsWith("mailto:") ? undefined : "_blank"}
                 rel="noopener noreferrer"
-                className="text-brand-grey transition-colors hover:text-brand-gold"
+                className="flex h-9 w-9 items-center justify-center rounded-md text-brand-grey transition-colors hover:text-brand-gold"
                 aria-label={s.platform}
                 title={s.platform}
               >
