@@ -7,7 +7,7 @@ import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import type { ListItem, PathFilterItem as PathFilterItemType } from ".";
 
-function PathFilterListItem({ item }: { item: PathFilterItemType }) {
+function PathFilterListItem({ item, onSelect }: { item: PathFilterItemType; onSelect?: () => void }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const active = pathname === item.path;
@@ -17,9 +17,10 @@ function PathFilterListItem({ item }: { item: PathFilterItemType }) {
   newParams.delete("q");
 
   return (
-    <li key={item.title}>
+    <li>
       <DynamicTag
         href={createUrl(item.path, newParams)}
+        onClick={onSelect}
         className={clsx(
           "flex w-full items-center gap-2.5 whitespace-nowrap lowercase rounded-md px-3 py-2 text-sm transition-colors",
           active
@@ -27,13 +28,10 @@ function PathFilterListItem({ item }: { item: PathFilterItemType }) {
             : "text-white hover:bg-brand-dark-gold/10 hover:text-brand-gold",
         )}
       >
-        {/* Radio dot */}
         <span
           className={clsx(
             "flex h-4 w-4 flex-none items-center justify-center rounded-full border",
-            active
-              ? "border-brand-gold"
-              : "border-brand-dark-gold/40",
+            active ? "border-brand-gold" : "border-brand-dark-gold/40",
           )}
         >
           {active && <span className="h-2 w-2 rounded-full bg-brand-gold" />}
@@ -44,7 +42,7 @@ function PathFilterListItem({ item }: { item: PathFilterItemType }) {
   );
 }
 
-function SortFilterListItem({ item }: { item: SortFilterItemType }) {
+function SortFilterListItem({ item, onSelect }: { item: SortFilterItemType; onSelect?: () => void }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const active = (searchParams.get("sort") || "") === (item.slug || "");
@@ -59,10 +57,10 @@ function SortFilterListItem({ item }: { item: SortFilterItemType }) {
   const DynamicTag = active ? "p" : Link;
 
   return (
-    <li key={item.title}>
+    <li>
       <DynamicTag
-        prefetch={!active ? false : undefined}
         href={href}
+        onClick={onSelect}
         className={clsx(
           "flex w-full items-center gap-2.5 whitespace-nowrap lowercase rounded-md px-3 py-2 text-sm transition-colors",
           active
@@ -70,13 +68,10 @@ function SortFilterListItem({ item }: { item: SortFilterItemType }) {
             : "text-white hover:bg-brand-dark-gold/10 hover:text-brand-gold",
         )}
       >
-        {/* Radio dot */}
         <span
           className={clsx(
             "flex h-4 w-4 flex-none items-center justify-center rounded-full border",
-            active
-              ? "border-brand-gold"
-              : "border-brand-dark-gold/40",
+            active ? "border-brand-gold" : "border-brand-dark-gold/40",
           )}
         >
           {active && <span className="h-2 w-2 rounded-full bg-brand-gold" />}
@@ -87,10 +82,10 @@ function SortFilterListItem({ item }: { item: SortFilterItemType }) {
   );
 }
 
-export function FilterItem({ item }: { item: ListItem }) {
+export function FilterItem({ item, onSelect }: { item: ListItem; onSelect?: () => void }) {
   return "path" in item ? (
-    <PathFilterListItem item={item} />
+    <PathFilterListItem item={item} onSelect={onSelect} />
   ) : (
-    <SortFilterListItem item={item} />
+    <SortFilterListItem item={item} onSelect={onSelect} />
   );
 }

@@ -59,6 +59,7 @@ export default function FilterItemDropdown({ list }: { list: ListItem[] }) {
             <FilterItem
               key={"path" in item ? item.path : item.slug || item.title}
               item={item}
+              onSelect={() => setOpenSelect(false)}
             />
           ))}
         </ul>

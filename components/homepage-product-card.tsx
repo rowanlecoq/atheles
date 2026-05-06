@@ -113,7 +113,7 @@ export function HomepageProductCard({
           />
         </div>
         {/* Border overlay — sits above image in paint order */}
-        <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-brand-dark-gold/20" />
+        <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brand-dark-gold/20" />
       </div>
     </motion.div>
   );
