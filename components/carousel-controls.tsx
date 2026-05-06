@@ -56,7 +56,7 @@ export function CarouselControls({
       <div className="flex items-end justify-between">
         <div>
           {subtitle && (
-            <p className="text-[11px] font-bold uppercase tracking-[0.2em] text-brand-dark-gold">
+            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-dark-gold">
               {subtitle}
             </p>
           )}

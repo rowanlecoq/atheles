@@ -161,7 +161,7 @@ html { scrollbar-width: none; }
 
 /* Selection styling */
 ::selection {
-  background-color: rgba(204, 177, 115, 0.3);
+  background-color: rgba(204, 177, 115, 0.5);
   color: #ffffff;
 }
 
@@ -350,6 +350,9 @@ html.thunder-shake {
     animation: none;
     opacity: 1;
     stroke-dashoffset: 0;
+  }
+  .animate-ping {
+    animation: none;
   }
 }
 

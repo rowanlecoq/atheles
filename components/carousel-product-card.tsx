@@ -35,7 +35,7 @@ export function CarouselProductCard({ product, index = 0 }: { product: Product; 
               alt={product.title}
               fill
               sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 72vw"
-              className={`h-full w-full object-cover transition-opacity duration-500 ${
+              className={`h-full w-full object-cover transition-opacity duration-200 ${
                 secondImage ? "group-hover:opacity-0" : ""
               }`}
             />
@@ -46,7 +46,7 @@ export function CarouselProductCard({ product, index = 0 }: { product: Product; 
               alt={`${product.title} - alternate`}
               fill
               sizes="(min-width: 1024px) 25vw, (min-width: 768px) 33vw, 72vw"
-              className="h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+              className="h-full w-full object-cover opacity-0 transition-opacity duration-200 group-hover:opacity-100"
             />
           )}
         </Link>
