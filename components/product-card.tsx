@@ -50,7 +50,7 @@ export function ProductCard({
       {/* Image container */}
       <Link
         href={`/product/${handle}`}
-        className="relative block aspect-[3/4] overflow-hidden bg-[#1a1a1a]"
+        className="relative block aspect-[3/4] overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-[#1a1a1a]"
       >
         {featuredImageUrl ? (
           <Image
