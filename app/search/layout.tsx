@@ -19,11 +19,11 @@ export default function SearchLayout({
       <SearchPageHeader />
 
       {/* Mobile filters — compact horizontal pills + sort dropdown */}
-      <div className="animate-slide-up relative z-10 mx-auto max-w-(--breakpoint-2xl) px-4 pt-4 md:hidden">
+      <div className="animate-slide-up relative z-10 mx-auto max-w-(--breakpoint-2xl) pt-4 md:hidden">
         <div className="mb-2">
           <MobileCollections />
         </div>
-        <div className="mb-4 flex items-center justify-end gap-3 border-b border-brand-dark-gold/20 pb-3">
+        <div className="mb-4 flex items-center justify-end gap-3 border-b border-brand-dark-gold/20 px-4 pb-3">
           <Suspense fallback={null}>
             <ClearFilters />
           </Suspense>

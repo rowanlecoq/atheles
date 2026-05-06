@@ -50,7 +50,7 @@ export default function FilterItemDropdown({ list }: { list: ListItem[] }) {
         }}
         className="tap-target flex min-h-[40px] items-center gap-1.5 rounded-full border border-brand-dark-gold/30 px-3.5 py-2 text-left text-sm text-white"
       >
-        <div className="whitespace-nowrap">{active || "Relevance"}</div>
+        <div className="lowercase whitespace-nowrap">{active || "relevance"}</div>
         <ChevronDownIcon className={`h-3.5 w-3.5 flex-none text-brand-gold transition-transform duration-200 ${openSelect ? "rotate-180" : ""}`} />
       </button>
       {openSelect && (

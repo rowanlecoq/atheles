@@ -50,7 +50,7 @@ export function ProductCard({
       {/* Image container */}
       <Link
         href={`/product/${handle}`}
-        className="relative block aspect-[3/4] overflow-hidden rounded-lg ring-1 ring-inset ring-brand-dark-gold/20 bg-[#1a1a1a]"
+        className="relative block aspect-[3/4] overflow-hidden rounded-lg bg-[#1a1a1a]"
       >
         {featuredImageUrl ? (
           <Image
@@ -81,6 +81,8 @@ export function ProductCard({
             ))}
           </div>
         )}
+        {/* Border overlay — sits above image in paint order */}
+        <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-brand-dark-gold/20" />
       </Link>
 
       {/* Favorite button */}

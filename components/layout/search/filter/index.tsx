@@ -27,7 +27,7 @@ function CollapsibleSection({
         onClick={() => setOpen(!open)}
         className="flex w-full items-center justify-between text-left"
       >
-        <span className="text-sm font-medium uppercase tracking-wider text-brand-pale-gold">
+        <span className="text-sm font-medium lowercase tracking-wider text-brand-pale-gold">
           {title}
         </span>
         <ChevronDownIcon
@@ -131,7 +131,7 @@ function CollectionPill({ item }: { item: PathFilterItem }) {
 // Mobile horizontal scrolling collection pills
 export function MobileCollectionFilter({ list }: { list: ListItem[] }) {
   return (
-    <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+    <div className="flex gap-2 overflow-x-auto px-4 pb-1 scrollbar-hide">
       <Suspense fallback={null}>
         {list.map((item, i) =>
           "path" in item ? <MobileCollectionPill key={i} item={item} /> : null,

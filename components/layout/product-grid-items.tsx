@@ -37,7 +37,7 @@ function ProductCard({ product }: { product: Product }) {
   return (
     <div className="group">
       {/* Image container */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded-lg ring-1 ring-inset ring-brand-dark-gold/20 bg-brand-dark">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark">
         <Link href={`/product/${product.handle}`} prefetch={true}>
           {/* Primary image */}
           {product.featuredImage?.url && (
@@ -154,6 +154,8 @@ function ProductCard({ product }: { product: Product }) {
             </div>
           </div>
         )}
+        {/* Border overlay — sits above image in paint order */}
+        <div className="pointer-events-none absolute inset-0 rounded-lg ring-1 ring-inset ring-brand-dark-gold/20" />
       </div>
 
       {/* Product info below */}
