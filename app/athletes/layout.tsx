@@ -13,42 +13,6 @@ export const metadata: Metadata = {
   },
 };
 
-const defaultAthletes = [
-  {
-    name: "rowan le coq",
-    jobTitle: "founder & athlete",
-    url: "https://atheles.co/athletes",
-    sameAs: [
-      "https://www.tiktok.com/@rowanlecoq",
-      "https://www.instagram.com/rowanlecoq",
-      "https://www.linkedin.com/in/rowanlecoq",
-      "https://www.youtube.com/@rowanlecoq",
-    ],
-    affiliation: { "@type": "Organization", name: "Atheles", url: "https://atheles.co" },
-  },
-];
-
 export default function AthletesLayout({ children }: { children: React.ReactNode }) {
-  return (
-    <>
-      {defaultAthletes.map((athlete) => (
-        <script
-          key={athlete.name}
-          type="application/ld+json"
-          dangerouslySetInnerHTML={{
-            __html: JSON.stringify({
-              "@context": "https://schema.org",
-              "@type": "Person",
-              name: athlete.name,
-              jobTitle: athlete.jobTitle,
-              url: athlete.url,
-              sameAs: athlete.sameAs,
-              affiliation: athlete.affiliation,
-            }),
-          }}
-        />
-      ))}
-      {children}
-    </>
-  );
+  return <>{children}</>;
 }
