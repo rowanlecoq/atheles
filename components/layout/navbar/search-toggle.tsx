@@ -5,7 +5,7 @@ import { useCurrency } from "components/currency-context";
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type SearchResult = {
@@ -194,18 +194,16 @@ export function SearchToggle() {
   }, [open, close]);
 
   // Focus desktop input on open (mobile uses autoFocus)
-  useEffect(() => {
+  // useLayoutEffect fires synchronously after DOM mutations (same phase as
+  // autoFocus) so iOS treats it as part of the tap gesture — keyboard appears.
+  // preventScroll stops iOS scrolling the page to show the already-visible input.
+  useLayoutEffect(() => {
     if (!open) return;
     const isMobile =
       typeof window !== "undefined" &&
       window.matchMedia("(pointer: coarse)").matches;
-    // preventScroll stops iOS from scrolling the page to bring the fixed
-    // input into view (it's already visible at top:0)
     const ref = isMobile ? mobileInputRef : inputRef;
-    const t = setTimeout(() => {
-      ref.current?.focus({ preventScroll: true });
-    }, 50);
-    return () => clearTimeout(t);
+    ref.current?.focus({ preventScroll: true });
   }, [open]);
 
   // Release scroll lock if component unmounts while open
