@@ -69,7 +69,7 @@ export function CategoryNav() {
     <div className="animate-category-nav-enter relative hidden md:block">
       {/* Category bar */}
       <nav className="category-nav-bar border-b border-brand-dark-gold/20 bg-brand-dark/90 backdrop-blur-sm">
-        <div className="mx-auto flex items-center justify-center gap-8 px-6 py-2.5">
+        <div className="mx-auto flex items-center justify-center gap-10 px-6 py-4">
           {categories.map((cat, i) => {
             const hasDropdown = cat.subcategories.length > 0 || cat.comingSoon;
             const current = isActive(cat);
@@ -82,7 +82,7 @@ export function CategoryNav() {
               >
                 <Link
                   href={cat.href}
-                  className={`group relative block py-1 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
+                  className={`group relative block py-1 text-sm uppercase tracking-[0.2em] transition-colors duration-200 ${
                     activeIndex === i || current
                       ? "text-brand-gold"
                       : "text-brand-grey hover:text-brand-gold"
