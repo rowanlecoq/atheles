@@ -8,6 +8,7 @@ import { ensureStartsWith } from "lib/utils";
 import {
   unstable_cacheLife as cacheLife,
   unstable_cacheTag as cacheTag,
+  unstable_cache,
   revalidateTag,
 } from "next/cache";
 import { cookies, headers } from "next/headers";
@@ -364,6 +365,23 @@ export async function getCollection(
   return reshapeCollection(res.body.data.collection);
 }
 
+const _getCollectionProducts = unstable_cache(
+  async (collection: string, sortKey: string | undefined, reverse: boolean | undefined) => {
+    const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
+      query: getCollectionProductsQuery,
+      variables: {
+        handle: collection,
+        reverse,
+        sortKey: sortKey === "CREATED_AT" ? "CREATED" : sortKey,
+      },
+    });
+    if (!res.body.data.collection) return [];
+    return reshapeProducts(removeEdgesAndNodes(res.body.data.collection.products));
+  },
+  ["shopify-collection-products"],
+  { tags: [TAGS.collections, TAGS.products], revalidate: 900 },
+);
+
 export async function getCollectionProducts({
   collection,
   reverse,
@@ -373,34 +391,13 @@ export async function getCollectionProducts({
   reverse?: boolean;
   sortKey?: string;
 }): Promise<Product[]> {
-  "use cache";
-  cacheTag(TAGS.collections, TAGS.products);
-  cacheLife("minutes");
-
   if (!endpoint) {
     console.log(
       `Skipping getCollectionProducts for '${collection}' - Shopify not configured`,
     );
     return [];
   }
-
-  const res = await shopifyFetch<ShopifyCollectionProductsOperation>({
-    query: getCollectionProductsQuery,
-    variables: {
-      handle: collection,
-      reverse,
-      sortKey: sortKey === "CREATED_AT" ? "CREATED" : sortKey,
-    },
-  });
-
-  if (!res.body.data.collection) {
-    console.log(`No collection found for \`${collection}\``);
-    return [];
-  }
-
-  return reshapeProducts(
-    removeEdgesAndNodes(res.body.data.collection.products),
-  );
+  return _getCollectionProducts(collection, sortKey, reverse);
 }
 
 export async function getCollections(): Promise<Collection[]> {
@@ -539,6 +536,18 @@ export async function getProductRecommendations(
   return reshapeProducts(res.body.data.productRecommendations);
 }
 
+const _getProducts = unstable_cache(
+  async (sortKey: string | undefined, reverse: boolean | undefined, query: string | undefined) => {
+    const res = await shopifyFetch<ShopifyProductsOperation>({
+      query: getProductsQuery,
+      variables: { query, reverse, sortKey },
+    });
+    return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
+  },
+  ["shopify-products"],
+  { tags: [TAGS.products], revalidate: 900 },
+);
+
 export async function getProducts({
   query,
   reverse,
@@ -548,22 +557,8 @@ export async function getProducts({
   reverse?: boolean;
   sortKey?: string;
 }): Promise<Product[]> {
-  "use cache";
-  cacheTag(TAGS.products);
-  cacheLife("minutes");
-
   if (!endpoint) return [];
-
-  const res = await shopifyFetch<ShopifyProductsOperation>({
-    query: getProductsQuery,
-    variables: {
-      query,
-      reverse,
-      sortKey,
-    },
-  });
-
-  return reshapeProducts(removeEdgesAndNodes(res.body.data.products));
+  return _getProducts(sortKey, reverse, query);
 }
 
 // This is called from `app/api/revalidate.ts` so providers can control revalidation logic.
