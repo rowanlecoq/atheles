@@ -6,6 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type SearchResult = {
   handle: string;
@@ -266,72 +267,74 @@ export function SearchToggle() {
         </div>
       </div>
 
-      {/* Mobile: full-width overlay bar */}
-      {open && (
-        <div className="fixed inset-x-0 top-0 z-[80] bg-brand-dark md:hidden">
-          <div className="flex items-center gap-2 px-4 py-3">
-            <form onSubmit={handleSubmit} className="flex flex-1 items-center">
-              <input
-                ref={mobileInputRef}
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="search..."
-                autoFocus
-                className="h-10 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-[16px] text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0 md:text-sm"
-              />
-            </form>
-            <button
-              type="button"
-              onClick={close}
-              aria-label="Close search"
-              className="flex h-11 w-11 shrink-0 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
-          </div>
-          {/* Mobile results */}
-          {showDropdown && (
-            <div className="border-t border-brand-dark-gold/20">
-              {loading && results.length === 0 ? (
-                <div className="px-4 py-3 text-xs text-brand-grey">
-                  searching...
-                </div>
-              ) : (
-                <>
-                  {results.slice(0, 5).map((product) => (
-                    <ResultItem
-                      key={product.handle}
-                      product={product}
-                      onClose={close}
-                    />
-                  ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      router.push(
-                        `/search?q=${encodeURIComponent(query.trim())}`,
-                      );
-                      close();
-                    }}
-                    className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
-                  >
-                    view all results
-                  </button>
-                </>
-              )}
+      {/* Mobile: portal renders outside the navbar stacking context so
+          fixed positioning and z-index work relative to the document root */}
+      {open && typeof document !== "undefined" && createPortal(
+        <div className="md:hidden">
+          {/* Overlay bar */}
+          <div className="fixed inset-x-0 top-0 z-[9999] bg-brand-dark">
+            <div className="flex items-center gap-2 px-4 py-3">
+              <form onSubmit={handleSubmit} className="flex flex-1 items-center">
+                <input
+                  ref={mobileInputRef}
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="search..."
+                  autoFocus
+                  className="h-10 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-[16px] text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0"
+                />
+              </form>
+              <button
+                type="button"
+                onClick={close}
+                aria-label="Close search"
+                className="flex h-11 w-11 shrink-0 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold"
+              >
+                <XMarkIcon className="h-5 w-5" />
+              </button>
             </div>
-          )}
-        </div>
-      )}
-
-      {/* Mobile: backdrop */}
-      {open && (
-        <div
-          className="fixed inset-0 z-[75] bg-black/50 md:hidden"
-          onClick={close}
-          aria-hidden="true"
-        />
+            {/* Mobile results */}
+            {showDropdown && (
+              <div className="border-t border-brand-dark-gold/20">
+                {loading && results.length === 0 ? (
+                  <div className="px-4 py-3 text-xs text-brand-grey">
+                    searching...
+                  </div>
+                ) : (
+                  <>
+                    {results.slice(0, 5).map((product) => (
+                      <ResultItem
+                        key={product.handle}
+                        product={product}
+                        onClose={close}
+                      />
+                    ))}
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push(
+                          `/search?q=${encodeURIComponent(query.trim())}`,
+                        );
+                        close();
+                      }}
+                      className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
+                    >
+                      view all results
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
+          {/* Backdrop */}
+          <div
+            className="fixed inset-0 z-[9998] bg-black/50"
+            onClick={close}
+            aria-hidden="true"
+          />
+        </div>,
+        document.body
       )}
 
       {/* Toggle button */}
