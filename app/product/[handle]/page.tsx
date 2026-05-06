@@ -9,6 +9,7 @@ import {
 import { HIDDEN_PRODUCT_TAG } from "lib/constants";
 import { getProduct, getProductRecommendations } from "lib/shopify";
 import type { Image } from "lib/shopify/types";
+import { baseUrl } from "lib/utils";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
@@ -59,12 +60,15 @@ export default async function ProductPage(props: {
 
   if (!product) return notFound();
 
+  const productUrl = `${baseUrl}/product/${product.handle}`;
   const productJsonLd = {
     "@context": "https://schema.org",
     "@type": "Product",
+    "@id": productUrl,
     name: product.title,
     description: product.description,
     image: product.featuredImage.url,
+    url: productUrl,
     brand: {
       "@type": "Brand",
       name: "ATHELES",
@@ -77,6 +81,7 @@ export default async function ProductPage(props: {
       priceCurrency: product.priceRange.minVariantPrice.currencyCode,
       highPrice: product.priceRange.maxVariantPrice.amount,
       lowPrice: product.priceRange.minVariantPrice.amount,
+      url: productUrl,
     },
   };
 
