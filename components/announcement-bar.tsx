@@ -77,7 +77,7 @@ export function AnnouncementBar() {
         type="button"
         onClick={togglePause}
         aria-label={paused ? "Play announcements" : "Pause announcements"}
-        className="absolute right-3 flex h-5 w-5 items-center justify-center text-brand-dark-gold/70 transition-colors hover:text-brand-dark-gold sm:right-4"
+        className="absolute right-1 flex h-full min-w-[44px] items-center justify-center text-brand-dark-gold/70 transition-colors hover:text-brand-dark-gold sm:right-2"
       >
         {paused ? (
           <svg viewBox="0 0 10 12" fill="currentColor" className="h-2.5 w-2.5">

@@ -174,13 +174,13 @@ function FavoritesCarousel({
                   amount={p.priceRange.maxVariantPrice.amount}
                   currencyCode={p.priceRange.maxVariantPrice.currencyCode}
                 />
-                <a
+                <Link
                   href={`/product/${p.handle}`}
                   onClick={onClose}
                   className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold"
                 >
                   view
-                </a>
+                </Link>
               </div>
             </div>
           );
@@ -738,7 +738,7 @@ function CloseCart({ className }: { className?: string }) {
     <div className="relative flex h-11 w-11 items-center justify-center rounded-md text-brand-grey transition-colors hover:text-brand-gold">
       <XMarkIcon
         className={clsx(
-          "h-6 transition-colors",
+          "h-6 w-6 transition-colors",
           className,
         )}
       />

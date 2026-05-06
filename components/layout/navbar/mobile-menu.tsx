@@ -100,7 +100,7 @@ function CategoryItem({
                 <Link
                   href={sub.path}
                   onClick={onNavigate}
-                  className="tap-target flex min-h-[40px] items-center py-2 text-sm uppercase tracking-[0.12em] text-brand-dark-gold transition-colors hover:text-brand-gold"
+                  className="tap-target flex min-h-[44px] items-center py-2 text-sm uppercase tracking-[0.12em] text-brand-dark-gold transition-colors hover:text-brand-gold"
                 >
                   {sub.title}
                 </Link>

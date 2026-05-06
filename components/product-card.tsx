@@ -91,7 +91,7 @@ export function ProductCard({
           e.stopPropagation();
           toggleFavorite(handle);
         }}
-        className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark/50 backdrop-blur-sm transition-all duration-200 hover:bg-brand-dark/80"
+        className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-brand-dark/50 backdrop-blur-sm transition-all duration-200 hover:bg-brand-dark/80"
         aria-label={liked ? "Remove from favorites" : "Add to favorites"}
       >
         {liked ? (

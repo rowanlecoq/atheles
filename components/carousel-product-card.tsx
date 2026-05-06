@@ -70,7 +70,7 @@ export function CarouselProductCard({ product, index = 0 }: { product: Product; 
               setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translateY(4px)"; }, 1000);
             }
           }}
-          className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-all duration-200 hover:bg-brand-dark/80 active:scale-90"
+          className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-all duration-200 hover:bg-brand-dark/80 active:scale-90"
           aria-label={liked ? "Remove from favorites" : "Add to favorites"}
         >
           {liked ? (
