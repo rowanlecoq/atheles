@@ -207,7 +207,7 @@ function AthleteCard({
 
   return (
     <motion.div
-      className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
+      className="group overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark transition-[border-color,box-shadow] duration-300 hover:border-brand-gold hover:shadow-[0_0_20px_rgba(204,177,115,0.1)]"
       initial={{ opacity: 0, y: 20, ...(blurInitial ? { filter: blurInitial } : {}) }}
       whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
       viewport={{ once: true, margin: "0px" }}
@@ -236,11 +236,11 @@ function AthleteCard({
 
       {/* Desktop: static main image — click opens lightbox */}
       <div
-        className="relative hidden aspect-[4/5] w-full cursor-pointer bg-brand-medium-grey/10 lg:block"
+        className="relative hidden aspect-[4/5] w-full cursor-pointer overflow-hidden bg-brand-medium-grey/10 lg:block"
         onClick={() => { if (allImages.length > 0) onOpenLightbox(allImages, imageIndex); }}
       >
         {allImages[imageIndex]
-          ? renderMediaItem(allImages[imageIndex]!, athlete.name, "h-full w-full object-cover")
+          ? renderMediaItem(allImages[imageIndex]!, athlete.name, "h-full w-full object-cover transition duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-105")
           : placeholder}
       </div>
 
@@ -491,6 +491,26 @@ export function AthletesContent() {
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-8 w-8"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
 
+          {/* Zoom toggle — images only, desktop only */}
+          {getEmbedUrl(lightbox.items[lightbox.index] || "").type === "image" && (
+            <button
+              type="button"
+              onClick={(e) => { e.stopPropagation(); setZoom(z => !z); }}
+              className="absolute left-4 top-4 z-10 hidden text-white/70 transition-colors hover:text-white sm:block"
+              aria-label={zoom ? "Zoom out" : "Zoom in"}
+            >
+              {zoom ? (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+                  <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /><path d="M8 11h6" />
+                </svg>
+              ) : (
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
+                  <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /><path d="M11 8v6M8 11h6" />
+                </svg>
+              )}
+            </button>
+          )}
+
           {/* Prev button — tall panel on left edge */}
           {lightbox.items.length > 1 && (
             <button
@@ -586,13 +606,6 @@ export function AthletesContent() {
                     } : undefined}
                     onLoad={() => setEmbedLoading(false)}
                   />
-                  {/* Zoom hint — desktop only (mobile uses native pinch-zoom) */}
-                  {!zoom && (
-                    <div className="pointer-events-none absolute bottom-3 right-3 hidden items-center gap-1 rounded-full bg-black/60 px-2.5 py-1 text-[11px] text-white/70 backdrop-blur-sm sm:flex">
-                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3 w-3"><circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /><path d="M11 8v6M8 11h6" /></svg>
-                      click to zoom
-                    </div>
-                  )}
                 </div>
               );
             })()}
