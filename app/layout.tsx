@@ -103,7 +103,6 @@ export default async function RootLayout({
               <ProfileBackgroundApplier />
               <ThemeBackgroundCanvas />
               <AnnouncementBar />
-              <ScrollProgress />
               <KonamiLightning />
               <Navbar />
               <main className="relative z-[1] w-full">
