@@ -36,7 +36,7 @@ export function HomepageProductCard({
       viewport={{ once: true, margin: "0px" }}
       transition={{ duration: 0.28, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
     >
-      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark md:aspect-auto md:h-full">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark md:aspect-auto md:h-full">
         <Link
           href={`/product/${product.handle}`}
           prefetch={true}

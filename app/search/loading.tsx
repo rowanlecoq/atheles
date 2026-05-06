@@ -6,7 +6,7 @@ export default function Loading() {
         {Array(8)
           .fill(0)
           .map((_, index) => (
-            <div key={index} className="aspect-[3/4] rounded-lg bg-white/[0.04]" />
+            <div key={index} className="aspect-[3/4] rounded-lg border border-brand-dark-gold/20 bg-white/[0.04]" />
           ))}
       </div>
     </>
