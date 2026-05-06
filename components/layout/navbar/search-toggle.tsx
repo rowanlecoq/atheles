@@ -68,6 +68,7 @@ function ResultItem({
 
 export function SearchToggle() {
   const [open, setOpen] = useState(false);
+  const [closing, setClosing] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchResult[]>([]);
   const [loading, setLoading] = useState(false);
@@ -97,10 +98,14 @@ export function SearchToggle() {
   }, []);
 
   const close = useCallback(() => {
-    setOpen(false);
-    setQuery("");
-    setResults([]);
-    unlockScroll();
+    setClosing(true);
+    setTimeout(() => {
+      setOpen(false);
+      setClosing(false);
+      setQuery("");
+      setResults([]);
+      unlockScroll();
+    }, 120);
   }, [unlockScroll]);
 
   const openSearch = useCallback(() => {
@@ -191,8 +196,14 @@ export function SearchToggle() {
   // Focus desktop input on open (mobile uses autoFocus)
   useEffect(() => {
     if (!open) return;
+    const isMobile =
+      typeof window !== "undefined" &&
+      window.matchMedia("(pointer: coarse)").matches;
+    // preventScroll stops iOS from scrolling the page to bring the fixed
+    // input into view (it's already visible at top:0)
+    const ref = isMobile ? mobileInputRef : inputRef;
     const t = setTimeout(() => {
-      inputRef.current?.focus({ preventScroll: true });
+      ref.current?.focus({ preventScroll: true });
     }, 50);
     return () => clearTimeout(t);
   }, [open]);
@@ -268,7 +279,7 @@ export function SearchToggle() {
       {/* Mobile: portal renders outside the navbar stacking context so
           fixed positioning and z-index work relative to the document root */}
       {open && typeof document !== "undefined" && createPortal(
-        <div className="md:hidden">
+        <div className={`md:hidden transition-opacity duration-100 ${closing ? "opacity-0" : "opacity-100"}`}>
           {/* Overlay bar */}
           <div ref={mobileOverlayRef} className="fixed inset-x-0 top-0 z-[9999] bg-brand-dark">
             <div className="flex items-center gap-2 px-4 py-3">
@@ -279,7 +290,6 @@ export function SearchToggle() {
                   value={query}
                   onChange={(e) => setQuery(e.target.value)}
                   placeholder="search..."
-                  autoFocus
                   className="h-10 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-[16px] text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0"
                 />
               </form>
