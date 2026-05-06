@@ -5,36 +5,10 @@ import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { FadeIn } from "components/animations";
+import { normalizeSocials as _normalizeSocials, type AthleteData } from "lib/athletes";
 
 type Social = { platform: string; url: string };
-
-type Athlete = {
-  name: string;
-  age: number;
-  role: string;
-  description?: string;
-  image: string | null;
-  images?: string[];
-  socials: Social[] | Record<string, string>;
-  hobbies: string[];
-};
-
-const defaultAthletes: Athlete[] = [
-  {
-    name: "rowan le coq",
-    age: 18,
-    role: "founder & athlete",
-    description: "",
-    image: null,
-    socials: [
-      { platform: "tiktok", url: "https://www.tiktok.com/@rowanlecoq" },
-      { platform: "instagram", url: "https://www.instagram.com/rowanlecoq" },
-      { platform: "linkedin", url: "https://www.linkedin.com/in/rowanlecoq" },
-      { platform: "youtube", url: "https://www.youtube.com/@rowanlecoq" },
-    ],
-    hobbies: ["baking brownies or chocolate chip banana bread", "working out on the daily", "playing hockey"],
-  },
-];
+type Athlete = AthleteData;
 
 const requirements = [
   "post consistently on socials.",
@@ -46,8 +20,7 @@ const requirements = [
 ];
 
 function normalizeSocials(socials: Social[] | Record<string, string>): Social[] {
-  if (Array.isArray(socials)) return socials.filter((s) => s.url);
-  return Object.entries(socials).filter(([, v]) => v).map(([k, v]) => ({ platform: k, url: v }));
+  return _normalizeSocials(socials as { platform: string; url: string }[] | Record<string, string>);
 }
 
 function socialUrl(s: Social): string {
@@ -346,9 +319,9 @@ function AthleteCard({
   );
 }
 
-export function AthletesContent() {
-  const [athletes, setAthletes] = useState<Athlete[]>([]);
-  const [loaded, setLoaded] = useState(false);
+export function AthletesContent({ initialAthletes = [] }: { initialAthletes?: Athlete[] }) {
+  const [athletes, setAthletes] = useState<Athlete[]>(initialAthletes);
+  const [loaded, setLoaded] = useState(initialAthletes.length > 0);
   const [lightbox, setLightbox] = useState<{ items: string[]; index: number } | null>(null);
   const [embedLoading, setEmbedLoading] = useState(false);
   const [zoom, setZoom] = useState(false);
@@ -376,43 +349,14 @@ export function AthletesContent() {
     fetch("/api/admin/athletes")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        setAthletes(d?.athletes?.length > 0 ? d.athletes : defaultAthletes);
+        if (d?.athletes?.length > 0) setAthletes(d.athletes);
         setLoaded(true);
       })
-      .catch(() => { setAthletes(defaultAthletes); setLoaded(true); });
+      .catch(() => { setLoaded(true); });
   }, []);
 
   return (
     <div className="mx-auto min-h-[calc(100vh-200px)] max-w-4xl px-4 py-16 sm:px-6">
-      {/* Structured data for search engines — invisible to users */}
-      {athletes.map((athlete) => {
-        const socials = normalizeSocials(athlete.socials);
-        const jsonLd = {
-          "@context": "https://schema.org",
-          "@type": "Person",
-          name: athlete.name,
-          jobTitle: athlete.role,
-          description: athlete.description || undefined,
-          image: athlete.image || undefined,
-          url: "https://atheles.co/athletes",
-          affiliation: {
-            "@type": "Organization",
-            name: "Atheles",
-            url: "https://atheles.co",
-          },
-          sameAs: socials
-            .filter((s) => s.url.startsWith("http"))
-            .map((s) => s.url),
-        };
-        return (
-          <script
-            key={athlete.name}
-            type="application/ld+json"
-            dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
-          />
-        );
-      })}
-
       <FadeIn direction="up">
       <h1 className="mb-2 text-center font-heading text-3xl tracking-wider text-brand-gold sm:text-4xl">
         our athletes
