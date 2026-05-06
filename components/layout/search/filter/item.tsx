@@ -43,7 +43,6 @@ function SortFilterListItem({ item, onSelect, optimisticSlug }: { item: SortFilt
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const realActive = (searchParams.get("sort") || "") === (item.slug || "");
-  // Show as active immediately when optimistically selected
   const active = optimisticSlug !== null && optimisticSlug !== undefined
     ? (item.slug || "") === optimisticSlug
     : realActive;
@@ -55,25 +54,28 @@ function SortFilterListItem({ item, onSelect, optimisticSlug }: { item: SortFilt
       ...(item.slug?.length ? { sort: item.slug } : {}),
     }),
   );
-  const DynamicTag = active ? "p" : Link;
+
+  const className = clsx(
+    "flex w-full items-center gap-2.5 lowercase rounded-md px-3 py-2 text-sm transition-colors",
+    active
+      ? "bg-brand-gold/10 text-brand-gold"
+      : "text-white hover:bg-brand-dark-gold/10 hover:text-brand-gold",
+  );
+  const radio = (
+    <span className={clsx("flex h-4 w-4 flex-none items-center justify-center rounded-full border", active ? "border-brand-gold" : "border-brand-dark-gold/40")}>
+      {active && <span className="h-2 w-2 rounded-full bg-brand-gold" />}
+    </span>
+  );
 
   return (
     <li>
-      <DynamicTag
-        href={href}
-        onClick={() => onSelect?.(item.slug || "")}
-        className={clsx(
-          "flex w-full items-center gap-2.5 lowercase rounded-md px-3 py-2 text-sm transition-colors",
-          active
-            ? "bg-brand-gold/10 text-brand-gold"
-            : "text-white hover:bg-brand-dark-gold/10 hover:text-brand-gold",
-        )}
-      >
-        <span className={clsx("flex h-4 w-4 flex-none items-center justify-center rounded-full border", active ? "border-brand-gold" : "border-brand-dark-gold/40")}>
-          {active && <span className="h-2 w-2 rounded-full bg-brand-gold" />}
-        </span>
-        {item.title}
-      </DynamicTag>
+      {active ? (
+        <span className={className}>{radio}{item.title}</span>
+      ) : (
+        <Link href={href} prefetch={true} onClick={() => onSelect?.(item.slug || "")} className={className}>
+          {radio}{item.title}
+        </Link>
+      )}
     </li>
   );
 }
