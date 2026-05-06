@@ -1,9 +1,12 @@
 "use client";
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
+import clsx from "clsx";
 import { SortFilterItem } from "lib/constants";
+import { createUrl } from "lib/utils";
+import Link from "next/link";
+import { usePathname, useSearchParams } from "next/navigation";
 import { Suspense, useEffect, useState } from "react";
-import { useSearchParams } from "next/navigation";
 import FilterItemDropdown from "./dropdown";
 import { FilterItem } from "./item";
 
@@ -113,11 +116,6 @@ export default function FilterList({
 }
 
 // Collection pill button
-import clsx from "clsx";
-import { createUrl } from "lib/utils";
-import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
-
 function CollectionPill({ item }: { item: PathFilterItem }) {
   const pathname = usePathname();
   const searchParams = useSearchParams();
