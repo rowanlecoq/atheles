@@ -69,7 +69,7 @@ export function CategoryNav() {
     <div className="animate-category-nav-enter relative hidden md:block">
       {/* Category bar */}
       <nav className="category-nav-bar border-b border-brand-dark-gold/20 bg-brand-dark/90 backdrop-blur-sm">
-        <div className="mx-auto flex items-center justify-center gap-10 px-6 py-4">
+        <div className="mx-auto flex items-center justify-center gap-8 px-6 py-2.5">
           {categories.map((cat, i) => {
             const hasDropdown = cat.subcategories.length > 0 || cat.comingSoon;
             const current = isActive(cat);
@@ -82,7 +82,7 @@ export function CategoryNav() {
               >
                 <Link
                   href={cat.href}
-                  className={`group relative block py-1 text-sm uppercase tracking-[0.2em] transition-colors duration-200 ${
+                  className={`group relative block py-1 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
                     activeIndex === i || current
                       ? "text-brand-gold"
                       : "text-brand-grey hover:text-brand-gold"
@@ -112,7 +112,7 @@ export function CategoryNav() {
           return (
             <div
               key={cat.title}
-              className={`absolute left-1/2 z-30 w-fit -translate-x-1/2 rounded-sm border border-brand-dark-gold/20 bg-brand-dark/95 backdrop-blur-sm transition-all duration-200 ${
+              className={`absolute top-full left-1/2 z-30 mt-1 w-fit -translate-x-1/2 rounded-sm border border-brand-dark-gold/20 bg-brand-dark/95 backdrop-blur-sm transition-all duration-200 ${
                 activeIndex === i
                   ? "pointer-events-auto visible translate-y-0 opacity-100"
                   : "pointer-events-none invisible -translate-y-1 opacity-0"
@@ -120,13 +120,13 @@ export function CategoryNav() {
               onMouseEnter={() => handleEnter(i)}
               onMouseLeave={handleLeave}
             >
-              <div className="mx-auto w-fit px-8 py-5">
+              <div className="mx-auto w-fit px-10 py-6">
                 {cat.comingSoon ? (
                   <p className="text-center font-heading text-sm italic tracking-wide text-brand-gold">
                     Coming Soon
                   </p>
                 ) : (
-                  <div className="flex items-center justify-center gap-8">
+                  <div className="flex items-center justify-center gap-10">
                     {cat.subcategories.map((sub) => (
                       <Link
                         key={sub.title}
