@@ -998,12 +998,15 @@ export default function ProfileContent() {
 
           {/* Stats */}
           <div className="grid grid-cols-2 gap-3">
-            <div className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center">
+            <Link
+              href="/account"
+              className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center transition-colors hover:border-brand-gold/40 hover:bg-brand-dark-gold/10"
+            >
               <p className="font-heading text-xl text-brand-gold">{orders}</p>
               <p className="text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
                 orders
               </p>
-            </div>
+            </Link>
             <div className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center">
               <p className="font-heading text-xl text-brand-gold">
                 ${totalSpentNum.toFixed(0)}
@@ -1464,13 +1467,6 @@ export default function ProfileContent() {
         <h2 className="mb-4 font-heading text-xl text-brand-pale-gold sm:text-lg">
           quick links
         </h2>
-        <Link
-          href="/account"
-          className="flex items-center justify-between rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 transition-colors hover:border-brand-gold/30"
-        >
-          <span className="text-sm text-white">orders</span>
-          <span className="text-xs text-brand-grey">&rarr;</span>
-        </Link>
         <Link
           href="/favorites"
           className="flex items-center justify-between rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 transition-colors hover:border-brand-gold/30"
