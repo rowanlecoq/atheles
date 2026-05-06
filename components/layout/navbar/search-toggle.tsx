@@ -72,8 +72,6 @@ export function SearchToggle() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollYRef = useRef(0);
   const touchLockRef = useRef<((e: TouchEvent) => void) | null>(null);
-  const scrollHandlerRef = useRef<(() => void) | null>(null);
-  const isSnappingRef = useRef(false);
   const router = useRouter();
 
   const unlockScroll = useCallback(() => {
@@ -81,11 +79,6 @@ export function SearchToggle() {
     if (touchLockRef.current) {
       document.removeEventListener("touchmove", touchLockRef.current);
       touchLockRef.current = null;
-    }
-    // Mobile: remove scroll snap handler
-    if (scrollHandlerRef.current) {
-      window.removeEventListener("scroll", scrollHandlerRef.current);
-      scrollHandlerRef.current = null;
     }
     // Desktop: restore body position
     if (document.body.style.position === "fixed") {
@@ -108,22 +101,12 @@ export function SearchToggle() {
     scrollYRef.current = window.scrollY;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
+      // touchmove lock prevents finger-scroll gestures while search is open.
+      // no scroll snap — iOS fights the snap when keyboard opens, causing a
+      // rapid oscillation that makes the fixed overlay flicker invisible.
       const touchHandler = (e: TouchEvent) => e.preventDefault();
       touchLockRef.current = touchHandler;
       document.addEventListener("touchmove", touchHandler, { passive: false });
-      // scroll snap prevents per-keystroke drift; isSnapping flag prevents
-      // re-entry that would cause a feedback loop
-      const scrollHandler = () => {
-        if (isSnappingRef.current) return;
-        if (window.scrollY === scrollYRef.current) return;
-        isSnappingRef.current = true;
-        window.scrollTo(0, scrollYRef.current);
-        requestAnimationFrame(() => {
-          isSnappingRef.current = false;
-        });
-      };
-      scrollHandlerRef.current = scrollHandler;
-      window.addEventListener("scroll", scrollHandler, { passive: true });
     } else {
       // Desktop: body lock stops per-keystroke scroll drift
       document.body.style.position = "fixed";
