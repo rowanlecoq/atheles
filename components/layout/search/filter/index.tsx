@@ -66,11 +66,10 @@ export function CollectionFilter({ list }: { list: ListItem[] }) {
   );
 }
 
-export function SortFilter({ list, title }: { list: ListItem[]; title?: string }) {
+function SortFilterInner({ list, title }: { list: ListItem[]; title?: string }) {
   const searchParams = useSearchParams();
   const [optimisticSlug, setOptimisticSlug] = useState<string | null>(null);
 
-  // Reset when navigation settles
   useEffect(() => {
     setOptimisticSlug(null);
   }, [searchParams]);
@@ -78,18 +77,24 @@ export function SortFilter({ list, title }: { list: ListItem[]; title?: string }
   return (
     <CollapsibleSection title={title || "Sort By"}>
       <ul className="space-y-1">
-        <Suspense fallback={null}>
-          {list.map((item: ListItem, i) => (
-            <FilterItem
-              key={i}
-              item={item}
-              optimisticSlug={optimisticSlug}
-              onSelect={(slug) => setOptimisticSlug(slug ?? null)}
-            />
-          ))}
-        </Suspense>
+        {list.map((item: ListItem, i) => (
+          <FilterItem
+            key={i}
+            item={item}
+            optimisticSlug={optimisticSlug}
+            onSelect={(slug) => setOptimisticSlug(slug ?? null)}
+          />
+        ))}
       </ul>
     </CollapsibleSection>
+  );
+}
+
+export function SortFilter({ list, title }: { list: ListItem[]; title?: string }) {
+  return (
+    <Suspense fallback={null}>
+      <SortFilterInner list={list} title={title} />
+    </Suspense>
   );
 }
 
