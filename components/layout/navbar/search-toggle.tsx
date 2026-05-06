@@ -68,6 +68,7 @@ export function SearchToggle() {
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
+  const mobileOverlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const scrollYRef = useRef(0);
@@ -101,10 +102,16 @@ export function SearchToggle() {
     scrollYRef.current = window.scrollY;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      // touchmove lock prevents finger-scroll gestures while search is open.
-      // no scroll snap — iOS fights the snap when keyboard opens, causing a
-      // rapid oscillation that makes the fixed overlay flicker invisible.
-      const touchHandler = (e: TouchEvent) => e.preventDefault();
+      // only prevent scroll outside the overlay — touches inside (product
+      // links) must not have preventDefault called or iOS swallows the click.
+      const touchHandler = (e: TouchEvent) => {
+        if (
+          mobileOverlayRef.current &&
+          mobileOverlayRef.current.contains(e.target as Node)
+        )
+          return;
+        e.preventDefault();
+      };
       touchLockRef.current = touchHandler;
       document.addEventListener("touchmove", touchHandler, { passive: false });
     } else {
@@ -255,7 +262,7 @@ export function SearchToggle() {
       {open && typeof document !== "undefined" && createPortal(
         <div className="md:hidden">
           {/* Overlay bar */}
-          <div className="fixed inset-x-0 top-0 z-[9999] bg-brand-dark">
+          <div ref={mobileOverlayRef} className="fixed inset-x-0 top-0 z-[9999] bg-brand-dark">
             <div className="flex items-center gap-2 px-4 py-3">
               <form onSubmit={handleSubmit} className="flex flex-1 items-center">
                 <input
