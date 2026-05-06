@@ -2,17 +2,17 @@
 
 import { motion, useScroll, useTransform } from "motion/react";
 
+// Zero-height invisible element that keeps framer-motion's scroll compositor
+// subscription active — without it, the sticky navbar + backdrop-blur combo
+// loses its GPU layer and jitters on scroll.
 export function ScrollProgress() {
   const { scrollYProgress } = useScroll();
-  const opacity = useTransform(scrollYProgress, [0, 0.02, 0.04], [0, 0, 1]);
-  // translateX is smoother than scaleX on older iOS — avoids GPU layer conflicts
-  // with the scroll compositor
   const x = useTransform(scrollYProgress, [0, 1], ["-100%", "0%"]);
 
   return (
     <motion.div
-      className="fixed left-0 top-0 z-40 h-[2px] w-full bg-brand-gold"
-      style={{ x, opacity }}
+      className="pointer-events-none fixed left-0 top-0 z-40 h-0 w-full"
+      style={{ x }}
     />
   );
 }
