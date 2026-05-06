@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import ImageCropModal from "components/image-crop-modal";
+import { invalidateSessionCache } from "lib/session-cache";
 import { PROFILE_BACKGROUNDS } from "lib/profile-backgrounds";
 
 type User = {
@@ -337,12 +338,15 @@ export default function ProfileContent() {
         }
       })
       .catch(() => {
-        // Network error — use cache
+        // Network error — use cache if available, only redirect if there's nothing to show
         try {
           const fallback = localStorage.getItem("atheles-session");
-          if (fallback) { applyUser(JSON.parse(fallback)); }
+          if (fallback) {
+            applyUser(JSON.parse(fallback));
+            setLoading(false);
+            return;
+          }
         } catch {}
-        setLoading(false);
         setLoading(false);
         setRedirecting(true);
         setTimeout(() => {
@@ -368,6 +372,7 @@ export default function ProfileContent() {
     try { localStorage.removeItem("atheles-session"); } catch {}
     document.body.removeAttribute("data-bg");
     document.cookie = "atheles-logged-in=; max-age=0; path=/";
+    invalidateSessionCache();
     // Notify all components to clear cached user data
     window.dispatchEvent(new Event("user-logout"));
     await fetch("/api/auth/logout", { method: "POST" });

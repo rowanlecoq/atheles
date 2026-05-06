@@ -15,6 +15,13 @@ export function AnnouncementBar() {
   const [index, setIndex] = useState(0);
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const announcementsLenRef = useRef(defaultAnnouncements.length);
+
+  // Keep ref in sync so the interval closure always sees the current length
+  // without needing to be recreated when announcements change.
+  useEffect(() => {
+    announcementsLenRef.current = announcements.length;
+  }, [announcements.length]);
 
   // Fetch announcements from Shopify metafield
   useEffect(() => {
@@ -30,9 +37,9 @@ export function AnnouncementBar() {
 
   const startTimer = useCallback(() => {
     intervalRef.current = setInterval(() => {
-      setIndex((prev) => (prev + 1) % announcements.length);
+      setIndex((prev) => (prev + 1) % announcementsLenRef.current);
     }, 5000);
-  }, [announcements.length]);
+  }, []);
 
   const stopTimer = useCallback(() => {
     if (intervalRef.current) {
