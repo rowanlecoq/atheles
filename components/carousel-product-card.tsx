@@ -27,7 +27,7 @@ export function CarouselProductCard({ product, index = 0 }: { product: Product; 
       transition={{ duration: 0.28, delay: Math.min(index, 4) * 0.05, ease: [0.22, 1, 0.36, 1] }}
     >
       {/* Image */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
+      <div className="relative aspect-[3/4] overflow-hidden rounded-lg ring-1 ring-inset ring-brand-dark-gold/20 bg-brand-dark">
         <Link href={`/product/${product.handle}`} prefetch={true}>
           {product.featuredImage?.url && (
             <Image
