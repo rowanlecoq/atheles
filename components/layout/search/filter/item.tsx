@@ -24,7 +24,7 @@ function PathFilterListItem({ item, onSelect }: { item: PathFilterItemType } & I
         href={createUrl(item.path, newParams)}
         onClick={() => onSelect?.()}
         className={clsx(
-          "flex w-full items-center gap-2.5 whitespace-nowrap lowercase rounded-md px-3 py-2 text-sm transition-colors",
+          "flex w-full items-center gap-2.5 lowercase rounded-md px-3 py-2 text-sm transition-colors",
           active
             ? "bg-brand-gold/10 text-brand-gold"
             : "text-white hover:bg-brand-dark-gold/10 hover:text-brand-gold",
@@ -63,7 +63,7 @@ function SortFilterListItem({ item, onSelect, optimisticSlug }: { item: SortFilt
         href={href}
         onClick={() => onSelect?.(item.slug || "")}
         className={clsx(
-          "flex w-full items-center gap-2.5 whitespace-nowrap lowercase rounded-md px-3 py-2 text-sm transition-colors",
+          "flex w-full items-center gap-2.5 lowercase rounded-md px-3 py-2 text-sm transition-colors",
           active
             ? "bg-brand-gold/10 text-brand-gold"
             : "text-white hover:bg-brand-dark-gold/10 hover:text-brand-gold",

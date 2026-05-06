@@ -33,7 +33,7 @@ export default function SearchLayout({
 
       {/* Main content area */}
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-8 pt-4 text-white md:pt-8">
-        <div className="grid grid-cols-1 gap-10 md:grid-cols-[180px_1fr]">
+        <div className="grid grid-cols-1 gap-10 md:grid-cols-[200px_1fr]">
           {/* Desktop sidebar: filter & sort */}
           <div className="animate-slide-up relative z-10 hidden md:block">
             <div className="sticky top-20 pr-4">
