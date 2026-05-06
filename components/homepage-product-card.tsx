@@ -112,8 +112,6 @@ export function HomepageProductCard({
             currencyCode={product.priceRange.maxVariantPrice.currencyCode}
           />
         </div>
-        {/* Border overlay — sits above image in paint order */}
-        <div className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-brand-dark-gold/20" />
       </div>
     </motion.div>
   );
