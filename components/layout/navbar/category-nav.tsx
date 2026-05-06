@@ -120,13 +120,13 @@ export function CategoryNav() {
               onMouseEnter={() => handleEnter(i)}
               onMouseLeave={handleLeave}
             >
-              <div className="mx-auto w-fit px-10 py-6">
+              <div className="mx-auto w-fit px-8 py-5">
                 {cat.comingSoon ? (
                   <p className="text-center font-heading text-sm italic tracking-wide text-brand-gold">
                     Coming Soon
                   </p>
                 ) : (
-                  <div className="flex items-center justify-center gap-10">
+                  <div className="flex items-center justify-center gap-8">
                     {cat.subcategories.map((sub) => (
                       <Link
                         key={sub.title}
