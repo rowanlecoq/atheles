@@ -29,12 +29,17 @@ export default function FilterItemDropdown({ list }: { list: ListItem[] }) {
     list.forEach((listItem: ListItem) => {
       if (
         ("path" in listItem && pathname === listItem.path) ||
-        ("slug" in listItem && searchParams.get("sort") === listItem.slug)
+        ("slug" in listItem && (searchParams.get("sort") || "") === (listItem.slug || ""))
       ) {
         setActive(listItem.title);
       }
     });
   }, [pathname, list, searchParams]);
+
+  // Close dropdown when navigation completes (sort param changed)
+  useEffect(() => {
+    setOpenSelect(false);
+  }, [searchParams]);
 
   return (
     <div className="relative flex-none" ref={ref}>
@@ -49,14 +54,14 @@ export default function FilterItemDropdown({ list }: { list: ListItem[] }) {
         <ChevronDownIcon className={`h-3.5 w-3.5 flex-none text-brand-gold transition-transform duration-200 ${openSelect ? "rotate-180" : ""}`} />
       </button>
       {openSelect && (
-        <div className="absolute right-0 z-40 mt-1 min-w-[200px] overflow-auto rounded-lg border border-brand-dark-gold/30 bg-brand-dark p-3 shadow-lg">
+        <ul className="absolute right-0 z-40 mt-1 min-w-[220px] list-none overflow-auto rounded-lg border border-brand-dark-gold/30 bg-brand-dark p-2 shadow-lg">
           {list.map((item: ListItem) => (
             <FilterItem
               key={"path" in item ? item.path : item.slug || item.title}
               item={item}
             />
           ))}
-        </div>
+        </ul>
       )}
     </div>
   );
