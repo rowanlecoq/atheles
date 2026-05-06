@@ -170,13 +170,16 @@ export function SearchToggle() {
     return () => document.removeEventListener("keydown", onKey);
   }, [open, close]);
 
-  // Close on click outside
+  // Close on click outside — must also exclude the portal overlay which lives
+  // in document.body outside containerRef's DOM subtree
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
       if (
         containerRef.current &&
-        !containerRef.current.contains(e.target as Node)
+        !containerRef.current.contains(e.target as Node) &&
+        mobileOverlayRef.current &&
+        !mobileOverlayRef.current.contains(e.target as Node)
       ) {
         close();
       }
