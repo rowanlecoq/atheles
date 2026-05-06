@@ -5,16 +5,18 @@ import { Dialog, Transition } from "@headlessui/react";
 import {
   ShoppingCartIcon,
   XMarkIcon,
-  HeartIcon,
+  HeartIcon as HeartOutlineIcon,
   TagIcon,
 } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 import LoadingDots from "components/loading-dots";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Fragment, useEffect, useRef, useState } from "react";
+import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
   addItem,
@@ -41,6 +43,153 @@ type FavProduct = {
   availableForSale?: boolean;
 };
 
+function FavoritesCarousel({
+  products,
+  addingFav,
+  onAdd,
+  onClose,
+}: {
+  products: FavProduct[];
+  addingFav: string | null;
+  onAdd: (handle: string, variantId: string) => void;
+  onClose: () => void;
+}) {
+  const scrollRef = useRef<HTMLDivElement>(null);
+  const [canScrollLeft, setCanScrollLeft] = useState(false);
+  const [canScrollRight, setCanScrollRight] = useState(false);
+
+  const checkScroll = useCallback(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    setCanScrollLeft(el.scrollLeft > 4);
+    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
+  }, []);
+
+  useEffect(() => {
+    const el = scrollRef.current;
+    if (!el) return;
+    checkScroll();
+    el.addEventListener("scroll", checkScroll, { passive: true });
+    return () => el.removeEventListener("scroll", checkScroll);
+  }, [checkScroll, products.length]);
+
+  const scroll = (dir: "left" | "right") => {
+    scrollRef.current?.scrollBy({ left: dir === "left" ? -144 : 144, behavior: "smooth" });
+  };
+
+  return (
+    <div>
+      <div className="mb-2 flex items-center justify-between">
+        <Link
+          href="/favorites"
+          onClick={onClose}
+          className="group flex items-center gap-1.5"
+        >
+          <HeartOutlineIcon className="h-3.5 w-3.5 text-brand-gold group-hover:hidden" />
+          <HeartSolidIcon className="hidden h-3.5 w-3.5 text-brand-gold group-hover:block" />
+          <p className="text-xs uppercase tracking-wider text-brand-grey transition-colors group-hover:text-brand-gold">
+            from your favorites
+          </p>
+        </Link>
+        {/* Desktop scroll arrows — hidden on mobile where touch scrolling works */}
+        <div className="hidden items-center gap-1 md:flex">
+          <button
+            type="button"
+            onClick={() => scroll("left")}
+            disabled={!canScrollLeft}
+            aria-label="Scroll favorites left"
+            className="flex h-6 w-6 items-center justify-center rounded border border-brand-dark-gold/20 text-brand-grey transition-colors hover:border-brand-gold/40 hover:text-brand-gold disabled:pointer-events-none disabled:opacity-20"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
+              <polyline points="15 18 9 12 15 6" />
+            </svg>
+          </button>
+          <button
+            type="button"
+            onClick={() => scroll("right")}
+            disabled={!canScrollRight}
+            aria-label="Scroll favorites right"
+            className="flex h-6 w-6 items-center justify-center rounded border border-brand-dark-gold/20 text-brand-grey transition-colors hover:border-brand-gold/40 hover:text-brand-gold disabled:pointer-events-none disabled:opacity-20"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
+              <polyline points="9 18 15 12 9 6" />
+            </svg>
+          </button>
+        </div>
+      </div>
+      <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        {products.map((p) => {
+          const canAdd = !!p.firstVariantId && !!p.availableForSale;
+          return (
+            <div
+              key={p.handle}
+              className="group/card flex w-[130px] flex-none flex-col rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-2 transition-colors hover:border-brand-gold/30"
+            >
+              {canAdd ? (
+                <button
+                  type="button"
+                  disabled={addingFav === p.handle}
+                  onClick={() => {
+                    if (!p.firstVariantId) return;
+                    onAdd(p.handle, p.firstVariantId);
+                  }}
+                  className="text-left"
+                >
+                  <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
+                    {p.featuredImage?.url ? (
+                      <Image src={p.featuredImage.url} alt={p.title} fill className="object-cover" sizes="130px" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
+                        <span className="text-[8px] text-brand-grey">ATHELES</span>
+                      </div>
+                    )}
+                    <div className={`absolute inset-0 flex items-center justify-center transition-colors ${addingFav === p.handle ? "bg-brand-dark/50" : "bg-brand-dark/0 group-hover/card:bg-brand-dark/40"}`}>
+                      <span className={`text-xs font-medium uppercase tracking-wider text-white transition-opacity ${addingFav === p.handle ? "opacity-100" : "opacity-0 group-hover/card:opacity-100"}`}>
+                        {addingFav === p.handle ? "adding..." : "+ add"}
+                      </span>
+                    </div>
+                  </div>
+                  <p className="truncate text-[10px] text-white group-hover/card:text-brand-gold">{p.title}</p>
+                </button>
+              ) : (
+                <div>
+                  <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
+                    {p.featuredImage?.url ? (
+                      <Image src={p.featuredImage.url} alt={p.title} fill className="object-cover opacity-50" sizes="130px" />
+                    ) : (
+                      <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
+                        <span className="text-[8px] text-brand-grey">ATHELES</span>
+                      </div>
+                    )}
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <span className="text-[10px] uppercase tracking-wider text-red-400">sold out</span>
+                    </div>
+                  </div>
+                  <p className="truncate text-[10px] text-white/50">{p.title}</p>
+                </div>
+              )}
+              <div className="mt-1 flex items-center justify-between">
+                <Price
+                  className="text-[10px] text-brand-grey"
+                  amount={p.priceRange.maxVariantPrice.amount}
+                  currencyCode={p.priceRange.maxVariantPrice.currencyCode}
+                />
+                <a
+                  href={`/product/${p.handle}`}
+                  onClick={onClose}
+                  className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold"
+                >
+                  view
+                </a>
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
 export default function CartModal() {
   const { cart, updateCartItem, addCartItem } = useCart();
   const router = useRouter();
@@ -55,8 +204,18 @@ export default function CartModal() {
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
   const [addingFav, setAddingFav] = useState<string | null>(null);
+  const favCacheRef = useRef<{ products: FavProduct[] } | null>(null);
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
+
+  const handleAddFav = useCallback(async (handle: string, variantId: string) => {
+    setAddingFav(handle);
+    favCacheRef.current = null;
+    try {
+      await addItem(null, variantId);
+    } catch {}
+    setAddingFav(null);
+  }, []);
 
   useEffect(() => {
     if (!cart) {
@@ -146,8 +305,6 @@ export default function CartModal() {
       })
       .catch(() => {});
   }, [isOpen]);
-
-  const favCacheRef = useRef<{ products: FavProduct[] } | null>(null);
 
   // Load favorited products once when cart opens
   useEffect(() => {
@@ -279,82 +436,13 @@ export default function CartModal() {
 
                   {/* Favorites section in empty cart too */}
                   {filteredFavProducts.length > 0 && (
-                    <div className="border-t border-brand-dark-gold/20 px-1 pb-4 pt-6 mt-2">
-                      <div className="mb-2 flex items-center gap-1.5">
-                        <HeartIcon className="h-3.5 w-3.5 text-brand-gold" />
-                        <p className="text-xs uppercase tracking-wider text-brand-grey">
-                          from your favorites
-                        </p>
-                      </div>
-                      <div className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
-                        {filteredFavProducts.map((p) => {
-                          const canAdd = !!p.firstVariantId && !!p.availableForSale;
-                          return (
-                            <div
-                              key={p.handle}
-                              className="group flex w-[130px] flex-none flex-col rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-2 transition-colors hover:border-brand-gold/30"
-                            >
-                              {canAdd ? (
-                                <button
-                                  type="button"
-                                  disabled={addingFav === p.handle}
-                                  onClick={async () => {
-                                    if (!p.firstVariantId) return;
-                                    setAddingFav(p.handle);
-                                    addItem(null, p.firstVariantId).catch(() => {});
-                                    // Clear fav cache so filtered list updates
-                                    favCacheRef.current = null;
-                                    setTimeout(() => setAddingFav(null), 600);
-                                  }}
-                                  className="text-left"
-                                >
-                                  <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
-                                    {p.featuredImage?.url ? (
-                                      <Image src={p.featuredImage.url} alt={p.title} fill className="object-cover" sizes="130px" />
-                                    ) : (
-                                      <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
-                                        <span className="text-[8px] text-brand-grey">ATHELES</span>
-                                      </div>
-                                    )}
-                                    <div className={`absolute inset-0 flex items-center justify-center transition-colors ${addingFav === p.handle ? "bg-brand-dark/50" : "bg-brand-dark/0 group-hover:bg-brand-dark/40"}`}>
-                                      <span className={`text-xs font-medium uppercase tracking-wider text-white transition-opacity ${addingFav === p.handle ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                                        {addingFav === p.handle ? "adding..." : "+ add"}
-                                      </span>
-                                    </div>
-                                  </div>
-                                  <p className="truncate text-[10px] text-white group-hover:text-brand-gold">{p.title}</p>
-                                </button>
-                              ) : (
-                                <div>
-                                  <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
-                                    {p.featuredImage?.url ? (
-                                      <Image src={p.featuredImage.url} alt={p.title} fill className="object-cover opacity-50" sizes="130px" />
-                                    ) : (
-                                      <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
-                                        <span className="text-[8px] text-brand-grey">ATHELES</span>
-                                      </div>
-                                    )}
-                                    <div className="absolute inset-0 flex items-center justify-center">
-                                      <span className="text-[10px] uppercase tracking-wider text-red-400">sold out</span>
-                                    </div>
-                                  </div>
-                                  <p className="truncate text-[10px] text-white/50">{p.title}</p>
-                                </div>
-                              )}
-                              <div className="mt-1 flex items-center justify-between">
-                                <Price
-                                  className="text-[10px] text-brand-grey"
-                                  amount={p.priceRange.maxVariantPrice.amount}
-                                  currencyCode={p.priceRange.maxVariantPrice.currencyCode}
-                                />
-                                <a href={`/product/${p.handle}`} onClick={closeCart} className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold">
-                                  view
-                                </a>
-                              </div>
-                            </div>
-                          );
-                        })}
-                      </div>
+                    <div className="mt-2 border-t border-brand-dark-gold/20 px-1 pb-4 pt-5">
+                      <FavoritesCarousel
+                        products={filteredFavProducts}
+                        addingFav={addingFav}
+                        onAdd={handleAddFav}
+                        onClose={closeCart}
+                      />
                     </div>
                   )}
                 </div>
@@ -477,103 +565,12 @@ export default function CartModal() {
                   {/* Favorites section */}
                   {filteredFavProducts.length > 0 && (
                     <div className="border-t border-brand-dark-gold/20 pt-3">
-                      <div className="mb-2 flex items-center gap-1.5">
-                        <HeartIcon className="h-3.5 w-3.5 text-brand-gold" />
-                        <p className="text-xs uppercase tracking-wider text-brand-grey">
-                          from your favorites
-                        </p>
-                      </div>
-                      <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                        {filteredFavProducts.map((p) => {
-                          const canAdd = !!p.firstVariantId && !!p.availableForSale;
-                          return (
-                          <div
-                            key={p.handle}
-                            className="group flex w-[130px] flex-none flex-col rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-2 transition-colors hover:border-brand-gold/30"
-                          >
-                            {/* Image: adds to cart if available, otherwise links to page */}
-                            {canAdd ? (
-                              <button
-                                type="button"
-                                disabled={addingFav === p.handle}
-                                onClick={async () => {
-                                  if (!p.firstVariantId) return;
-                                  setAddingFav(p.handle);
-                                  try {
-                                    await addItem(null, p.firstVariantId);
-                                  } catch {}
-                                  setAddingFav(null);
-                                }}
-                                className="text-left"
-                              >
-                                <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
-                                  {p.featuredImage?.url ? (
-                                    <Image
-                                      src={p.featuredImage.url}
-                                      alt={p.title}
-                                      fill
-                                      className="object-cover"
-                                      sizes="130px"
-                                    />
-                                  ) : (
-                                    <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
-                                      <span className="text-[8px] text-brand-grey">ATHELES</span>
-                                    </div>
-                                  )}
-                                  {/* Add overlay */}
-                                  <div className={`absolute inset-0 flex items-center justify-center transition-colors ${addingFav === p.handle ? "bg-brand-dark/50" : "bg-brand-dark/0 group-hover:bg-brand-dark/40"}`}>
-                                    <span className={`text-xs font-medium uppercase tracking-wider text-white transition-opacity ${addingFav === p.handle ? "opacity-100" : "opacity-0 group-hover:opacity-100"}`}>
-                                      {addingFav === p.handle ? "adding..." : "+ add"}
-                                    </span>
-                                  </div>
-                                </div>
-                                <p className="truncate text-[10px] text-white group-hover:text-brand-gold">
-                                  {p.title}
-                                </p>
-                              </button>
-                            ) : (
-                              <div>
-                                <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
-                                  {p.featuredImage?.url ? (
-                                    <Image
-                                      src={p.featuredImage.url}
-                                      alt={p.title}
-                                      fill
-                                      className="object-cover opacity-50"
-                                      sizes="130px"
-                                    />
-                                  ) : (
-                                    <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
-                                      <span className="text-[8px] text-brand-grey">ATHELES</span>
-                                    </div>
-                                  )}
-                                  <div className="absolute inset-0 flex items-center justify-center">
-                                    <span className="text-[10px] uppercase tracking-wider text-red-400">sold out</span>
-                                  </div>
-                                </div>
-                                <p className="truncate text-[10px] text-white/50">
-                                  {p.title}
-                                </p>
-                              </div>
-                            )}
-                            <div className="mt-1 flex items-center justify-between">
-                              <Price
-                                className="text-[10px] text-brand-grey"
-                                amount={p.priceRange.maxVariantPrice.amount}
-                                currencyCode={p.priceRange.maxVariantPrice.currencyCode}
-                              />
-                              <a
-                                href={`/product/${p.handle}`}
-                                onClick={closeCart}
-                                className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold"
-                              >
-                                view
-                              </a>
-                            </div>
-                          </div>
-                          );
-                        })}
-                      </div>
+                      <FavoritesCarousel
+                        products={filteredFavProducts}
+                        addingFav={addingFav}
+                        onAdd={handleAddFav}
+                        onClose={closeCart}
+                      />
                     </div>
                   )}
 
