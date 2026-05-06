@@ -52,6 +52,8 @@ const DEFAULT_ATHLETES = [
   },
 ];
 
+const CACHE_HEADERS = { "Cache-Control": "s-maxage=60, stale-while-revalidate=300" };
+
 export async function GET() {
   try {
     const data = await adminFetch(`
@@ -59,11 +61,11 @@ export async function GET() {
     `);
     const raw = data.data?.shop?.metafield?.value;
     if (raw) {
-      try { return NextResponse.json({ athletes: JSON.parse(raw) }); } catch {}
+      try { return NextResponse.json({ athletes: JSON.parse(raw) }, { headers: CACHE_HEADERS }); } catch {}
     }
-    return NextResponse.json({ athletes: DEFAULT_ATHLETES });
+    return NextResponse.json({ athletes: DEFAULT_ATHLETES }, { headers: CACHE_HEADERS });
   } catch {
-    return NextResponse.json({ athletes: DEFAULT_ATHLETES });
+    return NextResponse.json({ athletes: DEFAULT_ATHLETES }, { headers: CACHE_HEADERS });
   }
 }
 

@@ -32,6 +32,8 @@ async function verifyAdmin() {
   return customer?.isAdmin ?? false;
 }
 
+const CACHE_HEADERS = { "Cache-Control": "s-maxage=60, stale-while-revalidate=300" };
+
 // GET: fetch current announcements from shop metafield
 export async function GET() {
   try {
@@ -48,7 +50,7 @@ export async function GET() {
     const raw = data.data?.shop?.metafield?.value;
     if (raw) {
       try {
-        return NextResponse.json({ announcements: JSON.parse(raw) });
+        return NextResponse.json({ announcements: JSON.parse(raw) }, { headers: CACHE_HEADERS });
       } catch {}
     }
 
@@ -60,7 +62,7 @@ export async function GET() {
         "authentic superiority.",
         "follow us at @atheles.co to share your aesthetic.",
       ],
-    });
+    }, { headers: CACHE_HEADERS });
   } catch {
     return NextResponse.json({ announcements: [] });
   }
