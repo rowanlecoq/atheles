@@ -207,7 +207,7 @@ function AthleteCard({
 
   return (
     <motion.div
-      className="group overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark transition-[border-color,box-shadow] duration-300 hover:border-brand-gold hover:shadow-[0_0_20px_rgba(204,177,115,0.1)]"
+      className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
       initial={{ opacity: 0, y: 20, ...(blurInitial ? { filter: blurInitial } : {}) }}
       whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
       viewport={{ once: true, margin: "0px" }}
@@ -240,7 +240,7 @@ function AthleteCard({
         onClick={() => { if (allImages.length > 0) onOpenLightbox(allImages, imageIndex); }}
       >
         {allImages[imageIndex]
-          ? renderMediaItem(allImages[imageIndex]!, athlete.name, "h-full w-full object-cover transition duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-105")
+          ? renderMediaItem(allImages[imageIndex]!, athlete.name, "h-full w-full object-cover")
           : placeholder}
       </div>
 
@@ -275,10 +275,10 @@ function AthleteCard({
                 type="button"
                 onClick={() => goToImage(idx)}
                 aria-label={`View image ${idx + 1}`}
-                className={`relative h-16 w-16 flex-none overflow-hidden rounded transition-all duration-200 ${
+                className={`group relative h-16 w-16 flex-none overflow-hidden rounded transition-[border-color,box-shadow] duration-300 ${
                   idx === imageIndex
-                    ? "border-2 border-brand-gold opacity-100"
-                    : "border border-brand-dark-gold/20 opacity-70 hover:border-brand-gold/40 hover:opacity-100"
+                    ? "border-2 border-brand-gold"
+                    : "border border-brand-dark-gold/20 hover:border-brand-gold hover:shadow-[0_0_20px_rgba(204,177,115,0.1)]"
                 }`}
               >
                 {ytThumb ? (
@@ -293,7 +293,7 @@ function AthleteCard({
                   <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-brand-grey">▶</div>
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item} alt={`${athlete.name} ${idx + 1}`} className="h-full w-full object-cover object-top" />
+                  <img src={item} alt={`${athlete.name} ${idx + 1}`} className="h-full w-full object-cover object-top transition duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-105" />
                 )}
               </button>
             );
@@ -425,7 +425,7 @@ export function AthletesContent() {
       {!loaded ? (
         <div className="mb-14 grid gap-6 sm:grid-cols-2">
           {[0, 1].map((i) => (
-            <div key={i} className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
+            <div key={i} className="animate-pulse overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
               <div className="aspect-[4/5] w-full bg-white/[0.04]" />
               <div className="p-5 space-y-3">
                 <div className="h-4 w-32 rounded bg-white/[0.06]" />
@@ -490,26 +490,6 @@ export function AthletesContent() {
           >
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-8 w-8"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
           </button>
-
-          {/* Zoom toggle — images only, desktop only */}
-          {getEmbedUrl(lightbox.items[lightbox.index] || "").type === "image" && (
-            <button
-              type="button"
-              onClick={(e) => { e.stopPropagation(); setZoom(z => !z); }}
-              className="absolute left-4 top-4 z-10 hidden text-white/70 transition-colors hover:text-white sm:block"
-              aria-label={zoom ? "Zoom out" : "Zoom in"}
-            >
-              {zoom ? (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
-                  <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /><path d="M8 11h6" />
-                </svg>
-              ) : (
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-8 w-8">
-                  <circle cx="11" cy="11" r="8" /><path d="M21 21l-4.35-4.35" /><path d="M11 8v6M8 11h6" />
-                </svg>
-              )}
-            </button>
-          )}
 
           {/* Prev button — tall panel on left edge */}
           {lightbox.items.length > 1 && (
@@ -606,6 +586,16 @@ export function AthletesContent() {
                     } : undefined}
                     onLoad={() => setEmbedLoading(false)}
                   />
+                  {!zoom && (
+                    <div className="pointer-events-none absolute bottom-3 right-3 hidden items-center gap-1.5 rounded-full bg-black/70 px-3 py-1.5 text-xs text-white/80 backdrop-blur-sm sm:flex">
+                      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5">
+                        <circle cx="11" cy="11" r="8" />
+                        <path d="M21 21l-4.35-4.35" />
+                        <path d="M11 8v6M8 11h6" />
+                      </svg>
+                      click to zoom
+                    </div>
+                  )}
                 </div>
               );
             })()}
