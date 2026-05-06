@@ -719,7 +719,7 @@ export default function ProfileContent() {
           <button
             type="button"
             onClick={() => fileInputRef.current?.click()}
-            className="absolute -bottom-2 -right-2 flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
+            className="absolute -bottom-3 -right-3 sm:-bottom-2 sm:-right-2 flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
             aria-label="Change profile photo"
           >
             <svg
