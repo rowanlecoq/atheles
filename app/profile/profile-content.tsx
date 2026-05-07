@@ -531,6 +531,7 @@ export default function ProfileContent() {
         }
         localStorage.setItem("atheles-session", JSON.stringify(data.user));
         setEditing(false);
+        setShowChangeEmail(false);
         setSaveMessage("profile updated.");
         setTimeout(() => setSaveMessage(""), 3000);
       } else {
@@ -559,6 +560,7 @@ export default function ProfileContent() {
       setDobYear("");
     }
     setEditing(false);
+    setShowChangeEmail(false);
     setSaveMessage("");
   };
 
@@ -1303,13 +1305,15 @@ export default function ProfileContent() {
             </label>
             <div className="flex items-center justify-between px-3 py-2">
               <p className="text-sm text-brand-grey">{user.email}</p>
-              <button
-                type="button"
-                onClick={() => { setShowChangeEmail(!showChangeEmail); setNewEmail(""); setEmailError(""); }}
-                className="text-xs text-brand-dark-gold/60 underline underline-offset-2 hover:text-brand-gold transition-colors"
-              >
-                {showChangeEmail ? "cancel" : "change"}
-              </button>
+              {editing && (
+                <button
+                  type="button"
+                  onClick={() => { setShowChangeEmail(!showChangeEmail); setNewEmail(""); setEmailError(""); }}
+                  className="text-xs text-brand-dark-gold/60 underline underline-offset-2 hover:text-brand-gold transition-colors"
+                >
+                  {showChangeEmail ? "cancel" : "change"}
+                </button>
+              )}
             </div>
             {showChangeEmail && (
               <div className="mt-2 space-y-2 rounded border border-brand-dark-gold/20 bg-brand-dark-gold/5 p-3">
