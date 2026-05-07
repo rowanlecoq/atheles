@@ -138,6 +138,11 @@ async function upgradeNewsletterAccount(
     password_confirmation: password,
     verified_email: true,
     accepts_marketing: acceptsMarketing,
+    email_marketing_consent: {
+      state: acceptsMarketing ? "subscribed" : "unsubscribed",
+      opt_in_level: "single_opt_in",
+      consent_updated_at: new Date().toISOString(),
+    },
   };
   if (lastName) updateBody.last_name = lastName;
   const dobTags = buildDobTags(customer.tags ?? "", dob);
