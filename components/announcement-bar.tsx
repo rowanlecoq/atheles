@@ -58,7 +58,10 @@ export function AnnouncementBar() {
   };
 
   return (
-    <div className="announcement-bar-root relative flex h-8 items-center justify-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
+    <div className="announcement-bar-root flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
+      {/* Spacer balances the pause button on the right */}
+      <div className="min-w-[44px] flex-none" />
+
       <AnimatePresence mode="wait">
         <motion.p
           key={index}
@@ -66,7 +69,7 @@ export function AnnouncementBar() {
           animate={{ opacity: 1, filter: "blur(0px)" }}
           exit={{ opacity: 0, filter: "blur(4px)" }}
           transition={{ duration: 0.4, ease: "easeInOut" }}
-          className="px-8 text-xs uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em]"
+          className="flex-1 text-center text-xs uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em]"
         >
           {announcements[index]}
         </motion.p>
@@ -77,7 +80,7 @@ export function AnnouncementBar() {
         type="button"
         onClick={togglePause}
         aria-label={paused ? "Play announcements" : "Pause announcements"}
-        className="absolute right-1 flex h-full min-w-[44px] items-center justify-center text-brand-dark-gold/70 transition-colors hover:text-brand-dark-gold sm:right-2"
+        className="flex h-full min-w-[44px] flex-none items-center justify-center text-brand-dark-gold/70 transition-colors hover:text-brand-dark-gold"
       >
         {paused ? (
           <svg viewBox="0 0 10 12" fill="currentColor" className="h-2.5 w-2.5">
