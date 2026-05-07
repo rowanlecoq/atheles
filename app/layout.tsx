@@ -1,4 +1,5 @@
 import { Analytics } from "@vercel/analytics/next";
+import { SpeedInsights } from "@vercel/speed-insights/next";
 import { AnnouncementBar } from "components/announcement-bar";
 import { CartProvider } from "components/cart/cart-context";
 import { ThemeBackgroundCanvas } from "components/canvas-loader";
@@ -116,6 +117,7 @@ export default async function RootLayout({
           </CurrencyProvider>
         </SiteImagesProvider>
         <Analytics />
+        <SpeedInsights />
       </body>
     </html>
   );
