@@ -7,18 +7,16 @@ const rawDomain = process.env.SHOPIFY_STORE_DOMAIN || "";
 const domain = rawDomain
   ? rawDomain.startsWith("https://") ? rawDomain : `https://${rawDomain}`
   : "";
-const adminEndpoint = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
 
-async function adminGraphQL(query: string, variables: Record<string, unknown> = {}) {
-  const res = await fetch(adminEndpoint, {
-    method: "POST",
+async function adminRest(path: string, method: string, body?: object) {
+  return fetch(`${domain}/admin/api/2024-10${path}`, {
+    method,
     headers: {
       "Content-Type": "application/json",
       "X-Shopify-Access-Token": adminToken,
     },
-    body: JSON.stringify({ query, variables }),
+    ...(body ? { body: JSON.stringify(body) } : {}),
   });
-  return res.json();
 }
 
 export async function POST(request: Request) {
@@ -47,76 +45,65 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, updated: true });
     }
 
-    // Try to create the customer via Admin GraphQL.
-    // emailMarketingConsent sets the subscription status shown in Shopify admin.
-    const createData = await adminGraphQL(
-      `mutation customerCreate($input: CustomerInput!) {
-        customerCreate(input: $input) {
-          customer { id }
-          userErrors { field message code }
-        }
-      }`,
-      {
-        input: {
-          email,
-          acceptsMarketing: true,
-          emailMarketingConsent: {
-            marketingState: "SUBSCRIBED",
-            marketingOptInLevel: "SINGLE_OPT_IN",
-            consentUpdatedAt: new Date().toISOString(),
-          },
+    // Create customer via REST API with send_email_invite: false so no invite
+    // email is ever sent to newsletter subscribers.
+    const createRes = await adminRest("/customers.json", "POST", {
+      customer: {
+        email,
+        accepts_marketing: true,
+        marketing_opt_in_level: "single_opt_in",
+        email_marketing_consent: {
+          state: "subscribed",
+          opt_in_level: "single_opt_in",
+          consent_updated_at: new Date().toISOString(),
         },
+        send_email_invite: false,
+        send_email_welcome: false,
+        verified_email: true,
       },
-    );
+    });
 
-    const userErrors = createData.data?.customerCreate?.userErrors ?? [];
-    const alreadyExists = userErrors.some(
-      (e: { code: string }) => e.code === "TAKEN" || e.code === "CUSTOMER_DISABLED",
+    if (createRes.ok) {
+      return NextResponse.json({ success: true });
+    }
+
+    const createData = await createRes.json();
+    const errors: string[] = createData.errors?.email ?? [];
+    const alreadyExists = errors.some((e) =>
+      e.toLowerCase().includes("taken") || e.toLowerCase().includes("already"),
     );
 
     if (alreadyExists) {
       // Customer exists — look them up and update their marketing consent
-      const searchData = await adminGraphQL(
-        `query findCustomer($query: String!) {
-          customers(first: 1, query: $query) {
-            edges { node { id } }
-          }
-        }`,
-        { query: `email:${email}` },
+      const searchRes = await adminRest(
+        `/customers/search.json?query=email:${encodeURIComponent(email)}&limit=1`,
+        "GET",
       );
-
-      const customerId = searchData.data?.customers?.edges?.[0]?.node?.id;
-      if (customerId) {
-        await adminGraphQL(
-          `mutation customerUpdate($input: CustomerInput!) {
-            customerUpdate(input: $input) {
-              userErrors { message }
-            }
-          }`,
-          {
-            input: {
-              id: customerId,
-              acceptsMarketing: true,
-              emailMarketingConsent: {
-                marketingState: "SUBSCRIBED",
-                marketingOptInLevel: "SINGLE_OPT_IN",
-                consentUpdatedAt: new Date().toISOString(),
+      if (searchRes.ok) {
+        const searchData = await searchRes.json();
+        const customer = searchData.customers?.[0];
+        if (customer) {
+          await adminRest(`/customers/${customer.id}.json`, "PUT", {
+            customer: {
+              id: customer.id,
+              accepts_marketing: true,
+              marketing_opt_in_level: "single_opt_in",
+              email_marketing_consent: {
+                state: "subscribed",
+                opt_in_level: "single_opt_in",
+                consent_updated_at: new Date().toISOString(),
               },
             },
-          },
-        );
+          });
+        }
       }
       return NextResponse.json({ success: true });
     }
 
-    if (userErrors.length > 0) {
-      return NextResponse.json(
-        { success: false, error: "failed to subscribe" },
-        { status: 400 },
-      );
-    }
-
-    return NextResponse.json({ success: true });
+    return NextResponse.json(
+      { success: false, error: "failed to subscribe" },
+      { status: 400 },
+    );
   } catch {
     return NextResponse.json(
       { success: false, error: "something went wrong" },
