@@ -53,6 +53,7 @@ export async function POST(request: Request) {
     const createRes = await adminRestFetch("/customers.json", "POST", {
       customer: {
         email,
+        accepts_marketing: true,
         verified_email: true,
         send_email_invite: false,
         send_email_welcome: false,

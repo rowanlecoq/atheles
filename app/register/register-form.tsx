@@ -292,7 +292,7 @@ export default function RegisterForm() {
                 />
                 <span className="text-xs leading-relaxed text-brand-grey">
                   sign me up for the atheles club newsletter to receive
-                  exclusive drops, birthday rewards, and member perks.
+                  exclusive drops and member perks.
                 </span>
               </label>
               {error && (
