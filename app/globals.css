@@ -175,6 +175,7 @@ html { scrollbar-width: none; }
 }
 
 .animate-header-enter {
+  will-change: transform;
   animation: header-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
