@@ -67,8 +67,8 @@ export function NewsletterSignup() {
       const data = await res.json();
 
       if (data.success) {
-        setSubmitted(true);
         setAlreadySubscribed(true);
+        if (!data.alreadySubscribed) setSubmitted(true);
         setEmail("");
         // Update session cache so it persists
         try {

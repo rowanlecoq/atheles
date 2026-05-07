@@ -18,7 +18,6 @@ export default function RegisterForm() {
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
-  const [wasNewsletterSubscriber, setWasNewsletterSubscriber] = useState(false);
   const router = useRouter();
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -46,12 +45,6 @@ export default function RegisterForm() {
 
       if (data.success && data.user) {
         localStorage.setItem("atheles-session", JSON.stringify(data.user));
-        if (data.wasNewsletterSubscriber) {
-          setWasNewsletterSubscriber(true);
-          setLoading(false);
-          setTimeout(() => { router.push("/profile"); router.refresh(); }, 2000);
-          return;
-        }
         router.push("/profile");
         router.refresh();
       } else if (data.success && !data.user) {
@@ -76,30 +69,7 @@ export default function RegisterForm() {
           <p className="text-sm text-brand-grey">join the atheles club.</p>
         </div>
         <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8">
-          {wasNewsletterSubscriber ? (
-            <div className="space-y-4 text-center">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-brand-dark-gold/30">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth={1.5}
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                  className="h-6 w-6 text-brand-gold"
-                >
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-              </div>
-              <p className="text-sm text-brand-pale-gold">
-                welcome club member 🔱
-              </p>
-              <p className="text-xs text-brand-grey">
-                your account is ready.
-              </p>
-            </div>
-          ) : verificationSent ? (
+          {verificationSent ? (
             <div className="space-y-4 text-center">
               <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-full border border-brand-dark-gold/30">
                 <svg
