@@ -6,12 +6,16 @@ import { NextResponse } from "next/server";
 async function sendWelcomeEmail(toEmail: string, firstName: string) {
   const gmailUser = process.env.GMAIL_USER;
   const gmailPass = process.env.GMAIL_APP_PASSWORD;
-  if (!gmailUser || !gmailPass) return;
+  if (!gmailUser || !gmailPass) {
+    console.error("[welcome-email] Gmail credentials not configured");
+    return;
+  }
 
-  const transporter = nodemailer.createTransport({
-    service: "gmail",
-    auth: { user: gmailUser, pass: gmailPass },
-  });
+  try {
+    const transporter = nodemailer.createTransport({
+      service: "gmail",
+      auth: { user: gmailUser, pass: gmailPass },
+    });
 
   await transporter.sendMail({
     from: `"atheles" <${gmailUser}>`,
@@ -78,7 +82,10 @@ async function sendWelcomeEmail(toEmail: string, firstName: string) {
   </table>
 </body>
 </html>`,
-  });
+    });
+  } catch (err) {
+    console.error("[welcome-email] Failed to send:", err);
+  }
 }
 
 const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
@@ -264,7 +271,10 @@ export async function POST(request: Request) {
         );
       }
 
-      const tokenResult = await authenticateCustomer(email, password);
+      const [tokenResult] = await Promise.all([
+        authenticateCustomer(email, password),
+        sendWelcomeEmail(email, first).catch(() => {}),
+      ]);
       if (tokenResult) {
         await setAuthCookie(tokenResult.accessToken, tokenResult.expiresAt);
         const user = upgraded.numericId

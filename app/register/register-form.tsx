@@ -45,6 +45,8 @@ export default function RegisterForm() {
 
       if (data.success && data.user) {
         localStorage.setItem("atheles-session", JSON.stringify(data.user));
+        localStorage.removeItem("atheles-bg-theme");
+        localStorage.removeItem("atheles-site-theme");
         router.push("/profile");
         router.refresh();
       } else if (data.success && !data.user) {
