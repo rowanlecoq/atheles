@@ -196,6 +196,13 @@ export default function ProfileContent() {
   const [dobDay, setDobDay] = useState("");
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear] = useState("");
+  const [newEmail, setNewEmail] = useState("");
+  const [emailError, setEmailError] = useState("");
+  const [emailSaving, setEmailSaving] = useState(false);
+  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [deleteEmail, setDeleteEmail] = useState("");
+  const [deleteError, setDeleteError] = useState("");
+  const [deleting, setDeleting] = useState(false);
   const [showAvatarPreview, setShowAvatarPreview] = useState(false);
   const [discountRevealed, setDiscountRevealed] = useState(false);
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
@@ -377,6 +384,55 @@ export default function ProfileContent() {
     window.dispatchEvent(new Event("user-logout"));
     await fetch("/api/auth/logout", { method: "POST" });
     window.location.href = "/";
+  };
+
+  const handleChangeEmail = async () => {
+    setEmailError("");
+    if (!newEmail.trim() || !newEmail.includes("@")) {
+      setEmailError("enter a valid email.");
+      return;
+    }
+    setEmailSaving(true);
+    try {
+      const res = await fetch("/api/auth/change-email", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newEmail: newEmail.trim() }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setEmailError(data.error || "failed to update email.");
+      } else {
+        localStorage.removeItem("atheles-session");
+        window.location.href = "/login?message=email-updated";
+      }
+    } catch {
+      setEmailError("something went wrong.");
+    }
+    setEmailSaving(false);
+  };
+
+  const handleDeleteAccount = async () => {
+    setDeleteError("");
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/auth/delete-account", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ confirmEmail: deleteEmail }),
+      });
+      const data = await res.json();
+      if (!data.success) {
+        setDeleteError(data.error || "failed to delete account.");
+        setDeleting(false);
+        return;
+      }
+      localStorage.removeItem("atheles-session");
+      window.location.href = "/?account=deleted";
+    } catch {
+      setDeleteError("something went wrong.");
+      setDeleting(false);
+    }
   };
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -1239,12 +1295,31 @@ export default function ProfileContent() {
             )}
           </div>
 
-          {/* Email (read-only) */}
+          {/* Email */}
           <div>
             <label className="mb-1 block text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
               email
             </label>
             <p className="px-3 py-2 text-sm text-brand-grey">{user.email}</p>
+            <div className="mt-2 space-y-2">
+              <input
+                type="email"
+                value={newEmail}
+                onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
+                placeholder="new email address"
+                className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+              />
+              {emailError && <p className="text-xs text-red-400">{emailError}</p>}
+              <button
+                type="button"
+                onClick={handleChangeEmail}
+                disabled={emailSaving || !newEmail.trim()}
+                className="rounded border border-brand-dark-gold/30 px-4 py-1.5 text-xs uppercase tracking-wider text-brand-pale-gold transition-colors hover:border-brand-gold hover:text-brand-gold disabled:opacity-40"
+              >
+                {emailSaving ? "saving..." : "change email"}
+              </button>
+              <p className="text-xs text-brand-grey/40">you will be signed out after changing your email.</p>
+            </div>
           </div>
 
           {/* Date of Birth */}
@@ -1515,7 +1590,55 @@ export default function ProfileContent() {
           <span className="text-sm text-red-400">sign out</span>
           <span className="text-xs text-red-400/50">&rarr;</span>
         </button>
+        <button
+          type="button"
+          onClick={() => { setShowDeleteModal(true); setDeleteEmail(""); setDeleteError(""); }}
+          className="flex w-full items-center justify-between rounded-lg border border-red-900/20 bg-brand-dark px-4 py-3 transition-colors hover:border-red-900/50"
+        >
+          <span className="text-sm text-red-900/70 hover:text-red-700/80">delete account</span>
+          <span className="text-xs text-red-900/40">&rarr;</span>
+        </button>
       </div>
+
+      {/* Delete account modal */}
+      {showDeleteModal && (
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+          <div className="w-full max-w-sm rounded-lg border border-red-900/30 bg-brand-dark p-6">
+            <h3 className="mb-2 font-heading text-lg text-red-400">delete account</h3>
+            <p className="mb-4 text-xs leading-relaxed text-brand-grey">
+              this will permanently delete your account and all associated data. this cannot be undone.
+            </p>
+            <p className="mb-3 text-xs text-brand-pale-gold">
+              type your email to confirm:
+            </p>
+            <input
+              type="email"
+              value={deleteEmail}
+              onChange={(e) => { setDeleteEmail(e.target.value); setDeleteError(""); }}
+              placeholder={user.email}
+              className="mb-3 w-full rounded border border-red-900/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/30 focus:border-red-700/50 focus:outline-none"
+            />
+            {deleteError && <p className="mb-3 text-xs text-red-400">{deleteError}</p>}
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setShowDeleteModal(false)}
+                className="flex-1 rounded border border-brand-dark-gold/20 px-4 py-2 text-xs uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold/30 hover:text-white"
+              >
+                cancel
+              </button>
+              <button
+                type="button"
+                onClick={handleDeleteAccount}
+                disabled={deleting || deleteEmail.trim().toLowerCase() !== user.email?.toLowerCase()}
+                className="flex-1 rounded border border-red-900/40 bg-red-900/10 px-4 py-2 text-xs uppercase tracking-wider text-red-400 transition-colors hover:bg-red-900/20 disabled:opacity-40"
+              >
+                {deleting ? "deleting..." : "delete"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
       </div>
     </div>
   );
