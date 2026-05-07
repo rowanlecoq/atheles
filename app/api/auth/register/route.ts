@@ -210,6 +210,13 @@ export async function POST(request: Request) {
     };
     if (last) customerBody.last_name = last;
     if (dob) customerBody.tags = `dob:${dob}`;
+    if (marketing) {
+      customerBody.email_marketing_consent = {
+        state: "subscribed",
+        opt_in_level: "single_opt_in",
+        consent_updated_at: new Date().toISOString(),
+      };
+    }
 
     const createRes = await adminRestFetch("/customers.json", "POST", {
       customer: customerBody,
