@@ -15,12 +15,13 @@ export function useThunderShake() {
     if (clickCount.current >= 3) {
       clickCount.current = 0;
       setActive(true);
-      document.documentElement.classList.add("thunder-shake");
+      const shakeRoot = document.getElementById("thunder-shake-root");
+      shakeRoot?.classList.add("thunder-shake");
       if (typeof navigator !== "undefined" && "vibrate" in navigator) {
         navigator.vibrate(100);
       }
       setTimeout(() => {
-        document.documentElement.classList.remove("thunder-shake");
+        shakeRoot?.classList.remove("thunder-shake");
         setActive(false);
       }, 400);
     } else {

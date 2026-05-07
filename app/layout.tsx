@@ -102,14 +102,16 @@ export default async function RootLayout({
               <SiteThemeProvider />
               <ProfileBackgroundApplier />
               <ThemeBackgroundCanvas />
-              <AnnouncementBar />
-              <ScrollProgress />
               <KonamiLightning />
-              <Navbar />
-              <main className="relative z-[1] w-full">
-                <PageTransition>{children}</PageTransition>
-                <Toaster closeButton />
-              </main>
+              <div id="thunder-shake-root">
+                <AnnouncementBar />
+                <ScrollProgress />
+                <Navbar />
+                <main className="relative z-[1] w-full">
+                  <PageTransition>{children}</PageTransition>
+                  <Toaster closeButton />
+                </main>
+              </div>
             </CartProvider>
           </CurrencyProvider>
         </SiteImagesProvider>
