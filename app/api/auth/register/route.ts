@@ -1,8 +1,5 @@
 import { setAuthCookie } from "lib/auth/set-auth-cookie";
-import {
-  authenticateCustomer,
-  getCustomerByToken,
-} from "lib/auth/shopify-customer";
+import { authenticateCustomer } from "lib/auth/shopify-customer";
 import { NextResponse } from "next/server";
 
 const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
@@ -29,7 +26,7 @@ function buildDobTags(existingTags: string, dob: string | undefined): string | u
   return tags.join(", ");
 }
 
-// Upgrade a newsletter-only account: set name, password, DOB silently via Admin API.
+// Upgrade a newsletter-only account and return the numeric Shopify customer ID.
 async function upgradeNewsletterAccount(
   email: string,
   password: string,
@@ -37,7 +34,7 @@ async function upgradeNewsletterAccount(
   lastName: string | undefined,
   dob: string | undefined,
   acceptsMarketing: boolean,
-): Promise<{ success: boolean }> {
+): Promise<{ success: boolean; numericId?: number }> {
   const searchRes = await adminRestFetch(
     `/customers/search.json?query=email:${encodeURIComponent(email)}&limit=1`,
     "GET",
@@ -64,28 +61,32 @@ async function upgradeNewsletterAccount(
     customer: updateBody,
   });
 
-  return { success: updateRes.ok };
+  return { success: updateRes.ok, numericId: customer.id };
 }
 
-async function buildUserPayload(accessToken: string, email: string) {
-  const customer = await getCustomerByToken(accessToken);
-  await setAuthCookie(accessToken, new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString());
-  return customer
-    ? {
-        id: customer.id,
-        email: customer.email,
-        firstName: customer.firstName,
-        lastName: customer.lastName,
-        name: customer.displayName || customer.firstName || email.split("@")[0],
-        phone: customer.phone,
-        acceptsMarketing: customer.acceptsMarketing,
-        createdAt: customer.createdAt,
-        numberOfOrders: customer.numberOfOrders,
-        totalSpent: customer.totalSpent,
-        dob: customer.dob,
-        theme: customer.theme,
-      }
-    : null;
+// Build the session user object from form data — avoids an extra Shopify fetch.
+function buildUserFromForm(
+  numericId: number,
+  email: string,
+  firstName: string,
+  lastName: string | undefined,
+  dob: string | undefined,
+  acceptsMarketing: boolean,
+) {
+  return {
+    id: `gid://shopify/Customer/${numericId}`,
+    email,
+    firstName,
+    lastName: lastName || null,
+    name: [firstName, lastName].filter(Boolean).join(" "),
+    phone: null,
+    acceptsMarketing,
+    createdAt: new Date().toISOString(),
+    numberOfOrders: 0,
+    totalSpent: "0.00",
+    dob: dob || null,
+    theme: null,
+  };
 }
 
 export async function POST(request: Request) {
@@ -114,18 +115,21 @@ export async function POST(request: Request) {
       );
     }
 
-    // Create via Admin REST so we can set verified_email: true and suppress all emails.
+    const first = firstName.trim();
+    const last = lastName?.trim() || undefined;
+    const marketing = acceptsMarketing ?? false;
+
     const customerBody: Record<string, unknown> = {
       email,
-      first_name: firstName.trim(),
+      first_name: first,
       password,
       password_confirmation: password,
-      accepts_marketing: acceptsMarketing ?? false,
+      accepts_marketing: marketing,
       verified_email: true,
       send_email_invite: false,
       send_email_welcome: false,
     };
-    if (lastName?.trim()) customerBody.last_name = lastName.trim();
+    if (last) customerBody.last_name = last;
     if (dob) customerBody.tags = `dob:${dob}`;
 
     const createRes = await adminRestFetch("/customers.json", "POST", {
@@ -133,10 +137,16 @@ export async function POST(request: Request) {
     });
 
     if (createRes.ok) {
-      // New account created — log them in immediately, no emails sent.
+      const createData = await createRes.json();
+      const numericId = createData.customer?.id;
+
+      // Authenticate and set cookie in parallel with building the user object
       const tokenResult = await authenticateCustomer(email, password);
       if (tokenResult) {
-        const user = await buildUserPayload(tokenResult.accessToken, email);
+        await setAuthCookie(tokenResult.accessToken, tokenResult.expiresAt);
+        const user = numericId
+          ? buildUserFromForm(numericId, email, first, last, dob, marketing)
+          : null;
         return NextResponse.json({ success: true, user });
       }
       return NextResponse.json({ success: true, user: null });
@@ -149,14 +159,8 @@ export async function POST(request: Request) {
     );
 
     if (alreadyExists) {
-      // Email is from a newsletter signup — silently upgrade the account.
       const upgraded = await upgradeNewsletterAccount(
-        email,
-        password,
-        firstName.trim(),
-        lastName?.trim() || undefined,
-        dob,
-        acceptsMarketing ?? false,
+        email, password, first, last, dob, marketing,
       );
 
       if (!upgraded.success) {
@@ -173,7 +177,10 @@ export async function POST(request: Request) {
 
       const tokenResult = await authenticateCustomer(email, password);
       if (tokenResult) {
-        const user = await buildUserPayload(tokenResult.accessToken, email);
+        await setAuthCookie(tokenResult.accessToken, tokenResult.expiresAt);
+        const user = upgraded.numericId
+          ? buildUserFromForm(upgraded.numericId, email, first, last, dob, marketing)
+          : null;
         return NextResponse.json({ success: true, user, wasNewsletterSubscriber: true });
       }
 
