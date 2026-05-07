@@ -127,7 +127,7 @@ export async function POST(request: Request) {
       accepts_marketing: marketing,
       verified_email: true,
       send_email_invite: false,
-      send_email_welcome: false,
+      send_email_welcome: true,
     };
     if (last) customerBody.last_name = last;
     if (dob) customerBody.tags = `dob:${dob}`;
