@@ -60,8 +60,8 @@ export function AnnouncementBar() {
   return (
     <motion.div
       className="announcement-bar-root flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark"
-      initial={{ opacity: 0, y: -8 }}
-      animate={{ opacity: 1, y: 0 }}
+      initial={{ y: -8 }}
+      animate={{ y: 0 }}
       transition={{ duration: 0.5, ease: [0.16, 1, 0.3, 1] }}
     >
       {/* Spacer balances the pause button on the right */}
