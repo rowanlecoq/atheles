@@ -321,8 +321,8 @@ export default function RegisterForm() {
                   className="mt-0.5 h-4 w-4 rounded border-brand-dark-gold/30 bg-brand-dark accent-brand-gold"
                 />
                 <span className="text-xs leading-relaxed text-brand-grey">
-                  sign me up for the atheles club newsletter to receive
-                  exclusive drops and member perks.
+                  join the club. be the first to know about drops, exclusive
+                  offers, and member perks.
                 </span>
               </label>
               {error && (

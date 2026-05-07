@@ -1363,9 +1363,9 @@ export default function ProfileContent() {
           {/* Newsletter */}
           <div className="flex items-center justify-between rounded border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-3">
             <div>
-              <p className="text-sm text-white">newsletter</p>
+              <p className="text-sm text-white">the club</p>
               <p className="text-xs text-brand-grey">
-                get notified about drops, offers & updates
+                drops, exclusive offers & member updates
               </p>
             </div>
             <button
