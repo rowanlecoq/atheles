@@ -71,7 +71,7 @@ function FavoriteItem({
         className="absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center transition-transform duration-200 hover:scale-110"
         aria-label="Remove from favorites"
       >
-        <HeartIconSolid className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold transition-colors hover:text-red-400" />
+        <HeartIconSolid className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold" />
       </button>
     </div>
   );

@@ -96,7 +96,7 @@ export function ProductCard({
           {liked ? (
             <HeartIconSolid className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold" />
           ) : (
-            <HeartIcon className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-white/80 transition-colors group-hover:text-white" />
+            <HeartIcon className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-white/60 transition-colors group-hover:text-brand-gold" />
           )}
         </button>
       </Link>
