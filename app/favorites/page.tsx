@@ -69,7 +69,7 @@ function FavoriteItem({
       <button
         type="button"
         onClick={onRemove}
-        className="group/heart absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center transition-transform duration-200 hover:scale-110"
+        className="group/heart absolute bottom-3 right-3 flex h-8 w-8 items-center justify-center"
         aria-label="Remove from favorites"
       >
         <HeartIconSolid className="h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:hidden" />

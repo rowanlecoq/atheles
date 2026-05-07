@@ -90,7 +90,7 @@ export function ProductCard({
             e.stopPropagation();
             toggleFavorite(handle);
           }}
-          className="group/heart absolute bottom-2 right-2 z-10 flex h-9 w-9 items-center justify-center transition-transform duration-200 hover:scale-110"
+          className="group/heart absolute bottom-2 right-2 z-10 flex h-9 w-9 items-center justify-center"
           aria-label={liked ? "Remove from favorites" : "Add to favorites"}
         >
           {liked ? (

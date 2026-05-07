@@ -75,13 +75,19 @@ export function HomepageProductCard({
             e.stopPropagation();
             toggleFavorite(product.handle);
           }}
-          className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-all hover:bg-brand-dark/80"
+          className="group/heart absolute bottom-2 right-2 z-10 flex h-9 w-9 items-center justify-center"
           aria-label={liked ? "Remove from favorites" : "Add to favorites"}
         >
           {liked ? (
-            <HeartIconSolid className="h-4 w-4 text-brand-gold" />
+            <>
+              <HeartIconSolid className="h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:hidden" />
+              <HeartIcon className="hidden h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:block" />
+            </>
           ) : (
-            <HeartIcon className="h-4 w-4 text-white/70 transition-colors group-hover:text-white" />
+            <>
+              <HeartIcon className="h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-white/60 group-hover/heart:hidden" />
+              <HeartIcon className="hidden h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:block" />
+            </>
           )}
         </button>
 
