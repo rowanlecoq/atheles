@@ -1,6 +1,85 @@
 import { setAuthCookie } from "lib/auth/set-auth-cookie";
 import { authenticateCustomer } from "lib/auth/shopify-customer";
+import nodemailer from "nodemailer";
 import { NextResponse } from "next/server";
+
+async function sendWelcomeEmail(toEmail: string, firstName: string) {
+  const gmailUser = process.env.GMAIL_USER;
+  const gmailPass = process.env.GMAIL_APP_PASSWORD;
+  if (!gmailUser || !gmailPass) return;
+
+  const transporter = nodemailer.createTransport({
+    service: "gmail",
+    auth: { user: gmailUser, pass: gmailPass },
+  });
+
+  await transporter.sendMail({
+    from: `"Atheles" <${gmailUser}>`,
+    to: toEmail,
+    subject: "welcome to atheles.",
+    html: `<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome | Atheles</title>
+</head>
+<body style="margin:0;padding:0;background-color:#1a1a1a;font-family:'Helvetica Neue',Helvetica,Arial,sans-serif;">
+  <table width="100%" cellpadding="0" cellspacing="0" style="background-color:#1a1a1a;padding:40px 20px;">
+    <tr>
+      <td align="center">
+        <table width="600" cellpadding="0" cellspacing="0" style="max-width:600px;width:100%;">
+          <tr>
+            <td align="center" style="padding:30px 0 20px;">
+              <h1 style="margin:0;font-size:28px;letter-spacing:8px;color:#ccb173;font-weight:300;text-transform:uppercase;">ATHELES</h1>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding-bottom:30px;">
+              <div style="width:60px;height:1px;background-color:#7f6f4c;"></div>
+            </td>
+          </tr>
+          <tr>
+            <td style="background-color:#222222;border:1px solid #3a3428;border-radius:8px;padding:40px 30px;">
+              <h2 style="margin:0 0 8px;font-size:22px;color:#ccb173;font-weight:400;letter-spacing:2px;text-transform:lowercase;">welcome to the club.</h2>
+              <p style="margin:0 0 24px;font-size:14px;color:#999;line-height:1.6;">
+                ${firstName}, your account is all set. welcome to atheles. get ready to unlock your fullest potential.
+              </p>
+              <p style="margin:0 0 8px;font-size:12px;color:#7f6f4c;letter-spacing:2px;text-transform:uppercase;">what's next:</p>
+              <table cellpadding="0" cellspacing="0" style="margin:0 0 24px;">
+                <tr><td style="padding:6px 0;font-size:13px;color:#999;">&#x1F531; set up your profile and avatar</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:#999;">&#x1F531; earn loyalty points with every purchase</td></tr>
+                <tr><td style="padding:6px 0;font-size:13px;color:#999;">&#x1F531; unlock exclusive perks as you level up</td></tr>
+              </table>
+              <table cellpadding="0" cellspacing="0" style="margin:0 auto;">
+                <tr>
+                  <td align="center" style="background-color:#ccb173;border-radius:50px;padding:14px 40px;">
+                    <a href="https://atheles.co/profile" style="color:#1a1a1a;text-decoration:none;font-size:13px;font-weight:600;letter-spacing:3px;text-transform:uppercase;">View Profile</a>
+                  </td>
+                </tr>
+              </table>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:30px 0 10px;">
+              <p style="margin:0;font-size:11px;letter-spacing:4px;color:#7f6f4c;text-transform:uppercase;">authentic superiority.</p>
+            </td>
+          </tr>
+          <tr>
+            <td align="center" style="padding:10px 0;">
+              <a href="https://atheles.co" style="color:#666;font-size:11px;text-decoration:none;">atheles.co</a>
+              <span style="color:#444;margin:0 8px;">|</span>
+              <a href="https://www.instagram.com/atheles.co/" style="color:#666;font-size:11px;text-decoration:none;">@atheles.co</a>
+            </td>
+          </tr>
+        </table>
+      </td>
+    </tr>
+  </table>
+</body>
+</html>`,
+  });
+}
 
 const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
 const rawDomain = process.env.SHOPIFY_STORE_DOMAIN || "";
@@ -127,7 +206,7 @@ export async function POST(request: Request) {
       accepts_marketing: marketing,
       verified_email: true,
       send_email_invite: false,
-      send_email_welcome: true,
+      send_email_welcome: false,
     };
     if (last) customerBody.last_name = last;
     if (dob) customerBody.tags = `dob:${dob}`;
@@ -140,8 +219,11 @@ export async function POST(request: Request) {
       const createData = await createRes.json();
       const numericId = createData.customer?.id;
 
-      // Authenticate and set cookie in parallel with building the user object
-      const tokenResult = await authenticateCustomer(email, password);
+      const [tokenResult] = await Promise.all([
+        authenticateCustomer(email, password),
+        sendWelcomeEmail(email, first).catch(() => {}),
+      ]);
+
       if (tokenResult) {
         await setAuthCookie(tokenResult.accessToken, tokenResult.expiresAt);
         const user = numericId
