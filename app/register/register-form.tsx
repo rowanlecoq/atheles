@@ -93,10 +93,10 @@ export default function RegisterForm() {
                 </svg>
               </div>
               <p className="text-sm text-brand-pale-gold">
-                welcome to the club, {firstName || email.split("@")[0]}!
+                welcome, atheles member 🔱
               </p>
               <p className="text-xs text-brand-grey">
-                you were already on our newsletter — your account is all set. taking you to your profile...
+                your account is ready. taking you to your profile...
               </p>
             </div>
           ) : verificationSent ? (
