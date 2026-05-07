@@ -16,7 +16,7 @@ export default async function OpengraphImage(
     (
       <div
         tw="flex h-full w-full items-center justify-center"
-        style={{ backgroundColor: "#0D1B2A" }}
+        style={{ backgroundColor: "#1a1a1a" }}
       >
         {/* eslint-disable-next-line @next/next/no-img-element */}
         <img
