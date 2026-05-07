@@ -68,7 +68,7 @@ export function ContactForm() {
           type="text"
           required
           className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-          placeholder="Your name"
+          placeholder="your name"
         />
       </div>
       <div>
@@ -105,6 +105,7 @@ export function ContactForm() {
           <option value="sizing help">sizing help</option>
           <option value="returns & exchanges">returns & exchanges</option>
           <option value="collaboration">collaboration</option>
+          <option value="ambassadorship">ambassadorship</option>
           <option value="sponsorship">sponsorship</option>
           <option value="wholesale inquiry">wholesale inquiry</option>
           <option value="feedback">feedback</option>
@@ -124,7 +125,7 @@ export function ContactForm() {
           required
           rows={5}
           className="w-full resize-none rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-          placeholder="How can we help?"
+          placeholder="how can we help?"
         />
       </div>
       {error && <p className="text-xs text-red-400">{error}</p>}

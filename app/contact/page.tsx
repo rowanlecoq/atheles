@@ -72,7 +72,7 @@ export default function ContactPage() {
                   Response Time
                 </h3>
                 <p className="text-sm text-brand-grey">
-                  We typically respond within 24-48 hours during business days.
+                  we typically respond within 24 to 48 hours during business days.
                 </p>
               </div>
               <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
