@@ -14,7 +14,7 @@ async function sendWelcomeEmail(toEmail: string, firstName: string) {
   });
 
   await transporter.sendMail({
-    from: `"Atheles" <${gmailUser}>`,
+    from: `"atheles" <${gmailUser}>`,
     to: toEmail,
     subject: "welcome to atheles.",
     html: `<!DOCTYPE html>

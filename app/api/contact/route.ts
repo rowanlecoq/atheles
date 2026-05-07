@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     });
 
     await transporter.sendMail({
-      from: `"Atheles Contact Form" <${gmailUser}>`,
+      from: `"atheles" <${gmailUser}>`,
       to: gmailUser,
       replyTo: email,
       subject: `[Atheles] ${subject} — from ${name}`,
