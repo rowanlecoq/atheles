@@ -196,6 +196,7 @@ export default function ProfileContent() {
   const [dobDay, setDobDay] = useState("");
   const [dobMonth, setDobMonth] = useState("");
   const [dobYear, setDobYear] = useState("");
+  const [showChangeEmail, setShowChangeEmail] = useState(false);
   const [newEmail, setNewEmail] = useState("");
   const [emailError, setEmailError] = useState("");
   const [emailSaving, setEmailSaving] = useState(false);
@@ -1300,26 +1301,37 @@ export default function ProfileContent() {
             <label className="mb-1 block text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
               email
             </label>
-            <p className="px-3 py-2 text-sm text-brand-grey">{user.email}</p>
-            <div className="mt-2 space-y-2">
-              <input
-                type="email"
-                value={newEmail}
-                onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
-                placeholder="new email address"
-                className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
-              />
-              {emailError && <p className="text-xs text-red-400">{emailError}</p>}
+            <div className="flex items-center justify-between px-3 py-2">
+              <p className="text-sm text-brand-grey">{user.email}</p>
               <button
                 type="button"
-                onClick={handleChangeEmail}
-                disabled={emailSaving || !newEmail.trim()}
-                className="rounded border border-brand-dark-gold/30 px-4 py-1.5 text-xs uppercase tracking-wider text-brand-pale-gold transition-colors hover:border-brand-gold hover:text-brand-gold disabled:opacity-40"
+                onClick={() => { setShowChangeEmail(!showChangeEmail); setNewEmail(""); setEmailError(""); }}
+                className="text-xs text-brand-dark-gold/60 underline underline-offset-2 hover:text-brand-gold transition-colors"
               >
-                {emailSaving ? "saving..." : "change email"}
+                {showChangeEmail ? "cancel" : "change"}
               </button>
-              <p className="text-xs text-brand-grey/40">you will be signed out after changing your email.</p>
             </div>
+            {showChangeEmail && (
+              <div className="mt-2 space-y-2 rounded border border-brand-dark-gold/20 bg-brand-dark-gold/5 p-3">
+                <p className="text-xs text-brand-grey/60">enter a new email address. you'll be signed out so you can log in with it.</p>
+                <input
+                  type="email"
+                  value={newEmail}
+                  onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
+                  placeholder="new email address"
+                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                />
+                {emailError && <p className="text-xs text-red-400">{emailError}</p>}
+                <button
+                  type="button"
+                  onClick={handleChangeEmail}
+                  disabled={emailSaving || !newEmail.trim()}
+                  className="rounded border border-brand-dark-gold/30 px-4 py-1.5 text-xs uppercase tracking-wider text-brand-pale-gold transition-colors hover:border-brand-gold hover:text-brand-gold disabled:opacity-40"
+                >
+                  {emailSaving ? "saving..." : "confirm change"}
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Date of Birth */}

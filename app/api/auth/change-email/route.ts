@@ -42,11 +42,11 @@ export async function POST(request: Request) {
 
     const data = await res.json();
     if (!res.ok || data.errors) {
-      const emailErr = data.errors?.email?.[0];
-      return NextResponse.json(
-        { success: false, error: emailErr || "failed to update email" },
-        { status: 400 },
-      );
+      const emailErr: string = data.errors?.email?.[0] ?? "";
+      const friendly = emailErr.toLowerCase().includes("taken")
+        ? "that email is already associated with another account."
+        : emailErr || "failed to update email.";
+      return NextResponse.json({ success: false, error: friendly }, { status: 400 });
     }
 
     // Email changed — clear session so they log in with new email
