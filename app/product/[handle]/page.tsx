@@ -1,3 +1,4 @@
+import { FadeIn } from "components/animations/fade-in";
 import { GridTileImage } from "components/grid/tile";
 import Footer from "components/layout/footer";
 import { Gallery } from "components/product/gallery";
@@ -103,28 +104,32 @@ export default async function ProductPage(props: {
         }}
       />
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4 py-6">
-        <div className="animate-slide-up flex flex-col rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 sm:p-6 md:p-10 lg:flex-row lg:gap-8 lg:p-12">
-          <div className="w-full basis-full lg:basis-4/6">
-            <Suspense
-              fallback={
-                <div className="relative aspect-square max-h-[460px] w-full overflow-hidden sm:max-h-[550px]" />
-              }
-            >
-              <Gallery
-                images={product.images.map((image: Image) => ({
-                  src: image.url,
-                  altText: image.altText,
-                }))}
-              />
-            </Suspense>
-          </div>
+        <FadeIn direction="up" duration={0.45}>
+          <div className="flex flex-col rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 sm:p-6 md:p-10 lg:flex-row lg:gap-8 lg:p-12">
+            <div className="w-full basis-full lg:basis-4/6">
+              <Suspense
+                fallback={
+                  <div className="relative aspect-square max-h-[460px] w-full overflow-hidden sm:max-h-[550px]" />
+                }
+              >
+                <Gallery
+                  images={product.images.map((image: Image) => ({
+                    src: image.url,
+                    altText: image.altText,
+                  }))}
+                />
+              </Suspense>
+            </div>
 
-          <div className="mt-8 basis-full animate-slide-up-delay lg:mt-0 lg:basis-2/6">
-            <Suspense fallback={null}>
-              <ProductDescription product={product} />
-            </Suspense>
+            <FadeIn direction="up" delay={0.1} duration={0.45}>
+              <div className="mt-8 basis-full lg:mt-0 lg:basis-2/6">
+                <Suspense fallback={null}>
+                  <ProductDescription product={product} />
+                </Suspense>
+              </div>
+            </FadeIn>
           </div>
-        </div>
+        </FadeIn>
         <RelatedProducts id={product.id} />
         <Suspense fallback={null}>
           <RecentlyViewedProducts currentHandle={product.handle} />
@@ -142,7 +147,8 @@ async function RelatedProducts({ id }: { id: string }) {
   if (!relatedProducts.length) return null;
 
   return (
-    <div className="animate-fade-in py-8 [animation-delay:400ms]">
+    <FadeIn direction="up" delay={0.15}>
+    <div className="py-8">
       <h2 className="mb-4 font-heading text-xl font-bold text-brand-gold sm:text-2xl">
         Related Items
       </h2>
@@ -173,5 +179,6 @@ async function RelatedProducts({ id }: { id: string }) {
         ))}
       </ul>
     </div>
+    </FadeIn>
   );
 }
