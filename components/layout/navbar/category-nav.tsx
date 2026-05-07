@@ -62,8 +62,15 @@ export function CategoryNav() {
     cat.subcategories.some((sub) => pathname === sub.href);
 
   // Hide on homepage — HeroCategoryNav is used there instead.
-  // Don't use CSS visibility tricks (backdrop-blur bleeds through even at height 0).
-  if (!pathname || pathname === "/") return null;
+  // Render a same-height placeholder (no backdrop-blur) so the sticky header
+  // never changes height between pages — prevents layout-shift bounce.
+  if (!pathname || pathname === "/") {
+    return (
+      <div className="hidden md:block border-b border-transparent" aria-hidden>
+        <div className="py-2.5 invisible select-none">placeholder</div>
+      </div>
+    );
+  }
 
   return (
     <div className="relative hidden md:block">

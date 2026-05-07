@@ -1,20 +1,20 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useLayoutEffect, useRef } from "react";
 import type { ReactNode } from "react";
 
-// Module-level: survives soft navigations, resets on hard reload
+// Persists across soft navigations, resets on hard reload
 let entranceDone = false;
 
 export function NavbarShell({ children }: { children: ReactNode }) {
   const ref = useRef<HTMLDivElement>(null);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const el = ref.current;
     if (!el) return;
 
     if (entranceDone) {
-      // Component remounted after entrance — suppress immediately
+      // Suppress before browser paints — no visible flash
       el.style.animation = "none";
       return;
     }
