@@ -9,9 +9,11 @@ import { NextResponse } from "next/server";
 
 
 export async function POST(request: Request) {
+  let email = "";
   try {
-    const { email, password, firstName, lastName, dob, acceptsMarketing } =
+    const { email: _email, password, firstName, lastName, dob, acceptsMarketing } =
       await request.json();
+    email = _email ?? "";
 
     if (!email || !password) {
       return NextResponse.json(
