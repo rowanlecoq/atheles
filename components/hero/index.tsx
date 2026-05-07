@@ -7,7 +7,7 @@ import { HeroCenter } from "./hero-center";
 
 export function Hero() {
   return (
-    <section className="animate-hero-section-enter theme-section relative overflow-hidden bg-brand-dark">
+    <section className="theme-section relative overflow-hidden bg-brand-dark">
       {/* Background — slideshow with crossfade */}
       <SlideshowMedia
         slotKey="hero_bg"
@@ -29,6 +29,7 @@ export function Hero() {
               className="object-cover object-top"
               iframeClass="h-full w-full pointer-events-none"
               sizes="(min-width: 768px) 25vw, 0px"
+              priority
             />
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-brand-dark/60 via-transparent to-brand-dark/30" />
           </div>
@@ -48,6 +49,7 @@ export function Hero() {
               className="object-cover object-top"
               iframeClass="h-full w-full pointer-events-none"
               sizes="(min-width: 768px) 25vw, 0px"
+              priority
             />
             <div className="absolute inset-0 z-10 bg-gradient-to-t from-brand-dark/60 via-transparent to-brand-dark/30" />
           </div>
