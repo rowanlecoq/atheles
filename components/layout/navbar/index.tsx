@@ -21,7 +21,7 @@ export async function Navbar() {
   const menu = shopifyMenu.length ? shopifyMenu : fallbackMenu;
 
   return (
-    <div className="site-header-root animate-navbar-enter sticky top-0 z-50">
+    <div className="site-header-root sticky top-0 z-50">
       <nav className="relative z-10 border-b border-brand-dark-gold/20 bg-brand-dark/95 px-4 py-2 backdrop-blur-sm lg:px-6">
         <div className="grid grid-cols-3 items-center">
           {/* Left: Mobile hamburger | Desktop: Country + Favorites */}

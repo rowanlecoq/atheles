@@ -66,7 +66,7 @@ export function CategoryNav() {
   if (!pathname || pathname === "/") return null;
 
   return (
-    <div className="animate-category-nav-enter relative hidden md:block">
+    <div className="relative hidden md:block">
       {/* Category bar */}
       <nav className="category-nav-bar border-b border-brand-dark-gold/20 bg-brand-dark/90 backdrop-blur-sm">
         <div className="mx-auto flex items-center justify-center gap-8 px-6 py-2.5">
