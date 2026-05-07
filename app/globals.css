@@ -167,18 +167,20 @@ html { scrollbar-width: none; }
 
 
 
-/* Sticky navbar slide-in — translateY only, no opacity to prevent flicker */
-@keyframes navbar-enter {
-  from {
-    transform: translateY(-10px);
-  }
-  to {
-    transform: translateY(0);
-  }
+/* Header entrance — translateY only, no opacity to prevent flicker.
+   CSS so it starts at first paint, before JS hydration. */
+@keyframes header-enter {
+  from { transform: translateY(-8px); }
+  to   { transform: translateY(0); }
 }
 
+.animate-header-enter {
+  animation: header-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+/* Keep old name as alias in case anything still references it */
 .animate-navbar-enter {
-  animation: navbar-enter 0.38s cubic-bezier(0.22, 1, 0.36, 1) both;
+  animation: header-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Category nav in sticky header — translateY only */
