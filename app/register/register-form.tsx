@@ -93,10 +93,10 @@ export default function RegisterForm() {
                 </svg>
               </div>
               <p className="text-sm text-brand-pale-gold">
-                welcome, atheles member 🔱
+                welcome club member 🔱
               </p>
               <p className="text-xs text-brand-grey">
-                your account is ready. redirecting to your profile...
+                your account is ready.
               </p>
             </div>
           ) : verificationSent ? (
