@@ -55,7 +55,7 @@ export default function AboutPage() {
                   ATHELES was born from a singular vision: to create athletic
                   wear that embodies the strength, beauty, and discipline of the
                   ancient Greek gods. The name itself is derived from the Greek
-                  word for athlete — those who competed not just for victory,
+                  word for athlete, those who competed not just for victory,
                   but for the pursuit of human excellence.
                 </p>
                 <p>
@@ -95,7 +95,7 @@ export default function AboutPage() {
             </div>
             <p className="max-w-lg text-center text-xs leading-relaxed text-brand-grey">
               Our logo, rendered in gothic blackletter, bridges the gap between
-              classical antiquity and modern street culture — a typographic
+              classical antiquity and modern street culture. a typographic
               declaration that tradition and innovation are not opposites, but
               allies.
             </p>
@@ -116,7 +116,7 @@ export default function AboutPage() {
               {[
                 {
                   title: "Craftsmanship",
-                  text: "Every stitch, every seam, every fabric choice is deliberate. We use premium materials — heavyweight cottons, 4-way stretch performance blends, custom hardware — because the gods never settled for less.",
+                  text: "Every stitch, every seam, every fabric choice is deliberate. We use premium materials: heavyweight cottons, 4-way stretch performance blends, custom hardware. Because the gods never settled for less.",
                 },
                 {
                   title: "Performance",
@@ -124,7 +124,7 @@ export default function AboutPage() {
                 },
                 {
                   title: "Identity",
-                  text: "ATHELES is more than clothing. It's a statement of intent. When you wear ATHELES, you declare that you pursue excellence in every domain — in the gym, on the street, and in life.",
+                  text: "ATHELES is more than clothing. It's a statement of intent. When you wear ATHELES, you declare that you pursue excellence in every domain: in the gym, on the street, and in life.",
                 },
               ].map((item) => (
                 <div
@@ -155,7 +155,7 @@ export default function AboutPage() {
             </div>
             <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8 text-center">
               <p className="mb-6 text-sm leading-relaxed text-brand-grey">
-                Our tagline is not arrogance — it is aspiration.
+                Our tagline is not arrogance. it is aspiration.
                 &ldquo;Authentic Superiority&rdquo; means striving for the
                 highest version of yourself, authentically and without
                 compromise. It is the same pursuit that drove Greek athletes to
@@ -179,7 +179,7 @@ export default function AboutPage() {
               <div className="h-px flex-1 bg-brand-dark-gold/20" />
             </div>
             <p className="mb-6 text-sm text-brand-grey">
-              Inspired by ancient Greek temples at dusk — dark stone lit by
+              Inspired by ancient Greek temples at dusk. dark stone lit by
               golden hour light. All color effects in our garments are achieved
               through fabric dye and pigment only. No metallic, foil, or glossy
               finishes.

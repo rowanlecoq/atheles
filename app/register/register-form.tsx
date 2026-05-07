@@ -96,7 +96,7 @@ export default function RegisterForm() {
                 welcome, atheles member 🔱
               </p>
               <p className="text-xs text-brand-grey">
-                your account is ready. taking you to your profile...
+                your account is ready. redirecting to your profile...
               </p>
             </div>
           ) : verificationSent ? (

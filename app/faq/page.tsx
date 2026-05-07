@@ -51,7 +51,7 @@ const sections = [
       {
         question: "how do i become an ambassador?",
         answer:
-          "we're looking for passionate individuals who embody the atheles lifestyle. to apply, reach out through our contact page with your social media profiles and a brief introduction about yourself and your fitness journey. we look for authentic voices who align with our values — no formal athlete background required.",
+          "we're looking for passionate individuals who embody the atheles lifestyle. to apply, reach out through our contact page with your social media profiles and a brief introduction about yourself and your fitness journey. we look for authentic voices who align with our values. no formal athlete background required.",
       },
     ],
   },
