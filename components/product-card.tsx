@@ -90,13 +90,13 @@ export function ProductCard({
             e.stopPropagation();
             toggleFavorite(handle);
           }}
-          className="absolute bottom-2 right-2 z-10 flex h-9 w-9 items-center justify-center transition-transform duration-200 hover:scale-110"
+          className="group/heart absolute bottom-2 right-2 z-10 flex h-9 w-9 items-center justify-center transition-transform duration-200 hover:scale-110"
           aria-label={liked ? "Remove from favorites" : "Add to favorites"}
         >
           {liked ? (
             <HeartIconSolid className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold" />
           ) : (
-            <HeartIcon className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-white/60 transition-colors group-hover:text-brand-gold" />
+            <HeartIcon className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-white/60 transition-colors group-hover/heart:text-brand-gold" />
           )}
         </button>
       </Link>

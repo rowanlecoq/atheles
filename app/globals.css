@@ -170,9 +170,11 @@ html { scrollbar-width: none; }
 /* Sticky navbar slide-in — translateY only, no opacity to prevent flicker */
 @keyframes navbar-enter {
   from {
+    opacity: 0;
     transform: translateY(-10px);
   }
   to {
+    opacity: 1;
     transform: translateY(0);
   }
 }
