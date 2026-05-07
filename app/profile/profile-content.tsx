@@ -1363,7 +1363,7 @@ export default function ProfileContent() {
           {/* Newsletter */}
           <div className="flex items-center justify-between rounded border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-3">
             <div>
-              <p className="text-sm text-white">the club</p>
+              <p className="text-sm text-white">atheles club</p>
               <p className="text-xs text-brand-grey">
                 drops, exclusive offers & member updates
               </p>
