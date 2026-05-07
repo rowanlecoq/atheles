@@ -98,11 +98,27 @@ export default async function CategoryPage(props: {
 
     // Deduplicate by product id
     const seen = new Set<string>();
-    const products = allProducts.filter((p) => {
+    const deduped = allProducts.filter((p) => {
       if (seen.has(p.id)) return false;
       seen.add(p.id);
       return true;
     });
+
+    // Re-sort the merged results since subcollection ordering is lost after merging
+    let products = deduped;
+    if (sortKey === "PRICE") {
+      products = [...deduped].sort((a, b) => {
+        const pa = parseFloat(a.priceRange.minVariantPrice.amount);
+        const pb = parseFloat(b.priceRange.minVariantPrice.amount);
+        return reverse ? pb - pa : pa - pb;
+      });
+    } else if (sortKey === "CREATED_AT") {
+      products = [...deduped].sort((a, b) => {
+        const da = new Date(a.updatedAt).getTime();
+        const db = new Date(b.updatedAt).getTime();
+        return reverse ? db - da : da - db;
+      });
+    }
 
     return (
       <section>
