@@ -45,15 +45,22 @@ export async function POST(request: Request) {
       return NextResponse.json({ success: true, updated: true });
     }
 
-    // Guest — create customer via Admin API so we can suppress the activation email
+    // Guest — create customer via Admin API with all email sending disabled.
+    // send_email_invite:false suppresses the account activation email.
+    // send_email_welcome:false suppresses the welcome email.
+    // verified_email:true marks the email as verified so Shopify skips the
+    // confirmation step and doesn't route the customer through Shop.
     const createRes = await adminRestFetch("/customers.json", "POST", {
       customer: {
         email,
-        accepts_marketing: true,
-        // Prevents Shopify from sending an account activation email,
-        // which would confuse guests who only wanted a newsletter subscription.
+        verified_email: true,
         send_email_invite: false,
-        marketing_opt_in_level: "single_opt_in",
+        send_email_welcome: false,
+        email_marketing_consent: {
+          state: "subscribed",
+          opt_in_level: "single_opt_in",
+          consent_updated_at: new Date().toISOString(),
+        },
       },
     });
 

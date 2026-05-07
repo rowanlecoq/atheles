@@ -14,6 +14,7 @@ export default function RegisterForm() {
   const [dobYear, setDobYear] = useState("");
   const [acceptsMarketing, setAcceptsMarketing] = useState(false);
   const [error, setError] = useState("");
+  const [alreadyExists, setAlreadyExists] = useState(false);
   const [loading, setLoading] = useState(false);
   const [showPassword, setShowPassword] = useState(false);
   const [verificationSent, setVerificationSent] = useState(false);
@@ -49,6 +50,7 @@ export default function RegisterForm() {
       } else if (data.success && !data.user) {
         setVerificationSent(true);
       } else {
+        setAlreadyExists(!!data.alreadyExists);
         setError(data.error || "failed to create account.");
       }
     } catch {
@@ -293,7 +295,19 @@ export default function RegisterForm() {
                   exclusive drops, birthday rewards, and member perks.
                 </span>
               </label>
-              {error && <p className="text-xs text-red-400">{error}</p>}
+              {error && (
+                <div className="rounded border border-red-400/20 bg-red-400/5 p-3">
+                  <p className="text-xs text-red-400">{error}</p>
+                  {alreadyExists && (
+                    <Link
+                      href="/forgot-password"
+                      className="mt-2 block text-xs font-medium text-brand-gold underline underline-offset-4 hover:text-brand-light-gold"
+                    >
+                      set your password →
+                    </Link>
+                  )}
+                </div>
+              )}
               <button
                 type="submit"
                 disabled={loading}

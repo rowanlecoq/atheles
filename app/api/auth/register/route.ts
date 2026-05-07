@@ -3,7 +3,6 @@ import {
   createCustomerAccount,
   authenticateCustomer,
   getCustomerByToken,
-  recoverCustomerPassword,
 } from "lib/auth/shopify-customer";
 import { NextResponse } from "next/server";
 
@@ -45,15 +44,12 @@ export async function POST(request: Request) {
     if (!result.success) {
       const err = result.error || "";
       if (err.toLowerCase().includes("taken") || err.toLowerCase().includes("already")) {
-        // Email was taken by a newsletter signup — silently send a password
-        // reset so they can set a real password without a confusing error.
-        await recoverCustomerPassword(email).catch(() => {});
         return NextResponse.json(
           {
             success: false,
             alreadyExists: true,
             error:
-              "looks like you're already on our list! we've sent you an email to set your password and complete your account.",
+              "looks like you're already on our list! use the forgot password link below to set your password and complete your account.",
           },
           { status: 400 },
         );
@@ -103,12 +99,11 @@ export async function POST(request: Request) {
     console.error("[register] Error:", err);
     const message = err instanceof Error ? err.message : "";
     if (message.toLowerCase().includes("taken") || message.toLowerCase().includes("already")) {
-      await recoverCustomerPassword(email).catch(() => {});
       return NextResponse.json(
         {
           success: false,
           alreadyExists: true,
-          error: "looks like you're already on our list! we've sent you an email to set your password and complete your account.",
+          error: "looks like you're already on our list! use the forgot password link below to set your password and complete your account.",
         },
         { status: 400 },
       );
