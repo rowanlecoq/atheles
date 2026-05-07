@@ -94,9 +94,15 @@ export function ProductCard({
           aria-label={liked ? "Remove from favorites" : "Add to favorites"}
         >
           {liked ? (
-            <HeartIconSolid className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold" />
+            <>
+              <HeartIconSolid className="h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:hidden" />
+              <HeartIcon className="hidden h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:block" />
+            </>
           ) : (
-            <HeartIcon className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-white/60 transition-colors group-hover/heart:text-brand-gold" />
+            <>
+              <HeartIcon className="h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-white/60 group-hover/heart:hidden" />
+              <HeartIcon className="hidden h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:block" />
+            </>
           )}
         </button>
       </Link>
