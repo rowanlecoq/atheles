@@ -1,6 +1,5 @@
 import { setAuthCookie } from "lib/auth/set-auth-cookie";
 import {
-  createCustomerAccount,
   authenticateCustomer,
   getCustomerByToken,
 } from "lib/auth/shopify-customer";
@@ -23,8 +22,14 @@ async function adminRestFetch(path: string, method: string, body?: object) {
   });
 }
 
-// When a newsletter subscriber registers, we update their Shopify account
-// directly via the Admin API (no email sent) and log them in immediately.
+function buildDobTags(existingTags: string, dob: string | undefined): string | undefined {
+  if (!dob) return undefined;
+  const tags = existingTags ? existingTags.split(", ").filter((t) => !t.startsWith("dob:")) : [];
+  tags.push(`dob:${dob}`);
+  return tags.join(", ");
+}
+
+// Upgrade a newsletter-only account: set name, password, DOB silently via Admin API.
 async function upgradeNewsletterAccount(
   email: string,
   password: string,
@@ -32,7 +37,7 @@ async function upgradeNewsletterAccount(
   lastName: string | undefined,
   dob: string | undefined,
   acceptsMarketing: boolean,
-): Promise<{ success: boolean; customerId?: string }> {
+): Promise<{ success: boolean }> {
   const searchRes = await adminRestFetch(
     `/customers/search.json?query=email:${encodeURIComponent(email)}&limit=1`,
     "GET",
@@ -48,19 +53,39 @@ async function upgradeNewsletterAccount(
     first_name: firstName,
     password,
     password_confirmation: password,
+    verified_email: true,
     accepts_marketing: acceptsMarketing,
   };
   if (lastName) updateBody.last_name = lastName;
-  if (dob) updateBody.tags = [
-    ...(customer.tags ? customer.tags.split(", ").filter((t: string) => !t.startsWith("dob:")) : []),
-    `dob:${dob}`,
-  ].join(", ");
+  const dobTags = buildDobTags(customer.tags ?? "", dob);
+  if (dobTags !== undefined) updateBody.tags = dobTags;
 
   const updateRes = await adminRestFetch(`/customers/${customer.id}.json`, "PUT", {
     customer: updateBody,
   });
 
-  return { success: updateRes.ok, customerId: customer.id };
+  return { success: updateRes.ok };
+}
+
+async function buildUserPayload(accessToken: string, email: string) {
+  const customer = await getCustomerByToken(accessToken);
+  await setAuthCookie(accessToken, new Date(Date.now() + 1000 * 60 * 60 * 24 * 30).toISOString());
+  return customer
+    ? {
+        id: customer.id,
+        email: customer.email,
+        firstName: customer.firstName,
+        lastName: customer.lastName,
+        name: customer.displayName || customer.firstName || email.split("@")[0],
+        phone: customer.phone,
+        acceptsMarketing: customer.acceptsMarketing,
+        createdAt: customer.createdAt,
+        numberOfOrders: customer.numberOfOrders,
+        totalSpent: customer.totalSpent,
+        dob: customer.dob,
+        theme: customer.theme,
+      }
+    : null;
 }
 
 export async function POST(request: Request) {
@@ -89,111 +114,76 @@ export async function POST(request: Request) {
       );
     }
 
-    const result = await createCustomerAccount(
+    // Create via Admin REST so we can set verified_email: true and suppress all emails.
+    const customerBody: Record<string, unknown> = {
       email,
+      first_name: firstName.trim(),
       password,
-      firstName.trim(),
-      lastName?.trim() || undefined,
-      acceptsMarketing,
-      dob,
+      password_confirmation: password,
+      accepts_marketing: acceptsMarketing ?? false,
+      verified_email: true,
+      send_email_invite: false,
+      send_email_welcome: false,
+    };
+    if (lastName?.trim()) customerBody.last_name = lastName.trim();
+    if (dob) customerBody.tags = `dob:${dob}`;
+
+    const createRes = await adminRestFetch("/customers.json", "POST", {
+      customer: customerBody,
+    });
+
+    if (createRes.ok) {
+      // New account created — log them in immediately, no emails sent.
+      const tokenResult = await authenticateCustomer(email, password);
+      if (tokenResult) {
+        const user = await buildUserPayload(tokenResult.accessToken, email);
+        return NextResponse.json({ success: true, user });
+      }
+      return NextResponse.json({ success: true, user: null });
+    }
+
+    const createData = await createRes.json();
+    const emailErrors: string[] = createData.errors?.email ?? [];
+    const alreadyExists = emailErrors.some((e) =>
+      e.toLowerCase().includes("taken") || e.toLowerCase().includes("already"),
     );
 
-    if (!result.success) {
-      const err = result.error || "";
-      if (err.toLowerCase().includes("taken") || err.toLowerCase().includes("already")) {
-        // Email already exists (likely from newsletter) — upgrade the account
-        // via Admin API so no email or Shop redirect is triggered.
-        const upgraded = await upgradeNewsletterAccount(
-          email,
-          password,
-          firstName.trim(),
-          lastName?.trim() || undefined,
-          dob,
-          acceptsMarketing,
+    if (alreadyExists) {
+      // Email is from a newsletter signup — silently upgrade the account.
+      const upgraded = await upgradeNewsletterAccount(
+        email,
+        password,
+        firstName.trim(),
+        lastName?.trim() || undefined,
+        dob,
+        acceptsMarketing ?? false,
+      );
+
+      if (!upgraded.success) {
+        return NextResponse.json(
+          {
+            success: false,
+            alreadyExists: true,
+            error:
+              "looks like you already have an account. use the forgot password link below to sign in.",
+          },
+          { status: 400 },
         );
-
-        if (!upgraded.success) {
-          return NextResponse.json(
-            {
-              success: false,
-              alreadyExists: true,
-              error:
-                "looks like you're already on our list! use the forgot password link below to set your password and complete your account.",
-            },
-            { status: 400 },
-          );
-        }
-
-        // Log them in with their new password
-        const tokenResult = await authenticateCustomer(email, password);
-        if (tokenResult) {
-          const customer = await getCustomerByToken(tokenResult.accessToken);
-          await setAuthCookie(tokenResult.accessToken, tokenResult.expiresAt);
-          return NextResponse.json({
-            success: true,
-            user: customer
-              ? {
-                  id: customer.id,
-                  email: customer.email,
-                  firstName: customer.firstName,
-                  lastName: customer.lastName,
-                  name: customer.displayName || customer.firstName || email.split("@")[0],
-                  phone: customer.phone,
-                  acceptsMarketing: customer.acceptsMarketing,
-                  createdAt: customer.createdAt,
-                  numberOfOrders: customer.numberOfOrders,
-                  totalSpent: customer.totalSpent,
-                  dob: customer.dob,
-                  theme: customer.theme,
-                }
-              : null,
-          });
-        }
-
-        return NextResponse.json({ success: true, user: null });
       }
 
-      return NextResponse.json(
-        { success: false, error: result.error },
-        { status: 400 },
-      );
+      const tokenResult = await authenticateCustomer(email, password);
+      if (tokenResult) {
+        const user = await buildUserPayload(tokenResult.accessToken, email);
+        return NextResponse.json({ success: true, user, wasNewsletterSubscriber: true });
+      }
+
+      return NextResponse.json({ success: true, user: null, wasNewsletterSubscriber: true });
     }
 
-    const tokenResult = await authenticateCustomer(email, password);
-    if (tokenResult) {
-      const customer = await getCustomerByToken(tokenResult.accessToken);
-      await setAuthCookie(tokenResult.accessToken, tokenResult.expiresAt);
-      return NextResponse.json({
-        success: true,
-        user: customer
-          ? {
-              id: customer.id,
-              email: customer.email,
-              firstName: customer.firstName,
-              lastName: customer.lastName,
-              name:
-                customer.displayName ||
-                customer.firstName ||
-                email.split("@")[0],
-              phone: customer.phone,
-              acceptsMarketing: customer.acceptsMarketing,
-              createdAt: customer.createdAt,
-              numberOfOrders: customer.numberOfOrders,
-              totalSpent: customer.totalSpent,
-              dob: customer.dob,
-              theme: customer.theme,
-            }
-          : null,
-      });
-    }
-
-    return NextResponse.json({
-      success: true,
-      user: null,
-      verificationRequired: true,
-      message:
-        "account created. please check your email to activate your account.",
-    });
+    return NextResponse.json(
+      { success: false, error: "something went wrong. please try again." },
+      { status: 400 },
+    );
   } catch (err) {
     console.error("[register] Error:", err);
     return NextResponse.json(
