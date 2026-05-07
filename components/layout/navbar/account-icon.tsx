@@ -7,28 +7,45 @@ import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 
 export function AccountIcon() {
-  const [loggedIn, setLoggedIn] = useState(false);
-  const [initials, setInitials] = useState<string | null>(null);
-  const [avatar, setAvatar] = useState<string | null>(null);
-  const pathname = usePathname();
-
-  // Show cached avatar instantly before session loads
-  useEffect(() => {
-    if (!document.cookie.includes("atheles-logged-in=1")) return;
+  // Read cookie synchronously so href is correct on first render — avoids
+  // the "must click 3-4 times" bug caused by href flipping from /login to /profile after hydration
+  const [loggedIn, setLoggedIn] = useState(() => {
+    if (typeof window === "undefined") return false;
+    try {
+      if (!document.cookie.includes("atheles-logged-in=1")) return false;
+      const cached = localStorage.getItem("atheles-session");
+      return !!cached;
+    } catch {
+      return false;
+    }
+  });
+  const [initials, setInitials] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      const cached = localStorage.getItem("atheles-session");
+      if (cached) {
+        const u = JSON.parse(cached);
+        const n = u.name || u.email || "A";
+        return n.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2);
+      }
+    } catch {}
+    return null;
+  });
+  const [avatar, setAvatar] = useState<string | null>(() => {
+    if (typeof window === "undefined") return null;
     try {
       const cached = localStorage.getItem("atheles-session");
       if (cached) {
         const u = JSON.parse(cached);
         const key = `atheles-avatar-${u.email}`;
-        const av = localStorage.getItem(key);
-        if (av) setAvatar(av);
-        setLoggedIn(true);
-        const n = u.name || u.email || "A";
-        setInitials(n.split(" ").map((w: string) => w[0]).join("").toUpperCase().slice(0, 2));
+        return localStorage.getItem(key);
       }
     } catch {}
-  }, []);
+    return null;
+  });
+  const pathname = usePathname();
 
+  // Keep avatar in sync after login/profile changes
   const refreshSession = useCallback(() => {
     fetchSession()
       .then((data) => {

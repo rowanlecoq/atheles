@@ -81,25 +81,25 @@ export function ProductCard({
             ))}
           </div>
         )}
-      </Link>
 
-      {/* Favorite button */}
-      <button
-        type="button"
-        onClick={(e) => {
-          e.preventDefault();
-          e.stopPropagation();
-          toggleFavorite(handle);
-        }}
-        className="absolute right-2 top-2 z-10 flex h-11 w-11 items-center justify-center rounded-full bg-brand-dark/50 backdrop-blur-sm transition-all duration-200 hover:bg-brand-dark/80"
-        aria-label={liked ? "Remove from favorites" : "Add to favorites"}
-      >
-        {liked ? (
-          <HeartIconSolid className="h-[18px] w-[18px] text-brand-gold" />
-        ) : (
-          <HeartIcon className="h-[18px] w-[18px] text-white/70 transition-colors group-hover:text-white" />
-        )}
-      </button>
+        {/* Favorite button — inside image so it positions relative to image bottom-right */}
+        <button
+          type="button"
+          onClick={(e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            toggleFavorite(handle);
+          }}
+          className="absolute bottom-2 right-2 z-10 flex h-9 w-9 items-center justify-center transition-transform duration-200 hover:scale-110"
+          aria-label={liked ? "Remove from favorites" : "Add to favorites"}
+        >
+          {liked ? (
+            <HeartIconSolid className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold" />
+          ) : (
+            <HeartIcon className="h-5 w-5 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-white/80 transition-colors group-hover:text-white" />
+          )}
+        </button>
+      </Link>
 
       {/* Product info */}
       <div className="mt-3 space-y-0.5">

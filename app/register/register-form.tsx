@@ -1,5 +1,6 @@
 "use client";
 
+import { FadeIn } from "components/animations";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
@@ -62,6 +63,7 @@ export default function RegisterForm() {
   };
 
   return (
+    <FadeIn direction="up">
     <div className="mx-auto flex min-h-[60vh] max-w-md items-center px-4 py-10 sm:py-12">
       <div className="w-full">
         <div className="mb-8 text-center">
@@ -333,5 +335,6 @@ export default function RegisterForm() {
         </div>
       </div>
     </div>
+    </FadeIn>
   );
 }

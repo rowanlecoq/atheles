@@ -9,7 +9,7 @@
 
 type SessionData = { user: unknown } | null;
 
-const SESSION_TTL_MS = 8_000;
+const SESSION_TTL_MS = 30_000;
 
 let cached: SessionData = null;
 let cacheTime = 0;

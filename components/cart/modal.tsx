@@ -489,7 +489,7 @@ export default function CartModal() {
                             key={item.id ?? item.merchandise.id}
                             className="flex w-full flex-col border-b border-brand-dark-gold/20"
                           >
-                            <div className="relative flex w-full flex-row justify-between gap-3 py-4 pl-11 pr-1">
+                            <div className="relative flex w-full flex-row justify-between gap-3 py-4 pl-14 pr-1">
                               <div className="absolute left-0 top-3 z-40">
                                 <DeleteItemButton
                                   item={item}
