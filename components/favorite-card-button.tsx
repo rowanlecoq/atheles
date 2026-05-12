@@ -35,13 +35,19 @@ export function FavoriteCardButton({
       onClick={handleClick}
       animate={{ scale: popped ? 1.25 : 1 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
-      className={`${className} flex h-10 w-10 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-colors duration-200 hover:bg-brand-dark/80`}
+      className={`${className} group/fav flex h-10 w-10 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-colors duration-200 hover:bg-brand-dark/80`}
       aria-label={liked ? "Remove from favorites" : "Add to favorites"}
     >
       {liked ? (
-        <HeartIconSolid className="h-5 w-5 text-brand-gold" />
+        <>
+          <HeartIconSolid className="h-5 w-5 text-brand-gold group-hover/fav:hidden" />
+          <HeartIcon className="hidden h-5 w-5 text-white/50 group-hover/fav:block" />
+        </>
       ) : (
-        <HeartIcon className="h-5 w-5 text-white/70 transition-colors duration-200 hover:text-white" />
+        <>
+          <HeartIcon className="h-5 w-5 text-white/70 group-hover/fav:hidden" />
+          <HeartIconSolid className="hidden h-5 w-5 text-brand-gold group-hover/fav:block" />
+        </>
       )}
       <AnimatePresence>
         {toast && (

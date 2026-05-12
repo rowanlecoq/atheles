@@ -34,12 +34,12 @@ export function FavoriteButton({ handle }: { handle: string }) {
         {liked ? (
           <>
             <HeartIconSolid className="h-5 w-5 text-brand-gold group-hover/heart:hidden" />
-            <HeartIcon className="hidden h-5 w-5 text-brand-gold group-hover/heart:block" />
+            <HeartIcon className="hidden h-5 w-5 text-brand-grey group-hover/heart:block" />
           </>
         ) : (
           <>
             <HeartIcon className="h-5 w-5 text-brand-grey group-hover/heart:hidden" />
-            <HeartIcon className="hidden h-5 w-5 text-brand-gold group-hover/heart:block" />
+            <HeartIconSolid className="hidden h-5 w-5 text-brand-gold group-hover/heart:block" />
           </>
         )}
       </motion.button>
