@@ -17,7 +17,7 @@ export function NavbarShell({ children }: { children: ReactNode }) {
       <motion.div
         initial={didMount ? { opacity: 0, y: -6 } : false}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.45, ease: [0.16, 1, 0.3, 1] }}
+        transition={{ duration: 0.65, ease: [0.16, 1, 0.3, 1] }}
       >
         {children}
       </motion.div>
