@@ -129,6 +129,11 @@ export default function FavoritesPage() {
         .then((r) => (r.ok ? r.json() : { products: [] }))
         .then((data) => {
           const newProducts: FavoriteProduct[] = data.products || [];
+          // Auto-remove any handles that no longer exist in Shopify
+          const foundHandles = new Set(newProducts.map((p) => p.handle));
+          missing.forEach((h) => {
+            if (!foundHandles.has(h)) removeFavorite(h);
+          });
           setProducts([...cached, ...newProducts]);
           fetchedHandlesRef.current = key;
         })
