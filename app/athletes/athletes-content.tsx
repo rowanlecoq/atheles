@@ -92,7 +92,7 @@ function renderMediaItem(item: string, altText: string, imgClassName: string) {
         <img src={ytThumb} alt={altText} className={imgClassName} />
         <div className="absolute inset-0 flex items-center justify-center bg-black/30">
           <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/60 backdrop-blur-sm">
-            <span className="ml-1 text-xl text-white">▶</span>
+            <span className="ml-1 text-xl text-white" aria-hidden="true">▶</span>
           </div>
         </div>
       </div>
@@ -102,7 +102,7 @@ function renderMediaItem(item: string, altText: string, imgClassName: string) {
     return (
       <div className="flex h-full w-full flex-col items-center justify-center gap-2 bg-brand-medium-grey/20">
         <div className="flex h-12 w-12 items-center justify-center rounded-full bg-black/60">
-          <span className="ml-1 text-xl text-brand-grey">▶</span>
+          <span className="ml-1 text-xl text-brand-grey" aria-hidden="true">▶</span>
         </div>
         <span className="text-xs text-brand-grey">tap to view</span>
       </div>
@@ -259,14 +259,14 @@ function AthleteCard({
                     {/* eslint-disable-next-line @next/next/no-img-element */}
                     <img src={ytThumb} alt="" className="h-full w-full object-cover object-top" />
                     <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                      <span className="text-white">▶</span>
+                      <span className="text-white" aria-hidden="true">▶</span>
                     </div>
                   </div>
                 ) : isMed ? (
-                  <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-brand-grey">▶</div>
+                  <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-brand-grey" aria-hidden="true">▶</div>
                 ) : (
                   // eslint-disable-next-line @next/next/no-img-element
-                  <img src={item} alt={`${athlete.name} ${idx + 1}`} className="h-full w-full object-cover object-top transition duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-105" />
+                  <img src={item} alt="" className="h-full w-full object-cover object-top transition duration-300 ease-in-out group-hover:scale-105 group-hover:brightness-105" />
                 )}
               </button>
             );
@@ -362,7 +362,7 @@ export function AthletesContent({ initialAthletes = [] }: { initialAthletes?: At
         our athletes
       </h1>
       <p className="mb-10 text-center text-sm text-brand-grey">
-        atheles athletes are on the way. stay tuned.
+        driven individuals who train, compete, and represent what atheles stands for.
       </p>
       </FadeIn>
 

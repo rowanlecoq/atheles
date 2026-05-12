@@ -9,6 +9,11 @@ export default {
       destination: "/search/tees",
       permanent: true,
     },
+    {
+      source: "/about",
+      destination: "/",
+      permanent: true,
+    },
   ],
   images: {
     formats: ["image/avif", "image/webp"],

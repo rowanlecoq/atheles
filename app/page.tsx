@@ -7,7 +7,7 @@ import { NewsletterSignup } from "components/newsletter-signup";
 
 export const metadata = {
   description:
-    "premium fitness and lifestyle clothing crafted for authentic superiority.",
+    "the new era of gymwear and streetwear. unlock your fullest potential 🔱 craft your aesthetic.",
   openGraph: {
     type: "website",
   },
