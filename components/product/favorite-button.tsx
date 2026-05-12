@@ -19,6 +19,7 @@ export function FavoriteButton({ handle }: { handle: string }) {
   const handleClick = () => {
     const wasLiked = liked;
     setOptimistic(!wasLiked);
+    setHovered(false);
     toggleFavorite(handle);
     setPopped(true);
     setTimeout(() => setPopped(false), 180);
