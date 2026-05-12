@@ -8,21 +8,22 @@ import { useState } from "react";
 
 export function FavoriteButton({ handle }: { handle: string }) {
   const { isFavorite, toggleFavorite } = useFavorites();
-  const liked = isFavorite(handle);
+  const hookLiked = isFavorite(handle);
+  const [optimistic, setOptimistic] = useState<boolean | null>(null);
+  const liked = optimistic ?? hookLiked;
   const [popped, setPopped] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
   const [hovered, setHovered] = useState(false);
-  const [justClicked, setJustClicked] = useState(false);
-  const showPreview = hovered && !justClicked;
+  const showPreview = hovered && optimistic === null;
 
   const handleClick = () => {
     const wasLiked = liked;
+    setOptimistic(!wasLiked);
     toggleFavorite(handle);
     setPopped(true);
-    setJustClicked(true);
     setTimeout(() => setPopped(false), 180);
     setToast(wasLiked ? "removed!" : "saved!");
-    setTimeout(() => { setToast(null); setJustClicked(false); }, 1300);
+    setTimeout(() => { setToast(null); setOptimistic(null); }, 1300);
   };
 
   return (
