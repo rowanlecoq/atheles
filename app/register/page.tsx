@@ -4,7 +4,6 @@ import RegisterForm from "./register-form";
 
 export const metadata: Metadata = {
   title: "register",
-  robots: { index: false, follow: false },
 };
 
 export default function RegisterPage() {

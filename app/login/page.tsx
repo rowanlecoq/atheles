@@ -4,7 +4,6 @@ import LoginForm from "./login-form";
 
 export const metadata: Metadata = {
   title: "login",
-  robots: { index: false, follow: false },
 };
 
 export default function LoginPage() {
