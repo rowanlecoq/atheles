@@ -1,8 +1,6 @@
 "use client";
 
-import { HeartIcon } from "@heroicons/react/24/outline";
-import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
-import { useFavorites } from "lib/hooks/use-favorites";
+import { FavoriteCardButton } from "components/favorite-card-button";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion } from "motion/react";
 import Image from "next/image";
@@ -11,8 +9,6 @@ import Price from "components/price";
 import type { Product } from "lib/shopify/types";
 
 export function CarouselProductCard({ product, index = 0 }: { product: Product; index?: number }) {
-  const { isFavorite, toggleFavorite } = useFavorites();
-  const liked = isFavorite(product.handle);
   const secondImage = product.images?.[1]?.url;
   const prefersReducedMotion = useReducedMotion();
   const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
@@ -51,29 +47,7 @@ export function CarouselProductCard({ product, index = 0 }: { product: Product; 
           )}
         </Link>
 
-        {/* Favorite */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            toggleFavorite(product.handle);
-          }}
-          className="group/heart absolute bottom-2 right-2 z-10 flex h-9 w-9 items-center justify-center"
-          aria-label={liked ? "Remove from favorites" : "Add to favorites"}
-        >
-          {liked ? (
-            <>
-              <HeartIconSolid className="h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:hidden" />
-              <HeartIcon className="hidden h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:block" />
-            </>
-          ) : (
-            <>
-              <HeartIcon className="h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-white/60 group-hover/heart:hidden" />
-              <HeartIcon className="hidden h-6 w-6 drop-shadow-[0_1px_3px_rgba(0,0,0,0.8)] text-brand-gold group-hover/heart:block" />
-            </>
-          )}
-        </button>
+        <FavoriteCardButton handle={product.handle} />
 
         {/* Stock badge */}
         <div className="absolute left-3 top-3 z-10">
