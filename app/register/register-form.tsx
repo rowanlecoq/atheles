@@ -63,15 +63,17 @@ export default function RegisterForm() {
   };
 
   return (
-    <FadeIn direction="up">
     <div className="mx-auto flex min-h-[60vh] max-w-md items-center px-4 py-10 sm:py-12">
       <div className="w-full">
+        <FadeIn direction="up">
         <div className="mb-8 text-center">
           <h1 className="mb-2 font-heading text-3xl text-brand-gold sm:text-4xl">
             create account
           </h1>
           <p className="text-sm text-brand-grey">join the atheles club.</p>
         </div>
+        </FadeIn>
+        <FadeIn direction="up" delay={0.12}>
         <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8">
           {verificationSent ? (
             <div className="space-y-4 text-center">
@@ -333,8 +335,8 @@ export default function RegisterForm() {
             </p>
           </div>
         </div>
+        </FadeIn>
       </div>
     </div>
-    </FadeIn>
   );
 }

@@ -7,7 +7,7 @@ import { HeroCenter } from "./hero-center";
 
 export function Hero() {
   return (
-    <section className="theme-section relative overflow-hidden bg-brand-dark">
+    <section className="theme-section animate-hero-section-enter relative overflow-hidden bg-brand-dark">
       {/* Background — slideshow with crossfade */}
       <SlideshowMedia
         slotKey="hero_bg"

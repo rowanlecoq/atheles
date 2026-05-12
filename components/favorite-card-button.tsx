@@ -6,7 +6,13 @@ import { useFavorites } from "lib/hooks/use-favorites";
 import { AnimatePresence, motion } from "motion/react";
 import { useState } from "react";
 
-export function FavoriteButton({ handle }: { handle: string }) {
+export function FavoriteCardButton({
+  handle,
+  className = "absolute right-3 top-3 z-10",
+}: {
+  handle: string;
+  className?: string;
+}) {
   const { isFavorite, toggleFavorite } = useFavorites();
   const hookLiked = isFavorite(handle);
   const [optimistic, setOptimistic] = useState<boolean | null>(null);
@@ -16,39 +22,39 @@ export function FavoriteButton({ handle }: { handle: string }) {
   const [hovered, setHovered] = useState(false);
   const showPreview = hovered && optimistic === null;
 
-  const handleClick = () => {
+  const handleClick = (e: React.MouseEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
     const wasLiked = liked;
     setOptimistic(!wasLiked);
     setHovered(false);
     toggleFavorite(handle);
     setPopped(true);
     setTimeout(() => setPopped(false), 180);
-    setToast(wasLiked ? "removed!" : "saved!");
+    setToast(wasLiked ? "removed!" : "added!");
     setTimeout(() => { setToast(null); setOptimistic(null); }, 1300);
   };
 
   return (
-    <div className="relative">
-      <motion.button
-        type="button"
-        onClick={handleClick}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        animate={{ scale: popped ? 1.2 : 1 }}
-        transition={{ duration: 0.15, ease: "easeOut" }}
-        className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark/50 backdrop-blur-sm transition-all duration-200 hover:border-brand-gold/50 hover:bg-brand-dark/80"
-        aria-label={liked ? "Remove from favorites" : "Add to favorites"}
-      >
-        {liked ? (
-          showPreview
-            ? <HeartIcon className="h-5 w-5 text-brand-grey" />
-            : <HeartIconSolid className="h-5 w-5 text-brand-gold" />
-        ) : (
-          showPreview
-            ? <HeartIconSolid className="h-5 w-5 text-brand-gold" />
-            : <HeartIcon className="h-5 w-5 text-brand-grey" />
-        )}
-      </motion.button>
+    <motion.button
+      type="button"
+      onClick={handleClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      animate={{ scale: popped ? 1.25 : 1 }}
+      transition={{ duration: 0.15, ease: "easeOut" }}
+      className={`${className} flex h-10 w-10 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-colors duration-200 hover:bg-brand-dark/80`}
+      aria-label={liked ? "Remove from favorites" : "Add to favorites"}
+    >
+      {liked ? (
+        showPreview
+          ? <HeartIcon className="h-5 w-5 text-white/50" />
+          : <HeartIconSolid className="h-5 w-5 text-brand-gold" />
+      ) : (
+        showPreview
+          ? <HeartIconSolid className="h-5 w-5 text-brand-gold" />
+          : <HeartIcon className="h-5 w-5 text-white/70" />
+      )}
       <AnimatePresence>
         {toast && (
           <motion.span
@@ -63,6 +69,6 @@ export function FavoriteButton({ handle }: { handle: string }) {
           </motion.span>
         )}
       </AnimatePresence>
-    </div>
+    </motion.button>
   );
 }

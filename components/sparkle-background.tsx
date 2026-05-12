@@ -82,12 +82,16 @@ export function SparkleBackground() {
     window.addEventListener("resize", resize);
 
     let time = 0;
-    const draw = () => {
+    let lastTs = 0;
+    const FRAME_MS = 1000 / 30;
+    const draw = (ts: number) => {
       animIdRef.current = requestAnimationFrame(draw);
+      if (ts - lastTs < FRAME_MS) return;
+      lastTs = ts;
       const w = canvas.width;
       const h = canvas.height;
       ctx.clearRect(0, 0, w, h);
-      time += 0.005; // slow time advance for gentle undulation
+      time += 0.005;
 
       for (const s of starsRef.current) {
         s.x += s.vx;

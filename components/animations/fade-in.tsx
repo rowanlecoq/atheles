@@ -2,7 +2,6 @@
 
 import {
   animationDurations,
-  animationDurationsMobile,
   animationEasing,
   animationViewportMargins,
   animationViewportMarginsMobile,
@@ -50,11 +49,14 @@ export function FadeIn({
   const mobileOffsetMultiplier = isMobileViewport ? 0.65 : 1;
   const hiddenX = prefersReducedMotion ? 0 : offset.x * mobileOffsetMultiplier;
   const hiddenY = prefersReducedMotion ? 0 : offset.y * mobileOffsetMultiplier;
-  const transitionDuration = prefersReducedMotion
-    ? Math.min(duration, animationDurations.fast)
-    : isMobileViewport
-      ? Math.min(duration, animationDurationsMobile.normal)
-      : duration;
+
+  const transition = prefersReducedMotion
+    ? { duration: animationDurations.fast, delay }
+    : {
+        opacity: { duration: duration * 0.8, ease: animationEasing, delay },
+        x: { type: "spring" as const, stiffness: 300, damping: 30, delay },
+        y: { type: "spring" as const, stiffness: 300, damping: 30, delay },
+      };
 
   return (
     <motion.div
@@ -65,11 +67,7 @@ export function FadeIn({
           ? { opacity: 1, x: 0, y: 0 }
           : { opacity: 0, x: hiddenX, y: hiddenY }
       }
-      transition={{
-        duration: transitionDuration,
-        delay,
-        ease: animationEasing,
-      }}
+      transition={transition}
       className={className}
     >
       {children}

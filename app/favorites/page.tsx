@@ -2,6 +2,7 @@
 
 import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
+import { FadeIn } from "components/animations";
 import { useCurrency } from "components/currency-context";
 import { useFavorites } from "lib/hooks/use-favorites";
 import Image from "next/image";
@@ -140,13 +141,17 @@ export default function FavoritesPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
-      <h1 className="animate-slide-up mb-2 font-heading text-3xl uppercase tracking-wider text-brand-gold sm:text-4xl">
-        your favorites.
-      </h1>
-      <div className="animate-slide-up mb-8 h-px w-24 bg-brand-dark-gold/40" />
+      <FadeIn direction="up">
+        <h1 className="mb-2 font-heading text-3xl uppercase tracking-wider text-brand-gold sm:text-4xl">
+          your favorites.
+        </h1>
+      </FadeIn>
+      <FadeIn direction="none" delay={0.1}>
+        <div className="mb-8 h-px w-24 bg-brand-dark-gold/40" />
+      </FadeIn>
 
       {loading && products.length === 0 ? (
-        <div className="animate-fade-in grid gap-3 sm:grid-cols-2 [animation-delay:150ms]">
+        <FadeIn delay={0.15} className="grid gap-3 sm:grid-cols-2">
           {Array.from({ length: Math.min(favorites.length || 2, 4) }).map(
             (_, i) => (
               <div
@@ -161,9 +166,9 @@ export default function FavoritesPage() {
               </div>
             ),
           )}
-        </div>
+        </FadeIn>
       ) : favorites.length === 0 ? (
-        <div className="animate-fade-in py-12 text-center [animation-delay:150ms]">
+        <FadeIn delay={0.15} className="py-12 text-center">
           <p className="mb-6 text-base text-brand-grey">
             you haven&apos;t saved any favorites yet.
           </p>
@@ -173,9 +178,9 @@ export default function FavoritesPage() {
           >
             browse the shop
           </Link>
-        </div>
+        </FadeIn>
       ) : (
-        <div className="animate-fade-in grid gap-3 sm:grid-cols-2 [animation-delay:150ms]">
+        <FadeIn delay={0.15} className="grid gap-3 sm:grid-cols-2">
           {favorites.map((handle) => {
             const product = products.find((p) => p.handle === handle);
             if (!product) {
@@ -208,7 +213,7 @@ export default function FavoritesPage() {
               />
             );
           })}
-        </div>
+        </FadeIn>
       )}
     </div>
   );

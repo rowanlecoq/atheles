@@ -1,9 +1,7 @@
 "use client";
 
-import { HeartIcon } from "@heroicons/react/24/outline";
-import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { useCart } from "components/cart/cart-context";
-import { useFavorites } from "lib/hooks/use-favorites";
+import { FavoriteCardButton } from "components/favorite-card-button";
 import type { Product } from "lib/shopify/types";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,11 +12,9 @@ import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
 function ProductCard({ product }: { product: Product }) {
-  const { isFavorite, toggleFavorite } = useFavorites();
   const { addCartItem } = useCart();
   const [showSizes, setShowSizes] = useState(false);
   const [adding, setAdding] = useState(false);
-  const liked = isFavorite(product.handle);
   const hasMultipleImages = product.images.length > 1;
   const secondImage = product.images[1]?.url;
   const hasMultipleVariants = product.variants.length > 1;
@@ -63,37 +59,7 @@ function ProductCard({ product }: { product: Product }) {
           )}
         </Link>
 
-        {/* Favorite button */}
-        <button
-          type="button"
-          onClick={(e) => {
-            e.preventDefault();
-            e.stopPropagation();
-            const wasLiked = liked;
-            toggleFavorite(product.handle);
-            // Pop animation
-            const btn = e.currentTarget;
-            btn.style.transform = "scale(1.3)";
-            setTimeout(() => { btn.style.transform = ""; }, 200);
-            // Show toast
-            const toast = btn.querySelector("[data-fav-toast]") as HTMLElement;
-            if (toast) {
-              toast.textContent = wasLiked ? "removed!" : "added!";
-              toast.style.opacity = "1";
-              toast.style.transform = "translateY(0)";
-              setTimeout(() => { toast.style.opacity = "0"; toast.style.transform = "translateY(4px)"; }, 1000);
-            }
-          }}
-          className="absolute right-3 top-3 z-10 flex h-10 w-10 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-all duration-200 hover:bg-brand-dark/80 active:scale-90"
-          aria-label={liked ? "Remove from favorites" : "Add to favorites"}
-        >
-          {liked ? (
-            <HeartIconSolid className="h-5 w-5 text-brand-gold" />
-          ) : (
-            <HeartIcon className="h-5 w-5 text-white/70 transition-colors group-hover:text-white" />
-          )}
-          <span data-fav-toast className="pointer-events-none absolute -bottom-6 left-1/2 -translate-x-1/2 whitespace-nowrap rounded bg-brand-dark/90 px-2 py-0.5 text-[10px] text-brand-gold opacity-0 transition-all duration-300" style={{ transform: "translateY(4px)" }} />
-        </button>
+        <FavoriteCardButton handle={product.handle} />
 
         {/* Stock badge */}
         <div className="absolute left-3 top-3 z-10">
@@ -211,20 +177,14 @@ export default function ProductGridItems({
   products: Product[];
 }) {
   const prefersReducedMotion = useReducedMotion();
-  // Don't use useMobileViewport here — it starts false on SSR then flips to true
-  // on mobile after hydration, which changes the initial/animate targets mid-animation
-  // and leaves blur permanently stuck. Apply blur on all devices; blur(0.001px) as
-  // the end state prevents GPU compositing layer teardown on mobile.
-  const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
-  const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
 
   return (
     <>
       {products.map((product, index) => (
         <motion.li
           key={product.handle}
-          initial={{ opacity: 0, y: 20, ...(blurInitial ? { filter: blurInitial } : {}) }}
-          whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px" }}
           transition={{
             duration: 0.28,
