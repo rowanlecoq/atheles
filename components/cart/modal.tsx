@@ -417,20 +417,20 @@ export default function CartModal() {
 
                     {/* Quick shop links */}
                     <div className="mt-6 flex w-full flex-col gap-2.5">
-                      <button
-                        type="button"
-                        onClick={() => { closeCart(); router.push("/search/mens"); }}
+                      <Link
+                        href="/search/mens"
+                        onClick={closeCart}
                         className="flex min-h-[44px] items-center justify-center rounded-full bg-brand-gold px-6 py-3 text-center text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
                       >
                         shop mens
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => { closeCart(); router.push("/search"); }}
+                      </Link>
+                      <Link
+                        href="/search"
+                        onClick={closeCart}
                         className="flex min-h-[44px] items-center justify-center rounded-full border border-brand-dark-gold/30 px-6 py-3 text-center text-sm uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
                       >
                         browse all
-                      </button>
+                      </Link>
                     </div>
                   </div>
 

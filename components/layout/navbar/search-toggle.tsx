@@ -25,7 +25,6 @@ function ResultItem({
   onClose: () => void;
 }) {
   const { currency, convert } = useCurrency();
-  const router = useRouter();
   const price = new Intl.NumberFormat(undefined, {
     style: "currency",
     currency,
@@ -35,11 +34,7 @@ function ResultItem({
   return (
     <Link
       href={`/product/${product.handle}`}
-      onClick={(e) => {
-        e.preventDefault();
-        router.push(`/product/${product.handle}`);
-        onClose();
-      }}
+      onClick={onClose}
       className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-brand-dark-gold/10"
     >
       {product.featuredImage?.url ? (

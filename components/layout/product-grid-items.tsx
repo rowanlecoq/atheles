@@ -177,20 +177,14 @@ export default function ProductGridItems({
   products: Product[];
 }) {
   const prefersReducedMotion = useReducedMotion();
-  // Don't use useMobileViewport here — it starts false on SSR then flips to true
-  // on mobile after hydration, which changes the initial/animate targets mid-animation
-  // and leaves blur permanently stuck. Apply blur on all devices; blur(0.001px) as
-  // the end state prevents GPU compositing layer teardown on mobile.
-  const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
-  const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
 
   return (
     <>
       {products.map((product, index) => (
         <motion.li
           key={product.handle}
-          initial={{ opacity: 0, y: 20, ...(blurInitial ? { filter: blurInitial } : {}) }}
-          whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
+          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
+          whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px" }}
           transition={{
             duration: 0.28,

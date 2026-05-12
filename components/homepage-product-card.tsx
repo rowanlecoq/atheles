@@ -21,14 +21,12 @@ export function HomepageProductCard({
 }) {
   const secondImage = product.images?.[1]?.url;
   const prefersReducedMotion = useReducedMotion();
-  const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
-  const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
 
   return (
     <motion.div
       className="group h-full"
-      initial={{ opacity: 0, y: 16, ...(blurInitial ? { filter: blurInitial } : {}) }}
-      whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
+      initial={prefersReducedMotion ? {} : { opacity: 0, y: 16 }}
+      whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
       viewport={{ once: true, margin: "0px" }}
       transition={{ duration: 0.28, delay: index * 0.05, ease: [0.22, 1, 0.36, 1] }}
     >
