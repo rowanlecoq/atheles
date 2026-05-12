@@ -167,6 +167,17 @@ html { scrollbar-width: none; }
 
 
 
+/* Announcement bar: opacity-only fade so the border line doesn't flash in
+   before the animation. CSS so it applies before JS/Framer Motion loads. */
+@keyframes announcement-bar-enter {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+.animate-announcement-bar-enter {
+  animation: announcement-bar-enter 0.6s ease-out 0.05s both;
+}
+
 /* Header entrance — translateY only, no opacity to prevent flicker.
    CSS so it starts at first paint, before JS hydration. */
 @keyframes header-enter {

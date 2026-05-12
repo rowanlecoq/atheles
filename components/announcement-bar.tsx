@@ -58,12 +58,7 @@ export function AnnouncementBar() {
   };
 
   return (
-    <motion.div
-      className="announcement-bar-root flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark"
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      transition={{ duration: 0.5, ease: "easeOut", delay: 0.1 }}
-    >
+    <div className="announcement-bar-root animate-announcement-bar-enter flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
       {/* Spacer balances the pause button on the right */}
       <div className="min-w-[44px] flex-none" />
 
@@ -98,6 +93,6 @@ export function AnnouncementBar() {
           </svg>
         )}
       </button>
-    </motion.div>
+    </div>
   );
 }
