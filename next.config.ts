@@ -14,6 +14,21 @@ export default {
       destination: "/product/:handle",
       permanent: true,
     },
+    {
+      source: "/product/atheles101",
+      destination: "/product/ogtee",
+      permanent: true,
+    },
+    {
+      source: "/product/atheles102",
+      destination: "/product/ogsweats",
+      permanent: true,
+    },
+    {
+      source: "/product/atheles103",
+      destination: "/product/ogcompression",
+      permanent: true,
+    },
   ],
   images: {
     formats: ["image/avif", "image/webp"],

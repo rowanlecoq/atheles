@@ -1,6 +1,8 @@
 import Footer from "components/layout/footer";
 import { AccountNav } from "./account-nav";
 
+export const dynamic = "force-dynamic";
+
 export default function AccountLayout({
   children,
 }: {
