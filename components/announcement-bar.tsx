@@ -62,7 +62,7 @@ export function AnnouncementBar() {
       {/* Spacer balances the pause button on the right */}
       <div className="min-w-[44px] flex-none" />
 
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence mode="wait">
         <motion.p
           key={index}
           initial={{ opacity: 0, filter: "blur(4px)" }}
