@@ -3,11 +3,11 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "our athletes",
   description:
-    "meet rowan le coq and the athletes who represent atheles — founder, athlete, and the face of the new era of gymwear and streetwear.",
+    "meet the athletes who represent atheles — training in hockey, fitness, and more. rowan le coq (founder & athlete, age 18) leads a team of driven individuals building the new era of gymwear and streetwear.",
   openGraph: {
     title: "our athletes | atheles 🔱",
     description:
-      "meet rowan le coq and the athletes who represent atheles — founder, athlete, and the face of the new era of gymwear and streetwear.",
+      "meet the athletes who represent atheles — training in hockey, fitness, and more. rowan le coq (founder & athlete, age 18) leads a team of driven individuals building the new era.",
     type: "profile",
     url: "https://atheles.co/athletes",
   },
