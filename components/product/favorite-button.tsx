@@ -11,14 +11,18 @@ export function FavoriteButton({ handle }: { handle: string }) {
   const liked = isFavorite(handle);
   const [popped, setPopped] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [hovered, setHovered] = useState(false);
+  const [justClicked, setJustClicked] = useState(false);
+  const showPreview = hovered && !justClicked;
 
   const handleClick = () => {
     const wasLiked = liked;
     toggleFavorite(handle);
     setPopped(true);
+    setJustClicked(true);
     setTimeout(() => setPopped(false), 180);
     setToast(wasLiked ? "removed!" : "saved!");
-    setTimeout(() => setToast(null), 1300);
+    setTimeout(() => { setToast(null); setJustClicked(false); }, 1300);
   };
 
   return (
@@ -26,21 +30,21 @@ export function FavoriteButton({ handle }: { handle: string }) {
       <motion.button
         type="button"
         onClick={handleClick}
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
         animate={{ scale: popped ? 1.2 : 1 }}
         transition={{ duration: 0.15, ease: "easeOut" }}
-        className="group/heart flex h-11 w-11 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark/50 backdrop-blur-sm transition-all duration-200 hover:border-brand-gold/50 hover:bg-brand-dark/80"
+        className="flex h-11 w-11 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark/50 backdrop-blur-sm transition-all duration-200 hover:border-brand-gold/50 hover:bg-brand-dark/80"
         aria-label={liked ? "Remove from favorites" : "Add to favorites"}
       >
         {liked ? (
-          <>
-            <HeartIconSolid className="h-5 w-5 text-brand-gold group-hover/heart:hidden" />
-            <HeartIcon className="hidden h-5 w-5 text-brand-grey group-hover/heart:block" />
-          </>
+          showPreview
+            ? <HeartIcon className="h-5 w-5 text-brand-grey" />
+            : <HeartIconSolid className="h-5 w-5 text-brand-gold" />
         ) : (
-          <>
-            <HeartIcon className="h-5 w-5 text-brand-grey group-hover/heart:hidden" />
-            <HeartIconSolid className="hidden h-5 w-5 text-brand-gold group-hover/heart:block" />
-          </>
+          showPreview
+            ? <HeartIconSolid className="h-5 w-5 text-brand-gold" />
+            : <HeartIcon className="h-5 w-5 text-brand-grey" />
         )}
       </motion.button>
       <AnimatePresence>

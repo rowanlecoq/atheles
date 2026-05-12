@@ -17,6 +17,9 @@ export function FavoriteCardButton({
   const liked = isFavorite(handle);
   const [popped, setPopped] = useState(false);
   const [toast, setToast] = useState<string | null>(null);
+  const [hovered, setHovered] = useState(false);
+  const [justClicked, setJustClicked] = useState(false);
+  const showPreview = hovered && !justClicked;
 
   const handleClick = (e: React.MouseEvent) => {
     e.preventDefault();
@@ -24,30 +27,31 @@ export function FavoriteCardButton({
     const wasLiked = liked;
     toggleFavorite(handle);
     setPopped(true);
+    setJustClicked(true);
     setTimeout(() => setPopped(false), 180);
     setToast(wasLiked ? "removed!" : "added!");
-    setTimeout(() => setToast(null), 1300);
+    setTimeout(() => { setToast(null); setJustClicked(false); }, 1300);
   };
 
   return (
     <motion.button
       type="button"
       onClick={handleClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       animate={{ scale: popped ? 1.25 : 1 }}
       transition={{ duration: 0.15, ease: "easeOut" }}
-      className={`${className} group/fav flex h-10 w-10 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-colors duration-200 hover:bg-brand-dark/80`}
+      className={`${className} flex h-10 w-10 items-center justify-center rounded-full bg-brand-dark/60 backdrop-blur-sm transition-colors duration-200 hover:bg-brand-dark/80`}
       aria-label={liked ? "Remove from favorites" : "Add to favorites"}
     >
       {liked ? (
-        <>
-          <HeartIconSolid className="h-5 w-5 text-brand-gold group-hover/fav:hidden" />
-          <HeartIcon className="hidden h-5 w-5 text-white/50 group-hover/fav:block" />
-        </>
+        showPreview
+          ? <HeartIcon className="h-5 w-5 text-white/50" />
+          : <HeartIconSolid className="h-5 w-5 text-brand-gold" />
       ) : (
-        <>
-          <HeartIcon className="h-5 w-5 text-white/70 group-hover/fav:hidden" />
-          <HeartIconSolid className="hidden h-5 w-5 text-brand-gold group-hover/fav:block" />
-        </>
+        showPreview
+          ? <HeartIconSolid className="h-5 w-5 text-brand-gold" />
+          : <HeartIcon className="h-5 w-5 text-white/70" />
       )}
       <AnimatePresence>
         {toast && (
