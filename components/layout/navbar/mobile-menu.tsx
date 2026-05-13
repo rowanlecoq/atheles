@@ -72,7 +72,7 @@ function CategoryItem({
         <Link
           href={item.path}
           onClick={onNavigate}
-          className="tap-target flex min-h-[44px] flex-1 items-center py-3 text-lg uppercase tracking-[0.12em] text-brand-grey transition-colors hover:text-brand-gold sm:text-xl sm:tracking-wider"
+          className="tap-target flex min-h-[52px] flex-1 items-center py-4 text-xl uppercase tracking-[0.12em] text-brand-grey transition-colors hover:text-brand-gold"
         >
           {item.title}
           {item.comingSoon && (
@@ -329,47 +329,37 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   </Link>
                 </div>
 
-                {/* Main nav links */}
-                {menu.length ? (
-                  <ul className="flex w-full flex-col">
-                    {menu.map((item: Menu) => (
-                      <li
-                        className="border-b border-brand-dark-gold/10"
-                        key={item.title}
+                {/* Unified nav list — Shopify menu items + categories together */}
+                <ul className="flex w-full flex-col">
+                  {menu.map((item: Menu) => (
+                    <li className="border-b border-brand-dark-gold/10" key={item.title}>
+                      <Link
+                        href={item.path}
+                        prefetch={true}
+                        onClick={closeMobileMenu}
+                        className="tap-target flex min-h-[52px] items-center py-4 text-xl uppercase tracking-[0.12em] text-brand-pale-gold transition-colors hover:text-brand-gold"
                       >
-                        <Link
-                          href={item.path}
-                          prefetch={true}
-                          onClick={closeMobileMenu}
-                          className="tap-target flex min-h-[44px] items-center py-3 text-lg uppercase tracking-[0.12em] text-brand-pale-gold transition-colors hover:text-brand-gold sm:text-xl sm:tracking-wider"
-                        >
-                          {item.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-
-                {/* Category links with expandable subcategories */}
-                <div className="mt-4">
-                  <p className="mb-2 text-xs uppercase tracking-[0.2em] text-brand-dark-gold">
-                    Categories
-                  </p>
-                  <ul className="flex w-full flex-col">
-                    {categoryLinks.map((item, idx) => (
-                      <CategoryItem
-                        key={item.title}
-                        item={item}
-                        onNavigate={closeMobileMenu}
-                        isLast={idx === categoryLinks.length - 1}
-                      />
-                    ))}
-                  </ul>
-                </div>
+                        {item.title}
+                      </Link>
+                    </li>
+                  ))}
+                  {categoryLinks.map((item, idx) => (
+                    <CategoryItem
+                      key={item.title}
+                      item={item}
+                      onNavigate={closeMobileMenu}
+                      isLast={idx === categoryLinks.length - 1}
+                    />
+                  ))}
+                </ul>
               </div>
 
-              {/* Social at bottom */}
-              <div className="mt-auto px-4 pb-4">
+              {/* Brand mark + socials */}
+              <div className="px-4 pb-4 pt-8">
+                <div className="mb-6 flex flex-col items-center gap-1 text-center">
+                  <span className="text-2xl text-brand-gold">🔱</span>
+                  <p className="text-[10px] uppercase tracking-[0.3em] text-brand-dark-gold">to ascend.</p>
+                </div>
                 <div className="border-t border-brand-dark-gold/20 pt-3">
                   <a
                     href="https://www.instagram.com/atheles.co/"
