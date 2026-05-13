@@ -9,6 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { flushSync } from "react-dom";
 
 type SearchProduct = {
   handle: string;
@@ -58,15 +59,7 @@ export function SearchToggle() {
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const touchLockRef = useRef<((e: TouchEvent) => void) | null>(null);
   const router = useRouter();
-
-  const unlockScroll = useCallback(() => {
-    if (touchLockRef.current) {
-      document.removeEventListener("touchmove", touchLockRef.current);
-      touchLockRef.current = null;
-    }
-  }, []);
 
   const close = useCallback(() => {
     setClosing(true);
@@ -75,24 +68,18 @@ export function SearchToggle() {
       setClosing(false);
       setQuery("");
       setResults([]);
-      unlockScroll();
     }, 120);
-  }, [unlockScroll]);
+  }, []);
 
   const openSearch = useCallback(() => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      // Prevent touches outside the overlay from scrolling the page
-      const touchHandler = (e: TouchEvent) => {
-        if (
-          mobileOverlayRef.current &&
-          mobileOverlayRef.current.contains(e.target as Node)
-        )
-          return;
-        e.preventDefault();
-      };
-      touchLockRef.current = touchHandler;
-      document.addEventListener("touchmove", touchHandler, { passive: false });
+      // flushSync forces the overlay to render synchronously while we're still
+      // inside the tap event handler — iOS only shows the keyboard when focus()
+      // is called within the same user-gesture tick.
+      flushSync(() => setOpen(true));
+      mobileInputRef.current?.focus({ preventScroll: true });
+      return;
     }
     setOpen(true);
   }, []);
@@ -100,8 +87,7 @@ export function SearchToggle() {
   // Desktop: the navbar is position:sticky, so the browser tracks the input's
   // natural layout position near y=0 and scrolls toward it on every keystroke.
   // Intercept any scroll that fires while a key is held and snap back to the
-  // saved position — this stops the creeping-upward drift without touching the
-  // body style (which would break the sticky navbar).
+  // saved position — stops the creeping-upward drift without touching body style.
   useEffect(() => {
     if (!open) return;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
@@ -114,12 +100,8 @@ export function SearchToggle() {
       keyActive = true;
       savedY = window.scrollY;
     };
-    const onKeyup = () => {
-      keyActive = false;
-    };
-    const onScroll = () => {
-      if (keyActive) window.scrollTo(0, savedY);
-    };
+    const onKeyup = () => { keyActive = false; };
+    const onScroll = () => { if (keyActive) window.scrollTo(0, savedY); };
 
     document.addEventListener("keydown", onKeydown, true);
     document.addEventListener("keyup", onKeyup, true);
@@ -131,7 +113,6 @@ export function SearchToggle() {
       window.removeEventListener("scroll", onScroll);
     };
   }, [open]);
-
 
   // Fetch search results
   useEffect(() => {
@@ -146,9 +127,7 @@ export function SearchToggle() {
     setLoading(true);
     debounceRef.current = setTimeout(async () => {
       try {
-        const res = await fetch(
-          `/api/search?q=${encodeURIComponent(query.trim())}`,
-        );
+        const res = await fetch(`/api/search?q=${encodeURIComponent(query.trim())}`);
         if (res.ok) {
           const data = await res.json();
           setResults(data.products || []);
@@ -160,18 +139,14 @@ export function SearchToggle() {
       }
     }, 280);
 
-    return () => {
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query]);
 
-  // Focus the appropriate input when search opens, without scrolling the page.
+  // Desktop: focus input after the expand animation renders it
   useEffect(() => {
     if (!open) return;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    if (isMobile) {
-      setTimeout(() => mobileInputRef.current?.focus({ preventScroll: true }), 50);
-    } else {
+    if (!isMobile) {
       setTimeout(() => desktopInputRef.current?.focus({ preventScroll: true }), 50);
     }
   }, [open]);
@@ -191,20 +166,15 @@ export function SearchToggle() {
   // Close on Escape
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") close(); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [open, close]);
 
   // Cleanup on unmount
   useEffect(() => {
-    return () => {
-      unlockScroll();
-      if (debounceRef.current) clearTimeout(debounceRef.current);
-    };
-  }, [unlockScroll]);
+    return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
+  }, []);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -218,10 +188,11 @@ export function SearchToggle() {
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Mobile: compact bar pinned to top + results dropdown + dim backdrop */}
+      {/* Mobile: slim bar pinned to top + results that fill the remaining
+          viewport height so there's no arbitrary cutoff. Page stays scrollable
+          behind the dim backdrop; tap backdrop to close. */}
       {(open || closing) && (
         <>
-          {/* Backdrop dims the page without covering it entirely */}
           <div
             className={`fixed inset-0 z-[59] bg-black/40 transition-opacity duration-200 md:hidden ${
               closing ? "opacity-0" : "opacity-100"
@@ -233,9 +204,9 @@ export function SearchToggle() {
             className={`fixed left-0 right-0 top-0 z-[60] flex flex-col bg-brand-dark transition-opacity duration-200 md:hidden ${
               closing ? "opacity-0" : "opacity-100"
             }`}
+            style={{ maxHeight: "100dvh" }}
           >
-            {/* Search bar row */}
-            <div className="flex items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-1.5">
+            <div className="flex flex-none items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-1.5">
               <MagnifyingGlassIcon className="h-4 w-4 flex-none text-brand-dark-gold" />
               <form onSubmit={handleSubmit} className="flex-1">
                 <input
@@ -258,9 +229,8 @@ export function SearchToggle() {
                 <XMarkIcon className="h-4 w-4" />
               </button>
             </div>
-            {/* Results dropdown */}
             {query.trim().length >= 2 && (
-              <div className="max-h-[55vh] overflow-y-auto">
+              <div className="min-h-0 flex-1 overflow-y-auto">
                 {loading && results.length === 0 && (
                   <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
                 )}
@@ -302,28 +272,19 @@ export function SearchToggle() {
               className="h-9 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0"
             />
           </form>
-          {/* Desktop dropdown */}
           {showDropdown && (
             <div className="absolute left-0 right-0 top-full z-[70] mt-1 overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-xl shadow-black/40">
               {loading && results.length === 0 ? (
-                <div className="px-4 py-3 text-xs text-brand-grey">
-                  searching...
-                </div>
+                <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
               ) : (
                 <>
                   {results.slice(0, 5).map((product) => (
-                    <ResultItem
-                      key={product.handle}
-                      product={product}
-                      onClose={close}
-                    />
+                    <ResultItem key={product.handle} product={product} onClose={close} />
                   ))}
                   <button
                     type="button"
                     onClick={() => {
-                      router.push(
-                        `/search?q=${encodeURIComponent(query.trim())}`,
-                      );
+                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
                       close();
                     }}
                     className="w-full border-t border-brand-dark-gold/20 px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-brand-dark-gold transition-colors hover:bg-brand-dark-gold/5 hover:text-brand-gold"
