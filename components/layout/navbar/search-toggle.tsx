@@ -62,8 +62,6 @@ export function SearchToggle() {
   // Tracks pointer-down position so we can distinguish a tap from a scroll
   // on the backdrop (scroll gestures should not close the search).
   const backdropPointerStart = useRef({ x: 0, y: 0 });
-  // Saved scroll Y when mobile search opens — restored on any drift.
-  const mobileSavedY = useRef(0);
   const router = useRouter();
 
   const close = useCallback(() => {
@@ -79,7 +77,6 @@ export function SearchToggle() {
   const openSearch = useCallback(() => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      mobileSavedY.current = window.scrollY;
       // flushSync renders the portal synchronously inside the tap handler so
       // focus() fires within the same user-gesture tick (required for iOS keyboard).
       flushSync(() => setOpen(true));
@@ -89,32 +86,14 @@ export function SearchToggle() {
     setOpen(true);
   }, []);
 
-  // Mobile: snap scroll back to where it was when search opened.
-  // Covers two cases the keydown intercept misses:
-  //   • iOS virtual keyboard autocomplete bar resizing the visual viewport
-  //   • Android IME input that fires 'input' without 'keydown'
+  // Unified scroll intercept for both mobile and desktop.
+  // Saves Y on keydown/mousedown; snaps back if the browser drifts during
+  // that interaction (sticky-navbar "scroll input into view" behaviour).
+  // Also listens to visualViewport.resize to catch iOS keyboard autocomplete
+  // bar height changes, which resize the viewport and drift scroll without
+  // firing keydown.
   useEffect(() => {
     if (!open) return;
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    if (!isMobile) return;
-
-    const restore = () => window.scrollTo(0, mobileSavedY.current);
-
-    window.addEventListener("scroll", restore, { passive: true });
-    window.visualViewport?.addEventListener("resize", restore);
-    return () => {
-      window.removeEventListener("scroll", restore);
-      window.visualViewport?.removeEventListener("resize", restore);
-    };
-  }, [open]);
-
-  // Desktop: the navbar is position:sticky — the browser drifts the scroll
-  // toward the input's layout position (near y=0) on every keystroke or
-  // mouse-selection drag. Intercept and snap back.
-  useEffect(() => {
-    if (!open) return;
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    if (isMobile) return;
 
     let active = false;
     let savedY = window.scrollY;
@@ -122,12 +101,14 @@ export function SearchToggle() {
     const onStart = () => { active = true; savedY = window.scrollY; };
     const onEnd = () => { active = false; };
     const onScroll = () => { if (active) window.scrollTo(0, savedY); };
+    const onViewportResize = () => { window.scrollTo(0, savedY); };
 
     document.addEventListener("keydown", onStart, true);
     document.addEventListener("keyup", onEnd, true);
     document.addEventListener("mousedown", onStart, true);
     document.addEventListener("mouseup", onEnd, true);
     window.addEventListener("scroll", onScroll);
+    window.visualViewport?.addEventListener("resize", onViewportResize);
 
     return () => {
       document.removeEventListener("keydown", onStart, true);
@@ -135,6 +116,7 @@ export function SearchToggle() {
       document.removeEventListener("mousedown", onStart, true);
       document.removeEventListener("mouseup", onEnd, true);
       window.removeEventListener("scroll", onScroll);
+      window.visualViewport?.removeEventListener("resize", onViewportResize);
     };
   }, [open]);
 
