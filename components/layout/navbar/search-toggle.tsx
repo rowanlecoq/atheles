@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { flushSync } from "react-dom";
+import { createPortal, flushSync } from "react-dom";
 
 type SearchProduct = {
   handle: string;
@@ -84,32 +84,31 @@ export function SearchToggle() {
     setOpen(true);
   }, []);
 
-  // Desktop: the navbar is position:sticky, so the browser tracks the input's
-  // natural layout position near y=0 and scrolls toward it on every keystroke.
-  // Intercept any scroll that fires while a key is held and snap back to the
-  // saved position — stops the creeping-upward drift without touching body style.
+  // The navbar has a CSS transform, so the browser tracks the input's natural
+  // layout position near y=0 and drifts the scroll toward it on every keystroke
+  // or mouse-selection drag. Intercept any scroll that fires while a key or
+  // mouse button is held and snap back — applies to both mobile and desktop.
   useEffect(() => {
     if (!open) return;
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    if (isMobile) return;
 
-    let keyActive = false;
+    let active = false;
     let savedY = window.scrollY;
 
-    const onKeydown = () => {
-      keyActive = true;
-      savedY = window.scrollY;
-    };
-    const onKeyup = () => { keyActive = false; };
-    const onScroll = () => { if (keyActive) window.scrollTo(0, savedY); };
+    const onStart = () => { active = true; savedY = window.scrollY; };
+    const onEnd = () => { active = false; };
+    const onScroll = () => { if (active) window.scrollTo(0, savedY); };
 
-    document.addEventListener("keydown", onKeydown, true);
-    document.addEventListener("keyup", onKeyup, true);
+    document.addEventListener("keydown", onStart, true);
+    document.addEventListener("keyup", onEnd, true);
+    document.addEventListener("mousedown", onStart, true);
+    document.addEventListener("mouseup", onEnd, true);
     window.addEventListener("scroll", onScroll);
 
     return () => {
-      document.removeEventListener("keydown", onKeydown, true);
-      document.removeEventListener("keyup", onKeyup, true);
+      document.removeEventListener("keydown", onStart, true);
+      document.removeEventListener("keyup", onEnd, true);
+      document.removeEventListener("mousedown", onStart, true);
+      document.removeEventListener("mouseup", onEnd, true);
       window.removeEventListener("scroll", onScroll);
     };
   }, [open]);
@@ -188,10 +187,11 @@ export function SearchToggle() {
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Mobile: slim bar pinned to top + results that fill the remaining
-          viewport height so there's no arbitrary cutoff. Page stays scrollable
-          behind the dim backdrop; tap backdrop to close. */}
-      {(open || closing) && (
+      {/* Mobile: portalled to document.body so position:fixed is relative to
+          the viewport, not the navbar's CSS-transform containing block.
+          Slim bar pinned to top + results filling the remaining viewport
+          height. Page stays scrollable behind the dim backdrop. */}
+      {(open || closing) && createPortal(
         <>
           <div
             className={`fixed inset-0 z-[59] bg-black/40 transition-opacity duration-200 md:hidden ${
@@ -252,7 +252,8 @@ export function SearchToggle() {
               </div>
             )}
           </div>
-        </>
+        </>,
+        document.body,
       )}
 
       {/* Desktop: inline expanding search with dropdown */}
