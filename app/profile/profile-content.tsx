@@ -1093,9 +1093,10 @@ export default function ProfileContent() {
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs text-brand-grey/50">
-            earn <span className="text-brand-pale-gold">50 points</span> per $1
-            spent &#183; unlock exclusive tiers & perks
+          <p className="mt-4 text-center text-xs text-brand-grey/50" suppressHydrationWarning>
+            earn <span className="text-brand-pale-gold">50 points</span> per{" "}
+            {new Intl.NumberFormat(undefined, { style: "currency", currency, currencyDisplay: "narrowSymbol", maximumFractionDigits: 0 }).format(parseFloat(convert("1")))}
+            {" "}spent &#183; unlock exclusive tiers & perks
           </p>
         </div>
 
