@@ -1,61 +1,47 @@
 "use client";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useCurrency } from "components/currency-context";
-import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { createPortal } from "react-dom";
+import {
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 
-type SearchResult = {
+type SearchProduct = {
   handle: string;
   title: string;
-  featuredImage?: { url: string } | null;
-  priceRange: {
-    maxVariantPrice: { amount: string; currencyCode: string };
-  };
+  featuredImage?: { url: string; altText?: string };
+  priceRange?: { minVariantPrice?: { amount: string; currencyCode: string } };
 };
 
-function ResultItem({
-  product,
-  onClose,
-}: {
-  product: SearchResult;
-  onClose: () => void;
-}) {
-  const { currency, convert } = useCurrency();
-  const price = new Intl.NumberFormat(undefined, {
-    style: "currency",
-    currency,
-    currencyDisplay: "narrowSymbol",
-  }).format(parseFloat(convert(product.priceRange.maxVariantPrice.amount)));
-
+function ResultItem({ product, onClose }: { product: SearchProduct; onClose: () => void }) {
+  const price = product.priceRange?.minVariantPrice;
   return (
     <Link
       href={`/product/${product.handle}`}
       onClick={onClose}
-      className="flex items-center gap-3 px-4 py-2.5 transition-colors hover:bg-brand-dark-gold/10"
+      className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-brand-dark-gold/10"
     >
-      {product.featuredImage?.url ? (
-        <div className="relative h-10 w-10 flex-none overflow-hidden rounded bg-[#222]">
-          <Image
+      <div className="relative h-10 w-10 flex-none overflow-hidden rounded bg-brand-medium-grey/20">
+        {product.featuredImage && (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
             src={product.featuredImage.url}
-            alt={product.title}
-            fill
-            loading="eager"
-            className="object-cover"
-            sizes="40px"
+            alt={product.featuredImage.altText || product.title}
+            className="h-full w-full object-cover"
           />
-        </div>
-      ) : (
-        <div className="flex h-10 w-10 flex-none items-center justify-center rounded bg-[#222]">
-          <span className="text-[11px] text-brand-grey">ATHELES</span>
-        </div>
-      )}
+        )}
+      </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-sm text-white">{product.title}</p>
-        <p className="text-xs text-brand-grey">{price}</p>
+        <p className="truncate text-xs text-brand-pale-gold">{product.title}</p>
+        {price && (
+          <p className="text-[11px] text-brand-dark-gold">
+            {parseFloat(price.amount).toFixed(2)} {price.currencyCode}
+          </p>
+        )}
       </div>
     </Link>
   );
@@ -65,10 +51,9 @@ export function SearchToggle() {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const [query, setQuery] = useState("");
-  const [results, setResults] = useState<SearchResult[]>([]);
+  const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const inputRef = useRef<HTMLInputElement>(null);
-  const mobileInputRef = useRef<HTMLInputElement>(null);
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -82,14 +67,8 @@ export function SearchToggle() {
       document.removeEventListener("touchmove", touchLockRef.current);
       touchLockRef.current = null;
     }
-    // Desktop: restore body position
-    if (document.body.style.position === "fixed") {
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      document.body.style.overscrollBehavior = "";
-      window.scrollTo(0, scrollYRef.current);
-    }
+    // Desktop: restore scroll
+    document.documentElement.style.overflow = "";
   }, []);
 
   const close = useCallback(() => {
@@ -104,7 +83,6 @@ export function SearchToggle() {
   }, [unlockScroll]);
 
   const openSearch = useCallback(() => {
-    scrollYRef.current = window.scrollY;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
       // only prevent scroll outside the overlay — touches inside (product
@@ -120,11 +98,8 @@ export function SearchToggle() {
       touchLockRef.current = touchHandler;
       document.addEventListener("touchmove", touchHandler, { passive: false });
     } else {
-      // Desktop: body lock stops per-keystroke scroll drift
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollYRef.current}px`;
-      document.body.style.width = "100%";
-      document.body.style.overscrollBehavior = "none";
+      // Desktop: overflow hidden blocks scroll without visual jump
+      document.documentElement.style.overflow = "hidden";
     }
     setOpen(true);
   }, []);
@@ -151,36 +126,28 @@ export function SearchToggle() {
         }
       } catch {
         setResults([]);
+      } finally {
+        setLoading(false);
       }
-      setLoading(false);
-    }, 300);
+    }, 280);
 
     return () => {
       if (debounceRef.current) clearTimeout(debounceRef.current);
     };
   }, [query]);
 
-  // Close on Escape
+  // Focus input when search opens
   useEffect(() => {
-    if (!open) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === "Escape") close();
-    };
-    document.addEventListener("keydown", onKey);
-    return () => document.removeEventListener("keydown", onKey);
-  }, [open, close]);
+    if (open) {
+      setTimeout(() => inputRef.current?.focus(), 50);
+    }
+  }, [open]);
 
-  // Close on click outside — must also exclude the portal overlay which lives
-  // in document.body outside containerRef's DOM subtree
+  // Close on click outside (desktop)
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (
-        containerRef.current &&
-        !containerRef.current.contains(e.target as Node) &&
-        mobileOverlayRef.current &&
-        !mobileOverlayRef.current.contains(e.target as Node)
-      ) {
+      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
         close();
       }
     };
@@ -188,21 +155,23 @@ export function SearchToggle() {
     return () => document.removeEventListener("mousedown", handler);
   }, [open, close]);
 
-  // Focus desktop input on open (mobile uses autoFocus)
-  // useLayoutEffect fires synchronously after DOM mutations (same phase as
-  // autoFocus) so iOS treats it as part of the tap gesture — keyboard appears.
-  // preventScroll stops iOS scrolling the page to show the already-visible input.
-  useLayoutEffect(() => {
+  // Close on Escape
+  useEffect(() => {
     if (!open) return;
-    const isMobile =
-      typeof window !== "undefined" &&
-      window.matchMedia("(pointer: coarse)").matches;
-    const ref = isMobile ? mobileInputRef : inputRef;
-    ref.current?.focus({ preventScroll: true });
-  }, [open]);
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape") close();
+    };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [open, close]);
 
-  // Release scroll lock if component unmounts while open
-  useEffect(() => () => unlockScroll(), [unlockScroll]);
+  // Cleanup on unmount
+  useEffect(() => {
+    return () => {
+      unlockScroll();
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+    };
+  }, [unlockScroll]);
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -212,11 +181,64 @@ export function SearchToggle() {
     }
   };
 
-  const showDropdown =
-    open && query.trim().length >= 2 && (results.length > 0 || loading);
+  const showDropdown = open && (loading || results.length > 0) && query.trim().length >= 2;
 
   return (
-    <div ref={containerRef} className="relative flex items-center">
+    <div ref={containerRef} className="relative">
+      {/* Mobile: full-screen overlay */}
+      {(open || closing) && (
+        <div
+          ref={mobileOverlayRef}
+          className={`fixed inset-0 z-[60] flex flex-col bg-brand-dark transition-opacity duration-200 md:hidden ${
+            closing ? "opacity-0" : "opacity-100"
+          }`}
+        >
+          <div className="flex items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-3">
+            <MagnifyingGlassIcon className="h-5 w-5 flex-none text-brand-dark-gold" />
+            <form onSubmit={handleSubmit} className="flex-1">
+              <input
+                ref={inputRef}
+                type="text"
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                placeholder="search products..."
+                className="w-full bg-transparent text-base text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none"
+                autoComplete="off"
+                autoCorrect="off"
+                autoCapitalize="off"
+              />
+            </form>
+            <button
+              type="button"
+              onClick={close}
+              className="flex h-9 w-9 flex-none items-center justify-center text-brand-grey hover:text-brand-gold"
+            >
+              <XMarkIcon className="h-5 w-5" />
+            </button>
+          </div>
+          <div className="flex-1 overflow-y-auto">
+            {loading && results.length === 0 && (
+              <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
+            )}
+            {results.slice(0, 8).map((product) => (
+              <ResultItem key={product.handle} product={product} onClose={close} />
+            ))}
+            {!loading && results.length > 0 && query.trim().length >= 2 && (
+              <button
+                type="button"
+                onClick={() => {
+                  router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                  close();
+                }}
+                className="w-full px-4 py-3 text-center text-xs uppercase tracking-wider text-brand-dark-gold hover:text-brand-gold"
+              >
+                view all results
+              </button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Desktop: inline expanding search with dropdown */}
       <div className="hidden md:block">
         <div
@@ -258,7 +280,7 @@ export function SearchToggle() {
                       );
                       close();
                     }}
-                    className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
+                    className="w-full px-4 py-2.5 text-center text-[11px] uppercase tracking-wider text-brand-dark-gold transition-colors hover:bg-brand-dark-gold/5 hover:text-brand-gold"
                   >
                     view all results
                   </button>
@@ -268,75 +290,6 @@ export function SearchToggle() {
           )}
         </div>
       </div>
-
-      {/* Mobile: portal renders outside the navbar stacking context so
-          fixed positioning and z-index work relative to the document root */}
-      {open && typeof document !== "undefined" && createPortal(
-        <div className={`md:hidden transition-opacity duration-100 ${closing ? "opacity-0" : "opacity-100"}`}>
-          {/* Overlay bar */}
-          <div ref={mobileOverlayRef} className="fixed inset-x-0 top-0 z-[9999] bg-brand-dark">
-            <div className="flex items-center gap-2 px-4 py-3">
-              <form onSubmit={handleSubmit} className="flex flex-1 items-center">
-                <input
-                  ref={mobileInputRef}
-                  type="text"
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="search..."
-                  className="h-10 w-full border-0 border-b border-brand-dark-gold/40 bg-transparent px-2 text-[16px] text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none ring-0 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none focus:ring-0"
-                />
-              </form>
-              <button
-                type="button"
-                onClick={close}
-                aria-label="Close search"
-                className="flex h-11 w-11 shrink-0 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold"
-              >
-                <XMarkIcon className="h-5 w-5" />
-              </button>
-            </div>
-            {/* Mobile results */}
-            {showDropdown && (
-              <div className="border-t border-brand-dark-gold/20">
-                {loading && results.length === 0 ? (
-                  <div className="px-4 py-3 text-xs text-brand-grey">
-                    searching...
-                  </div>
-                ) : (
-                  <>
-                    {results.slice(0, 5).map((product) => (
-                      <ResultItem
-                        key={product.handle}
-                        product={product}
-                        onClose={close}
-                      />
-                    ))}
-                    <button
-                      type="button"
-                      onClick={() => {
-                        router.push(
-                          `/search?q=${encodeURIComponent(query.trim())}`,
-                        );
-                        close();
-                      }}
-                      className="block w-full border-t border-brand-dark-gold/10 px-4 py-2.5 text-left text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
-                    >
-                      view all results
-                    </button>
-                  </>
-                )}
-              </div>
-            )}
-          </div>
-          {/* Backdrop */}
-          <div
-            className="fixed inset-0 z-[9998] bg-black/50"
-            onClick={close}
-            aria-hidden="true"
-          />
-        </div>,
-        document.body
-      )}
 
       {/* Toggle button */}
       <button
