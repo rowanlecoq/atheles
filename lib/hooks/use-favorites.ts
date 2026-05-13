@@ -52,14 +52,25 @@ export function useFavorites() {
           const server: string[] = data.favorites;
           const local = favoritesRef.current;
 
-          // Merge: union of local + server (keeps items from both devices)
-          const merged = Array.from(new Set([...server, ...local]));
+          let merged: string[];
+          if (local.length > 0) {
+            // Local is truth — add only server items not present locally
+            // (items added on another device). Don't re-add stale server
+            // handles that were removed locally.
+            const localSet = new Set(local);
+            const serverOnlyNew = server.filter((h) => !localSet.has(h));
+            merged = serverOnlyNew.length > 0 ? [...local, ...serverOnlyNew] : local;
+          } else {
+            // No local data — use server (first load / cleared storage)
+            merged = server;
+          }
+
           favoritesRef.current = merged;
           setFavorites(merged);
           storeLocal(merged);
           syncedRef.current = true;
 
-          // If merged differs from server, push merged back
+          // Sync server if it differs from merged
           if (merged.length !== server.length || !merged.every((h) => server.includes(h))) {
             fetch("/api/auth/favorites", {
               method: "POST",

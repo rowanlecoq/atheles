@@ -120,6 +120,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [tierLabel, setTierLabel] = useState("");
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
@@ -146,6 +147,17 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           const user = (data as { user: Record<string, string> }).user;
           setLoggedIn(true);
           setUserName(user.name || user.firstName || "");
+          const points = Math.floor(parseFloat(user.totalSpent || "0") * 50);
+          const label = user.isAdmin === "true" || user.isAdmin === true as unknown as string
+            ? "ADMIN"
+            : user.isAthlete === "true" || user.isAthlete === true as unknown as string
+            ? "ATHLETE"
+            : points >= 50000 ? "CHAMPION"
+            : points >= 30000 ? "PLATINUM"
+            : points >= 15000 ? "GOLD"
+            : points >= 5000 ? "SILVER"
+            : "BRONZE";
+          setTierLabel(label);
           // Per-user avatar cache
           const avatarKey = `atheles-avatar-${user.email}`;
           try {
@@ -165,6 +177,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           setLoggedIn(false);
           setUserName("");
           setAvatar(null);
+          setTierLabel("");
         }
       })
       .catch(() => {});
@@ -284,6 +297,11 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                           <p className="text-lg font-medium text-white">
                             {userName}
                           </p>
+                          {tierLabel && (
+                            <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">
+                              {tierLabel}
+                            </p>
+                          )}
                           <p className="text-sm uppercase tracking-wider text-brand-dark-gold">
                             view profile
                           </p>

@@ -14,8 +14,8 @@ export function FavoritesIcon() {
       className="group relative flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold"
       aria-label="Favorites"
     >
-      <HeartOutline className="h-6 w-6 group-hover:hidden" />
-      <HeartSolid className="hidden h-6 w-6 group-hover:block" />
+      <HeartOutline className="h-5 w-5 group-hover:hidden" />
+      <HeartSolid className="hidden h-5 w-5 group-hover:block" />
       {count > 0 && (
         <span className="absolute -right-1 -top-1 flex h-4 w-4 items-center justify-center rounded-full bg-brand-gold text-xs font-bold text-brand-dark">
           {count > 9 ? "9+" : count}
