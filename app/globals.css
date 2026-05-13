@@ -167,15 +167,15 @@ html { scrollbar-width: none; }
 
 
 
-/* Announcement bar: opacity-only fade so the border line doesn't flash in
-   before the animation. CSS so it applies before JS/Framer Motion loads. */
+/* Announcement bar: slides down with the rest of the header. CSS so it
+   applies before JS/hydration — no Framer Motion opacity on backdrop-blur. */
 @keyframes announcement-bar-enter {
-  from { opacity: 0; }
-  to   { opacity: 1; }
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .animate-announcement-bar-enter {
-  animation: announcement-bar-enter 0.6s ease-out 0.05s both;
+  animation: announcement-bar-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
 /* Header entrance — translateY only, no opacity to prevent flicker.
