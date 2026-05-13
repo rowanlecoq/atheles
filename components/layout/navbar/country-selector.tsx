@@ -23,7 +23,7 @@ export function CountrySelector() {
   const openDropdown = useCallback(() => {
     if (ref.current) {
       const rect = ref.current.getBoundingClientRect();
-      setDropdownPos({ top: rect.bottom + 8, left: rect.left });
+      setDropdownPos({ top: rect.bottom + 4, left: rect.left });
     }
     setOpen(true);
   }, []);
