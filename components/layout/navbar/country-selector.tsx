@@ -75,6 +75,14 @@ export function CountrySelector() {
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
+  // Close on scroll so the dropdown doesn't drift from the button
+  useEffect(() => {
+    if (!open) return;
+    const handler = () => setOpen(false);
+    window.addEventListener("scroll", handler, { passive: true });
+    return () => window.removeEventListener("scroll", handler);
+  }, [open]);
+
   const handleSelect = useCallback(
     (code: RegionCode) => {
       setRegion(code);
