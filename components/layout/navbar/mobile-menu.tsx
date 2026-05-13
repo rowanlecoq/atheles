@@ -8,7 +8,6 @@ import { Fragment, Suspense, useCallback, useEffect, useState } from "react";
 import {
   Bars3Icon,
   ChevronDownIcon,
-  HeartIcon,
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -258,31 +257,31 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   </button>
                 </div>
 
-                {/* Account, Favorites at top */}
+                {/* Account at top */}
                 <div className="mb-5 border-b border-brand-dark-gold/20 pb-4">
                   <Link
                     href={loggedIn ? "/profile" : "/login"}
                     onClick={closeMobileMenu}
-                    className="tap-target mb-1 flex min-h-[48px] items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-dark-gold/10"
+                    className="tap-target flex min-h-[64px] items-center gap-4 rounded-lg px-3 py-3 transition-colors hover:bg-brand-dark-gold/10"
                   >
                     {avatar ? (
-                      <div className="relative h-9 w-9 overflow-hidden rounded-full" style={{ clipPath: "circle(50%)" }}>
+                      <div className="relative h-12 w-12 flex-none overflow-hidden rounded-full" style={{ clipPath: "circle(50%)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={avatar} alt="Profile" width={36} height={36} className="absolute inset-0 h-full w-full scale-[1.02] object-cover" />
+                        <img src={avatar} alt="Profile" width={48} height={48} className="absolute inset-0 h-full w-full scale-[1.02] object-cover" />
                       </div>
                     ) : loggedIn && initials ? (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
+                      <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full bg-brand-dark-gold/20 text-sm font-bold text-brand-gold">
                         {initials}
                       </span>
                     ) : (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark-gold/10">
-                        <UserIcon className="h-5 w-5 text-brand-grey" />
+                      <span className="flex h-12 w-12 flex-none items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark-gold/10">
+                        <UserIcon className="h-6 w-6 text-brand-grey" />
                       </span>
                     )}
                     <div>
                       {loggedIn ? (
                         <>
-                          <p className="text-base font-medium text-white">
+                          <p className="text-lg font-medium text-white">
                             {userName}
                           </p>
                           <p className="text-sm uppercase tracking-wider text-brand-dark-gold">
@@ -291,7 +290,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                         </>
                       ) : (
                         <>
-                          <p className="text-base font-medium text-brand-pale-gold">
+                          <p className="text-lg font-medium text-brand-pale-gold">
                             sign in
                           </p>
                           <p className="text-sm uppercase tracking-wider text-brand-dark-gold">
@@ -300,14 +299,6 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                         </>
                       )}
                     </div>
-                  </Link>
-                  <Link
-                    href="/favorites"
-                    onClick={closeMobileMenu}
-                    className="tap-target flex min-h-[44px] items-center gap-3 rounded-lg px-2 py-2 text-base uppercase tracking-wider text-brand-grey transition-colors hover:bg-brand-dark-gold/10 hover:text-brand-gold"
-                  >
-                    <HeartIcon className="h-5 w-5" />
-                    Favorites
                   </Link>
                 </div>
 
