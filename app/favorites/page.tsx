@@ -129,6 +129,11 @@ export default function FavoritesPage() {
         .then((r) => (r.ok ? r.json() : { products: [] }))
         .then((data) => {
           const newProducts: FavoriteProduct[] = data.products || [];
+          // Auto-remove any handles that no longer exist in Shopify
+          const foundHandles = new Set(newProducts.map((p) => p.handle));
+          missing.forEach((h) => {
+            if (!foundHandles.has(h)) removeFavorite(h);
+          });
           setProducts([...cached, ...newProducts]);
           fetchedHandlesRef.current = key;
         })
@@ -150,71 +155,59 @@ export default function FavoritesPage() {
         <div className="mb-8 h-px w-24 bg-brand-dark-gold/40" />
       </FadeIn>
 
-      {loading && products.length === 0 ? (
-        <FadeIn delay={0.15} className="grid gap-3 sm:grid-cols-2">
-          {Array.from({ length: Math.min(favorites.length || 2, 4) }).map(
-            (_, i) => (
-              <div
-                key={i}
-                className="flex items-center gap-4 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-3"
+      {(() => {
+        const visibleProducts = products.filter((p) => favorites.includes(p.handle));
+        const isEmpty = favorites.length === 0;
+        const isLoading = loading && !isEmpty && visibleProducts.length === 0;
+
+        if (isLoading) {
+          return (
+            <FadeIn delay={0.15} className="grid gap-3 sm:grid-cols-2">
+              {Array.from({ length: Math.min(favorites.length || 2, 4) }).map((_, i) => (
+                <div key={i} className="flex items-center gap-4 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-3">
+                  <div className="h-20 w-20 flex-none animate-pulse rounded bg-brand-dark-gold/15" />
+                  <div className="flex-1 space-y-2">
+                    <div className="h-4 w-3/4 animate-pulse rounded bg-brand-dark-gold/15" />
+                    <div className="h-4 w-1/3 animate-pulse rounded bg-brand-dark-gold/15" />
+                  </div>
+                </div>
+              ))}
+            </FadeIn>
+          );
+        }
+
+        if (isEmpty) {
+          return (
+            <FadeIn delay={0.15} className="py-12 text-center">
+              <p className="mb-6 text-base text-brand-grey">
+                you haven&apos;t saved any favorites yet.
+              </p>
+              <Link
+                href="/search"
+                className="inline-block border border-brand-gold px-8 py-3 text-xs uppercase tracking-[0.18em] text-brand-gold transition-colors duration-300 hover:bg-brand-gold hover:text-brand-dark"
               >
-                <div className="h-20 w-20 flex-none animate-pulse rounded bg-brand-dark-gold/15" />
-                <div className="flex-1 space-y-2">
-                  <div className="h-4 w-3/4 animate-pulse rounded bg-brand-dark-gold/15" />
-                  <div className="h-4 w-1/3 animate-pulse rounded bg-brand-dark-gold/15" />
-                </div>
-              </div>
-            ),
-          )}
-        </FadeIn>
-      ) : favorites.length === 0 ? (
-        <FadeIn delay={0.15} className="py-12 text-center">
-          <p className="mb-6 text-base text-brand-grey">
-            you haven&apos;t saved any favorites yet.
-          </p>
-          <Link
-            href="/search"
-            className="inline-block border border-brand-gold px-8 py-3 text-xs uppercase tracking-[0.18em] text-brand-gold transition-colors duration-300 hover:bg-brand-gold hover:text-brand-dark"
-          >
-            browse the shop
-          </Link>
-        </FadeIn>
-      ) : (
-        <FadeIn delay={0.15} className="grid gap-3 sm:grid-cols-2">
-          {favorites.map((handle) => {
-            const product = products.find((p) => p.handle === handle);
-            if (!product) {
+                browse the shop
+              </Link>
+            </FadeIn>
+          );
+        }
+
+        return (
+          <FadeIn delay={0.15} className="grid gap-3 sm:grid-cols-2">
+            {favorites.map((handle) => {
+              const product = visibleProducts.find((p) => p.handle === handle);
+              if (!product) return null;
               return (
-                <div
+                <FavoriteItem
                   key={handle}
-                  className="flex items-center justify-between rounded-lg border border-brand-dark-gold/20 p-3"
-                >
-                  <Link
-                    href={`/product/${handle}`}
-                    className="text-sm uppercase tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
-                  >
-                    {handle.replace(/-/g, " ")}
-                  </Link>
-                  <button
-                    type="button"
-                    onClick={() => removeFavorite(handle)}
-                    className="text-xs uppercase tracking-wider text-brand-dark-gold transition-colors hover:text-brand-gold"
-                  >
-                    remove
-                  </button>
-                </div>
+                  product={product}
+                  onRemove={() => removeFavorite(handle)}
+                />
               );
-            }
-            return (
-              <FavoriteItem
-                key={handle}
-                product={product}
-                onRemove={() => removeFavorite(handle)}
-              />
-            );
-          })}
-        </FadeIn>
-      )}
+            })}
+          </FadeIn>
+        );
+      })()}
     </div>
   );
 }

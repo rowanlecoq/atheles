@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "contact us",
   description:
-    "Get in touch with ATHELES. We'd love to hear from you about orders, collaborations, or general inquiries.",
+    "get in touch with ATHELES. we'd love to hear from you about orders, collaborations, or general inquiries.",
 };
 
 export default function ContactPage() {

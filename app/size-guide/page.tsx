@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "size guide",
   description:
-    "Find your perfect fit with the ATHELES size guide. Detailed measurements for compressions, regular tops, oversized tops, and sweatpants.",
+    "find your perfect fit with the ATHELES size guide. detailed measurements for compressions, tees, oversized tops, and sweatpants.",
 };
 
 export default function Page() {

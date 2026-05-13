@@ -10,8 +10,8 @@ export default {
       permanent: true,
     },
     {
-      source: "/about",
-      destination: "/",
+      source: "/products/:handle",
+      destination: "/product/:handle",
       permanent: true,
     },
   ],

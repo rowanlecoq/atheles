@@ -9,6 +9,7 @@ import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ProfileBackgroundApplier } from "components/profile-background-applier";
 import { ScrollProgress } from "components/scroll-progress";
+import { SelfLinkScroll } from "components/self-link-scroll";
 import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";
 import { getCart } from "lib/shopify";
@@ -100,6 +101,7 @@ export default async function RootLayout({
         <SiteImagesProvider data={siteImages}>
           <CurrencyProvider>
             <CartProvider cartPromise={cart}>
+              <SelfLinkScroll />
               <SiteThemeProvider />
               <ProfileBackgroundApplier />
               <ThemeBackgroundCanvas />
