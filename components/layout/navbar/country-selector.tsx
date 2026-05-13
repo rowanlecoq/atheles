@@ -6,81 +6,29 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 const regions = [
-  {
-    code: "US" as RegionCode,
-    flag: "🇺🇸",
-    label: "US",
-    language: "EN",
-    currency: "USD",
-  },
-  {
-    code: "CA" as RegionCode,
-    flag: "🇨🇦",
-    label: "CA",
-    language: "EN",
-    currency: "CAD",
-  },
-  {
-    code: "GB" as RegionCode,
-    flag: "🇬🇧",
-    label: "UK",
-    language: "EN",
-    currency: "GBP",
-  },
-  {
-    code: "AU" as RegionCode,
-    flag: "🇦🇺",
-    label: "AU",
-    language: "EN",
-    currency: "AUD",
-  },
-  {
-    code: "EU" as RegionCode,
-    flag: "🇪🇺",
-    label: "EU",
-    language: "EN",
-    currency: "EUR",
-  },
+  { code: "US" as RegionCode, flag: "🇺🇸", label: "US", language: "EN", currency: "USD" },
+  { code: "CA" as RegionCode, flag: "🇨🇦", label: "CA", language: "EN", currency: "CAD" },
+  { code: "GB" as RegionCode, flag: "🇬🇧", label: "UK", language: "EN", currency: "GBP" },
+  { code: "AU" as RegionCode, flag: "🇦🇺", label: "AU", language: "EN", currency: "AUD" },
+  { code: "EU" as RegionCode, flag: "🇪🇺", label: "EU", language: "EN", currency: "EUR" },
 ];
 
 export function CountrySelector() {
   const { region, setRegion } = useCurrency();
   const [open, setOpen] = useState(false);
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
   const ref = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
-  const scrollYRef = useRef(0);
-
-  const lockScroll = useCallback(() => {
-    scrollYRef.current = window.scrollY;
-    document.body.style.position = "fixed";
-    document.body.style.top = `-${scrollYRef.current}px`;
-    document.body.style.width = "100%";
-    document.body.style.overscrollBehavior = "none";
-  }, []);
-
-  const unlockScroll = useCallback(() => {
-    if (document.body.style.position === "fixed") {
-      document.body.style.position = "";
-      document.body.style.top = "";
-      document.body.style.width = "";
-      document.body.style.overscrollBehavior = "";
-      window.scrollTo(0, scrollYRef.current);
-    }
-  }, []);
 
   const openDropdown = useCallback(() => {
     if (ref.current) {
       const rect = ref.current.getBoundingClientRect();
       setDropdownPos({ top: rect.bottom + 8, left: rect.left });
     }
-    lockScroll();
     setOpen(true);
-  }, [lockScroll]);
+  }, []);
 
-  const closeDropdown = useCallback(() => {
-    setOpen(false);
-    unlockScroll();
-  }, [unlockScroll]);
+  const closeDropdown = useCallback(() => setOpen(false), []);
 
   // Close on click outside
   useEffect(() => {
@@ -90,9 +38,7 @@ export function CountrySelector() {
       if (
         ref.current && !ref.current.contains(target) &&
         dropdownRef.current && !dropdownRef.current.contains(target)
-      ) {
-        closeDropdown();
-      }
+      ) closeDropdown();
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -101,22 +47,15 @@ export function CountrySelector() {
   // Close on Escape
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") closeDropdown();
-    };
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeDropdown(); };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
   }, [open, closeDropdown]);
 
   const handleSelect = useCallback(
-    (code: RegionCode) => {
-      setRegion(code);
-      closeDropdown();
-    },
+    (code: RegionCode) => { setRegion(code); closeDropdown(); },
     [setRegion, closeDropdown],
   );
-
-  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 
   const current = regions.find((r) => r.code === region) || regions[0]!;
 
@@ -129,24 +68,16 @@ export function CountrySelector() {
         className="flex h-11 items-center gap-1.5 px-1 text-brand-grey transition-colors hover:text-brand-gold"
       >
         <span className="text-base leading-none">{current.flag}</span>
-        <span className="text-xs uppercase tracking-wider">
-          {current.language}
-        </span>
+        <span className="text-xs uppercase tracking-wider">{current.language}</span>
         <ChevronDownIcon
           className={`h-3 w-3 transition-transform duration-200 ${open ? "rotate-180" : ""}`}
         />
       </button>
 
-      {/* Dropdown — portaled to body to avoid z-index issues */}
       {open && typeof document !== "undefined" && createPortal(
         <div
           ref={dropdownRef}
-          style={{
-            position: "fixed",
-            top: dropdownPos.top,
-            left: dropdownPos.left,
-            zIndex: 9999,
-          }}
+          style={{ position: "fixed", top: dropdownPos.top, left: dropdownPos.left, zIndex: 9999 }}
           className="min-w-[200px] rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-lg shadow-black/30"
         >
           {regions.map((r) => (
@@ -162,9 +93,7 @@ export function CountrySelector() {
             >
               <span className="text-base leading-none">{r.flag}</span>
               <span className="flex-1 uppercase tracking-wider">{r.label}</span>
-              <span className="text-xs tracking-wider text-brand-grey/60">
-                {r.language} / {r.currency}
-              </span>
+              <span className="text-xs tracking-wider text-brand-grey/60">{r.language} / {r.currency}</span>
             </button>
           ))}
         </div>,
