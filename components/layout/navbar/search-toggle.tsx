@@ -150,13 +150,13 @@ export function SearchToggle() {
     }
   }, [open]);
 
-  // Close on click outside (desktop)
+  // Close on click outside (desktop only — mobile uses the backdrop tap)
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
-      if (containerRef.current && !containerRef.current.contains(e.target as Node)) {
-        close();
-      }
+      const inContainer = containerRef.current?.contains(e.target as Node);
+      const inOverlay = mobileOverlayRef.current?.contains(e.target as Node);
+      if (!inContainer && !inOverlay) close();
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
@@ -194,7 +194,7 @@ export function SearchToggle() {
       {(open || closing) && createPortal(
         <>
           <div
-            className={`fixed inset-0 z-[59] bg-black/40 transition-opacity duration-200 md:hidden ${
+            className={`fixed inset-0 z-[59] bg-black/70 transition-opacity duration-200 md:hidden ${
               closing ? "opacity-0" : "opacity-100"
             }`}
             onClick={close}
