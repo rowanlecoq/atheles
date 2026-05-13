@@ -353,8 +353,8 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
 
                 {/* Unified nav list — Shopify menu items + categories together */}
                 <ul className="flex w-full flex-col">
-                  {menu.map((item: Menu) => (
-                    <li className="border-b border-brand-dark-gold/10" key={item.title}>
+                  {menu.map((item: Menu, idx: number) => (
+                    <li className={idx < menu.length - 1 ? "border-b border-brand-dark-gold/10" : ""} key={item.title}>
                       <Link
                         href={item.path}
                         prefetch={true}
