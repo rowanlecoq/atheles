@@ -13,6 +13,7 @@ const defaultAnnouncements = [
 export function AnnouncementBar() {
   const [announcements, setAnnouncements] = useState(defaultAnnouncements);
   const [index, setIndex] = useState(0);
+  const [entered, setEntered] = useState(false);
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const announcementsLenRef = useRef(defaultAnnouncements.length);
@@ -53,12 +54,16 @@ export function AnnouncementBar() {
     return () => stopTimer();
   }, [paused, startTimer, stopTimer]);
 
+  useEffect(() => {
+    setEntered(true);
+  }, []);
+
   const togglePause = () => {
     setPaused((p) => !p);
   };
 
   return (
-    <div className="announcement-bar-root animate-announcement-bar-enter flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
+    <div className={`announcement-bar-root flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark ${entered ? "animate-announcement-bar-enter" : "navbar-pre-enter"}`}>
       {/* Spacer balances the pause button on the right */}
       <div className="min-w-[44px] flex-none" />
 

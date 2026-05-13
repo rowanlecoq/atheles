@@ -167,17 +167,22 @@ html { scrollbar-width: none; }
 
 
 
-/* Announcement bar: translateY only so the container + navbar move as one
-   unit. No opacity here — Framer Motion handles the text fade inside. */
+/* Pre-enter: keeps header invisible until JS triggers the animation.
+   Prevents the animation from replaying during React hydration. */
+.navbar-pre-enter {
+  opacity: 0;
+}
+
+/* Announcement bar uses same entrance keyframe as navbar */
 .animate-announcement-bar-enter {
   animation: header-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Header entrance — translateY only, no opacity to prevent flicker.
-   CSS so it starts at first paint, before JS hydration. */
+/* Header entrance — opacity + translateY. JS adds this class post-hydration
+   so it only ever fires once, from a stable DOM. */
 @keyframes header-enter {
-  from { transform: translateY(-8px); }
-  to   { transform: translateY(0); }
+  from { opacity: 0; transform: translateY(-8px); }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
 .animate-header-enter {
