@@ -167,10 +167,12 @@ html { scrollbar-width: none; }
 
 
 
-/* Pre-enter: keeps header invisible until JS triggers the animation.
-   Prevents the animation from replaying during React hydration. */
+/* Pre-enter: hidden via visibility (not opacity) so backdrop-blur children
+   don't trigger compositor flicker. Already at the 'from' transform so
+   there's no positional jump when the animation class is swapped in. */
 .navbar-pre-enter {
-  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-8px);
 }
 
 /* Announcement bar uses same entrance keyframe as navbar */
@@ -178,11 +180,11 @@ html { scrollbar-width: none; }
   animation: header-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
-/* Header entrance — opacity + translateY. JS adds this class post-hydration
-   so it only ever fires once, from a stable DOM. */
+/* Header entrance — translateY only. No opacity so backdrop-blur on child
+   elements doesn't cause compositor flicker. */
 @keyframes header-enter {
-  from { opacity: 0; transform: translateY(-8px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { transform: translateY(-8px); }
+  to   { transform: translateY(0); }
 }
 
 .animate-header-enter {

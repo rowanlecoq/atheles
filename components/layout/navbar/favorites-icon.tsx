@@ -17,7 +17,7 @@ export function FavoritesIcon() {
       <HeartOutline className="h-6 w-6 group-hover:hidden" />
       <HeartSolid className="hidden h-6 w-6 group-hover:block" />
       {count > 0 && (
-        <span className="absolute -right-1 -top-1 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-brand-gold text-[9px] font-bold text-brand-dark md:h-4 md:w-4 md:text-xs">
+        <span className="absolute -right-1 top-0 flex h-3.5 w-3.5 items-center justify-center rounded-full bg-brand-gold text-[9px] font-bold text-brand-dark md:h-4 md:w-4 md:text-xs">
           {count > 9 ? "9+" : count}
         </span>
       )}

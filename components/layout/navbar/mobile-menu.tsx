@@ -3,7 +3,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Fragment, Suspense, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 
 import {
   Bars3Icon,
@@ -14,7 +14,6 @@ import {
 import LogoSquare from "components/logo-square";
 import { fetchSession } from "lib/session-cache";
 import type { Menu } from "lib/shopify/types";
-import Search, { SearchSkeleton } from "./search";
 
 const TIER_GRADIENTS: Record<string, string> = {
   BRONZE: "from-amber-500 via-amber-400 to-yellow-300",
@@ -330,12 +329,6 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   </Link>
                 </div>
 
-                <div className="mb-6 w-full">
-                  <Suspense fallback={<SearchSkeleton />}>
-                    <Search />
-                  </Suspense>
-                </div>
-
                 {/* Main nav links */}
                 {menu.length ? (
                   <ul className="flex w-full flex-col">
@@ -384,24 +377,21 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     rel="noopener noreferrer"
                     className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="h-5 w-5"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
+                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                       <rect x="2" y="2" width="20" height="20" rx="5" />
                       <circle cx="12" cy="12" r="5" />
-                      <circle
-                        cx="17.5"
-                        cy="6.5"
-                        r="1"
-                        fill="currentColor"
-                        stroke="none"
-                      />
+                      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                    </svg>
+                    @ATHELES.CO
+                  </a>
+                  <a
+                    href="https://www.tiktok.com/@atheles.co"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V9.12a8.16 8.16 0 0 0 4.83 1.55V7.22a4.85 4.85 0 0 1-1.06-.53z" />
                     </svg>
                     @ATHELES.CO
                   </a>
