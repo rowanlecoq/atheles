@@ -53,7 +53,6 @@ export function SearchToggle() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
-  const [overlayHeight, setOverlayHeight] = useState<number | null>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const desktopInputRef = useRef<HTMLInputElement>(null);
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
@@ -133,21 +132,6 @@ export function SearchToggle() {
     };
   }, [open]);
 
-  // Track visual viewport height on mobile so the overlay shrinks when the
-  // virtual keyboard appears, keeping results visible above the keyboard.
-  useEffect(() => {
-    if (!open) return;
-    const isMobile = window.matchMedia("(pointer: coarse)").matches;
-    if (!isMobile || !window.visualViewport) return;
-
-    const update = () => setOverlayHeight(window.visualViewport!.height);
-    update();
-    window.visualViewport.addEventListener("resize", update);
-    return () => {
-      window.visualViewport!.removeEventListener("resize", update);
-      setOverlayHeight(null);
-    };
-  }, [open]);
 
   // Fetch search results
   useEffect(() => {
@@ -234,59 +218,71 @@ export function SearchToggle() {
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Mobile: full-screen overlay that shrinks with the virtual keyboard */}
+      {/* Mobile: compact bar pinned to top + results dropdown + dim backdrop */}
       {(open || closing) && (
-        <div
-          ref={mobileOverlayRef}
-          className={`fixed left-0 right-0 top-0 z-[60] flex flex-col bg-brand-dark transition-opacity duration-200 md:hidden ${
-            closing ? "opacity-0" : "opacity-100"
-          }`}
-          style={{ height: overlayHeight ? `${overlayHeight}px` : "100dvh" }}
-        >
-          <div className="flex items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-2">
-            <MagnifyingGlassIcon className="h-5 w-5 flex-none text-brand-dark-gold" />
-            <form onSubmit={handleSubmit} className="flex-1">
-              <input
-                ref={mobileInputRef}
-                type="text"
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                placeholder="find items"
-                className="w-full bg-transparent text-base text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none"
-                autoComplete="off"
-                autoCorrect="off"
-                autoCapitalize="off"
-              />
-            </form>
-            <button
-              type="button"
-              onClick={close}
-              className="flex h-9 w-9 flex-none items-center justify-center text-brand-grey hover:text-brand-gold"
-            >
-              <XMarkIcon className="h-5 w-5" />
-            </button>
-          </div>
-          <div className="flex-1 overflow-y-auto">
-            {loading && results.length === 0 && (
-              <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
-            )}
-            {results.slice(0, 8).map((product) => (
-              <ResultItem key={product.handle} product={product} onClose={close} />
-            ))}
-            {!loading && results.length > 0 && query.trim().length >= 2 && (
+        <>
+          {/* Backdrop dims the page without covering it entirely */}
+          <div
+            className={`fixed inset-0 z-[59] bg-black/40 transition-opacity duration-200 md:hidden ${
+              closing ? "opacity-0" : "opacity-100"
+            }`}
+            onClick={close}
+          />
+          <div
+            ref={mobileOverlayRef}
+            className={`fixed left-0 right-0 top-0 z-[60] flex flex-col bg-brand-dark transition-opacity duration-200 md:hidden ${
+              closing ? "opacity-0" : "opacity-100"
+            }`}
+          >
+            {/* Search bar row */}
+            <div className="flex items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-1.5">
+              <MagnifyingGlassIcon className="h-4 w-4 flex-none text-brand-dark-gold" />
+              <form onSubmit={handleSubmit} className="flex-1">
+                <input
+                  ref={mobileInputRef}
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="find items"
+                  className="w-full bg-transparent text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none"
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                />
+              </form>
               <button
                 type="button"
-                onClick={() => {
-                  router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-                  close();
-                }}
-                className="w-full border-t border-brand-dark-gold/20 px-4 py-3 text-left text-xs uppercase tracking-wider text-brand-dark-gold hover:text-brand-gold"
+                onClick={close}
+                className="flex h-8 w-8 flex-none items-center justify-center text-brand-grey hover:text-brand-gold"
               >
-                view all results
+                <XMarkIcon className="h-4 w-4" />
               </button>
+            </div>
+            {/* Results dropdown */}
+            {query.trim().length >= 2 && (
+              <div className="max-h-[55vh] overflow-y-auto">
+                {loading && results.length === 0 && (
+                  <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
+                )}
+                {results.slice(0, 8).map((product) => (
+                  <ResultItem key={product.handle} product={product} onClose={close} />
+                ))}
+                {!loading && results.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                      close();
+                    }}
+                    className="w-full border-t border-brand-dark-gold/20 px-4 py-3 text-left text-xs uppercase tracking-wider text-brand-dark-gold hover:text-brand-gold"
+                  >
+                    view all results
+                  </button>
+                )}
+              </div>
             )}
           </div>
-        </div>
+        </>
       )}
 
       {/* Desktop: inline expanding search with dropdown */}
