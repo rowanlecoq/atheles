@@ -288,7 +288,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
             leaveTo="translate-x-[-100%]"
           >
             <Dialog.Panel className="fixed bottom-0 left-0 right-0 top-0 flex h-full w-full flex-col overflow-y-auto bg-brand-dark pb-6">
-              <div className="p-4">
+              <div className="p-4 pb-0">
                 <div className="mb-6 flex items-center justify-between">
                   <LogoSquare size="sm" />
                   <button
