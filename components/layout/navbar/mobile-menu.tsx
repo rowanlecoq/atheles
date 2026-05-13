@@ -302,7 +302,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                 </div>
 
                 {/* Account at top */}
-                <div className="mb-6 border-b border-brand-dark-gold/20 pb-5">
+                <div className="mb-3 border-b border-brand-dark-gold/20 pb-3">
                   <Link
                     href={loggedIn ? "/profile" : "/login"}
                     onClick={closeMobileMenu}
@@ -380,7 +380,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
               </div>
 
               {/* Socials */}
-              <div className="px-4 pb-4 pt-6">
+              <div className="px-4 pb-4 pt-3">
                 <div className="border-t border-brand-dark-gold/20 pt-3">
                   <a
                     href="https://www.instagram.com/atheles.co/"
