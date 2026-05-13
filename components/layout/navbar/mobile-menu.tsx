@@ -376,45 +376,8 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                 </ul>
               </div>
 
-              {/* Loyalty card + socials */}
+              {/* Socials */}
               <div className="px-4 pb-4 pt-6">
-                {loggedIn && loyaltyPoints !== null && tierLabel && (() => {
-                  const thresh = TIER_THRESHOLDS[tierLabel];
-                  const barGradient = TIER_BAR_GRADIENTS[tierLabel] ?? "from-brand-gold to-brand-pale-gold";
-                  const pct = thresh && thresh.max !== Infinity
-                    ? Math.min(100, Math.round(((loyaltyPoints - thresh.min) / (thresh.max - thresh.min)) * 100))
-                    : 100;
-                  const ptsToNext = thresh?.next && thresh.max !== Infinity
-                    ? Math.max(0, thresh.max - loyaltyPoints)
-                    : null;
-                  return (
-                    <Link
-                      href="/profile"
-                      onClick={closeMobileMenu}
-                      className="mb-5 block rounded-xl border border-brand-dark-gold/20 bg-brand-dark-gold/5 px-4 py-3 transition-colors hover:border-brand-dark-gold/40"
-                    >
-                      <div className="mb-2 flex items-center justify-between">
-                        <span className={`bg-gradient-to-r ${TIER_GRADIENTS[tierLabel] ?? ""} bg-clip-text text-[10px] font-semibold uppercase tracking-[0.2em] text-transparent`}>
-                          {tierLabel}
-                        </span>
-                        <span className="text-sm font-semibold text-brand-pale-gold">
-                          {loyaltyPoints.toLocaleString()} pts
-                        </span>
-                      </div>
-                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-brand-dark-gold/20">
-                        <div
-                          className={`h-full rounded-full bg-gradient-to-r ${barGradient}`}
-                          style={{ width: `${pct}%` }}
-                        />
-                      </div>
-                      {ptsToNext !== null && (
-                        <p className="mt-1.5 text-right text-[10px] text-brand-dark-gold">
-                          {ptsToNext.toLocaleString()} pts to {thresh!.next}
-                        </p>
-                      )}
-                    </Link>
-                  );
-                })()}
                 <div className="border-t border-brand-dark-gold/20 pt-3">
                   <a
                     href="https://www.instagram.com/atheles.co/"
