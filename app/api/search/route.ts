@@ -17,9 +17,9 @@ export async function GET(request: Request) {
       title: p.title,
       featuredImage: p.featuredImage ? { url: p.featuredImage.url } : null,
       priceRange: {
-        maxVariantPrice: {
-          amount: p.priceRange.maxVariantPrice.amount,
-          currencyCode: p.priceRange.maxVariantPrice.currencyCode,
+        minVariantPrice: {
+          amount: p.priceRange.minVariantPrice.amount,
+          currencyCode: p.priceRange.minVariantPrice.currencyCode,
         },
       },
     }));
