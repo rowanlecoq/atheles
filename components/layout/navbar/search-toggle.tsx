@@ -47,27 +47,6 @@ function ResultItem({ product, onClose }: { product: SearchProduct; onClose: () 
   );
 }
 
-// iOS-safe body scroll lock: fixes body position so iOS doesn't scroll the
-// underlying page when the virtual keyboard appears inside a fixed overlay.
-function lockBodyScroll() {
-  const scrollY = window.scrollY;
-  document.body.dataset.scrollY = String(scrollY);
-  document.body.style.position = "fixed";
-  document.body.style.top = `-${scrollY}px`;
-  document.body.style.width = "100%";
-  document.body.style.overflow = "hidden";
-}
-
-function unlockBodyScroll() {
-  const scrollY = parseInt(document.body.dataset.scrollY || "0", 10);
-  document.body.style.position = "";
-  document.body.style.top = "";
-  document.body.style.width = "";
-  document.body.style.overflow = "";
-  delete document.body.dataset.scrollY;
-  window.scrollTo(0, scrollY);
-}
-
 export function SearchToggle() {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
@@ -88,7 +67,6 @@ export function SearchToggle() {
       document.removeEventListener("touchmove", touchLockRef.current);
       touchLockRef.current = null;
     }
-    unlockBodyScroll();
   }, []);
 
   const close = useCallback(() => {
@@ -103,15 +81,9 @@ export function SearchToggle() {
   }, [unlockScroll]);
 
   const openSearch = useCallback(() => {
-    // Lock body scroll for both desktop and mobile. On desktop the navbar is
-    // position:sticky, so the browser treats the focused input as being near
-    // y=0 in the document and scrolls toward it on every keystroke. Locking
-    // the body prevents that per-keystroke scroll entirely.
-    lockBodyScroll();
-
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      // Prevent touches outside the overlay from reaching the locked body
+      // Prevent touches outside the overlay from scrolling the page
       const touchHandler = (e: TouchEvent) => {
         if (
           mobileOverlayRef.current &&
@@ -125,6 +97,41 @@ export function SearchToggle() {
     }
     setOpen(true);
   }, []);
+
+  // Desktop: the navbar is position:sticky, so the browser tracks the input's
+  // natural layout position near y=0 and scrolls toward it on every keystroke.
+  // Intercept any scroll that fires while a key is held and snap back to the
+  // saved position — this stops the creeping-upward drift without touching the
+  // body style (which would break the sticky navbar).
+  useEffect(() => {
+    if (!open) return;
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    if (isMobile) return;
+
+    let keyActive = false;
+    let savedY = window.scrollY;
+
+    const onKeydown = () => {
+      keyActive = true;
+      savedY = window.scrollY;
+    };
+    const onKeyup = () => {
+      keyActive = false;
+    };
+    const onScroll = () => {
+      if (keyActive) window.scrollTo(0, savedY);
+    };
+
+    document.addEventListener("keydown", onKeydown, true);
+    document.addEventListener("keyup", onKeyup, true);
+    window.addEventListener("scroll", onScroll);
+
+    return () => {
+      document.removeEventListener("keydown", onKeydown, true);
+      document.removeEventListener("keyup", onKeyup, true);
+      window.removeEventListener("scroll", onScroll);
+    };
+  }, [open]);
 
   // Track visual viewport height on mobile so the overlay shrinks when the
   // virtual keyboard appears, keeping results visible above the keyboard.
