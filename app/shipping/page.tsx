@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "shipping policy",
   description:
-    "ATHELES shipping policy. Learn about our shipping methods, timeframes, and international delivery.",
+    "ATHELES shipping policy. worldwide delivery with standard and express options.",
 };
 
 export default function ShippingPage() {
