@@ -45,7 +45,10 @@ export function SelfLinkScroll() {
       ) {
         e.preventDefault();
         e.stopPropagation();
-        smoothScrollToTop();
+        const isTouchDevice = window.matchMedia(
+          "(hover: none) and (pointer: coarse)"
+        ).matches;
+        if (!isTouchDevice) smoothScrollToTop();
       }
     };
 
