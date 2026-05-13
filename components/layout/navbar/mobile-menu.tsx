@@ -15,6 +15,25 @@ import LogoSquare from "components/logo-square";
 import { fetchSession } from "lib/session-cache";
 import type { Menu } from "lib/shopify/types";
 
+const TIER_BAR_GRADIENTS: Record<string, string> = {
+  BRONZE: "from-amber-900 via-amber-700 to-amber-500",
+  SILVER: "from-gray-500 via-gray-400 to-gray-300",
+  GOLD: "from-yellow-700 via-yellow-500 to-amber-300",
+  PLATINUM: "from-cyan-700 via-cyan-400 to-cyan-200",
+  CHAMPION: "from-fuchsia-700 via-purple-500 to-amber-400",
+  ADMIN: "from-red-500 via-orange-400 to-amber-300",
+  ATHLETE: "from-sky-400 via-teal-300 to-amber-300",
+};
+
+const TIER_THRESHOLDS: Record<string, { min: number; max: number; next: string | null }> = {
+  BRONZE:   { min: 0,     max: 5000,    next: "SILVER" },
+  SILVER:   { min: 5000,  max: 15000,   next: "GOLD" },
+  GOLD:     { min: 15000, max: 30000,   next: "PLATINUM" },
+  PLATINUM: { min: 30000, max: 50000,   next: "CHAMPION" },
+  CHAMPION: { min: 50000, max: Infinity, next: null },
+  ATHLETE:  { min: 0,     max: Infinity, next: null },
+  ADMIN:    { min: 0,     max: Infinity, next: null },
+};
 const TIER_GRADIENTS: Record<string, string> = {
   BRONZE: "from-amber-500 via-amber-400 to-yellow-300",
   SILVER: "from-gray-300 via-gray-200 to-white",
@@ -130,6 +149,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const [userName, setUserName] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
   const [tierLabel, setTierLabel] = useState("");
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number | null>(null);
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
@@ -156,17 +176,18 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           const user = (data as { user: Record<string, string> }).user;
           setLoggedIn(true);
           setUserName(user.name || user.firstName || "");
-          const points = Math.floor(parseFloat(user.totalSpent || "0") * 50);
+          const pts = Math.floor(parseFloat(user.totalSpent || "0") * 50);
           const label = user.isAdmin === "true" || user.isAdmin === true as unknown as string
             ? "ADMIN"
             : user.isAthlete === "true" || user.isAthlete === true as unknown as string
             ? "ATHLETE"
-            : points >= 50000 ? "CHAMPION"
-            : points >= 30000 ? "PLATINUM"
-            : points >= 15000 ? "GOLD"
-            : points >= 5000 ? "SILVER"
+            : pts >= 50000 ? "CHAMPION"
+            : pts >= 30000 ? "PLATINUM"
+            : pts >= 15000 ? "GOLD"
+            : pts >= 5000 ? "SILVER"
             : "BRONZE";
           setTierLabel(label);
+          setLoyaltyPoints(pts);
           // Per-user avatar cache
           const avatarKey = `atheles-avatar-${user.email}`;
           try {
@@ -187,6 +208,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           setUserName("");
           setAvatar(null);
           setTierLabel("");
+          setLoyaltyPoints(null);
         }
       })
       .catch(() => {});
@@ -354,12 +376,45 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                 </ul>
               </div>
 
-              {/* Brand mark + socials */}
-              <div className="px-4 pb-4 pt-8">
-                <div className="mb-6 flex flex-col items-center gap-1 text-center">
-                  <span className="text-2xl text-brand-gold">🔱</span>
-                  <p className="text-[10px] uppercase tracking-[0.3em] text-brand-dark-gold">to ascend.</p>
-                </div>
+              {/* Loyalty card + socials */}
+              <div className="px-4 pb-4 pt-6">
+                {loggedIn && loyaltyPoints !== null && tierLabel && (() => {
+                  const thresh = TIER_THRESHOLDS[tierLabel];
+                  const barGradient = TIER_BAR_GRADIENTS[tierLabel] ?? "from-brand-gold to-brand-pale-gold";
+                  const pct = thresh && thresh.max !== Infinity
+                    ? Math.min(100, Math.round(((loyaltyPoints - thresh.min) / (thresh.max - thresh.min)) * 100))
+                    : 100;
+                  const ptsToNext = thresh?.next && thresh.max !== Infinity
+                    ? Math.max(0, thresh.max - loyaltyPoints)
+                    : null;
+                  return (
+                    <Link
+                      href="/profile"
+                      onClick={closeMobileMenu}
+                      className="mb-5 block rounded-xl border border-brand-dark-gold/20 bg-brand-dark-gold/5 px-4 py-3 transition-colors hover:border-brand-dark-gold/40"
+                    >
+                      <div className="mb-2 flex items-center justify-between">
+                        <span className={`bg-gradient-to-r ${TIER_GRADIENTS[tierLabel] ?? ""} bg-clip-text text-[10px] font-semibold uppercase tracking-[0.2em] text-transparent`}>
+                          {tierLabel}
+                        </span>
+                        <span className="text-sm font-semibold text-brand-pale-gold">
+                          {loyaltyPoints.toLocaleString()} pts
+                        </span>
+                      </div>
+                      <div className="h-1.5 w-full overflow-hidden rounded-full bg-brand-dark-gold/20">
+                        <div
+                          className={`h-full rounded-full bg-gradient-to-r ${barGradient}`}
+                          style={{ width: `${pct}%` }}
+                        />
+                      </div>
+                      {ptsToNext !== null && (
+                        <p className="mt-1.5 text-right text-[10px] text-brand-dark-gold">
+                          {ptsToNext.toLocaleString()} pts to {thresh!.next}
+                        </p>
+                      )}
+                    </Link>
+                  );
+                })()}
                 <div className="border-t border-brand-dark-gold/20 pt-3">
                   <a
                     href="https://www.instagram.com/atheles.co/"
