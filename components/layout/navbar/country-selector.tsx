@@ -2,7 +2,7 @@
 
 import { ChevronDownIcon } from "@heroicons/react/24/outline";
 import { useCurrency, type RegionCode } from "components/currency-context";
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 const regions = [
@@ -86,23 +86,11 @@ export function CountrySelector() {
 
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
 
-  const updatePos = useCallback(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      setDropdownPos({ top: rect.bottom + 8, left: rect.left });
-    }
-  }, []);
-
   useEffect(() => {
-    if (!open) return;
-    updatePos();
-    window.addEventListener("scroll", updatePos, { passive: true });
-    window.addEventListener("resize", updatePos, { passive: true });
-    return () => {
-      window.removeEventListener("scroll", updatePos);
-      window.removeEventListener("resize", updatePos);
-    };
-  }, [open, updatePos]);
+    if (!open || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setDropdownPos({ top: rect.bottom + 8, left: rect.left });
+  }, [open]);
 
   const current = regions.find((r) => r.code === region) || regions[0]!;
 
