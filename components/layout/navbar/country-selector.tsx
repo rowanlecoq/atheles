@@ -75,6 +75,7 @@ export function CountrySelector() {
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
+
   const handleSelect = useCallback(
     (code: RegionCode) => {
       setRegion(code);
@@ -82,6 +83,14 @@ export function CountrySelector() {
     },
     [setRegion],
   );
+
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+
+  useEffect(() => {
+    if (!open || !ref.current) return;
+    const rect = ref.current.getBoundingClientRect();
+    setDropdownPos({ top: rect.bottom + 8, left: rect.left });
+  }, [open]);
 
   const current = regions.find((r) => r.code === region) || regions[0]!;
 
@@ -108,8 +117,8 @@ export function CountrySelector() {
           ref={dropdownRef}
           style={{
             position: "fixed",
-            top: ref.current ? ref.current.getBoundingClientRect().bottom + 8 : 0,
-            left: ref.current ? ref.current.getBoundingClientRect().left : 0,
+            top: dropdownPos.top,
+            left: dropdownPos.left,
             zIndex: 9999,
           }}
           className="min-w-[200px] rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-lg shadow-black/30"

@@ -17,35 +17,35 @@ type Particle = {
 // Per-theme particle config — gold, midnight, sunset use star shapes for sparkle
 const THEMES = {
   gold: {
-    count: 70,
+    count: 40,
     colors: [[255, 210, 60], [220, 185, 90], [255, 240, 160], [190, 160, 80]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.72,
     speed: 0.06, isStar: true,
   },
   water: {
-    count: 65,
+    count: 38,
     colors: [[0, 225, 240], [0, 170, 230], [120, 245, 255], [0, 195, 215]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.24,
     speed: 0.12, isStar: false,
   },
   tropical: {
-    count: 70,
+    count: 40,
     colors: [[20, 230, 110], [0, 195, 255], [255, 175, 30], [80, 255, 160]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.06, maxAlpha: 0.55,
     speed: 0.14, isStar: false,
   },
   midnight: {
-    count: 130,
+    count: 60,
     colors: [[255, 255, 255], [225, 185, 255], [255, 185, 225], [210, 165, 255]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.78,
     speed: 0.04, isStar: true,
   },
   sunset: {
-    count: 70,
+    count: 40,
     colors: [[255, 90, 145], [255, 145, 50], [200, 75, 225], [255, 125, 90]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.72,
@@ -373,6 +373,7 @@ export function ThemeBackgroundCanvas() {
     const loop = (ts: number) => {
       state.animId = requestAnimationFrame(loop);
       if (document.hidden) return;
+      if (!state.theme) return; // no theme active — skip draw, keep loop parked
       if (ts - lastFrameTime < TARGET_MS) return;
       lastFrameTime = ts;
       renderFrame();
@@ -400,6 +401,7 @@ export function ThemeBackgroundCanvas() {
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
+      canvas.style.willChange = "auto";
     };
   }, [prefersReducedMotion, isTouch, buildParticles]);
 

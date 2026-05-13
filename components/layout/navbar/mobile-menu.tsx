@@ -3,19 +3,46 @@
 import { Dialog, Transition } from "@headlessui/react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Fragment, Suspense, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useState } from "react";
 
 import {
   Bars3Icon,
   ChevronDownIcon,
-  HeartIcon,
   UserIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
 import LogoSquare from "components/logo-square";
 import { fetchSession } from "lib/session-cache";
 import type { Menu } from "lib/shopify/types";
-import Search, { SearchSkeleton } from "./search";
+
+const TIER_BAR_GRADIENTS: Record<string, string> = {
+  BRONZE: "from-amber-900 via-amber-700 to-amber-500",
+  SILVER: "from-gray-500 via-gray-400 to-gray-300",
+  GOLD: "from-yellow-700 via-yellow-500 to-amber-300",
+  PLATINUM: "from-cyan-700 via-cyan-400 to-cyan-200",
+  CHAMPION: "from-fuchsia-700 via-purple-500 to-amber-400",
+  ADMIN: "from-red-500 via-orange-400 to-amber-300",
+  ATHLETE: "from-sky-400 via-teal-300 to-amber-300",
+};
+
+const TIER_THRESHOLDS: Record<string, { min: number; max: number; next: string | null }> = {
+  BRONZE:   { min: 0,     max: 5000,    next: "SILVER" },
+  SILVER:   { min: 5000,  max: 15000,   next: "GOLD" },
+  GOLD:     { min: 15000, max: 30000,   next: "PLATINUM" },
+  PLATINUM: { min: 30000, max: 50000,   next: "CHAMPION" },
+  CHAMPION: { min: 50000, max: Infinity, next: null },
+  ATHLETE:  { min: 0,     max: Infinity, next: null },
+  ADMIN:    { min: 0,     max: Infinity, next: null },
+};
+const TIER_GRADIENTS: Record<string, string> = {
+  BRONZE: "from-amber-500 via-amber-400 to-yellow-300",
+  SILVER: "from-gray-300 via-gray-200 to-white",
+  GOLD: "from-yellow-400 via-yellow-300 to-amber-200",
+  PLATINUM: "from-cyan-300 via-cyan-200 to-white",
+  CHAMPION: "from-fuchsia-300 via-purple-300 to-amber-200",
+  ADMIN: "from-red-400 via-orange-300 to-amber-200",
+  ATHLETE: "from-sky-300 via-teal-200 to-amber-200",
+};
 
 type CategoryLink = {
   title: string;
@@ -64,7 +91,7 @@ function CategoryItem({
         <Link
           href={item.path}
           onClick={onNavigate}
-          className="tap-target flex min-h-[44px] flex-1 items-center py-3 text-lg uppercase tracking-[0.12em] text-brand-grey transition-colors hover:text-brand-gold sm:text-xl sm:tracking-wider"
+          className="tap-target flex min-h-[52px] flex-1 items-center py-4 text-xl uppercase tracking-[0.12em] text-brand-grey transition-colors hover:text-brand-gold"
         >
           {item.title}
           {item.comingSoon && (
@@ -121,6 +148,8 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const [loggedIn, setLoggedIn] = useState(false);
   const [userName, setUserName] = useState("");
   const [avatar, setAvatar] = useState<string | null>(null);
+  const [tierLabel, setTierLabel] = useState("");
+  const [loyaltyPoints, setLoyaltyPoints] = useState<number | null>(null);
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
@@ -147,6 +176,18 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           const user = (data as { user: Record<string, string> }).user;
           setLoggedIn(true);
           setUserName(user.name || user.firstName || "");
+          const pts = Math.floor(parseFloat(user.totalSpent || "0") * 50);
+          const label = user.isAdmin === "true" || user.isAdmin === true as unknown as string
+            ? "ADMIN"
+            : user.isAthlete === "true" || user.isAthlete === true as unknown as string
+            ? "ATHLETE"
+            : pts >= 50000 ? "CHAMPION"
+            : pts >= 30000 ? "PLATINUM"
+            : pts >= 15000 ? "GOLD"
+            : pts >= 5000 ? "SILVER"
+            : "BRONZE";
+          setTierLabel(label);
+          setLoyaltyPoints(pts);
           // Per-user avatar cache
           const avatarKey = `atheles-avatar-${user.email}`;
           try {
@@ -166,6 +207,8 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           setLoggedIn(false);
           setUserName("");
           setAvatar(null);
+          setTierLabel("");
+          setLoyaltyPoints(null);
         }
       })
       .catch(() => {});
@@ -231,7 +274,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
         aria-label="Open mobile menu"
         className="flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold md:hidden"
       >
-        <Bars3Icon className="h-5" />
+        <Bars3Icon className="h-5 w-5" />
       </button>
       <Transition show={isOpen}>
         <Dialog onClose={closeMobileMenu} className="relative z-50">
@@ -245,7 +288,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
             leaveTo="translate-x-[-100%]"
           >
             <Dialog.Panel className="fixed bottom-0 left-0 right-0 top-0 flex h-full w-full flex-col overflow-y-auto bg-brand-dark pb-6">
-              <div className="p-4">
+              <div className="p-4 pb-0">
                 <div className="mb-6 flex items-center justify-between">
                   <LogoSquare size="sm" />
                   <button
@@ -258,34 +301,39 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   </button>
                 </div>
 
-                {/* Account, Favorites at top */}
-                <div className="mb-5 border-b border-brand-dark-gold/20 pb-4">
+                {/* Account at top */}
+                <div className="mb-3 border-b border-brand-dark-gold/20 pb-3">
                   <Link
                     href={loggedIn ? "/profile" : "/login"}
                     onClick={closeMobileMenu}
-                    className="tap-target mb-1 flex min-h-[48px] items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-dark-gold/10"
+                    className="tap-target flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-dark-gold/10"
                   >
                     {avatar ? (
-                      <div className="relative h-9 w-9 overflow-hidden rounded-full" style={{ clipPath: "circle(50%)" }}>
+                      <div className="relative h-11 w-11 flex-none overflow-hidden rounded-full" style={{ clipPath: "circle(50%)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={avatar} alt="Profile" width={36} height={36} className="absolute inset-0 h-full w-full scale-[1.02] object-cover" />
+                        <img src={avatar} alt="Profile" width={44} height={44} className="absolute inset-0 h-full w-full scale-[1.02] object-cover" />
                       </div>
                     ) : loggedIn && initials ? (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold">
+                      <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-brand-dark-gold/20 text-sm font-bold text-brand-gold">
                         {initials}
                       </span>
                     ) : (
-                      <span className="flex h-9 w-9 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark-gold/10">
+                      <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark-gold/10">
                         <UserIcon className="h-5 w-5 text-brand-grey" />
                       </span>
                     )}
                     <div>
                       {loggedIn ? (
                         <>
+                          {tierLabel && (
+                            <p className={`bg-gradient-to-r ${TIER_GRADIENTS[tierLabel] ?? ""} bg-clip-text text-[10px] uppercase tracking-[0.18em] text-transparent`}>
+                              {tierLabel}
+                            </p>
+                          )}
                           <p className="text-base font-medium text-white">
                             {userName}
                           </p>
-                          <p className="text-sm uppercase tracking-wider text-brand-dark-gold">
+                          <p className="text-xs uppercase tracking-wider text-brand-dark-gold">
                             view profile
                           </p>
                         </>
@@ -294,70 +342,45 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                           <p className="text-base font-medium text-brand-pale-gold">
                             sign in
                           </p>
-                          <p className="text-sm uppercase tracking-wider text-brand-dark-gold">
+                          <p className="text-xs uppercase tracking-wider text-brand-dark-gold">
                             or create account
                           </p>
                         </>
                       )}
                     </div>
                   </Link>
-                  <Link
-                    href="/favorites"
-                    onClick={closeMobileMenu}
-                    className="tap-target flex min-h-[44px] items-center gap-3 rounded-lg px-2 py-2 text-base uppercase tracking-wider text-brand-grey transition-colors hover:bg-brand-dark-gold/10 hover:text-brand-gold"
-                  >
-                    <HeartIcon className="h-5 w-5" />
-                    Favorites
-                  </Link>
                 </div>
 
-                <div className="mb-6 w-full">
-                  <Suspense fallback={<SearchSkeleton />}>
-                    <Search />
-                  </Suspense>
-                </div>
-
-                {/* Main nav links */}
-                {menu.length ? (
-                  <ul className="flex w-full flex-col">
-                    {menu.map((item: Menu) => (
-                      <li
-                        className="border-b border-brand-dark-gold/10"
-                        key={item.title}
+                {/* Unified nav list — Shopify menu items + categories together */}
+                <ul className="flex w-full flex-col">
+                  {menu.map((item: Menu, idx: number) => (
+                    <li className={idx < menu.length - 1 ? "border-b border-brand-dark-gold/10" : ""} key={item.title}>
+                      <Link
+                        href={item.path}
+                        prefetch={true}
+                        onClick={closeMobileMenu}
+                        className="tap-target flex min-h-[52px] items-center py-4 text-xl uppercase tracking-[0.12em] text-brand-pale-gold transition-colors hover:text-brand-gold"
                       >
-                        <Link
-                          href={item.path}
-                          prefetch={true}
-                          onClick={closeMobileMenu}
-                          className="tap-target flex min-h-[44px] items-center py-3 text-lg uppercase tracking-[0.12em] text-brand-pale-gold transition-colors hover:text-brand-gold sm:text-xl sm:tracking-wider"
-                        >
-                          {item.title}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                ) : null}
-
-                {/* Category links with expandable subcategories */}
-                <div className="mt-4">
-                  <p className="mb-2 text-xs uppercase tracking-[0.2em] text-brand-dark-gold">
-                    Categories
-                  </p>
-                  <ul className="flex w-full flex-col">
-                    {categoryLinks.map((item, idx) => (
-                      <CategoryItem
-                        key={item.title}
-                        item={item}
-                        onNavigate={closeMobileMenu}
-                        isLast={idx === categoryLinks.length - 1}
-                      />
-                    ))}
-                  </ul>
-                </div>
+                        {item.title}
+                      </Link>
+                    </li>
+                  ))}
+                  <li aria-hidden="true" className="py-2">
+                    <div className="h-px w-full bg-brand-dark-gold/20" />
+                  </li>
+                  {categoryLinks.map((item, idx) => (
+                    <CategoryItem
+                      key={item.title}
+                      item={item}
+                      onNavigate={closeMobileMenu}
+                      isLast={idx === categoryLinks.length - 1}
+                    />
+                  ))}
+                </ul>
               </div>
 
-              {/* Social at bottom */}
-              <div className="mt-auto px-4 pb-4">
+              {/* Socials */}
+              <div className="px-4 pb-4 pt-3">
                 <div className="border-t border-brand-dark-gold/20 pt-3">
                   <a
                     href="https://www.instagram.com/atheles.co/"
@@ -365,24 +388,21 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     rel="noopener noreferrer"
                     className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
                   >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      className="h-5 w-5"
-                      stroke="currentColor"
-                      strokeWidth={1.5}
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
+                    <svg viewBox="0 0 24 24" fill="none" className="h-5 w-5" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round">
                       <rect x="2" y="2" width="20" height="20" rx="5" />
                       <circle cx="12" cy="12" r="5" />
-                      <circle
-                        cx="17.5"
-                        cy="6.5"
-                        r="1"
-                        fill="currentColor"
-                        stroke="none"
-                      />
+                      <circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none" />
+                    </svg>
+                    @ATHELES.CO
+                  </a>
+                  <a
+                    href="https://www.tiktok.com/@atheles.co"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="tap-target flex min-h-[44px] items-center gap-3 py-2 text-sm tracking-wider text-brand-grey transition-colors hover:text-brand-gold"
+                  >
+                    <svg viewBox="0 0 24 24" fill="currentColor" className="h-5 w-5">
+                      <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V9.12a8.16 8.16 0 0 0 4.83 1.55V7.22a4.85 4.85 0 0 1-1.06-.53z" />
                     </svg>
                     @ATHELES.CO
                   </a>

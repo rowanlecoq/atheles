@@ -32,7 +32,7 @@ export default async function Footer() {
   const menu = await getMenu("next-js-frontend-footer-menu");
 
   return (
-    <footer className="border-t border-brand-dark-gold/20 bg-brand-dark text-sm text-brand-grey">
+    <footer className="border-t border-brand-dark-gold/20 bg-brand-dark text-sm text-brand-grey [transform:translateZ(0)]">
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 min-[1320px]:px-0">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Column 1: Logo + Tagline */}
@@ -115,6 +115,18 @@ export default async function Footer() {
               be part of the new era.
             </p>
             <div className="flex gap-4">
+              <a
+                href="https://www.tiktok.com/@atheles.co"
+                target="_blank"
+                rel="noopener noreferrer"
+                aria-label="TikTok"
+                className="text-brand-grey transition-colors hover:text-brand-gold"
+              >
+                <span className="sr-only">TikTok</span>
+                <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="currentColor">
+                  <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V9.12a8.16 8.16 0 0 0 4.83 1.55V7.22a4.85 4.85 0 0 1-1.06-.53z" />
+                </svg>
+              </a>
               <a
                 href="https://www.instagram.com/atheles.co/"
                 target="_blank"

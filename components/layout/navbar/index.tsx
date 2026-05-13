@@ -25,12 +25,15 @@ export async function Navbar() {
     <NavbarShell>
       <nav className="relative z-10 border-b border-brand-dark-gold/20 bg-brand-dark/95 px-4 py-2 backdrop-blur-sm lg:px-6">
         <div className="grid grid-cols-3 items-center">
-          {/* Left: Mobile hamburger | Desktop: Country + Favorites */}
-          <div className="flex items-center gap-3">
+          {/* Left: Mobile hamburger + Favorites | Desktop: Country + Favorites */}
+          <div className="flex items-center gap-1">
             <div className="block flex-none md:hidden">
               <Suspense fallback={null}>
                 <MobileMenu menu={menu} />
               </Suspense>
+            </div>
+            <div className="block md:hidden">
+              <FavoritesIcon />
             </div>
             <CountrySelector />
             <div className="hidden md:block">

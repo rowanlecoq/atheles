@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { useCallback, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 // Hidden on homepage since HeroCategoryNav handles it there
 
@@ -19,7 +19,7 @@ const categories: Category[] = [
     href: "/search/mens",
     subcategories: [
       { title: "Compressions", href: "/search/compressions" },
-      { title: "Tees", href: "/search/t-shirts" },
+      { title: "Tees", href: "/search/tees" },
       { title: "Sweatpants", href: "/search/sweatpants" },
     ],
   },
@@ -54,6 +54,12 @@ export function CategoryNav() {
     closeTimeout.current = setTimeout(() => {
       setActiveIndex(null);
     }, 150);
+  }, []);
+
+  useEffect(() => {
+    return () => {
+      if (closeTimeout.current) clearTimeout(closeTimeout.current);
+    };
   }, []);
 
   // Check if a category or any of its subcategories match the current path

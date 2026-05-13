@@ -13,6 +13,7 @@ const defaultAnnouncements = [
 export function AnnouncementBar() {
   const [announcements, setAnnouncements] = useState(defaultAnnouncements);
   const [index, setIndex] = useState(0);
+  const [entered, setEntered] = useState(false);
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const announcementsLenRef = useRef(defaultAnnouncements.length);
@@ -53,22 +54,26 @@ export function AnnouncementBar() {
     return () => stopTimer();
   }, [paused, startTimer, stopTimer]);
 
+  useEffect(() => {
+    setEntered(true);
+  }, []);
+
   const togglePause = () => {
     setPaused((p) => !p);
   };
 
   return (
-    <div className="announcement-bar-root flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark">
+    <div className={`announcement-bar-root flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-brand-dark ${entered ? "animate-announcement-bar-enter" : "navbar-pre-enter"}`}>
       {/* Spacer balances the pause button on the right */}
       <div className="min-w-[44px] flex-none" />
 
       <AnimatePresence mode="wait">
         <motion.p
           key={index}
-          initial={{ opacity: 0, filter: "blur(4px)" }}
-          animate={{ opacity: 1, filter: "blur(0px)" }}
-          exit={{ opacity: 0, filter: "blur(4px)" }}
-          transition={{ duration: 0.4, ease: "easeInOut" }}
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.35, ease: "easeInOut" }}
           className="flex-1 text-center text-xs uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em]"
         >
           {announcements[index]}

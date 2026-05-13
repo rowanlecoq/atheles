@@ -6,6 +6,7 @@ import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import ImageCropModal from "components/image-crop-modal";
+import { useCurrency } from "components/currency-context";
 import { invalidateSessionCache } from "lib/session-cache";
 import { PROFILE_BACKGROUNDS } from "lib/profile-backgrounds";
 
@@ -179,6 +180,7 @@ function phoneToE164(raw: string): string {
 }
 
 export default function ProfileContent() {
+  const { currency, convert } = useCurrency();
   const [user, setUser] = useState<User | null>(null);
   const [loading, setLoading] = useState(true);
   const [redirecting, setRedirecting] = useState(false);
@@ -1077,8 +1079,13 @@ export default function ProfileContent() {
               </p>
             </Link>
             <div className="rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center">
-              <p className="font-heading text-xl text-brand-gold">
-                ${totalSpentNum.toFixed(0)}
+              <p className="font-heading text-xl text-brand-gold" suppressHydrationWarning>
+                {new Intl.NumberFormat(undefined, {
+                  style: "currency",
+                  currency,
+                  currencyDisplay: "narrowSymbol",
+                  maximumFractionDigits: 0,
+                }).format(parseFloat(convert(totalSpentNum.toString())))}
               </p>
               <p className="text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
                 total spent
@@ -1086,9 +1093,10 @@ export default function ProfileContent() {
             </div>
           </div>
 
-          <p className="mt-4 text-center text-xs text-brand-grey/50">
-            earn <span className="text-brand-pale-gold">50 points</span> per $1
-            spent &#183; unlock exclusive tiers & perks
+          <p className="mt-4 text-center text-xs text-brand-grey/50" suppressHydrationWarning>
+            earn <span className="text-brand-pale-gold">50 points</span> per{" "}
+            {new Intl.NumberFormat(undefined, { style: "currency", currency, currencyDisplay: "narrowSymbol", maximumFractionDigits: 0 }).format(parseFloat(convert("1")))}
+            {" "}spent &#183; unlock exclusive tiers & perks
           </p>
         </div>
 
