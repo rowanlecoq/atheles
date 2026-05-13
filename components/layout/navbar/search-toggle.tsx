@@ -53,22 +53,19 @@ export function SearchToggle() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
-  const inputRef = useRef<HTMLInputElement>(null);
+  const mobileInputRef = useRef<HTMLInputElement>(null);
+  const desktopInputRef = useRef<HTMLInputElement>(null);
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const scrollYRef = useRef(0);
   const touchLockRef = useRef<((e: TouchEvent) => void) | null>(null);
   const router = useRouter();
 
   const unlockScroll = useCallback(() => {
-    // Mobile: remove touchmove lock
     if (touchLockRef.current) {
       document.removeEventListener("touchmove", touchLockRef.current);
       touchLockRef.current = null;
     }
-    // Desktop: restore scroll
-    document.documentElement.style.overflow = "";
   }, []);
 
   const close = useCallback(() => {
@@ -97,9 +94,6 @@ export function SearchToggle() {
       };
       touchLockRef.current = touchHandler;
       document.addEventListener("touchmove", touchHandler, { passive: false });
-    } else {
-      // Desktop: overflow hidden blocks scroll without visual jump
-      document.documentElement.style.overflow = "hidden";
     }
     setOpen(true);
   }, []);
@@ -139,7 +133,14 @@ export function SearchToggle() {
   // Focus input when search opens
   useEffect(() => {
     if (open) {
-      setTimeout(() => inputRef.current?.focus(), 50);
+      const isMobile = window.matchMedia("(pointer: coarse)").matches;
+      setTimeout(() => {
+        if (isMobile) {
+          mobileInputRef.current?.focus();
+        } else {
+          desktopInputRef.current?.focus();
+        }
+      }, 50);
     }
   }, [open]);
 
@@ -197,7 +198,7 @@ export function SearchToggle() {
             <MagnifyingGlassIcon className="h-5 w-5 flex-none text-brand-dark-gold" />
             <form onSubmit={handleSubmit} className="flex-1">
               <input
-                ref={inputRef}
+                ref={mobileInputRef}
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
@@ -248,7 +249,7 @@ export function SearchToggle() {
         >
           <form onSubmit={handleSubmit}>
             <input
-              ref={inputRef}
+              ref={desktopInputRef}
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
