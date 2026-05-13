@@ -306,31 +306,31 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   <Link
                     href={loggedIn ? "/profile" : "/login"}
                     onClick={closeMobileMenu}
-                    className="tap-target flex items-center gap-4 rounded-lg px-2 py-3 transition-colors hover:bg-brand-dark-gold/10"
+                    className="tap-target flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-dark-gold/10"
                   >
                     {avatar ? (
-                      <div className="relative h-14 w-14 flex-none overflow-hidden rounded-full" style={{ clipPath: "circle(50%)" }}>
+                      <div className="relative h-11 w-11 flex-none overflow-hidden rounded-full" style={{ clipPath: "circle(50%)" }}>
                         {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={avatar} alt="Profile" width={56} height={56} className="absolute inset-0 h-full w-full scale-[1.02] object-cover" />
+                        <img src={avatar} alt="Profile" width={44} height={44} className="absolute inset-0 h-full w-full scale-[1.02] object-cover" />
                       </div>
                     ) : loggedIn && initials ? (
-                      <span className="flex h-14 w-14 flex-none items-center justify-center rounded-full bg-brand-dark-gold/20 text-base font-bold text-brand-gold">
+                      <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full bg-brand-dark-gold/20 text-sm font-bold text-brand-gold">
                         {initials}
                       </span>
                     ) : (
-                      <span className="flex h-14 w-14 flex-none items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark-gold/10">
-                        <UserIcon className="h-6 w-6 text-brand-grey" />
+                      <span className="flex h-11 w-11 flex-none items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark-gold/10">
+                        <UserIcon className="h-5 w-5 text-brand-grey" />
                       </span>
                     )}
                     <div>
                       {loggedIn ? (
                         <>
                           {tierLabel && (
-                            <p className={`bg-gradient-to-r ${TIER_GRADIENTS[tierLabel] ?? ""} bg-clip-text text-xs uppercase tracking-[0.2em] text-transparent`}>
+                            <p className={`bg-gradient-to-r ${TIER_GRADIENTS[tierLabel] ?? ""} bg-clip-text text-[10px] uppercase tracking-[0.18em] text-transparent`}>
                               {tierLabel}
                             </p>
                           )}
-                          <p className="text-lg font-medium text-white">
+                          <p className="text-base font-medium text-white">
                             {userName}
                           </p>
                           <p className="text-xs uppercase tracking-wider text-brand-dark-gold">
@@ -339,7 +339,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                         </>
                       ) : (
                         <>
-                          <p className="text-lg font-medium text-brand-pale-gold">
+                          <p className="text-base font-medium text-brand-pale-gold">
                             sign in
                           </p>
                           <p className="text-xs uppercase tracking-wider text-brand-dark-gold">
@@ -365,10 +365,8 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                       </Link>
                     </li>
                   ))}
-                  <li aria-hidden="true" className="flex items-center gap-3 py-3">
-                    <div className="h-px flex-1 bg-brand-dark-gold/30" />
-                    <span className="text-[8px] text-brand-dark-gold/60">◆</span>
-                    <div className="h-px flex-1 bg-brand-dark-gold/30" />
+                  <li aria-hidden="true" className="py-2">
+                    <div className="h-px w-full bg-brand-dark-gold/20" />
                   </li>
                   {categoryLinks.map((item, idx) => (
                     <CategoryItem
