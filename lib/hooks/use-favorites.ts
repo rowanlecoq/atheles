@@ -72,7 +72,7 @@ export function useFavorites() {
     }
   }, []);
 
-  // Debounced save to server
+  // Debounced save to server (for adds)
   const saveToServer = useCallback((next: string[]) => {
     if (!loggedInRef.current) return;
     if (savingRef.current) clearTimeout(savingRef.current);
@@ -85,15 +85,25 @@ export function useFavorites() {
     }, 500);
   }, []);
 
+  const saveToServerNow = useCallback((next: string[]) => {
+    if (!loggedInRef.current) return;
+    if (savingRef.current) clearTimeout(savingRef.current);
+    fetch("/api/auth/favorites", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ favorites: next }),
+    }).catch(() => {});
+  }, []);
+
   const persist = useCallback(
-    (next: string[]) => {
+    (next: string[], immediate = false) => {
       favoritesRef.current = next;
       setFavorites(next);
       storeLocal(next);
-      saveToServer(next);
+      if (immediate) saveToServerNow(next); else saveToServer(next);
       window.dispatchEvent(new Event("favorites-changed"));
     },
-    [saveToServer],
+    [saveToServer, saveToServerNow],
   );
 
   const addFavorite = useCallback(
@@ -107,7 +117,7 @@ export function useFavorites() {
 
   const removeFavorite = useCallback(
     (handle: string) => {
-      persist(favoritesRef.current.filter((h) => h !== handle));
+      persist(favoritesRef.current.filter((h) => h !== handle), true);
     },
     [persist],
   );
