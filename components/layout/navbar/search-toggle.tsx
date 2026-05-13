@@ -47,12 +47,34 @@ function ResultItem({ product, onClose }: { product: SearchProduct; onClose: () 
   );
 }
 
+// iOS-safe body scroll lock: fixes body position so iOS doesn't scroll the
+// underlying page when the virtual keyboard appears inside a fixed overlay.
+function lockBodyScroll() {
+  const scrollY = window.scrollY;
+  document.body.dataset.scrollY = String(scrollY);
+  document.body.style.position = "fixed";
+  document.body.style.top = `-${scrollY}px`;
+  document.body.style.width = "100%";
+  document.body.style.overflow = "hidden";
+}
+
+function unlockBodyScroll() {
+  const scrollY = parseInt(document.body.dataset.scrollY || "0", 10);
+  document.body.style.position = "";
+  document.body.style.top = "";
+  document.body.style.width = "";
+  document.body.style.overflow = "";
+  delete document.body.dataset.scrollY;
+  window.scrollTo(0, scrollY);
+}
+
 export function SearchToggle() {
   const [open, setOpen] = useState(false);
   const [closing, setClosing] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
+  const [overlayHeight, setOverlayHeight] = useState<number | null>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const desktopInputRef = useRef<HTMLInputElement>(null);
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
@@ -66,6 +88,7 @@ export function SearchToggle() {
       document.removeEventListener("touchmove", touchLockRef.current);
       touchLockRef.current = null;
     }
+    unlockBodyScroll();
   }, []);
 
   const close = useCallback(() => {
@@ -82,8 +105,8 @@ export function SearchToggle() {
   const openSearch = useCallback(() => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      // only prevent scroll outside the overlay — touches inside (product
-      // links) must not have preventDefault called or iOS swallows the click.
+      lockBodyScroll();
+      // Prevent touches outside the overlay from reaching the locked body
       const touchHandler = (e: TouchEvent) => {
         if (
           mobileOverlayRef.current &&
@@ -97,6 +120,22 @@ export function SearchToggle() {
     }
     setOpen(true);
   }, []);
+
+  // Track visual viewport height on mobile so the overlay shrinks when the
+  // virtual keyboard appears, keeping results visible above the keyboard.
+  useEffect(() => {
+    if (!open) return;
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    if (!isMobile || !window.visualViewport) return;
+
+    const update = () => setOverlayHeight(window.visualViewport!.height);
+    update();
+    window.visualViewport.addEventListener("resize", update);
+    return () => {
+      window.visualViewport!.removeEventListener("resize", update);
+      setOverlayHeight(null);
+    };
+  }, [open]);
 
   // Fetch search results
   useEffect(() => {
@@ -130,13 +169,14 @@ export function SearchToggle() {
     };
   }, [query]);
 
-  // Focus desktop input when search opens (mobile uses autoFocus on the input)
+  // Focus the appropriate input when search opens, without scrolling the page.
   useEffect(() => {
-    if (open) {
-      const isMobile = window.matchMedia("(pointer: coarse)").matches;
-      if (!isMobile) {
-        setTimeout(() => desktopInputRef.current?.focus(), 50);
-      }
+    if (!open) return;
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+    if (isMobile) {
+      setTimeout(() => mobileInputRef.current?.focus({ preventScroll: true }), 50);
+    } else {
+      setTimeout(() => desktopInputRef.current?.focus({ preventScroll: true }), 50);
     }
   }, [open]);
 
@@ -182,15 +222,16 @@ export function SearchToggle() {
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Mobile: full-screen overlay */}
+      {/* Mobile: full-screen overlay that shrinks with the virtual keyboard */}
       {(open || closing) && (
         <div
           ref={mobileOverlayRef}
-          className={`fixed inset-0 z-[60] flex flex-col bg-brand-dark transition-opacity duration-200 md:hidden ${
+          className={`fixed left-0 right-0 top-0 z-[60] flex flex-col bg-brand-dark transition-opacity duration-200 md:hidden ${
             closing ? "opacity-0" : "opacity-100"
           }`}
+          style={{ height: overlayHeight ? `${overlayHeight}px` : "100dvh" }}
         >
-          <div className="flex items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-3">
+          <div className="flex items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-2">
             <MagnifyingGlassIcon className="h-5 w-5 flex-none text-brand-dark-gold" />
             <form onSubmit={handleSubmit} className="flex-1">
               <input
@@ -203,7 +244,6 @@ export function SearchToggle() {
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="off"
-                autoFocus
               />
             </form>
             <button
