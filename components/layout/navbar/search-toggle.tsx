@@ -36,7 +36,7 @@ function ResultItem({ product, onClose }: { product: SearchProduct; onClose: () 
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs text-brand-pale-gold">{product.title}</p>
+        <p className="truncate text-xs text-white">{product.title}</p>
         {price && (
           <p className="text-[11px] text-brand-dark-gold">
             {parseFloat(price.amount).toFixed(2)} {price.currencyCode}
@@ -231,7 +231,7 @@ export function SearchToggle() {
                   router.push(`/search?q=${encodeURIComponent(query.trim())}`);
                   close();
                 }}
-                className="w-full px-4 py-3 text-center text-xs uppercase tracking-wider text-brand-dark-gold hover:text-brand-gold"
+                className="w-full border-t border-brand-dark-gold/20 px-4 py-3 text-left text-xs uppercase tracking-wider text-brand-dark-gold hover:text-brand-gold"
               >
                 view all results
               </button>
@@ -281,7 +281,7 @@ export function SearchToggle() {
                       );
                       close();
                     }}
-                    className="w-full px-4 py-2.5 text-center text-[11px] uppercase tracking-wider text-brand-dark-gold transition-colors hover:bg-brand-dark-gold/5 hover:text-brand-gold"
+                    className="w-full border-t border-brand-dark-gold/20 px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-brand-dark-gold transition-colors hover:bg-brand-dark-gold/5 hover:text-brand-gold"
                   >
                     view all results
                   </button>
