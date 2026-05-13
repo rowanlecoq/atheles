@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { createPortal, flushSync } from "react-dom";
+import { createPortal } from "react-dom";
 
 type SearchProduct = {
   handle: string;
@@ -54,15 +54,16 @@ export function SearchToggle() {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const desktopInputRef = useRef<HTMLInputElement>(null);
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  // Tracks pointer-down position so we can distinguish a tap from a scroll
-  // on the backdrop (scroll gestures should not close the search).
   const backdropPointerStart = useRef({ x: 0, y: 0 });
   const router = useRouter();
+
+  useEffect(() => { setMounted(true); }, []);
 
   const close = useCallback(() => {
     setClosing(true);
@@ -71,27 +72,28 @@ export function SearchToggle() {
       setClosing(false);
       setQuery("");
       setResults([]);
-    }, 120);
+    }, 150);
   }, []);
 
   const openSearch = useCallback(() => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      // flushSync renders the portal synchronously inside the tap handler so
-      // focus() fires within the same user-gesture tick (required for iOS keyboard).
-      flushSync(() => setOpen(true));
-      mobileInputRef.current?.focus({ preventScroll: true });
+      setOpen(true);
+      // Input is always in the DOM (portal is always mounted), so we can
+      // focus it directly in the click handler — no flushSync needed, which
+      // eliminates the render-flicker it caused.
+      requestAnimationFrame(() =>
+        mobileInputRef.current?.focus({ preventScroll: true })
+      );
       return;
     }
     setOpen(true);
   }, []);
 
-  // Unified scroll intercept for both mobile and desktop.
-  // Saves Y on keydown/mousedown; snaps back if the browser drifts during
-  // that interaction (sticky-navbar "scroll input into view" behaviour).
-  // Also listens to visualViewport.resize to catch iOS keyboard autocomplete
-  // bar height changes, which resize the viewport and drift scroll without
-  // firing keydown.
+  // Desktop: the navbar is position:sticky — the browser drifts the scroll
+  // toward the input's layout position (near y=0) on every keystroke or
+  // mouse-selection drag. Intercept and snap back. Also catches iOS keyboard
+  // autocomplete bar height changes via visualViewport.resize.
   useEffect(() => {
     if (!open) return;
 
@@ -143,7 +145,7 @@ export function SearchToggle() {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, [query]);
 
-  // Desktop: focus input after the expand animation renders it
+  // Desktop: focus input after expand animation
   useEffect(() => {
     if (!open) return;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
@@ -152,7 +154,7 @@ export function SearchToggle() {
     }
   }, [open]);
 
-  // Close on click outside (desktop only — mobile uses backdrop tap-to-close)
+  // Close on click outside (desktop)
   useEffect(() => {
     if (!open) return;
     const handler = (e: MouseEvent) => {
@@ -172,7 +174,6 @@ export function SearchToggle() {
     return () => document.removeEventListener("keydown", handler);
   }, [open, close]);
 
-  // Cleanup on unmount
   useEffect(() => {
     return () => { if (debounceRef.current) clearTimeout(debounceRef.current); };
   }, []);
@@ -187,84 +188,91 @@ export function SearchToggle() {
 
   const showDropdown = open && (loading || results.length > 0) && query.trim().length >= 2;
 
-  // Mobile overlay is portalled to document.body so it lives in the root
-  // stacking context (z-59/z-60 in root) and covers the NavbarShell (z-50)
-  // plus all page content — regardless of any stacking context the navbar creates.
-  const mobileOverlay = (open || closing) ? createPortal(
-    <>
-      {/* Backdrop: tap-to-close distinguishes tap from scroll via pointer distance */}
-      <div
-        className={`fixed inset-0 z-[200] bg-black/70 transition-opacity duration-200 md:hidden ${
-          closing ? "opacity-0" : "opacity-100"
-        }`}
-        onPointerDown={(e) => { backdropPointerStart.current = { x: e.clientX, y: e.clientY }; }}
-        onPointerUp={(e) => {
-          const dx = Math.abs(e.clientX - backdropPointerStart.current.x);
-          const dy = Math.abs(e.clientY - backdropPointerStart.current.y);
-          if (dx < 10 && dy < 10) close();
-        }}
-      />
-      {/* Search panel */}
-      <div
-        ref={mobileOverlayRef}
-        className={`fixed left-0 right-0 top-0 z-[201] flex flex-col bg-brand-dark transition-opacity duration-200 md:hidden ${
-          closing ? "opacity-0" : "opacity-100"
-        }`}
-        style={{ maxHeight: "100dvh" }}
-      >
-        <div className="flex flex-none items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-1.5">
-          <MagnifyingGlassIcon className="h-4 w-4 flex-none text-brand-dark-gold" />
-          <form onSubmit={handleSubmit} className="flex-1">
-            <input
-              ref={mobileInputRef}
-              type="text"
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="find items"
-              className="w-full bg-transparent text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none"
-              autoComplete="off"
-              autoCorrect="off"
-              autoCapitalize="off"
-            />
-          </form>
-          <button
-            type="button"
-            onClick={close}
-            className="flex h-8 w-8 flex-none items-center justify-center text-brand-grey hover:text-brand-gold"
-          >
-            <XMarkIcon className="h-4 w-4" />
-          </button>
-        </div>
-        {query.trim().length >= 2 && (
-          <div className="min-h-0 flex-1 overflow-y-auto">
-            {loading && results.length === 0 && (
-              <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
-            )}
-            {results.slice(0, 8).map((product) => (
-              <ResultItem key={product.handle} product={product} onClose={close} />
-            ))}
-            {!loading && results.length > 0 && (
-              <button
-                type="button"
-                onClick={() => {
-                  router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-                  close();
-                }}
-                className="w-full border-t border-brand-dark-gold/20 px-4 py-3 text-left text-xs uppercase tracking-wider text-brand-dark-gold hover:text-brand-gold"
-              >
-                view all results
-              </button>
-            )}
-          </div>
-        )}
-      </div>
-    </>,
-    document.body,
-  ) : null;
+  // Visibility helpers — overlay is always in the DOM so the input can be
+  // focused immediately without flushSync.
+  const overlayActive = open || closing;
+  const overlayClass = !overlayActive
+    ? "opacity-0 pointer-events-none"
+    : closing
+    ? "opacity-0"
+    : "opacity-100";
 
   return (
     <div ref={containerRef} className="relative">
-      {mobileOverlay}
+      {/* Mobile overlay — portalled to document.body (root stacking context)
+          so z-200/201 genuinely sits above the NavbarShell stacking context.
+          Always in the DOM; hidden via opacity when closed so the input can
+          be focused in the same gesture tick without flushSync. The backdrop's
+          touch-action:none locks page scroll while search is open. */}
+      {mounted && createPortal(
+        <>
+          <div
+            className={`fixed inset-0 z-[200] bg-black/70 transition-opacity duration-150 md:hidden ${overlayClass}`}
+            style={{ touchAction: overlayActive ? "none" : "auto" }}
+            onPointerDown={(e) => {
+              backdropPointerStart.current = { x: e.clientX, y: e.clientY };
+            }}
+            onPointerUp={(e) => {
+              const dx = Math.abs(e.clientX - backdropPointerStart.current.x);
+              const dy = Math.abs(e.clientY - backdropPointerStart.current.y);
+              if (dx < 10 && dy < 10) close();
+            }}
+          />
+          <div
+            ref={mobileOverlayRef}
+            className={`fixed left-0 right-0 top-0 z-[201] flex flex-col bg-brand-dark transition-opacity duration-150 md:hidden ${overlayClass}`}
+            style={{ maxHeight: "100dvh" }}
+          >
+            <div className="flex flex-none items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-2">
+              <MagnifyingGlassIcon className="h-4 w-4 flex-none text-brand-dark-gold" />
+              <form onSubmit={handleSubmit} className="flex-1">
+                <input
+                  ref={mobileInputRef}
+                  type="text"
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="find items"
+                  className="w-full bg-transparent text-sm text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none"
+                  tabIndex={open ? 0 : -1}
+                  autoComplete="off"
+                  autoCorrect="off"
+                  autoCapitalize="off"
+                />
+              </form>
+              <button
+                type="button"
+                onClick={close}
+                className="flex h-8 w-8 flex-none items-center justify-center text-brand-grey hover:text-brand-gold"
+              >
+                <XMarkIcon className="h-4 w-4" />
+              </button>
+            </div>
+            {query.trim().length >= 2 && (
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                {loading && results.length === 0 && (
+                  <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
+                )}
+                {results.slice(0, 8).map((product) => (
+                  <ResultItem key={product.handle} product={product} onClose={close} />
+                ))}
+                {!loading && results.length > 0 && (
+                  <button
+                    type="button"
+                    onClick={() => {
+                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                      close();
+                    }}
+                    className="w-full border-t border-brand-dark-gold/20 px-4 py-3 text-left text-xs uppercase tracking-wider text-brand-dark-gold hover:text-brand-gold"
+                  >
+                    view all results
+                  </button>
+                )}
+              </div>
+            )}
+          </div>
+        </>,
+        document.body,
+      )}
 
       {/* Desktop: inline expanding search with dropdown */}
       <div className="hidden md:block">
@@ -319,16 +327,12 @@ export function SearchToggle() {
         <div className="relative h-5 w-5">
           <MagnifyingGlassIcon
             className={`absolute inset-0 h-5 w-5 transition-all duration-300 ${
-              open
-                ? "rotate-90 scale-0 opacity-0"
-                : "rotate-0 scale-100 opacity-100"
+              open ? "rotate-90 scale-0 opacity-0" : "rotate-0 scale-100 opacity-100"
             }`}
           />
           <XMarkIcon
             className={`absolute inset-0 hidden h-5 w-5 transition-all duration-300 md:block ${
-              open
-                ? "rotate-0 scale-100 opacity-100"
-                : "-rotate-90 scale-0 opacity-0"
+              open ? "rotate-0 scale-100 opacity-100" : "-rotate-90 scale-0 opacity-0"
             }`}
           />
         </div>
