@@ -16,6 +16,16 @@ import { fetchSession } from "lib/session-cache";
 import type { Menu } from "lib/shopify/types";
 import Search, { SearchSkeleton } from "./search";
 
+const TIER_GRADIENTS: Record<string, string> = {
+  BRONZE: "from-amber-500 via-amber-400 to-yellow-300",
+  SILVER: "from-gray-300 via-gray-200 to-white",
+  GOLD: "from-yellow-400 via-yellow-300 to-amber-200",
+  PLATINUM: "from-cyan-300 via-cyan-200 to-white",
+  CHAMPION: "from-fuchsia-300 via-purple-300 to-amber-200",
+  ADMIN: "from-red-400 via-orange-300 to-amber-200",
+  ATHLETE: "from-sky-300 via-teal-200 to-amber-200",
+};
+
 type CategoryLink = {
   title: string;
   path: string;
@@ -298,7 +308,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                             {userName}
                           </p>
                           {tierLabel && (
-                            <p className="text-xs uppercase tracking-[0.18em] text-brand-gold">
+                            <p className={`bg-gradient-to-r ${TIER_GRADIENTS[tierLabel] ?? ""} bg-clip-text text-xs uppercase tracking-[0.18em] text-transparent`}>
                               {tierLabel}
                             </p>
                           )}
