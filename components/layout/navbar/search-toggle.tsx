@@ -9,7 +9,7 @@ import {
   useRef,
   useState,
 } from "react";
-import { createPortal, flushSync } from "react-dom";
+import { flushSync } from "react-dom";
 
 type SearchProduct = {
   handle: string;
@@ -187,11 +187,10 @@ export function SearchToggle() {
 
   return (
     <div ref={containerRef} className="relative">
-      {/* Mobile: portalled to document.body so position:fixed is relative to
-          the viewport, not the navbar's CSS-transform containing block.
-          Slim bar pinned to top + results filling the remaining viewport
-          height. Page stays scrollable behind the dim backdrop. */}
-      {(open || closing) && createPortal(
+      {/* Mobile: slim bar pinned to top + results filling the remaining
+          viewport height. The NavbarShell clears its transform after the
+          entrance animation so position:fixed works relative to the viewport. */}
+      {(open || closing) && (
         <>
           <div
             className={`fixed inset-0 z-[59] bg-black/70 transition-opacity duration-200 md:hidden ${
@@ -252,8 +251,7 @@ export function SearchToggle() {
               </div>
             )}
           </div>
-        </>,
-        document.body,
+        </>
       )}
 
       {/* Desktop: inline expanding search with dropdown */}
