@@ -103,9 +103,14 @@ export function SearchToggle() {
   }, [unlockScroll]);
 
   const openSearch = useCallback(() => {
+    // Lock body scroll for both desktop and mobile. On desktop the navbar is
+    // position:sticky, so the browser treats the focused input as being near
+    // y=0 in the document and scrolls toward it on every keystroke. Locking
+    // the body prevents that per-keystroke scroll entirely.
+    lockBodyScroll();
+
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
-      lockBodyScroll();
       // Prevent touches outside the overlay from reaching the locked body
       const touchHandler = (e: TouchEvent) => {
         if (
