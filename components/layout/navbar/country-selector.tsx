@@ -30,6 +30,19 @@ export function CountrySelector() {
 
   const closeDropdown = useCallback(() => setOpen(false), []);
 
+  // Keep dropdown anchored to button as announcement bar scrolls away
+  useEffect(() => {
+    if (!open) return;
+    const update = () => {
+      if (ref.current) {
+        const rect = ref.current.getBoundingClientRect();
+        setDropdownPos({ top: rect.bottom + 4, left: rect.left });
+      }
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, [open]);
+
   // Close on click outside
   useEffect(() => {
     if (!open) return;
