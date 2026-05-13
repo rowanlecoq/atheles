@@ -3,6 +3,26 @@
 import { useEffect } from "react";
 import { usePathname } from "next/navigation";
 
+function smoothScrollToTop() {
+  const start = window.scrollY;
+  if (start === 0) return;
+
+  const duration = Math.min(700, start * 0.5);
+  const startTime = performance.now();
+
+  const easeInOutCubic = (t: number) =>
+    t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
+
+  const animate = (now: number) => {
+    const elapsed = now - startTime;
+    const progress = Math.min(elapsed / duration, 1);
+    window.scrollTo(0, start * (1 - easeInOutCubic(progress)));
+    if (progress < 1) requestAnimationFrame(animate);
+  };
+
+  requestAnimationFrame(animate);
+}
+
 export function SelfLinkScroll() {
   const pathname = usePathname();
 
@@ -18,19 +38,20 @@ export function SelfLinkScroll() {
         return;
       }
 
-      // Only intercept same-origin links to the current path with no hash
       if (
         url.origin === window.location.origin &&
         url.pathname === pathname &&
         !url.hash
       ) {
         e.preventDefault();
-        window.scrollTo({ top: 0, behavior: "smooth" });
+        e.stopPropagation();
+        smoothScrollToTop();
       }
     };
 
-    document.addEventListener("click", handler);
-    return () => document.removeEventListener("click", handler);
+    // capture: true so we fire before React/Next.js router intercepts the click
+    document.addEventListener("click", handler, true);
+    return () => document.removeEventListener("click", handler, true);
   }, [pathname]);
 
   return null;
