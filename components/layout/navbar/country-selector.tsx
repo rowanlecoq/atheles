@@ -48,6 +48,39 @@ export function CountrySelector() {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const scrollYRef = useRef(0);
+
+  const lockScroll = useCallback(() => {
+    scrollYRef.current = window.scrollY;
+    document.body.style.position = "fixed";
+    document.body.style.top = `-${scrollYRef.current}px`;
+    document.body.style.width = "100%";
+    document.body.style.overscrollBehavior = "none";
+  }, []);
+
+  const unlockScroll = useCallback(() => {
+    if (document.body.style.position === "fixed") {
+      document.body.style.position = "";
+      document.body.style.top = "";
+      document.body.style.width = "";
+      document.body.style.overscrollBehavior = "";
+      window.scrollTo(0, scrollYRef.current);
+    }
+  }, []);
+
+  const openDropdown = useCallback(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 8, left: rect.left });
+    }
+    lockScroll();
+    setOpen(true);
+  }, [lockScroll]);
+
+  const closeDropdown = useCallback(() => {
+    setOpen(false);
+    unlockScroll();
+  }, [unlockScroll]);
 
   // Close on click outside
   useEffect(() => {
@@ -58,39 +91,32 @@ export function CountrySelector() {
         ref.current && !ref.current.contains(target) &&
         dropdownRef.current && !dropdownRef.current.contains(target)
       ) {
-        setOpen(false);
+        closeDropdown();
       }
     };
     document.addEventListener("mousedown", handler);
     return () => document.removeEventListener("mousedown", handler);
-  }, [open]);
+  }, [open, closeDropdown]);
 
   // Close on Escape
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") closeDropdown();
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [open]);
-
+  }, [open, closeDropdown]);
 
   const handleSelect = useCallback(
     (code: RegionCode) => {
       setRegion(code);
-      setOpen(false);
+      closeDropdown();
     },
-    [setRegion],
+    [setRegion, closeDropdown],
   );
 
   const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
-
-  useEffect(() => {
-    if (!open || !ref.current) return;
-    const rect = ref.current.getBoundingClientRect();
-    setDropdownPos({ top: rect.bottom + 8, left: rect.left });
-  }, [open]);
 
   const current = regions.find((r) => r.code === region) || regions[0]!;
 
@@ -98,7 +124,7 @@ export function CountrySelector() {
     <div ref={ref} className="relative hidden md:block">
       <button
         type="button"
-        onClick={() => setOpen((v) => !v)}
+        onClick={() => open ? closeDropdown() : openDropdown()}
         aria-label="Select region"
         className="flex h-11 items-center gap-1.5 px-1 text-brand-grey transition-colors hover:text-brand-gold"
       >
