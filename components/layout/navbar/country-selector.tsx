@@ -75,13 +75,6 @@ export function CountrySelector() {
     return () => document.removeEventListener("keydown", handler);
   }, [open]);
 
-  // Close on scroll so the dropdown doesn't drift from the button
-  useEffect(() => {
-    if (!open) return;
-    const handler = () => setOpen(false);
-    window.addEventListener("scroll", handler, { passive: true });
-    return () => window.removeEventListener("scroll", handler);
-  }, [open]);
 
   const handleSelect = useCallback(
     (code: RegionCode) => {
@@ -90,6 +83,26 @@ export function CountrySelector() {
     },
     [setRegion],
   );
+
+  const [dropdownPos, setDropdownPos] = useState({ top: 0, left: 0 });
+
+  const updatePos = useCallback(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      setDropdownPos({ top: rect.bottom + 8, left: rect.left });
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!open) return;
+    updatePos();
+    window.addEventListener("scroll", updatePos, { passive: true });
+    window.addEventListener("resize", updatePos, { passive: true });
+    return () => {
+      window.removeEventListener("scroll", updatePos);
+      window.removeEventListener("resize", updatePos);
+    };
+  }, [open, updatePos]);
 
   const current = regions.find((r) => r.code === region) || regions[0]!;
 
@@ -116,8 +129,8 @@ export function CountrySelector() {
           ref={dropdownRef}
           style={{
             position: "fixed",
-            top: ref.current ? ref.current.getBoundingClientRect().bottom + 8 : 0,
-            left: ref.current ? ref.current.getBoundingClientRect().left : 0,
+            top: dropdownPos.top,
+            left: dropdownPos.left,
             zIndex: 9999,
           }}
           className="min-w-[200px] rounded-md border border-brand-dark-gold/20 bg-brand-dark shadow-lg shadow-black/30"
