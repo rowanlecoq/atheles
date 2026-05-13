@@ -130,17 +130,13 @@ export function SearchToggle() {
     };
   }, [query]);
 
-  // Focus input when search opens
+  // Focus desktop input when search opens (mobile uses autoFocus on the input)
   useEffect(() => {
     if (open) {
       const isMobile = window.matchMedia("(pointer: coarse)").matches;
-      setTimeout(() => {
-        if (isMobile) {
-          mobileInputRef.current?.focus();
-        } else {
-          desktopInputRef.current?.focus();
-        }
-      }, 50);
+      if (!isMobile) {
+        setTimeout(() => desktopInputRef.current?.focus(), 50);
+      }
     }
   }, [open]);
 
@@ -202,11 +198,12 @@ export function SearchToggle() {
                 type="text"
                 value={query}
                 onChange={(e) => setQuery(e.target.value)}
-                placeholder="search products..."
+                placeholder="find items"
                 className="w-full bg-transparent text-base text-brand-pale-gold placeholder-brand-dark-gold/60 outline-none"
                 autoComplete="off"
                 autoCorrect="off"
                 autoCapitalize="off"
+                autoFocus
               />
             </form>
             <button
