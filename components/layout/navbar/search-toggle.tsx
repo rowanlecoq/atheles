@@ -1,7 +1,7 @@
 "use client";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -37,7 +37,7 @@ function ResultItem({ product, onCloseImmediate }: { product: SearchProduct; onC
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs text-white">{product.title}</p>
+        <p className="truncate text-xs lowercase text-white">{product.title}</p>
         {price && (
           <p className="text-[11px] text-brand-dark-gold">
             {parseFloat(price.amount).toFixed(2)} {price.currencyCode}
@@ -62,6 +62,8 @@ export function SearchToggle() {
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const backdropPointerStart = useRef({ x: 0, y: 0 });
   const router = useRouter();
+  const pathname = usePathname();
+  const prevPathnameRef = useRef(pathname);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -75,8 +77,6 @@ export function SearchToggle() {
     }, 150);
   }, []);
 
-  // No fade delay for result taps — the animation fighting page transition
-  // causes a flicker. Close instantly, then navigate.
   const closeImmediate = useCallback(() => {
     setOpen(false);
     setClosing(false);
@@ -84,10 +84,26 @@ export function SearchToggle() {
     setResults([]);
   }, []);
 
+  // When the pathname changes (navigation completed), close the overlay.
+  // This keeps the dark backdrop visible as a loading screen while Next.js
+  // fetches the new page, eliminating the flash of old page content.
+  useEffect(() => {
+    if (pathname !== prevPathnameRef.current) {
+      prevPathnameRef.current = pathname;
+      if (open) closeImmediate();
+    }
+  }, [pathname, open, closeImmediate]);
+
   const handleResultTap = useCallback((handle: string) => {
     const href = `/product/${handle}`;
-    closeImmediate();
-    router.push(href);
+    if (window.location.pathname === href) {
+      // Same page: pathname won't change, close immediately.
+      closeImmediate();
+    } else {
+      // Different page: keep overlay visible while Next.js loads,
+      // pathname change effect will close it once navigation completes.
+      router.push(href);
+    }
   }, [closeImmediate, router]);
 
   const openSearch = useCallback(() => {
