@@ -79,38 +79,46 @@ export function SearchToggle() {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (isMobile) {
       setOpen(true);
-      // Input is always in the DOM (portal is always mounted), so we can
-      // focus it directly in the click handler — no flushSync needed, which
-      // eliminates the render-flicker it caused.
-      requestAnimationFrame(() =>
-        mobileInputRef.current?.focus({ preventScroll: true })
-      );
+      mobileInputRef.current?.focus({ preventScroll: true });
       return;
     }
     setOpen(true);
   }, []);
 
-  // Desktop: the navbar is position:sticky — the browser drifts the scroll
-  // toward the input's layout position (near y=0) on every keystroke or
-  // mouse-selection drag. Intercept and snap back. Also catches iOS keyboard
-  // autocomplete bar height changes via visualViewport.resize.
   useEffect(() => {
     if (!open) return;
 
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+
+    if (isMobile) {
+      // Lock scroll on iOS with position:fixed trick — momentum scroll and
+      // rubber-band scrolling still bypass overflow:hidden on iOS.
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, scrollY);
+      };
+    }
+
+    // Desktop: sticky navbar drifts scroll toward y=0 on every keystroke.
+    // Intercept and snap back.
     let active = false;
     let savedY = window.scrollY;
 
     const onStart = () => { active = true; savedY = window.scrollY; };
     const onEnd = () => { active = false; };
     const onScroll = () => { if (active) window.scrollTo(0, savedY); };
-    const onViewportResize = () => { window.scrollTo(0, savedY); };
 
     document.addEventListener("keydown", onStart, true);
     document.addEventListener("keyup", onEnd, true);
     document.addEventListener("mousedown", onStart, true);
     document.addEventListener("mouseup", onEnd, true);
     window.addEventListener("scroll", onScroll);
-    window.visualViewport?.addEventListener("resize", onViewportResize);
 
     return () => {
       document.removeEventListener("keydown", onStart, true);
@@ -118,7 +126,6 @@ export function SearchToggle() {
       document.removeEventListener("mousedown", onStart, true);
       document.removeEventListener("mouseup", onEnd, true);
       window.removeEventListener("scroll", onScroll);
-      window.visualViewport?.removeEventListener("resize", onViewportResize);
     };
   }, [open]);
 
