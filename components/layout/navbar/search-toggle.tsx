@@ -2,7 +2,7 @@
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -19,11 +19,22 @@ type SearchProduct = {
 };
 
 function ResultItem({ product, onClose }: { product: SearchProduct; onClose: () => void }) {
+  const pathname = usePathname();
   const price = product.priceRange?.minVariantPrice;
+
+  const handleClick = () => {
+    onClose();
+    // Same page: Link won't navigate so we must scroll to top manually.
+    // Different page: Next.js handles scroll reset on navigation.
+    if (pathname === `/product/${product.handle}`) {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    }
+  };
+
   return (
     <Link
       href={`/product/${product.handle}`}
-      onClick={onClose}
+      onClick={handleClick}
       className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-brand-dark-gold/10"
     >
       <div className="relative h-10 w-10 flex-none overflow-hidden rounded bg-brand-medium-grey/20">
