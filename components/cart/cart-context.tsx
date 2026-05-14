@@ -13,7 +13,6 @@ import React, {
   useEffect,
   useMemo,
   useOptimistic,
-  useRef,
   useState,
 } from "react";
 
@@ -31,15 +30,17 @@ type CartAction =
 
 type CartContextType = {
   cartPromise: Promise<Cart | undefined>;
-  // Persistent quantity overrides — survive server cart re-fetches (discount apply, navigation, etc.)
   qtyPatch: Map<string, number>;
   setQtyPatch: React.Dispatch<React.SetStateAction<Map<string, number>>>;
+  // Flips to true once localStorage quantities are loaded — lets CartModal avoid
+  // treating the hydration quantity change as a real "item added" event.
+  patchHydrated: boolean;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
 function calculateItemCost(quantity: number, price: string): string {
-  return (Number(price) * quantity).toString();
+  return (Number(price) * quantity).toFixed(2);
 }
 
 function updateCartItemHelper(
@@ -115,8 +116,8 @@ function updateCartTotals(
   return {
     totalQuantity,
     cost: {
-      subtotalAmount: { amount: totalAmount.toString(), currencyCode },
-      totalAmount: { amount: totalAmount.toString(), currencyCode },
+      subtotalAmount: { amount: totalAmount.toFixed(2), currencyCode },
+      totalAmount: { amount: totalAmount.toFixed(2), currencyCode },
       totalTaxAmount: { amount: "0", currencyCode },
     },
   };
@@ -205,11 +206,8 @@ export function CartProvider({
   children: React.ReactNode;
   cartPromise: Promise<Cart | undefined>;
 }) {
-  // qtyPatch lives in CartProvider (persistent across navigations and cart re-fetches).
-  // When a server action invalidates the cart cache, useOptimistic resets to the fresh
-  // server state. qtyPatch keeps our local quantity overrides alive so they aren't lost.
   const [qtyPatch, setQtyPatch] = useState<Map<string, number>>(new Map());
-  const hydratedRef = useRef(false);
+  const [patchHydrated, setPatchHydrated] = useState(false);
 
   // Load persisted quantities from localStorage after mount
   useEffect(() => {
@@ -220,12 +218,14 @@ export function CartProvider({
         setQtyPatch(new Map(Object.entries(obj).map(([k, v]) => [k, Number(v)])));
       }
     } catch {}
-    hydratedRef.current = true;
+    // Signal that hydration is complete so CartModal can sync its quantityRef
+    // and not treat the hydration-induced qty change as a "new item added" event.
+    setPatchHydrated(true);
   }, []);
 
-  // Persist to localStorage whenever patch changes (skip pre-hydration write)
+  // Persist patch to localStorage whenever it changes (after initial hydration)
   useEffect(() => {
-    if (!hydratedRef.current) return;
+    if (!patchHydrated) return;
     if (qtyPatch.size === 0) {
       localStorage.removeItem("atheles-qty-patch");
     } else {
@@ -234,10 +234,10 @@ export function CartProvider({
         JSON.stringify(Object.fromEntries(qtyPatch)),
       );
     }
-  }, [qtyPatch]);
+  }, [qtyPatch, patchHydrated]);
 
   return (
-    <CartContext.Provider value={{ cartPromise, qtyPatch, setQtyPatch }}>
+    <CartContext.Provider value={{ cartPromise, qtyPatch, setQtyPatch, patchHydrated }}>
       {children}
     </CartContext.Provider>
   );
@@ -249,15 +249,14 @@ export function useCart() {
     throw new Error("useCart must be used within a CartProvider");
   }
 
-  const { cartPromise, qtyPatch, setQtyPatch } = context;
+  const { cartPromise, qtyPatch, setQtyPatch, patchHydrated } = context;
   const initialCart = use(cartPromise);
   const [optimisticCart, updateOptimisticCart] = useOptimistic(
     initialCart,
     cartReducer,
   );
 
-  // When server cart is refreshed, clear patch entries that the server has confirmed.
-  // This keeps patch entries alive until Shopify catches up, then auto-cleans them.
+  // When server cart is refreshed, clear patch entries the server has confirmed.
   useEffect(() => {
     if (!initialCart) return;
     setQtyPatch((prev) => {
@@ -268,7 +267,6 @@ export function useCart() {
         const serverItem = initialCart.lines.find(
           (l) => l.merchandise.id === id,
         );
-        // Server confirmed this quantity (or item was deleted) — remove the patch
         if (!serverItem || serverItem.quantity === qty) {
           next.delete(id);
           changed = true;
@@ -279,9 +277,12 @@ export function useCart() {
   }, [initialCart, setQtyPatch]);
 
   // Merge qtyPatch on top of the optimistic cart so quantity overrides survive
-  // any cart re-fetch triggered by discount codes or navigation.
+  // any cart re-fetch (discount apply, page navigation, etc.).
+  // Also scale discountAllocations proportionally so the displayed discount
+  // reflects the patched quantity rather than the last server-confirmed quantity.
   const cart = useMemo(() => {
     if (!optimisticCart || qtyPatch.size === 0) return optimisticCart;
+
     const updatedLines = optimisticCart.lines
       .map((item) => {
         const overrideQty = qtyPatch.get(item.merchandise.id);
@@ -302,10 +303,54 @@ export function useCart() {
         };
       })
       .filter(Boolean) as CartItem[];
+
+    const patchedSubtotal = updatedLines.reduce(
+      (sum, item) => sum + Number(item.cost.totalAmount.amount),
+      0,
+    );
+    const serverSubtotal = Number(optimisticCart.cost.subtotalAmount.amount);
+
+    // Scale any existing discount allocations proportionally to the new subtotal.
+    // This keeps the displayed discount in sync with quantity changes while the
+    // server action (updateItemQuantity) is still in-flight.
+    const discountScale =
+      serverSubtotal > 0 ? patchedSubtotal / serverSubtotal : 1;
+    const scaledDiscountAllocations = (
+      optimisticCart.discountAllocations ?? []
+    ).map((a) => ({
+      ...a,
+      discountedAmount: {
+        ...a.discountedAmount,
+        amount: (
+          parseFloat(a.discountedAmount.amount) * discountScale
+        ).toFixed(2),
+      },
+    }));
+
+    const totalDiscount = scaledDiscountAllocations.reduce(
+      (sum, a) => sum + parseFloat(a.discountedAmount.amount),
+      0,
+    );
+    const currencyCode =
+      updatedLines[0]?.cost.totalAmount.currencyCode ?? "USD";
+    const patchedTotal = Math.max(0, patchedSubtotal - totalDiscount);
+
     return {
       ...optimisticCart,
-      ...updateCartTotals(updatedLines),
       lines: updatedLines,
+      totalQuantity: updatedLines.reduce((sum, item) => sum + item.quantity, 0),
+      discountAllocations: scaledDiscountAllocations,
+      cost: {
+        ...optimisticCart.cost,
+        subtotalAmount: {
+          amount: patchedSubtotal.toFixed(2),
+          currencyCode,
+        },
+        totalAmount: {
+          amount: patchedTotal.toFixed(2),
+          currencyCode,
+        },
+      },
     };
   }, [optimisticCart, qtyPatch]);
 
@@ -314,7 +359,6 @@ export function useCart() {
       type: "UPDATE_ITEM",
       payload: { merchandiseId, updateType },
     });
-    // Also record in persistent patch so the quantity survives cache invalidations
     setQtyPatch((prev) => {
       const currentItem = optimisticCart?.lines.find(
         (l) => l.merchandise.id === merchandiseId,
@@ -343,8 +387,9 @@ export function useCart() {
       cart,
       updateCartItem,
       addCartItem,
+      patchHydrated,
     }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cart],
+    [cart, patchHydrated],
   );
 }

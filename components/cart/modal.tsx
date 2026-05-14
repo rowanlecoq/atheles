@@ -195,7 +195,7 @@ function FavoritesCarousel({
 }
 
 export default function CartModal() {
-  const { cart, updateCartItem, addCartItem } = useCart();
+  const { cart, updateCartItem, addCartItem, patchHydrated } = useCart();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
@@ -245,6 +245,15 @@ export default function CartModal() {
       createCartAndSetCookie();
     }
   }, [cart]);
+
+  // Sync quantityRef once the localStorage patch is loaded so the initial
+  // hydration quantity change doesn't mistakenly trigger a cart open.
+  useEffect(() => {
+    if (patchHydrated) {
+      quantityRef.current = cart?.totalQuantity;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patchHydrated]);
 
   useEffect(() => {
     if (

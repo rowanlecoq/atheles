@@ -268,7 +268,7 @@ export function SearchToggle() {
                 {results.slice(0, 8).map((product) => (
                   <ResultItem key={product.handle} product={product} onTap={handleResultTap} loading={navigatingHandle === product.handle} />
                 ))}
-                {!loading && results.length > 0 && (
+                {!loading && results.length > 8 && (
                   <button
                     type="button"
                     onClick={() => {
@@ -313,16 +313,18 @@ export function SearchToggle() {
                   {results.slice(0, 5).map((product) => (
                     <ResultItem key={product.handle} product={product} onTap={handleResultTap} loading={navigatingHandle === product.handle} />
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-                      close();
-                    }}
-                    className="w-full border-t border-brand-dark-gold/20 px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-brand-dark-gold transition-colors hover:bg-brand-dark-gold/5 hover:text-brand-gold"
-                  >
-                    view all results
-                  </button>
+                  {results.length > 5 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                        close();
+                      }}
+                      className="w-full border-t border-brand-dark-gold/20 px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-brand-dark-gold transition-colors hover:bg-brand-dark-gold/5 hover:text-brand-gold"
+                    >
+                      view all results
+                    </button>
+                  )}
                 </>
               )}
             </div>
