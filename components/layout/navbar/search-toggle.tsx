@@ -61,6 +61,7 @@ export function SearchToggle() {
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const backdropPointerStart = useRef({ x: 0, y: 0 });
+  const suppressScrollRestore = useRef(false);
   const router = useRouter();
 
   useEffect(() => { setMounted(true); }, []);
@@ -74,6 +75,17 @@ export function SearchToggle() {
       setResults([]);
     }, 150);
   }, []);
+
+  // Used when tapping a result — immediately unlocks body at y=0 so the
+  // incoming product page starts at the top instead of the saved scroll offset.
+  const closeForNavigation = useCallback(() => {
+    suppressScrollRestore.current = true;
+    document.body.style.position = "";
+    document.body.style.top = "";
+    document.body.style.width = "";
+    window.scrollTo(0, 0);
+    close();
+  }, [close]);
 
   const openSearch = useCallback(() => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
@@ -101,7 +113,8 @@ export function SearchToggle() {
         document.body.style.position = "";
         document.body.style.top = "";
         document.body.style.width = "";
-        window.scrollTo(0, scrollY);
+        if (!suppressScrollRestore.current) window.scrollTo(0, scrollY);
+        suppressScrollRestore.current = false;
       };
     }
 
@@ -260,7 +273,7 @@ export function SearchToggle() {
                   <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
                 )}
                 {results.slice(0, 8).map((product) => (
-                  <ResultItem key={product.handle} product={product} onClose={close} />
+                  <ResultItem key={product.handle} product={product} onClose={closeForNavigation} />
                 ))}
                 {!loading && results.length > 0 && (
                   <button
@@ -305,7 +318,7 @@ export function SearchToggle() {
               ) : (
                 <>
                   {results.slice(0, 5).map((product) => (
-                    <ResultItem key={product.handle} product={product} onClose={close} />
+                    <ResultItem key={product.handle} product={product} onClose={closeForNavigation} />
                   ))}
                   <button
                     type="button"
