@@ -234,7 +234,10 @@ export default function CartModal() {
       );
     }
     setAddingFav(handle);
-    addItem(null, variantId).catch(() => {}).finally(() => setAddingFav(null));
+    addItem(null, variantId).catch(() => {});
+    // Clear immediately — optimistic update already shows the item in cart,
+    // so "adding..." doesn't need to wait for the server to finish.
+    requestAnimationFrame(() => setAddingFav(null));
   }, [favProducts, addCartItem]);
 
   useEffect(() => {
