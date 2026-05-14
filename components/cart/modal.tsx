@@ -15,7 +15,6 @@ import { DEFAULT_OPTION } from "lib/constants";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
@@ -195,10 +194,8 @@ function FavoritesCarousel({
 }
 
 export default function CartModal() {
-  const { cart, updateCartItem, addCartItem, clearDiscount, setServerCart, patchHydrated } = useCart();
-  const router = useRouter();
+  const { cart, updateCartItem, addCartItem, clearDiscount, setServerCart } = useCart();
   const [isOpen, setIsOpen] = useState(false);
-  const quantityRef = useRef(cart?.totalQuantity);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
   const [discountError, setDiscountError] = useState("");
@@ -213,7 +210,7 @@ export default function CartModal() {
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
-  const handleAddFav = useCallback((handle: string, variantId: string) => {
+  const handleAddFav = useCallback(async (handle: string, variantId: string) => {
     const p = favProducts.find((f) => f.handle === handle);
     if (p?.id && p.firstVariantPrice) {
       // Optimistic update — item appears in cart instantly
@@ -234,37 +231,24 @@ export default function CartModal() {
       );
     }
     setAddingFav(handle);
-    addItem(null, variantId).catch(() => {});
-    // Clear immediately — optimistic update already shows the item in cart,
-    // so "adding..." doesn't need to wait for the server to finish.
-    requestAnimationFrame(() => setAddingFav(null));
-  }, [favProducts, addCartItem]);
+    try {
+      const result = await addItem(null, variantId);
+      // Immediately promote the server-confirmed cart into state so that
+      // when setAddingFav(null) triggers a re-render, useOptimistic can
+      // settle against a serverCart that already contains the new item,
+      // preventing the flash-to-empty glitch.
+      if (result && typeof result === "object" && "cart" in result) {
+        setServerCart(result.cart);
+      }
+    } catch {}
+    setAddingFav(null);
+  }, [favProducts, addCartItem, setServerCart]);
 
   useEffect(() => {
     if (!cart) {
       createCartAndSetCookie();
     }
   }, [cart]);
-
-  // Sync quantityRef once the localStorage patch is loaded so the initial
-  // hydration quantity change doesn't mistakenly trigger a cart open.
-  useEffect(() => {
-    if (patchHydrated) {
-      quantityRef.current = cart?.totalQuantity;
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [patchHydrated]);
-
-  useEffect(() => {
-    if (
-      cart?.totalQuantity &&
-      cart?.totalQuantity !== quantityRef.current &&
-      cart?.totalQuantity > 0
-    ) {
-      setIsOpen(true);
-      quantityRef.current = cart?.totalQuantity;
-    }
-  }, [cart?.totalQuantity]);
 
   // Listen for custom open-cart events (from quick-add etc.)
   useEffect(() => {
