@@ -85,12 +85,28 @@ export function SearchToggle() {
     setOpen(true);
   }, []);
 
-  // Desktop: the navbar is position:sticky — the browser drifts the scroll
-  // toward the input's layout position (near y=0) on every keystroke or
-  // mouse-selection drag. Intercept and snap back.
   useEffect(() => {
     if (!open) return;
 
+    const isMobile = window.matchMedia("(pointer: coarse)").matches;
+
+    if (isMobile) {
+      // Lock scroll on iOS with position:fixed trick — momentum scroll and
+      // rubber-band scrolling still bypass overflow:hidden on iOS.
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        window.scrollTo(0, scrollY);
+      };
+    }
+
+    // Desktop: sticky navbar drifts scroll toward y=0 on every keystroke.
+    // Intercept and snap back.
     let active = false;
     let savedY = window.scrollY;
 
