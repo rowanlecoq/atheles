@@ -61,7 +61,6 @@ export function SearchToggle() {
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const backdropPointerStart = useRef({ x: 0, y: 0 });
-  const suppressScrollRestore = useRef(false);
   const router = useRouter();
 
   useEffect(() => { setMounted(true); }, []);
@@ -76,11 +75,7 @@ export function SearchToggle() {
     }, 150);
   }, []);
 
-  // Used when tapping a result — suppresses scroll restore so the incoming
-  // page starts at the top. Body stays fixed during the fade-out so the
-  // current page doesn't flash to the top before navigation completes.
   const closeForNavigation = useCallback(() => {
-    suppressScrollRestore.current = true;
     close();
   }, [close]);
 
@@ -100,19 +95,16 @@ export function SearchToggle() {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
     if (isMobile) {
-      // Lock scroll on iOS with position:fixed trick — momentum scroll and
-      // rubber-band scrolling still bypass overflow:hidden on iOS.
-      const scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-      return () => {
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-        if (!suppressScrollRestore.current) window.scrollTo(0, scrollY);
-        suppressScrollRestore.current = false;
+      // Prevent scroll by blocking touchmove on anything outside the search
+      // panel. Safer than position:fixed body — no layout changes, no scroll
+      // restoration, cleanup is a single removeEventListener.
+      const preventScroll = (e: TouchEvent) => {
+        if (!mobileOverlayRef.current?.contains(e.target as Node)) {
+          e.preventDefault();
+        }
       };
+      document.addEventListener("touchmove", preventScroll, { passive: false });
+      return () => document.removeEventListener("touchmove", preventScroll);
     }
 
     // Desktop: sticky navbar drifts scroll toward y=0 on every keystroke.
