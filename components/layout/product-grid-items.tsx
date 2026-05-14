@@ -114,7 +114,7 @@ function ProductCard({ product }: { product: Product }) {
                   <button
                     key={variant.id}
                     type="button"
-                    disabled={!variant.availableForSale || adding}
+                    disabled={!variant.availableForSale || added}
                     onClick={() => variant.availableForSale && handleAdd(variant.id)}
                     className={`min-h-[40px] rounded-md py-2.5 text-xs font-medium transition-all ${
                       variant.availableForSale

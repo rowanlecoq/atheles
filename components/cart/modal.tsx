@@ -530,7 +530,7 @@ export default function CartModal() {
 
                         return (
                           <li
-                            key={item.id ?? item.merchandise.id}
+                            key={item.merchandise.id}
                             className="flex w-full flex-col border-b border-brand-dark-gold/20"
                           >
                             <div className="relative flex w-full flex-row justify-between gap-3 py-4 pl-14 pr-1">
