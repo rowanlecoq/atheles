@@ -74,7 +74,7 @@ export function AddToCart({ product }: { product: Product }) {
         )}
 
         <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
-          {adding ? "Adding..." : selectedVariantId ? "Add To Cart" : "Select a Size"}
+          {selectedVariantId ? "Add To Cart" : "Select a Size"}
         </span>
 
       </button>
