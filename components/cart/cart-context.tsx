@@ -27,11 +27,12 @@ type CartAction =
   | {
       type: "ADD_ITEM";
       payload: { variant: ProductVariant; product: Product };
-    };
+    }
+  | { type: "REMOVE_DISCOUNT" };
 
 type CartContextType = {
-  // Resolved cart data stored in state — never a promise, never causes suspension.
   serverCart: Cart | undefined;
+  setServerCart: React.Dispatch<React.SetStateAction<Cart | undefined>>;
   qtyPatch: Map<string, number>;
   setQtyPatch: React.Dispatch<React.SetStateAction<Map<string, number>>>;
   patchHydrated: boolean;
@@ -178,6 +179,18 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
 
       return { ...currentCart, ...updateCartTotals(updatedLines), lines: updatedLines };
     }
+    case "REMOVE_DISCOUNT": {
+      return {
+        ...currentCart,
+        discountCodes: [],
+        discountAllocations: [],
+        cost: {
+          ...currentCart.cost,
+          // Restore total to subtotal (no discount applied)
+          totalAmount: currentCart.cost.subtotalAmount,
+        },
+      };
+    }
     default:
       return currentCart;
   }
@@ -237,7 +250,7 @@ export function CartProvider({
   }, [qtyPatch, patchHydrated]);
 
   return (
-    <CartContext.Provider value={{ serverCart, qtyPatch, setQtyPatch, patchHydrated }}>
+    <CartContext.Provider value={{ serverCart, setServerCart, qtyPatch, setQtyPatch, patchHydrated }}>
       {children}
     </CartContext.Provider>
   );
@@ -249,7 +262,7 @@ export function useCart() {
     throw new Error("useCart must be used within a CartProvider");
   }
 
-  const { serverCart, qtyPatch, setQtyPatch, patchHydrated } = context;
+  const { serverCart, setServerCart, qtyPatch, setQtyPatch, patchHydrated } = context;
 
   // serverCart is plain state — no use(), no suspension possible.
   const [optimisticCart, updateOptimisticCart] = useOptimistic(
@@ -369,9 +382,15 @@ export function useCart() {
     updateOptimisticCart({ type: "ADD_ITEM", payload: { variant, product } });
   };
 
+  // Optimistically zeroes out discount so the total updates instantly on remove.
+  // The server action (removeDiscountCode) catches up in the background.
+  const clearDiscount = () => {
+    updateOptimisticCart({ type: "REMOVE_DISCOUNT" });
+  };
+
   return useMemo(
-    () => ({ cart, updateCartItem, addCartItem, patchHydrated }),
+    () => ({ cart, updateCartItem, addCartItem, clearDiscount, setServerCart, patchHydrated }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cart, patchHydrated],
+    [cart, patchHydrated, setServerCart],
   );
 }

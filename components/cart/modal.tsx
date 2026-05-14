@@ -195,7 +195,7 @@ function FavoritesCarousel({
 }
 
 export default function CartModal() {
-  const { cart, updateCartItem, addCartItem, patchHydrated } = useCart();
+  const { cart, updateCartItem, addCartItem, clearDiscount, setServerCart, patchHydrated } = useCart();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
@@ -653,9 +653,13 @@ export default function CartModal() {
                             <button
                               type="button"
                               onClick={() => {
-                                setAppliedCodeLocal(null); setDiscountConfirmed(false);
+                                setAppliedCodeLocal(null);
+                                setDiscountConfirmed(false);
                                 setDiscountCode("");
                                 setDiscountError("");
+                                // Optimistically zero out the discount so total
+                                // updates instantly without waiting for Shopify.
+                                clearDiscount();
                                 removeDiscountCode().catch(() => {});
                               }}
                               className="text-xs text-brand-grey hover:text-red-400"
@@ -691,6 +695,11 @@ export default function CartModal() {
                                         setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                         setDiscountError("invalid or expired code.");
                                         removeDiscountCode().catch(() => {});
+                                      } else if (result.cart) {
+                                        // Use the returned cart immediately — no need to wait
+                                        // for the next cartPromise refresh cycle.
+                                        setServerCart(result.cart);
+                                        setDiscountConfirmed(true);
                                       }
                                     }).catch(() => {
                                       setAppliedCodeLocal(null); setDiscountConfirmed(false);
@@ -719,6 +728,9 @@ export default function CartModal() {
                                       setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                       setDiscountError("invalid or expired code.");
                                       removeDiscountCode().catch(() => {});
+                                    } else if (result.cart) {
+                                      setServerCart(result.cart);
+                                      setDiscountConfirmed(true);
                                     }
                                   }).catch(() => {
                                     setAppliedCodeLocal(null); setDiscountConfirmed(false);
