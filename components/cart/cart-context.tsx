@@ -17,6 +17,8 @@ import React, {
   useState,
 } from "react";
 
+export const MAX_ITEM_QUANTITY = 20;
+
 type UpdateType = "plus" | "minus" | "delete";
 
 type CartAction =
@@ -50,8 +52,10 @@ function updateCartItemHelper(
 ): CartItem | null {
   if (updateType === "delete") return null;
 
-  const newQuantity =
-    updateType === "plus" ? item.quantity + 1 : item.quantity - 1;
+  const newQuantity = Math.min(
+    updateType === "plus" ? item.quantity + 1 : item.quantity - 1,
+    MAX_ITEM_QUANTITY,
+  );
   if (newQuantity === 0) return null;
 
   const singleItemAmount = Number(item.cost.totalAmount.amount) / item.quantity;
@@ -365,12 +369,14 @@ export function useCart() {
         (l) => l.merchandise.id === merchandiseId,
       );
       const baseQty = prev.get(merchandiseId) ?? currentItem?.quantity ?? 1;
-      const newQty =
+      const newQty = Math.min(
         updateType === "plus"
           ? baseQty + 1
           : updateType === "minus"
             ? baseQty - 1
-            : 0;
+            : 0,
+        MAX_ITEM_QUANTITY,
+      );
       const next = new Map(prev);
       if (newQty <= 0) next.delete(merchandiseId);
       else next.set(merchandiseId, newQty);
