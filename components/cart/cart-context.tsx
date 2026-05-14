@@ -35,6 +35,7 @@ type CartAction =
 type CartContextType = {
   serverCart: Cart | undefined;
   setServerCart: React.Dispatch<React.SetStateAction<Cart | undefined>>;
+  setServerCartFresh: (cart: Cart) => void;
   qtyPatch: Map<string, number>;
   setQtyPatch: React.Dispatch<React.SetStateAction<Map<string, number>>>;
   patchHydrated: boolean;
@@ -218,12 +219,29 @@ export function CartProvider({
   const [qtyPatch, setQtyPatch] = useState<Map<string, number>>(new Map());
   const [patchHydrated, setPatchHydrated] = useState(false);
 
+  // When a server action returns a confirmed cart directly, we call
+  // setServerCartFresh so RSC re-renders triggered by updateTag (which may
+  // resolve with a stale Shopify response) cannot immediately undo that update.
+  const rscHoldRef = useRef<{ minQty: number; until: number } | null>(null);
+  const setServerCartFresh = useCallback((cart: Cart) => {
+    rscHoldRef.current = { minQty: cart.totalQuantity, until: Date.now() + 8000 };
+    setServerCart(cart);
+  }, []);
+
   // Subscribe to future cartPromise changes without causing any suspension.
   useEffect(() => {
     if (cartPromise === initialPromiseRef.current) return;
     let cancelled = false;
     cartPromise.then((data) => {
-      if (!cancelled) setServerCart(data ?? undefined);
+      if (cancelled) return;
+      const hold = rscHoldRef.current;
+      if (hold && Date.now() < hold.until && (data == null || data.totalQuantity < hold.minQty)) {
+        // RSC landed within the hold window with fewer items — likely a stale
+        // Shopify response racing against a direct setServerCartFresh call.
+        return;
+      }
+      rscHoldRef.current = null;
+      setServerCart(data ?? undefined);
     });
     return () => { cancelled = true; };
   }, [cartPromise]);
@@ -258,7 +276,7 @@ export function CartProvider({
   }, [qtyPatch, patchHydrated]);
 
   return (
-    <CartContext.Provider value={{ serverCart, setServerCart, qtyPatch, setQtyPatch, patchHydrated }}>
+    <CartContext.Provider value={{ serverCart, setServerCart, setServerCartFresh, qtyPatch, setQtyPatch, patchHydrated }}>
       {children}
     </CartContext.Provider>
   );
@@ -270,7 +288,7 @@ export function useCart() {
     throw new Error("useCart must be used within a CartProvider");
   }
 
-  const { serverCart, setServerCart, qtyPatch, setQtyPatch, patchHydrated } = context;
+  const { serverCart, setServerCart, setServerCartFresh, qtyPatch, setQtyPatch, patchHydrated } = context;
 
   // serverCart is plain state — no use(), no suspension possible.
   const [optimisticCart, updateOptimisticCart] = useOptimistic(
@@ -407,8 +425,8 @@ export function useCart() {
   };
 
   return useMemo(
-    () => ({ cart, updateCartItem, addCartItem, clearDiscount, setServerCart, patchHydrated }),
+    () => ({ cart, updateCartItem, addCartItem, clearDiscount, setServerCart, setServerCartFresh, patchHydrated }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cart, patchHydrated, setServerCart],
+    [cart, patchHydrated, setServerCart, setServerCartFresh],
   );
 }

@@ -194,7 +194,7 @@ function FavoritesCarousel({
 }
 
 export default function CartModal() {
-  const { cart, updateCartItem, addCartItem, clearDiscount, setServerCart } = useCart();
+  const { cart, updateCartItem, addCartItem, clearDiscount, setServerCart, setServerCartFresh } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
@@ -211,15 +211,35 @@ export default function CartModal() {
   const closeCart = () => setIsOpen(false);
 
   const handleAddFav = useCallback(async (handle: string, variantId: string) => {
+    const p = favProducts.find((f) => f.handle === handle);
+    if (p?.id && p.firstVariantPrice) {
+      addCartItem(
+        {
+          id: variantId,
+          title: p.firstVariantTitle || "Default Title",
+          availableForSale: true,
+          selectedOptions: p.firstVariantOptions || [],
+          price: p.firstVariantPrice,
+        },
+        {
+          id: p.id,
+          handle: p.handle,
+          title: p.title,
+          featuredImage: p.featuredImage as never,
+        } as never,
+      );
+    }
     setAddingFav(handle);
     try {
       const result = await addItem(null, variantId);
       if (result && typeof result === "object" && "cart" in result) {
-        setServerCart(result.cart);
+        // Use setServerCartFresh so that any stale RSC re-render triggered by
+        // updateTag cannot override this confirmed result within the hold window.
+        setServerCartFresh(result.cart);
       }
     } catch {}
     setAddingFav(null);
-  }, [setServerCart]);
+  }, [favProducts, addCartItem, setServerCartFresh]);
 
   useEffect(() => {
     if (!cart) {
