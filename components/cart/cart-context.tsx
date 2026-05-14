@@ -13,6 +13,7 @@ import React, {
   useEffect,
   useMemo,
   useOptimistic,
+  useRef,
   useState,
 } from "react";
 
@@ -208,6 +209,32 @@ export function CartProvider({
   // When a server action invalidates the cart cache, useOptimistic resets to the fresh
   // server state. qtyPatch keeps our local quantity overrides alive so they aren't lost.
   const [qtyPatch, setQtyPatch] = useState<Map<string, number>>(new Map());
+  const hydratedRef = useRef(false);
+
+  // Load persisted quantities from localStorage after mount
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem("atheles-qty-patch");
+      if (stored) {
+        const obj = JSON.parse(stored) as Record<string, number>;
+        setQtyPatch(new Map(Object.entries(obj).map(([k, v]) => [k, Number(v)])));
+      }
+    } catch {}
+    hydratedRef.current = true;
+  }, []);
+
+  // Persist to localStorage whenever patch changes (skip pre-hydration write)
+  useEffect(() => {
+    if (!hydratedRef.current) return;
+    if (qtyPatch.size === 0) {
+      localStorage.removeItem("atheles-qty-patch");
+    } else {
+      localStorage.setItem(
+        "atheles-qty-patch",
+        JSON.stringify(Object.fromEntries(qtyPatch)),
+      );
+    }
+  }, [qtyPatch]);
 
   return (
     <CartContext.Provider value={{ cartPromise, qtyPatch, setQtyPatch }}>

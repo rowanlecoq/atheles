@@ -787,18 +787,30 @@ function CheckoutButton() {
 
   return (
     <button
-      className="tap-target flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand-gold p-3 text-center font-heading text-sm font-medium uppercase tracking-wider text-brand-dark opacity-90 transition-opacity hover:opacity-100"
+      className="group tap-target relative flex min-h-[44px] w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brand-gold p-3 text-center font-heading text-sm font-medium uppercase text-brand-dark"
       type="submit"
       disabled={pending}
     >
+      {!pending && (
+        <div
+          className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          style={{
+            background:
+              "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
+            animation: "cartShimmer 2s ease-in-out infinite",
+          }}
+        />
+      )}
       {pending ? (
         <LoadingDots className="bg-brand-dark" />
       ) : (
         <>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="relative z-10 h-4 w-4 flex-none">
             <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
           </svg>
-          Checkout Securely
+          <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
+            Checkout Securely
+          </span>
         </>
       )}
     </button>
