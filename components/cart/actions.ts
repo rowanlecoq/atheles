@@ -72,7 +72,9 @@ export async function addItem(
     } else {
       cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     }
-    updateTag(TAGS.cart);
+    // No updateTag here — callers receive result.cart and apply it via
+    // setServerCartFresh, which avoids the RSC re-render race that can
+    // overwrite the client state with a stale Shopify response.
     return { cart };
   } catch (e) {
     console.error("addItem error:", e);

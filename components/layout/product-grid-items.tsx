@@ -12,7 +12,7 @@ import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
 function ProductCard({ product }: { product: Product }) {
-  const { addCartItem } = useCart();
+  const { addCartItem, setServerCartFresh } = useCart();
   const [showSizes, setShowSizes] = useState(false);
   const [added, setAdded] = useState(false);
   const addedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -24,7 +24,7 @@ function ProductCard({ product }: { product: Product }) {
   const secondImage = product.images[1]?.url;
   const hasMultipleVariants = product.variants.length > 1;
 
-  const handleAdd = (variantId: string) => {
+  const handleAdd = async (variantId: string) => {
     const variant = product.variants.find((v) => v.id === variantId);
     if (!variant || added) return;
     addCartItem(variant, product);
@@ -32,11 +32,16 @@ function ProductCard({ product }: { product: Product }) {
       new CustomEvent("cart:add-optimistic", { detail: { variant, product } }),
     );
     window.dispatchEvent(new Event("open-cart"));
-    addItem(null, variantId).catch(() => {});
     setShowSizes(false);
     setAdded(true);
     if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
     addedTimerRef.current = setTimeout(() => setAdded(false), 700);
+    try {
+      const result = await addItem(null, variantId);
+      if (result && typeof result === "object" && "cart" in result) {
+        setServerCartFresh(result.cart);
+      }
+    } catch {}
   };
 
   return (
