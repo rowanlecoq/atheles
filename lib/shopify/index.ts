@@ -392,9 +392,7 @@ export async function getCollectionProducts({
   sortKey?: string;
 }): Promise<Product[]> {
   if (!endpoint) {
-    console.log(
-      `Skipping getCollectionProducts for '${collection}' - Shopify not configured`,
-    );
+    // Shopify not configured — return empty
     return [];
   }
   return _getCollectionProducts(collection, sortKey, reverse);
@@ -406,7 +404,6 @@ export async function getCollections(): Promise<Collection[]> {
   cacheLife("days");
 
   if (!endpoint) {
-    console.log("Skipping getCollections - Shopify not configured");
     return [
       {
         handle: "",
@@ -454,7 +451,6 @@ export async function getMenu(handle: string): Promise<Menu[]> {
   cacheLife("days");
 
   if (!endpoint) {
-    console.log(`Skipping getMenu for '${handle}' - Shopify not configured`);
     return [];
   }
 
@@ -503,7 +499,6 @@ export async function getProduct(handle: string): Promise<Product | undefined> {
   cacheLife("minutes");
 
   if (!endpoint) {
-    console.log(`Skipping getProduct for '${handle}' - Shopify not configured`);
     return undefined;
   }
 

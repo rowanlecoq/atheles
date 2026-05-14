@@ -498,3 +498,8 @@ body[data-bg="sunset"] {
 }
 
 
+
+@keyframes cartShimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}

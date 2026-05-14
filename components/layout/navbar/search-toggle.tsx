@@ -50,7 +50,6 @@ function ResultItem({ product, onCloseImmediate }: { product: SearchProduct; onC
 
 export function SearchToggle() {
   const [open, setOpen] = useState(false);
-  const [closing, setClosing] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
@@ -68,43 +67,29 @@ export function SearchToggle() {
   useEffect(() => { setMounted(true); }, []);
 
   const close = useCallback(() => {
-    setClosing(true);
-    setTimeout(() => {
-      setOpen(false);
-      setClosing(false);
-      setQuery("");
-      setResults([]);
-    }, 150);
-  }, []);
-
-  const closeImmediate = useCallback(() => {
     setOpen(false);
-    setClosing(false);
     setQuery("");
     setResults([]);
   }, []);
 
-  // When the pathname changes (navigation completed), close the overlay.
-  // This keeps the dark backdrop visible as a loading screen while Next.js
-  // fetches the new page, eliminating the flash of old page content.
+  // When pathname changes (navigation complete), close the overlay.
+  // This keeps the dark backdrop up as a loading screen during navigation,
+  // eliminating the flash of old page content underneath.
   useEffect(() => {
     if (pathname !== prevPathnameRef.current) {
       prevPathnameRef.current = pathname;
-      if (open) closeImmediate();
+      if (open) close();
     }
-  }, [pathname, open, closeImmediate]);
+  }, [pathname, open, close]);
 
   const handleResultTap = useCallback((handle: string) => {
     const href = `/product/${handle}`;
     if (window.location.pathname === href) {
-      // Same page: pathname won't change, close immediately.
-      closeImmediate();
+      close();
     } else {
-      // Different page: keep overlay visible while Next.js loads,
-      // pathname change effect will close it once navigation completes.
       router.push(href);
     }
-  }, [closeImmediate, router]);
+  }, [close, router]);
 
   const openSearch = useCallback(() => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
@@ -224,14 +209,7 @@ export function SearchToggle() {
 
   const showDropdown = open && (loading || results.length > 0) && query.trim().length >= 2;
 
-  // Visibility helpers — overlay is always in the DOM so the input can be
-  // focused immediately without flushSync.
-  const overlayActive = open || closing;
-  const overlayClass = !overlayActive
-    ? "opacity-0 pointer-events-none"
-    : closing
-    ? "opacity-0"
-    : "opacity-100";
+  const overlayClass = open ? "opacity-100" : "opacity-0 pointer-events-none";
 
   return (
     <div ref={containerRef} className="relative">
@@ -244,7 +222,7 @@ export function SearchToggle() {
         <>
           <div
             className={`fixed inset-0 z-[200] bg-black/70 md:hidden ${overlayClass}`}
-            style={{ touchAction: overlayActive ? "none" : "auto" }}
+            style={{ touchAction: open ? "none" : "auto" }}
             onPointerDown={(e) => {
               backdropPointerStart.current = { x: e.clientX, y: e.clientY };
             }}

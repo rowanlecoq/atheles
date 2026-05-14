@@ -198,6 +198,7 @@ export default function CartModal() {
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
   const [discountError, setDiscountError] = useState("");
+  const [applyingDiscount, setApplyingDiscount] = useState(false);
   const [appliedCodeLocal, setAppliedCodeLocal] = useState<string | null>(null);
   const [discountConfirmed, setDiscountConfirmed] = useState(false);
   const discountSyncedRef = useRef(false);
@@ -631,11 +632,12 @@ export default function CartModal() {
                                 }}
                                 placeholder="Enter code"
                                 onKeyDown={(e) => {
-                                  if (e.key === "Enter" && discountCode.trim()) {
+                                  if (e.key === "Enter" && discountCode.trim() && !applyingDiscount) {
                                     e.preventDefault();
                                     (e.target as HTMLInputElement).blur();
                                     const code = discountCode.trim();
                                     setDiscountError("");
+                                    setApplyingDiscount(true);
                                     setAppliedCodeLocal(code);
                                     setDiscountCode("");
                                     applyDiscountCode(code).then((result) => {
@@ -650,7 +652,7 @@ export default function CartModal() {
                                     }).catch(() => {
                                       setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                       setDiscountError("failed to apply code.");
-                                    });
+                                    }).finally(() => setApplyingDiscount(false));
                                   }
                                 }}
                                 enterKeyHint="done"
@@ -658,14 +660,14 @@ export default function CartModal() {
                               />
                               <button
                                 type="button"
-                                disabled={!discountCode.trim()}
+                                disabled={!discountCode.trim() || applyingDiscount}
                                 onClick={() => {
                                   const code = discountCode.trim();
-                                  if (!code) return;
+                                  if (!code || applyingDiscount) return;
                                   setDiscountError("");
+                                  setApplyingDiscount(true);
                                   setAppliedCodeLocal(code);
                                   setDiscountCode("");
-                                  // Validate in background
                                   applyDiscountCode(code).then((result) => {
                                     if (!result.success) {
                                       setAppliedCodeLocal(null); setDiscountConfirmed(false);
@@ -678,11 +680,11 @@ export default function CartModal() {
                                   }).catch(() => {
                                     setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                     setDiscountError("failed to apply code.");
-                                  });
+                                  }).finally(() => setApplyingDiscount(false));
                                 }}
-                                className="rounded-lg border border-brand-gold/40 px-4 py-2 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:opacity-30"
+                                className="rounded-lg border border-brand-gold/40 px-4 py-2 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:cursor-not-allowed disabled:opacity-30"
                               >
-                                apply
+                                {applyingDiscount ? "..." : "apply"}
                               </button>
                             </div>
                             {discountError && (

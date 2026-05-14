@@ -77,12 +77,6 @@ export function AddToCart({ product }: { product: Product }) {
           {adding ? "Adding..." : selectedVariantId ? "Add To Cart" : "Select a Size"}
         </span>
 
-        <style jsx>{`
-          @keyframes cartShimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-          }
-        `}</style>
       </button>
 
       {availableForSale && pointsEarned > 0 && (
