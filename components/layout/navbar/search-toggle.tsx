@@ -17,14 +17,15 @@ type SearchProduct = {
   priceRange?: { minVariantPrice?: { amount: string; currencyCode: string } };
 };
 
-function ResultItem({ product, onCloseImmediate }: { product: SearchProduct; onCloseImmediate: (handle: string) => void }) {
+function ResultItem({ product, onTap, loading }: { product: SearchProduct; onTap: (handle: string) => void; loading: boolean }) {
   const price = product.priceRange?.minVariantPrice;
 
   return (
     <button
       type="button"
-      onClick={() => onCloseImmediate(product.handle)}
-      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-brand-dark-gold/10"
+      onClick={() => onTap(product.handle)}
+      disabled={loading}
+      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors active:bg-brand-dark-gold/20 hover:bg-brand-dark-gold/10 disabled:pointer-events-none"
     >
       <div className="relative h-10 w-10 flex-none overflow-hidden rounded bg-brand-medium-grey/20">
         {product.featuredImage && (
@@ -44,6 +45,7 @@ function ResultItem({ product, onCloseImmediate }: { product: SearchProduct; onC
           </p>
         )}
       </div>
+      {loading && <div className="h-3 w-3 flex-none animate-spin rounded-full border border-brand-dark-gold/40 border-t-brand-dark-gold" />}
     </button>
   );
 }
@@ -54,6 +56,7 @@ export function SearchToggle() {
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [navigatingHandle, setNavigatingHandle] = useState<string | null>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const desktopInputRef = useRef<HTMLInputElement>(null);
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
@@ -70,6 +73,7 @@ export function SearchToggle() {
     setOpen(false);
     setQuery("");
     setResults([]);
+    setNavigatingHandle(null);
   }, []);
 
   // When pathname changes (navigation complete), close the overlay.
@@ -87,6 +91,7 @@ export function SearchToggle() {
     if (window.location.pathname === href) {
       close();
     } else {
+      setNavigatingHandle(handle);
       router.push(href);
     }
   }, [close, router]);
@@ -164,7 +169,8 @@ export function SearchToggle() {
     if (!open) return;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (!isMobile) {
-      setTimeout(() => desktopInputRef.current?.focus({ preventScroll: true }), 50);
+      const t = setTimeout(() => desktopInputRef.current?.focus({ preventScroll: true }), 50);
+      return () => clearTimeout(t);
     }
   }, [open]);
 
@@ -260,7 +266,7 @@ export function SearchToggle() {
                   <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
                 )}
                 {results.slice(0, 8).map((product) => (
-                  <ResultItem key={product.handle} product={product} onCloseImmediate={handleResultTap} />
+                  <ResultItem key={product.handle} product={product} onTap={handleResultTap} loading={navigatingHandle === product.handle} />
                 ))}
                 {!loading && results.length > 0 && (
                   <button
@@ -305,7 +311,7 @@ export function SearchToggle() {
               ) : (
                 <>
                   {results.slice(0, 5).map((product) => (
-                    <ResultItem key={product.handle} product={product} onCloseImmediate={handleResultTap} />
+                    <ResultItem key={product.handle} product={product} onTap={handleResultTap} loading={navigatingHandle === product.handle} />
                   ))}
                   <button
                     type="button"
