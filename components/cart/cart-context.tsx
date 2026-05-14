@@ -228,10 +228,14 @@ export function CartProvider({
     return () => { cancelled = true; };
   }, [cartPromise]);
 
-  // Load persisted quantities from localStorage after mount.
+  // Load persisted quantities from sessionStorage after mount.
+  // sessionStorage (not localStorage) is used intentionally: it survives
+  // soft Next.js navigation within a tab but is cleared on hard reload /
+  // new tab, preventing stale patches from previous sessions overriding
+  // the server cart and causing quantity/price glitches.
   useEffect(() => {
     try {
-      const stored = localStorage.getItem("atheles-qty-patch");
+      const stored = sessionStorage.getItem("atheles-qty-patch");
       if (stored) {
         const obj = JSON.parse(stored) as Record<string, number>;
         setQtyPatch(new Map(Object.entries(obj).map(([k, v]) => [k, Number(v)])));
@@ -240,13 +244,13 @@ export function CartProvider({
     setPatchHydrated(true);
   }, []);
 
-  // Persist patch to localStorage whenever it changes (after hydration).
+  // Persist patch to sessionStorage whenever it changes (after hydration).
   useEffect(() => {
     if (!patchHydrated) return;
     if (qtyPatch.size === 0) {
-      localStorage.removeItem("atheles-qty-patch");
+      sessionStorage.removeItem("atheles-qty-patch");
     } else {
-      localStorage.setItem(
+      sessionStorage.setItem(
         "atheles-qty-patch",
         JSON.stringify(Object.fromEntries(qtyPatch)),
       );
