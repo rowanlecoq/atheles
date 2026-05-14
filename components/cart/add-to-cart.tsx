@@ -25,18 +25,25 @@ export function AddToCart({ product }: { product: Product }) {
   const price = parseFloat(product.priceRange.maxVariantPrice.amount);
   const pointsEarned = Math.floor(price * 50);
 
-  const handleAddToCart = async () => {
+  const handleAddToCart = () => {
     if (!selectedVariantId || !finalVariant || adding) return;
     setAdding(true);
-    // Optimistic update — shows in cart immediately
+
+    // Optimistic update in this component's cart instance
     addCartItem(finalVariant, product);
-    // Open cart drawer immediately
+
+    // Broadcast to CartModal so it applies its own optimistic update
+    // (useOptimistic is component-local, so CartModal needs its own dispatch)
+    window.dispatchEvent(
+      new CustomEvent("cart:add-optimistic", {
+        detail: { variant: finalVariant, product },
+      }),
+    );
+
     window.dispatchEvent(new Event("open-cart"));
-    // Server action — runs in background, keep button disabled until done
-    try {
-      await addItem(null, selectedVariantId);
-    } catch {}
-    setAdding(false);
+    addItem(null, selectedVariantId).catch(() => {});
+    // Clear immediately — item is already visible in cart optimistically
+    requestAnimationFrame(() => setAdding(false));
   };
 
   if (!availableForSale) {

@@ -264,6 +264,18 @@ export default function CartModal() {
     return () => window.removeEventListener("open-cart", handleOpenCart);
   }, []);
 
+  // Mirror optimistic add-to-cart from product pages into this cart instance.
+  // useOptimistic is component-local, so AddToCart's dispatch doesn't reach
+  // CartModal — this bridges the gap so the item appears instantly on open.
+  useEffect(() => {
+    const handleOptimisticAdd = (e: Event) => {
+      const { variant, product } = (e as CustomEvent).detail;
+      addCartItem(variant, product);
+    };
+    window.addEventListener("cart:add-optimistic", handleOptimisticAdd);
+    return () => window.removeEventListener("cart:add-optimistic", handleOptimisticAdd);
+  }, [addCartItem]);
+
   // Sync applied discount code from cart on first open only
   useEffect(() => {
     if (!isOpen) {
