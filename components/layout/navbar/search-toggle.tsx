@@ -76,14 +76,11 @@ export function SearchToggle() {
     }, 150);
   }, []);
 
-  // Used when tapping a result — immediately unlocks body at y=0 so the
-  // incoming product page starts at the top instead of the saved scroll offset.
+  // Used when tapping a result — suppresses scroll restore so the incoming
+  // page starts at the top. Body stays fixed during the fade-out so the
+  // current page doesn't flash to the top before navigation completes.
   const closeForNavigation = useCallback(() => {
     suppressScrollRestore.current = true;
-    document.body.style.position = "";
-    document.body.style.top = "";
-    document.body.style.width = "";
-    window.scrollTo(0, 0);
     close();
   }, [close]);
 
