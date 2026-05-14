@@ -386,6 +386,14 @@ export function useCart() {
 
   const addCartItem = (variant: ProductVariant, product: Product) => {
     updateOptimisticCart({ type: "ADD_ITEM", payload: { variant, product } });
+    // Clear any stale patch for this variant so an old persisted quantity
+    // doesn't override the freshly-added quantity (qty 1 from a clean add).
+    setQtyPatch((prev) => {
+      if (!prev.has(variant.id)) return prev;
+      const next = new Map(prev);
+      next.delete(variant.id);
+      return next;
+    });
   };
 
   // Optimistically zeroes out discount so the total updates instantly on remove.
