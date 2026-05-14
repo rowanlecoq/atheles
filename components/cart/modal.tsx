@@ -140,7 +140,7 @@ function FavoritesCarousel({
                 >
                   <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
                     {p.featuredImage?.url ? (
-                      <Image src={p.featuredImage.url} alt={p.title} fill className="object-cover" sizes="130px" />
+                      <Image src={p.featuredImage.url} alt={p.title} fill priority className="object-cover" sizes="130px" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
                         <span className="text-[8px] text-brand-grey">ATHELES</span>
@@ -158,7 +158,7 @@ function FavoritesCarousel({
                 <div>
                   <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
                     {p.featuredImage?.url ? (
-                      <Image src={p.featuredImage.url} alt={p.title} fill className="object-cover opacity-50" sizes="130px" />
+                      <Image src={p.featuredImage.url} alt={p.title} fill priority className="object-cover opacity-50" sizes="130px" />
                     ) : (
                       <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
                         <span className="text-[8px] text-brand-grey">ATHELES</span>
@@ -530,6 +530,7 @@ export default function CartModal() {
                                     className="h-full w-full object-cover"
                                     width={64}
                                     height={64}
+                                    priority
                                     alt={
                                       item.merchandise.product.featuredImage
                                         .altText ||
