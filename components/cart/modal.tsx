@@ -35,11 +35,15 @@ type MerchandiseSearchParams = {
 };
 
 type FavProduct = {
+  id?: string;
   handle: string;
   title: string;
   featuredImage?: { url: string } | null;
   priceRange: { maxVariantPrice: { amount: string; currencyCode: string } };
   firstVariantId?: string | null;
+  firstVariantTitle?: string;
+  firstVariantPrice?: { amount: string; currencyCode: string } | null;
+  firstVariantOptions?: { name: string; value: string }[];
   availableForSale?: boolean;
 };
 
@@ -209,14 +213,29 @@ export default function CartModal() {
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
-  const handleAddFav = useCallback(async (handle: string, variantId: string) => {
+  const handleAddFav = useCallback((handle: string, variantId: string) => {
+    const p = favProducts.find((f) => f.handle === handle);
+    if (p?.id && p.firstVariantPrice) {
+      // Optimistic update — item appears in cart instantly
+      addCartItem(
+        {
+          id: variantId,
+          title: p.firstVariantTitle || "Default Title",
+          availableForSale: true,
+          selectedOptions: p.firstVariantOptions || [],
+          price: p.firstVariantPrice,
+        },
+        {
+          id: p.id,
+          handle: p.handle,
+          title: p.title,
+          featuredImage: p.featuredImage as never,
+        } as never,
+      );
+    }
     setAddingFav(handle);
-    favCacheRef.current = null;
-    try {
-      await addItem(null, variantId);
-    } catch {}
-    setAddingFav(null);
-  }, []);
+    addItem(null, variantId).catch(() => {}).finally(() => setAddingFav(null));
+  }, [favProducts, addCartItem]);
 
   useEffect(() => {
     if (!cart) {
