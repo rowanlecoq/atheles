@@ -1,8 +1,7 @@
 "use client";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -18,24 +17,14 @@ type SearchProduct = {
   priceRange?: { minVariantPrice?: { amount: string; currencyCode: string } };
 };
 
-function ResultItem({ product, onClose }: { product: SearchProduct; onClose: () => void }) {
-  const pathname = usePathname();
+function ResultItem({ product, onCloseImmediate }: { product: SearchProduct; onCloseImmediate: (handle: string) => void }) {
   const price = product.priceRange?.minVariantPrice;
 
-  const handleClick = () => {
-    onClose();
-    // Same page: Link won't navigate so we must scroll to top manually.
-    // Different page: Next.js handles scroll reset on navigation.
-    if (pathname === `/product/${product.handle}`) {
-      window.scrollTo({ top: 0, behavior: "smooth" });
-    }
-  };
-
   return (
-    <Link
-      href={`/product/${product.handle}`}
-      onClick={handleClick}
-      className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-brand-dark-gold/10"
+    <button
+      type="button"
+      onClick={() => onCloseImmediate(product.handle)}
+      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-brand-dark-gold/10"
     >
       <div className="relative h-10 w-10 flex-none overflow-hidden rounded bg-brand-medium-grey/20">
         {product.featuredImage && (
@@ -55,7 +44,7 @@ function ResultItem({ product, onClose }: { product: SearchProduct; onClose: () 
           </p>
         )}
       </div>
-    </Link>
+    </button>
   );
 }
 
@@ -86,9 +75,20 @@ export function SearchToggle() {
     }, 150);
   }, []);
 
-  const closeForNavigation = useCallback(() => {
-    close();
-  }, [close]);
+  // No fade delay for result taps — the animation fighting page transition
+  // causes a flicker. Close instantly, then navigate.
+  const closeImmediate = useCallback(() => {
+    setOpen(false);
+    setClosing(false);
+    setQuery("");
+    setResults([]);
+  }, []);
+
+  const handleResultTap = useCallback((handle: string) => {
+    const href = `/product/${handle}`;
+    closeImmediate();
+    router.push(href);
+  }, [closeImmediate, router]);
 
   const openSearch = useCallback(() => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
@@ -273,7 +273,7 @@ export function SearchToggle() {
                   <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
                 )}
                 {results.slice(0, 8).map((product) => (
-                  <ResultItem key={product.handle} product={product} onClose={closeForNavigation} />
+                  <ResultItem key={product.handle} product={product} onCloseImmediate={handleResultTap} />
                 ))}
                 {!loading && results.length > 0 && (
                   <button
@@ -318,7 +318,7 @@ export function SearchToggle() {
               ) : (
                 <>
                   {results.slice(0, 5).map((product) => (
-                    <ResultItem key={product.handle} product={product} onClose={closeForNavigation} />
+                    <ResultItem key={product.handle} product={product} onCloseImmediate={handleResultTap} />
                   ))}
                   <button
                     type="button"
