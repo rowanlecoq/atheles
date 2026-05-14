@@ -5,6 +5,8 @@ import clsx from "clsx";
 import { updateItemQuantity } from "components/cart/actions";
 import type { CartItem } from "lib/shopify/types";
 
+export const MAX_ITEM_QUANTITY = 20;
+
 export function EditItemQuantityButton({
   item,
   type,
@@ -17,13 +19,17 @@ export function EditItemQuantityButton({
     updateType: "plus" | "minus",
   ) => void;
 }) {
+  const atMax = type === "plus" && item.quantity >= MAX_ITEM_QUANTITY;
+
   return (
     <button
       type="button"
       aria-label={
         type === "plus" ? "Increase item quantity" : "Reduce item quantity"
       }
+      disabled={atMax}
       onClick={() => {
+        if (atMax) return;
         optimisticUpdate(item.merchandise.id, type);
         updateItemQuantity(null, {
           merchandiseId: item.merchandise.id,
@@ -31,8 +37,9 @@ export function EditItemQuantityButton({
         }).catch(() => {});
       }}
       className={clsx(
-        "tap-target ease flex h-11 min-w-11 max-w-11 flex-none items-center justify-center rounded-full p-2 transition-all duration-200 hover:opacity-80",
+        "tap-target ease flex h-11 min-w-11 max-w-11 flex-none items-center justify-center rounded-full p-2 transition-all duration-200",
         { "ml-auto": type === "minus" },
+        atMax ? "cursor-not-allowed opacity-25" : "hover:opacity-80",
       )}
     >
       {type === "plus" ? (

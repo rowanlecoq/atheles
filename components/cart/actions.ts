@@ -48,7 +48,7 @@ function getUserTierLevel(totalSpent: string): { name: string; level: number } {
 export async function addItem(
   prevState: unknown,
   selectedVariantId: string | undefined,
-) {
+): Promise<{ cart: Awaited<ReturnType<typeof addToCart>> } | string | undefined> {
   if (!selectedVariantId) {
     return "Error adding item to cart";
   }
@@ -58,8 +58,9 @@ export async function addItem(
   }
 
   try {
-    await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
+    const cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     updateTag(TAGS.cart);
+    return { cart };
   } catch (e) {
     console.error("addItem error:", e);
     return "Error adding item to cart";
