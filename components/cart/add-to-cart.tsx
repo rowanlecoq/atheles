@@ -4,14 +4,19 @@ import clsx from "clsx";
 import { addItem } from "components/cart/actions";
 import type { Product, ProductVariant } from "lib/shopify/types";
 import { useSearchParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useCart } from "./cart-context";
 
 export function AddToCart({ product }: { product: Product }) {
   const { variants, availableForSale } = product;
   const { addCartItem } = useCart();
   const searchParams = useSearchParams();
-  const [adding, setAdding] = useState(false);
+  const [state, setState] = useState<"idle" | "added">("idle");
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => { if (timerRef.current) clearTimeout(timerRef.current); };
+  }, []);
 
   const variant = variants.find((v: ProductVariant) =>
     v.selectedOptions.every(
@@ -25,18 +30,21 @@ export function AddToCart({ product }: { product: Product }) {
   const price = parseFloat(product.priceRange.maxVariantPrice.amount);
   const pointsEarned = Math.floor(price * 50);
 
-  const handleAddToCart = async () => {
-    if (!selectedVariantId || !finalVariant || adding) return;
-    setAdding(true);
-    // Optimistic update — shows in cart immediately
+  const handleAddToCart = () => {
+    if (!selectedVariantId || !finalVariant || state === "added") return;
+
     addCartItem(finalVariant, product);
-    // Open cart drawer immediately
+    window.dispatchEvent(
+      new CustomEvent("cart:add-optimistic", {
+        detail: { variant: finalVariant, product },
+      }),
+    );
     window.dispatchEvent(new Event("open-cart"));
-    // Server action — runs in background, keep button disabled until done
-    try {
-      await addItem(null, selectedVariantId);
-    } catch {}
-    setAdding(false);
+    addItem(null, selectedVariantId).catch(() => {});
+
+    setState("added");
+    if (timerRef.current) clearTimeout(timerRef.current);
+    timerRef.current = setTimeout(() => setState("idle"), 700);
   };
 
   if (!availableForSale) {
@@ -57,7 +65,7 @@ export function AddToCart({ product }: { product: Product }) {
       <button
         type="button"
         onClick={handleAddToCart}
-        disabled={!selectedVariantId || adding}
+        disabled={!selectedVariantId || state === "added"}
         aria-label={selectedVariantId ? "Add to cart" : "Please select a size"}
         className={clsx(
           "group relative flex w-full items-center justify-center overflow-hidden rounded-full p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300",
@@ -74,15 +82,9 @@ export function AddToCart({ product }: { product: Product }) {
         )}
 
         <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
-          {adding ? "Adding..." : selectedVariantId ? "Add To Cart" : "Select a Size"}
+          {state === "added" ? "Added!" : selectedVariantId ? "Add To Cart" : "Select a Size"}
         </span>
 
-        <style jsx>{`
-          @keyframes cartShimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-          }
-        `}</style>
       </button>
 
       {availableForSale && pointsEarned > 0 && (

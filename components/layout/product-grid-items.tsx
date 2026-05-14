@@ -7,27 +7,36 @@ import Image from "next/image";
 import Link from "next/link";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion } from "motion/react";
-import { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
 function ProductCard({ product }: { product: Product }) {
   const { addCartItem } = useCart();
   const [showSizes, setShowSizes] = useState(false);
-  const [adding, setAdding] = useState(false);
+  const [added, setAdded] = useState(false);
+  const addedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+
+  useEffect(() => {
+    return () => { if (addedTimerRef.current) clearTimeout(addedTimerRef.current); };
+  }, []);
   const hasMultipleImages = product.images.length > 1;
   const secondImage = product.images[1]?.url;
   const hasMultipleVariants = product.variants.length > 1;
 
-  const handleAdd = async (variantId: string) => {
+  const handleAdd = (variantId: string) => {
     const variant = product.variants.find((v) => v.id === variantId);
-    if (!variant) return;
-    setAdding(true);
+    if (!variant || added) return;
     addCartItem(variant, product);
-    addItem(null, variantId).catch(() => {});
+    window.dispatchEvent(
+      new CustomEvent("cart:add-optimistic", { detail: { variant, product } }),
+    );
     window.dispatchEvent(new Event("open-cart"));
-    setAdding(false);
+    addItem(null, variantId).catch(() => {});
     setShowSizes(false);
+    setAdded(true);
+    if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
+    addedTimerRef.current = setTimeout(() => setAdded(false), 700);
   };
 
   return (
@@ -105,7 +114,7 @@ function ProductCard({ product }: { product: Product }) {
                   <button
                     key={variant.id}
                     type="button"
-                    disabled={!variant.availableForSale || adding}
+                    disabled={!variant.availableForSale || added}
                     onClick={() => variant.availableForSale && handleAdd(variant.id)}
                     className={`min-h-[40px] rounded-md py-2.5 text-xs font-medium transition-all ${
                       variant.availableForSale
@@ -159,10 +168,10 @@ function ProductCard({ product }: { product: Product }) {
                 const variant = product.variants.find((v) => v.availableForSale);
                 if (variant) handleAdd(variant.id);
               }}
-              disabled={adding}
+              disabled={added}
               className="text-sm text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold sm:text-xs disabled:opacity-50"
             >
-              {adding ? "adding..." : "quick add"}
+              {added ? "added!" : "quick add"}
             </button>
           )}
         </div>

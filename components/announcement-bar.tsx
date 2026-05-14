@@ -38,7 +38,8 @@ export function AnnouncementBar() {
 
   const startTimer = useCallback(() => {
     intervalRef.current = setInterval(() => {
-      setIndex((prev) => (prev + 1) % announcementsLenRef.current);
+      const len = announcementsLenRef.current;
+      if (len > 1) setIndex((prev) => (prev + 1) % len);
     }, 5000);
   }, []);
 

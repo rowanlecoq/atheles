@@ -9,7 +9,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ products: [] });
     }
 
-    // Limit to 20 products max
     const limited = handles.slice(0, 20);
 
     const results = await Promise.all(
@@ -19,6 +18,7 @@ export async function POST(request: Request) {
           if (!product) return null;
           const firstVariant = product.variants.find((v) => v.availableForSale) || product.variants[0];
           return {
+            id: product.id,
             handle: product.handle,
             title: product.title,
             featuredImage: product.featuredImage
@@ -31,6 +31,9 @@ export async function POST(request: Request) {
               },
             },
             firstVariantId: firstVariant?.id || null,
+            firstVariantTitle: firstVariant?.title || "Default Title",
+            firstVariantPrice: firstVariant?.price || null,
+            firstVariantOptions: firstVariant?.selectedOptions || [],
             availableForSale: product.availableForSale,
           };
         } catch {

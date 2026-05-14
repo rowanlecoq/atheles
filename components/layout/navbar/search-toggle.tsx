@@ -17,14 +17,15 @@ type SearchProduct = {
   priceRange?: { minVariantPrice?: { amount: string; currencyCode: string } };
 };
 
-function ResultItem({ product, onCloseImmediate }: { product: SearchProduct; onCloseImmediate: (handle: string) => void }) {
+function ResultItem({ product, onTap, loading }: { product: SearchProduct; onTap: (handle: string) => void; loading: boolean }) {
   const price = product.priceRange?.minVariantPrice;
 
   return (
     <button
       type="button"
-      onClick={() => onCloseImmediate(product.handle)}
-      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-brand-dark-gold/10"
+      onClick={() => onTap(product.handle)}
+      disabled={loading}
+      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors active:bg-brand-dark-gold/20 hover:bg-brand-dark-gold/10 disabled:pointer-events-none"
     >
       <div className="relative h-10 w-10 flex-none overflow-hidden rounded bg-brand-medium-grey/20">
         {product.featuredImage && (
@@ -44,17 +45,18 @@ function ResultItem({ product, onCloseImmediate }: { product: SearchProduct; onC
           </p>
         )}
       </div>
+      {loading && <div className="h-3 w-3 flex-none animate-spin rounded-full border border-brand-dark-gold/40 border-t-brand-dark-gold" />}
     </button>
   );
 }
 
 export function SearchToggle() {
   const [open, setOpen] = useState(false);
-  const [closing, setClosing] = useState(false);
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<SearchProduct[]>([]);
   const [loading, setLoading] = useState(false);
   const [mounted, setMounted] = useState(false);
+  const [navigatingHandle, setNavigatingHandle] = useState<string | null>(null);
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const desktopInputRef = useRef<HTMLInputElement>(null);
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
@@ -68,43 +70,31 @@ export function SearchToggle() {
   useEffect(() => { setMounted(true); }, []);
 
   const close = useCallback(() => {
-    setClosing(true);
-    setTimeout(() => {
-      setOpen(false);
-      setClosing(false);
-      setQuery("");
-      setResults([]);
-    }, 150);
-  }, []);
-
-  const closeImmediate = useCallback(() => {
     setOpen(false);
-    setClosing(false);
     setQuery("");
     setResults([]);
+    setNavigatingHandle(null);
   }, []);
 
-  // When the pathname changes (navigation completed), close the overlay.
-  // This keeps the dark backdrop visible as a loading screen while Next.js
-  // fetches the new page, eliminating the flash of old page content.
+  // When pathname changes (navigation complete), close the overlay.
+  // This keeps the dark backdrop up as a loading screen during navigation,
+  // eliminating the flash of old page content underneath.
   useEffect(() => {
     if (pathname !== prevPathnameRef.current) {
       prevPathnameRef.current = pathname;
-      if (open) closeImmediate();
+      if (open) close();
     }
-  }, [pathname, open, closeImmediate]);
+  }, [pathname, open, close]);
 
   const handleResultTap = useCallback((handle: string) => {
     const href = `/product/${handle}`;
     if (window.location.pathname === href) {
-      // Same page: pathname won't change, close immediately.
-      closeImmediate();
+      close();
     } else {
-      // Different page: keep overlay visible while Next.js loads,
-      // pathname change effect will close it once navigation completes.
+      setNavigatingHandle(handle);
       router.push(href);
     }
-  }, [closeImmediate, router]);
+  }, [close, router]);
 
   const openSearch = useCallback(() => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
@@ -122,14 +112,7 @@ export function SearchToggle() {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
     if (isMobile) {
-      // Prevent scroll by blocking touchmove on anything outside the search
-      // panel. Safer than position:fixed body — no layout changes, no scroll
-      // restoration, cleanup is a single removeEventListener.
-      const preventScroll = (e: TouchEvent) => {
-        if (!mobileOverlayRef.current?.contains(e.target as Node)) {
-          e.preventDefault();
-        }
-      };
+      const preventScroll = (e: TouchEvent) => { e.preventDefault(); };
       document.addEventListener("touchmove", preventScroll, { passive: false });
       return () => document.removeEventListener("touchmove", preventScroll);
     }
@@ -186,7 +169,8 @@ export function SearchToggle() {
     if (!open) return;
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
     if (!isMobile) {
-      setTimeout(() => desktopInputRef.current?.focus({ preventScroll: true }), 50);
+      const t = setTimeout(() => desktopInputRef.current?.focus({ preventScroll: true }), 50);
+      return () => clearTimeout(t);
     }
   }, [open]);
 
@@ -224,14 +208,7 @@ export function SearchToggle() {
 
   const showDropdown = open && (loading || results.length > 0) && query.trim().length >= 2;
 
-  // Visibility helpers — overlay is always in the DOM so the input can be
-  // focused immediately without flushSync.
-  const overlayActive = open || closing;
-  const overlayClass = !overlayActive
-    ? "opacity-0 pointer-events-none"
-    : closing
-    ? "opacity-0"
-    : "opacity-100";
+  const overlayClass = open ? "opacity-100" : "opacity-0 pointer-events-none";
 
   return (
     <div ref={containerRef} className="relative">
@@ -243,8 +220,8 @@ export function SearchToggle() {
       {mounted && createPortal(
         <>
           <div
-            className={`fixed inset-0 z-[200] bg-black/70 transition-opacity duration-150 md:hidden ${overlayClass}`}
-            style={{ touchAction: overlayActive ? "none" : "auto" }}
+            className={`fixed inset-0 z-[200] bg-black/70 md:hidden ${overlayClass}`}
+            style={{ touchAction: open ? "none" : "auto" }}
             onPointerDown={(e) => {
               backdropPointerStart.current = { x: e.clientX, y: e.clientY };
             }}
@@ -256,7 +233,7 @@ export function SearchToggle() {
           />
           <div
             ref={mobileOverlayRef}
-            className={`fixed left-0 right-0 top-0 z-[201] flex flex-col bg-brand-dark transition-opacity duration-150 md:hidden ${overlayClass}`}
+            className={`fixed left-0 right-0 top-0 z-[201] flex flex-col bg-brand-dark md:hidden ${overlayClass}`}
             style={{ maxHeight: "100dvh" }}
           >
             <div className="flex flex-none items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-2">
@@ -284,14 +261,14 @@ export function SearchToggle() {
               </button>
             </div>
             {query.trim().length >= 2 && (
-              <div className="min-h-0 flex-1 overflow-y-auto">
+              <div className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                 {loading && results.length === 0 && (
                   <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
                 )}
                 {results.slice(0, 8).map((product) => (
-                  <ResultItem key={product.handle} product={product} onCloseImmediate={handleResultTap} />
+                  <ResultItem key={product.handle} product={product} onTap={handleResultTap} loading={navigatingHandle === product.handle} />
                 ))}
-                {!loading && results.length > 0 && (
+                {!loading && results.length > 8 && (
                   <button
                     type="button"
                     onClick={() => {
@@ -334,18 +311,20 @@ export function SearchToggle() {
               ) : (
                 <>
                   {results.slice(0, 5).map((product) => (
-                    <ResultItem key={product.handle} product={product} onCloseImmediate={handleResultTap} />
+                    <ResultItem key={product.handle} product={product} onTap={handleResultTap} loading={navigatingHandle === product.handle} />
                   ))}
-                  <button
-                    type="button"
-                    onClick={() => {
-                      router.push(`/search?q=${encodeURIComponent(query.trim())}`);
-                      close();
-                    }}
-                    className="w-full border-t border-brand-dark-gold/20 px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-brand-dark-gold transition-colors hover:bg-brand-dark-gold/5 hover:text-brand-gold"
-                  >
-                    view all results
-                  </button>
+                  {results.length > 5 && (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        router.push(`/search?q=${encodeURIComponent(query.trim())}`);
+                        close();
+                      }}
+                      className="w-full border-t border-brand-dark-gold/20 px-4 py-2.5 text-left text-[11px] uppercase tracking-wider text-brand-dark-gold transition-colors hover:bg-brand-dark-gold/5 hover:text-brand-gold"
+                    >
+                      view all results
+                    </button>
+                  )}
                 </>
               )}
             </div>

@@ -4,7 +4,7 @@ import { HeartIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartIconSolid } from "@heroicons/react/24/solid";
 import { useFavorites } from "lib/hooks/use-favorites";
 import { AnimatePresence, motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export function FavoriteButton({ handle }: { handle: string }) {
   const { isFavorite, toggleFavorite } = useFavorites();
@@ -15,6 +15,11 @@ export function FavoriteButton({ handle }: { handle: string }) {
   const [toast, setToast] = useState<string | null>(null);
   const [hovered, setHovered] = useState(false);
   const showPreview = hovered && optimistic === null;
+  const timersRef = useRef<ReturnType<typeof setTimeout>[]>([]);
+
+  useEffect(() => {
+    return () => { timersRef.current.forEach(clearTimeout); };
+  }, []);
 
   const handleClick = () => {
     const wasLiked = liked;
@@ -22,9 +27,9 @@ export function FavoriteButton({ handle }: { handle: string }) {
     setHovered(false);
     toggleFavorite(handle);
     setPopped(true);
-    setTimeout(() => setPopped(false), 180);
+    timersRef.current.push(setTimeout(() => setPopped(false), 180));
     setToast(wasLiked ? "removed!" : "saved!");
-    setTimeout(() => { setToast(null); setOptimistic(null); }, 1300);
+    timersRef.current.push(setTimeout(() => { setToast(null); setOptimistic(null); }, 1300));
   };
 
   return (

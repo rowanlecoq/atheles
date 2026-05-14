@@ -35,11 +35,15 @@ type MerchandiseSearchParams = {
 };
 
 type FavProduct = {
+  id?: string;
   handle: string;
   title: string;
   featuredImage?: { url: string } | null;
   priceRange: { maxVariantPrice: { amount: string; currencyCode: string } };
   firstVariantId?: string | null;
+  firstVariantTitle?: string;
+  firstVariantPrice?: { amount: string; currencyCode: string } | null;
+  firstVariantOptions?: { name: string; value: string }[];
   availableForSale?: boolean;
 };
 
@@ -191,13 +195,14 @@ function FavoritesCarousel({
 }
 
 export default function CartModal() {
-  const { cart, updateCartItem, addCartItem } = useCart();
+  const { cart, updateCartItem, addCartItem, patchHydrated } = useCart();
   const router = useRouter();
   const [isOpen, setIsOpen] = useState(false);
   const quantityRef = useRef(cart?.totalQuantity);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
   const [discountError, setDiscountError] = useState("");
+  const [applyingDiscount, setApplyingDiscount] = useState(false);
   const [appliedCodeLocal, setAppliedCodeLocal] = useState<string | null>(null);
   const [discountConfirmed, setDiscountConfirmed] = useState(false);
   const discountSyncedRef = useRef(false);
@@ -208,20 +213,47 @@ export default function CartModal() {
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
-  const handleAddFav = useCallback(async (handle: string, variantId: string) => {
+  const handleAddFav = useCallback((handle: string, variantId: string) => {
+    const p = favProducts.find((f) => f.handle === handle);
+    if (p?.id && p.firstVariantPrice) {
+      // Optimistic update — item appears in cart instantly
+      addCartItem(
+        {
+          id: variantId,
+          title: p.firstVariantTitle || "Default Title",
+          availableForSale: true,
+          selectedOptions: p.firstVariantOptions || [],
+          price: p.firstVariantPrice,
+        },
+        {
+          id: p.id,
+          handle: p.handle,
+          title: p.title,
+          featuredImage: p.featuredImage as never,
+        } as never,
+      );
+    }
     setAddingFav(handle);
-    favCacheRef.current = null;
-    try {
-      await addItem(null, variantId);
-    } catch {}
-    setAddingFav(null);
-  }, []);
+    addItem(null, variantId).catch(() => {});
+    // Clear immediately — optimistic update already shows the item in cart,
+    // so "adding..." doesn't need to wait for the server to finish.
+    requestAnimationFrame(() => setAddingFav(null));
+  }, [favProducts, addCartItem]);
 
   useEffect(() => {
     if (!cart) {
       createCartAndSetCookie();
     }
   }, [cart]);
+
+  // Sync quantityRef once the localStorage patch is loaded so the initial
+  // hydration quantity change doesn't mistakenly trigger a cart open.
+  useEffect(() => {
+    if (patchHydrated) {
+      quantityRef.current = cart?.totalQuantity;
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [patchHydrated]);
 
   useEffect(() => {
     if (
@@ -240,6 +272,18 @@ export default function CartModal() {
     window.addEventListener("open-cart", handleOpenCart);
     return () => window.removeEventListener("open-cart", handleOpenCart);
   }, []);
+
+  // Mirror optimistic add-to-cart from product pages into this cart instance.
+  // useOptimistic is component-local, so AddToCart's dispatch doesn't reach
+  // CartModal — this bridges the gap so the item appears instantly on open.
+  useEffect(() => {
+    const handleOptimisticAdd = (e: Event) => {
+      const { variant, product } = (e as CustomEvent).detail;
+      addCartItem(variant, product);
+    };
+    window.addEventListener("cart:add-optimistic", handleOptimisticAdd);
+    return () => window.removeEventListener("cart:add-optimistic", handleOptimisticAdd);
+  }, [addCartItem]);
 
   // Sync applied discount code from cart on first open only
   useEffect(() => {
@@ -486,7 +530,7 @@ export default function CartModal() {
 
                         return (
                           <li
-                            key={item.id ?? item.merchandise.id}
+                            key={item.merchandise.id}
                             className="flex w-full flex-col border-b border-brand-dark-gold/20"
                           >
                             <div className="relative flex w-full flex-row justify-between gap-3 py-4 pl-14 pr-1">
@@ -631,11 +675,12 @@ export default function CartModal() {
                                 }}
                                 placeholder="Enter code"
                                 onKeyDown={(e) => {
-                                  if (e.key === "Enter" && discountCode.trim()) {
+                                  if (e.key === "Enter" && discountCode.trim() && !applyingDiscount) {
                                     e.preventDefault();
                                     (e.target as HTMLInputElement).blur();
                                     const code = discountCode.trim();
                                     setDiscountError("");
+                                    setApplyingDiscount(true);
                                     setAppliedCodeLocal(code);
                                     setDiscountCode("");
                                     applyDiscountCode(code).then((result) => {
@@ -650,7 +695,7 @@ export default function CartModal() {
                                     }).catch(() => {
                                       setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                       setDiscountError("failed to apply code.");
-                                    });
+                                    }).finally(() => setApplyingDiscount(false));
                                   }
                                 }}
                                 enterKeyHint="done"
@@ -658,14 +703,14 @@ export default function CartModal() {
                               />
                               <button
                                 type="button"
-                                disabled={!discountCode.trim()}
+                                disabled={!discountCode.trim() || applyingDiscount}
                                 onClick={() => {
                                   const code = discountCode.trim();
-                                  if (!code) return;
+                                  if (!code || applyingDiscount) return;
                                   setDiscountError("");
+                                  setApplyingDiscount(true);
                                   setAppliedCodeLocal(code);
                                   setDiscountCode("");
-                                  // Validate in background
                                   applyDiscountCode(code).then((result) => {
                                     if (!result.success) {
                                       setAppliedCodeLocal(null); setDiscountConfirmed(false);
@@ -678,11 +723,11 @@ export default function CartModal() {
                                   }).catch(() => {
                                     setAppliedCodeLocal(null); setDiscountConfirmed(false);
                                     setDiscountError("failed to apply code.");
-                                  });
+                                  }).finally(() => setApplyingDiscount(false));
                                 }}
-                                className="rounded-lg border border-brand-gold/40 px-4 py-2 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:opacity-30"
+                                className="rounded-lg border border-brand-gold/40 px-4 py-2 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:cursor-not-allowed disabled:opacity-30"
                               >
-                                apply
+                                {applyingDiscount ? "..." : "apply"}
                               </button>
                             </div>
                             {discountError && (
@@ -751,18 +796,30 @@ function CheckoutButton() {
 
   return (
     <button
-      className="tap-target flex min-h-[44px] w-full items-center justify-center gap-2 rounded-full bg-brand-gold p-3 text-center font-heading text-sm font-medium uppercase tracking-wider text-brand-dark opacity-90 transition-opacity hover:opacity-100"
+      className="group tap-target relative flex min-h-[44px] w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brand-gold p-3 text-center font-heading text-sm font-medium uppercase text-brand-dark"
       type="submit"
       disabled={pending}
     >
+      {!pending && (
+        <div
+          className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+          style={{
+            background:
+              "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
+            animation: "cartShimmer 2s ease-in-out infinite",
+          }}
+        />
+      )}
       {pending ? (
         <LoadingDots className="bg-brand-dark" />
       ) : (
         <>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="h-4 w-4">
+          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="relative z-10 h-4 w-4 flex-none">
             <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
           </svg>
-          Checkout Securely
+          <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
+            Checkout Securely
+          </span>
         </>
       )}
     </button>
