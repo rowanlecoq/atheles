@@ -1,8 +1,7 @@
 "use client";
 
 import { MagnifyingGlassIcon, XMarkIcon } from "@heroicons/react/24/outline";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   useCallback,
   useEffect,
@@ -18,13 +17,14 @@ type SearchProduct = {
   priceRange?: { minVariantPrice?: { amount: string; currencyCode: string } };
 };
 
-function ResultItem({ product, onClose }: { product: SearchProduct; onClose: () => void }) {
+function ResultItem({ product, onCloseImmediate }: { product: SearchProduct; onCloseImmediate: (handle: string) => void }) {
   const price = product.priceRange?.minVariantPrice;
+
   return (
-    <Link
-      href={`/product/${product.handle}`}
-      onClick={onClose}
-      className="flex items-center gap-3 px-3 py-2.5 transition-colors hover:bg-brand-dark-gold/10"
+    <button
+      type="button"
+      onClick={() => onCloseImmediate(product.handle)}
+      className="flex w-full items-center gap-3 px-3 py-2.5 text-left transition-colors hover:bg-brand-dark-gold/10"
     >
       <div className="relative h-10 w-10 flex-none overflow-hidden rounded bg-brand-medium-grey/20">
         {product.featuredImage && (
@@ -37,14 +37,14 @@ function ResultItem({ product, onClose }: { product: SearchProduct; onClose: () 
         )}
       </div>
       <div className="min-w-0 flex-1">
-        <p className="truncate text-xs text-white">{product.title}</p>
+        <p className="truncate text-xs lowercase text-white">{product.title}</p>
         {price && (
           <p className="text-[11px] text-brand-dark-gold">
             {parseFloat(price.amount).toFixed(2)} {price.currencyCode}
           </p>
         )}
       </div>
-    </Link>
+    </button>
   );
 }
 
@@ -61,8 +61,9 @@ export function SearchToggle() {
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const backdropPointerStart = useRef({ x: 0, y: 0 });
-  const suppressScrollRestore = useRef(false);
   const router = useRouter();
+  const pathname = usePathname();
+  const prevPathnameRef = useRef(pathname);
 
   useEffect(() => { setMounted(true); }, []);
 
@@ -76,13 +77,34 @@ export function SearchToggle() {
     }, 150);
   }, []);
 
-  // Used when tapping a result — suppresses scroll restore so the incoming
-  // page starts at the top. Body stays fixed during the fade-out so the
-  // current page doesn't flash to the top before navigation completes.
-  const closeForNavigation = useCallback(() => {
-    suppressScrollRestore.current = true;
-    close();
-  }, [close]);
+  const closeImmediate = useCallback(() => {
+    setOpen(false);
+    setClosing(false);
+    setQuery("");
+    setResults([]);
+  }, []);
+
+  // When the pathname changes (navigation completed), close the overlay.
+  // This keeps the dark backdrop visible as a loading screen while Next.js
+  // fetches the new page, eliminating the flash of old page content.
+  useEffect(() => {
+    if (pathname !== prevPathnameRef.current) {
+      prevPathnameRef.current = pathname;
+      if (open) closeImmediate();
+    }
+  }, [pathname, open, closeImmediate]);
+
+  const handleResultTap = useCallback((handle: string) => {
+    const href = `/product/${handle}`;
+    if (window.location.pathname === href) {
+      // Same page: pathname won't change, close immediately.
+      closeImmediate();
+    } else {
+      // Different page: keep overlay visible while Next.js loads,
+      // pathname change effect will close it once navigation completes.
+      router.push(href);
+    }
+  }, [closeImmediate, router]);
 
   const openSearch = useCallback(() => {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
@@ -100,19 +122,16 @@ export function SearchToggle() {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
     if (isMobile) {
-      // Lock scroll on iOS with position:fixed trick — momentum scroll and
-      // rubber-band scrolling still bypass overflow:hidden on iOS.
-      const scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
-      return () => {
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
-        if (!suppressScrollRestore.current) window.scrollTo(0, scrollY);
-        suppressScrollRestore.current = false;
+      // Prevent scroll by blocking touchmove on anything outside the search
+      // panel. Safer than position:fixed body — no layout changes, no scroll
+      // restoration, cleanup is a single removeEventListener.
+      const preventScroll = (e: TouchEvent) => {
+        if (!mobileOverlayRef.current?.contains(e.target as Node)) {
+          e.preventDefault();
+        }
       };
+      document.addEventListener("touchmove", preventScroll, { passive: false });
+      return () => document.removeEventListener("touchmove", preventScroll);
     }
 
     // Desktop: sticky navbar drifts scroll toward y=0 on every keystroke.
@@ -270,7 +289,7 @@ export function SearchToggle() {
                   <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
                 )}
                 {results.slice(0, 8).map((product) => (
-                  <ResultItem key={product.handle} product={product} onClose={closeForNavigation} />
+                  <ResultItem key={product.handle} product={product} onCloseImmediate={handleResultTap} />
                 ))}
                 {!loading && results.length > 0 && (
                   <button
@@ -315,7 +334,7 @@ export function SearchToggle() {
               ) : (
                 <>
                   {results.slice(0, 5).map((product) => (
-                    <ResultItem key={product.handle} product={product} onClose={closeForNavigation} />
+                    <ResultItem key={product.handle} product={product} onCloseImmediate={handleResultTap} />
                   ))}
                   <button
                     type="button"
