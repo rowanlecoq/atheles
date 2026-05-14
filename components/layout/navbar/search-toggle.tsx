@@ -57,6 +57,7 @@ export function SearchToggle() {
   const mobileInputRef = useRef<HTMLInputElement>(null);
   const desktopInputRef = useRef<HTMLInputElement>(null);
   const mobileOverlayRef = useRef<HTMLDivElement>(null);
+  const mobileResultsRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const debounceRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const backdropPointerStart = useRef({ x: 0, y: 0 });
@@ -107,11 +108,12 @@ export function SearchToggle() {
     const isMobile = window.matchMedia("(pointer: coarse)").matches;
 
     if (isMobile) {
-      // Prevent scroll by blocking touchmove on anything outside the search
-      // panel. Safer than position:fixed body — no layout changes, no scroll
-      // restoration, cleanup is a single removeEventListener.
+      // Block all touchmove except within the results scroll container.
+      // Checking mobileOverlayRef (the whole panel) was too broad — dragging
+      // on the non-scrollable header or rubber-banding past the results list
+      // end both bled through to the page scroll.
       const preventScroll = (e: TouchEvent) => {
-        if (!mobileOverlayRef.current?.contains(e.target as Node)) {
+        if (!mobileResultsRef.current?.contains(e.target as Node)) {
           e.preventDefault();
         }
       };
@@ -262,7 +264,7 @@ export function SearchToggle() {
               </button>
             </div>
             {query.trim().length >= 2 && (
-              <div className="min-h-0 flex-1 overflow-y-auto">
+              <div ref={mobileResultsRef} className="min-h-0 flex-1 overflow-y-auto overscroll-contain">
                 {loading && results.length === 0 && (
                   <div className="px-4 py-3 text-xs text-brand-grey">searching...</div>
                 )}
