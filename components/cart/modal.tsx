@@ -211,38 +211,15 @@ export default function CartModal() {
   const closeCart = () => setIsOpen(false);
 
   const handleAddFav = useCallback(async (handle: string, variantId: string) => {
-    const p = favProducts.find((f) => f.handle === handle);
-    if (p?.id && p.firstVariantPrice) {
-      // Optimistic update — item appears in cart instantly
-      addCartItem(
-        {
-          id: variantId,
-          title: p.firstVariantTitle || "Default Title",
-          availableForSale: true,
-          selectedOptions: p.firstVariantOptions || [],
-          price: p.firstVariantPrice,
-        },
-        {
-          id: p.id,
-          handle: p.handle,
-          title: p.title,
-          featuredImage: p.featuredImage as never,
-        } as never,
-      );
-    }
     setAddingFav(handle);
     try {
       const result = await addItem(null, variantId);
-      // Immediately promote the server-confirmed cart into state so that
-      // when setAddingFav(null) triggers a re-render, useOptimistic can
-      // settle against a serverCart that already contains the new item,
-      // preventing the flash-to-empty glitch.
       if (result && typeof result === "object" && "cart" in result) {
         setServerCart(result.cart);
       }
     } catch {}
     setAddingFav(null);
-  }, [favProducts, addCartItem, setServerCart]);
+  }, [setServerCart]);
 
   useEffect(() => {
     if (!cart) {

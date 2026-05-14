@@ -58,7 +58,20 @@ export async function addItem(
   }
 
   try {
-    const cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
+    const existingCart = await getCart();
+    const existingLine = existingCart?.lines.find(
+      (l) => l.merchandise.id === selectedVariantId,
+    );
+    let cart;
+    if (existingLine?.id) {
+      cart = await updateCart([{
+        id: existingLine.id,
+        merchandiseId: selectedVariantId,
+        quantity: existingLine.quantity + 1,
+      }]);
+    } else {
+      cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
+    }
     updateTag(TAGS.cart);
     return { cart };
   } catch (e) {
