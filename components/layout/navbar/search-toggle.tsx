@@ -243,7 +243,7 @@ export function SearchToggle() {
       {mounted && createPortal(
         <>
           <div
-            className={`fixed inset-0 z-[200] bg-black/70 transition-opacity duration-150 md:hidden ${overlayClass}`}
+            className={`fixed inset-0 z-[200] bg-black/70 md:hidden ${overlayClass}`}
             style={{ touchAction: overlayActive ? "none" : "auto" }}
             onPointerDown={(e) => {
               backdropPointerStart.current = { x: e.clientX, y: e.clientY };
@@ -256,7 +256,7 @@ export function SearchToggle() {
           />
           <div
             ref={mobileOverlayRef}
-            className={`fixed left-0 right-0 top-0 z-[201] flex flex-col bg-brand-dark transition-opacity duration-150 md:hidden ${overlayClass}`}
+            className={`fixed left-0 right-0 top-0 z-[201] flex flex-col bg-brand-dark md:hidden ${overlayClass}`}
             style={{ maxHeight: "100dvh" }}
           >
             <div className="flex flex-none items-center gap-3 border-b border-brand-dark-gold/20 px-4 py-2">
