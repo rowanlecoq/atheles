@@ -214,8 +214,20 @@ export default function CartModal() {
       clearItemPatch(vid);
       const price = favProduct.firstVariantPrice ?? favProduct.priceRange.maxVariantPrice;
       setServerCart((prev) => {
-        if (!prev) return prev;
-        const existing = prev.lines.find((l) => l.merchandise.id === vid);
+        const base = prev ?? {
+          id: undefined,
+          checkoutUrl: "",
+          totalQuantity: 0,
+          lines: [] as NonNullable<typeof prev>["lines"],
+          cost: {
+            subtotalAmount: { amount: "0", currencyCode: price.currencyCode },
+            totalAmount: { amount: "0", currencyCode: price.currencyCode },
+            totalTaxAmount: { amount: "0", currencyCode: price.currencyCode },
+          },
+          discountCodes: [],
+          discountAllocations: [],
+        } as NonNullable<typeof prev>;
+        const existing = base.lines.find((l) => l.merchandise.id === vid);
         const qty = (existing?.quantity ?? 0) + 1;
         const itemTotal = (parseFloat(price.amount) * qty).toFixed(2);
         const newLine = {
@@ -235,22 +247,22 @@ export default function CartModal() {
                 : { url: "", altText: "" },
             },
           },
-        } as typeof prev.lines[number];
+        } as typeof base.lines[number];
         const lines = existing
-          ? prev.lines.map((l) => (l.merchandise.id === vid ? newLine : l))
-          : [...prev.lines, newLine];
+          ? base.lines.map((l) => (l.merchandise.id === vid ? newLine : l))
+          : [...base.lines, newLine];
         const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
         // Preserve the existing discount in the optimistic total so the displayed
         // price doesn't jump to the full undiscounted amount while the server confirms.
-        const prevSubtotal = parseFloat(prev.cost.subtotalAmount.amount);
-        const prevDiscount = Math.max(0, prevSubtotal - parseFloat(prev.cost.totalAmount.amount));
+        const prevSubtotal = parseFloat(base.cost.subtotalAmount.amount);
+        const prevDiscount = Math.max(0, prevSubtotal - parseFloat(base.cost.totalAmount.amount));
         const newTotal = Math.max(0, subtotal - prevDiscount);
         return {
-          ...prev,
+          ...base,
           lines,
           totalQuantity: lines.reduce((s, l) => s + l.quantity, 0),
           cost: {
-            ...prev.cost,
+            ...base.cost,
             subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: price.currencyCode },
             totalAmount: { amount: newTotal.toFixed(2), currencyCode: price.currencyCode },
           },
