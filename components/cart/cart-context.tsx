@@ -300,11 +300,6 @@ export function useCart() {
           // Server confirmed the deletion — clean up sentinel
           next.delete(id);
           changed = true;
-        } else if (serverItem && qty <= 0) {
-          // Stale delete sentinel — item was re-added to the server cart;
-          // remove the sentinel so the item becomes visible again
-          next.delete(id);
-          changed = true;
         }
       }
       return changed ? next : prev;

@@ -70,6 +70,11 @@ export async function addItem(
         merchandiseId: selectedVariantId,
         quantity: existingLine.quantity + 1,
       }]);
+      // If the line is gone from the returned cart, the stored line ID was stale
+      // (item was deleted between getCart() and now). Fall back to a fresh add.
+      if (!cart.lines.some((l) => l.merchandise.id === selectedVariantId)) {
+        cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
+      }
     } else {
       cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     }
@@ -92,8 +97,6 @@ export async function removeItem(
     // Use client-provided line item ID to skip getCart() (cache may be stale)
     if (lineItemId) {
       const cart = await removeFromCart([lineItemId]);
-      // Invalidate so addItem's getCart() sees the updated cart on re-add
-      updateTag(TAGS.cart);
       return { cart };
     }
 
@@ -107,7 +110,6 @@ export async function removeItem(
 
     if (lineItem && lineItem.id) {
       const cart = await removeFromCart([lineItem.id]);
-      updateTag(TAGS.cart);
       return { cart };
     } else {
       return "Item not found in cart";
