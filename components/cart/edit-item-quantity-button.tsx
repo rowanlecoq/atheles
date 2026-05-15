@@ -3,6 +3,7 @@
 import { MinusIcon, PlusIcon } from "@heroicons/react/24/outline";
 import clsx from "clsx";
 import { updateItemQuantity } from "components/cart/actions";
+import { useCart } from "components/cart/cart-context";
 import type { CartItem } from "lib/shopify/types";
 
 export const MAX_ITEM_QUANTITY = 20;
@@ -19,6 +20,7 @@ export function EditItemQuantityButton({
     updateType: "plus" | "minus",
   ) => void;
 }) {
+  const { setServerCart } = useCart();
   const atMax = type === "plus" && item.quantity >= MAX_ITEM_QUANTITY;
 
   return (
@@ -34,6 +36,10 @@ export function EditItemQuantityButton({
         updateItemQuantity(null, {
           merchandiseId: item.merchandise.id,
           quantity: type === "plus" ? item.quantity + 1 : item.quantity - 1,
+        }).then((result) => {
+          if (result && typeof result === "object" && "cart" in result) {
+            setServerCart(result.cart);
+          }
         }).catch(() => {});
       }}
       className={clsx(

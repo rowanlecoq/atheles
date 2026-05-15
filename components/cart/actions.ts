@@ -10,6 +10,7 @@ import {
   updateCart,
   updateCartDiscountCodes,
 } from "lib/shopify";
+import type { Cart } from "lib/shopify/types";
 import { isShopifyConfigured } from "lib/shopify/is-configured";
 import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
@@ -80,23 +81,27 @@ export async function addItem(
   }
 }
 
-export async function removeItem(prevState: unknown, merchandiseId: string) {
+export async function removeItem(
+  prevState: unknown,
+  merchandiseId: string,
+): Promise<{ cart: Cart } | string> {
   if (!isShopifyConfigured) return "Store is not yet configured";
 
   try {
-    const cart = await getCart();
+    const currentCart = await getCart();
 
-    if (!cart) {
+    if (!currentCart) {
       return "Error fetching cart";
     }
 
-    const lineItem = cart.lines.find(
+    const lineItem = currentCart.lines.find(
       (line) => line.merchandise.id === merchandiseId,
     );
 
     if (lineItem && lineItem.id) {
-      await removeFromCart([lineItem.id]);
+      const cart = await removeFromCart([lineItem.id]);
       updateTag(TAGS.cart);
+      return { cart };
     } else {
       return "Item not found in cart";
     }
@@ -112,39 +117,37 @@ export async function updateItemQuantity(
     merchandiseId: string;
     quantity: number;
   },
-) {
+): Promise<{ cart: Cart } | string> {
   if (!isShopifyConfigured) return "Store is not yet configured";
 
   const { merchandiseId, quantity } = payload;
 
   try {
-    const cart = await getCart();
+    const currentCart = await getCart();
 
-    if (!cart) {
+    if (!currentCart) {
       return "Error fetching cart";
     }
 
-    const lineItem = cart.lines.find(
+    const lineItem = currentCart.lines.find(
       (line) => line.merchandise.id === merchandiseId,
     );
 
+    let cart: Cart;
     if (lineItem && lineItem.id) {
       if (quantity === 0) {
-        await removeFromCart([lineItem.id]);
+        cart = await removeFromCart([lineItem.id]);
       } else {
-        await updateCart([
-          {
-            id: lineItem.id,
-            merchandiseId,
-            quantity,
-          },
-        ]);
+        cart = await updateCart([{ id: lineItem.id, merchandiseId, quantity }]);
       }
     } else if (quantity > 0) {
-      await addToCart([{ merchandiseId, quantity }]);
+      cart = await addToCart([{ merchandiseId, quantity }]);
+    } else {
+      return "Item not found in cart";
     }
 
     updateTag(TAGS.cart);
+    return { cart };
   } catch (e) {
     console.error("updateItemQuantity error:", e);
     return "Error updating item quantity";

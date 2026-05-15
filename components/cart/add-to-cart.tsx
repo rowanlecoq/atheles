@@ -9,7 +9,7 @@ import { useCart } from "./cart-context";
 
 export function AddToCart({ product }: { product: Product }) {
   const { variants, availableForSale } = product;
-  const { addCartItem } = useCart();
+  const { addCartItem, setServerCart } = useCart();
   const searchParams = useSearchParams();
   const [state, setState] = useState<"idle" | "added">("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -40,7 +40,11 @@ export function AddToCart({ product }: { product: Product }) {
       }),
     );
     window.dispatchEvent(new Event("open-cart"));
-    addItem(null, selectedVariantId).catch(() => {});
+    addItem(null, selectedVariantId).then((result) => {
+      if (result && typeof result === "object" && "cart" in result) {
+        setServerCart(result.cart);
+      }
+    }).catch(() => {});
 
     setState("added");
     if (timerRef.current) clearTimeout(timerRef.current);
