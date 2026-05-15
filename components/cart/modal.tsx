@@ -13,7 +13,6 @@ import LoadingDots from "components/loading-dots";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
 import { createUrl } from "lib/utils";
-import type { Product, ProductVariant } from "lib/shopify/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
@@ -212,28 +211,53 @@ export default function CartModal() {
   const closeCart = () => setIsOpen(false);
 
   const handleAddFav = useCallback(async (handle: string, variantId: string) => {
-    // Optimistic add so the item appears instantly and the card disappears from the carousel.
-    // Safe now that addItem returns the confirmed cart and setServerCart is called directly —
-    // the RSC re-render can no longer race in with stale data and revert the state.
+    // Update serverCart directly rather than dispatching through useOptimistic.
+    // Using addCartItem (useOptimistic) caused the flicker: when setServerCart(result.cart)
+    // arrived with the confirmed qty=1, useOptimistic re-applied the still-pending ADD_ITEM
+    // action on top of it, briefly showing qty=2 before settling back to 1.
+    // Bypassing useOptimistic entirely means serverCart IS the display — no re-apply possible.
     const favProduct = favProducts.find((p) => p.handle === handle);
     if (favProduct?.firstVariantId) {
+      const vid = favProduct.firstVariantId;
       const price = favProduct.firstVariantPrice ?? favProduct.priceRange.maxVariantPrice;
-      addCartItem(
-        {
-          id: favProduct.firstVariantId,
-          title: favProduct.firstVariantTitle ?? "Default Title",
-          price,
-          selectedOptions: favProduct.firstVariantOptions ?? [],
-        } as unknown as ProductVariant,
-        {
-          id: favProduct.id ?? "",
-          handle: favProduct.handle,
-          title: favProduct.title,
-          featuredImage: favProduct.featuredImage
-            ? { url: favProduct.featuredImage.url, altText: "" }
-            : { url: "", altText: "" },
-        } as unknown as Product,
-      );
+      setServerCart((prev) => {
+        if (!prev) return prev;
+        const existing = prev.lines.find((l) => l.merchandise.id === vid);
+        const qty = (existing?.quantity ?? 0) + 1;
+        const itemTotal = (parseFloat(price.amount) * qty).toFixed(2);
+        const newLine = {
+          id: existing?.id,
+          quantity: qty,
+          cost: { totalAmount: { amount: itemTotal, currencyCode: price.currencyCode } },
+          merchandise: {
+            id: vid,
+            title: favProduct.firstVariantTitle ?? "Default Title",
+            selectedOptions: favProduct.firstVariantOptions ?? [],
+            product: {
+              id: favProduct.id ?? "",
+              handle: favProduct.handle,
+              title: favProduct.title,
+              featuredImage: favProduct.featuredImage
+                ? { url: favProduct.featuredImage.url, altText: "" }
+                : { url: "", altText: "" },
+            },
+          },
+        } as typeof prev.lines[number];
+        const lines = existing
+          ? prev.lines.map((l) => (l.merchandise.id === vid ? newLine : l))
+          : [...prev.lines, newLine];
+        const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
+        return {
+          ...prev,
+          lines,
+          totalQuantity: lines.reduce((s, l) => s + l.quantity, 0),
+          cost: {
+            ...prev.cost,
+            subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: price.currencyCode },
+            totalAmount: { amount: subtotal.toFixed(2), currencyCode: price.currencyCode },
+          },
+        };
+      });
     }
 
     setAddingFav(handle);
@@ -244,7 +268,7 @@ export default function CartModal() {
       }
     } catch {}
     setAddingFav(null);
-  }, [addCartItem, favProducts, setServerCart]);
+  }, [favProducts, setServerCart]);
 
   useEffect(() => {
     if (!cart) {
