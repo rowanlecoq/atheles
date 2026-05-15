@@ -34,6 +34,7 @@ export function EditItemQuantityButton({
         if (atMax) return;
         optimisticUpdate(item.merchandise.id, type);
         updateItemQuantity(null, {
+          lineItemId: item.id,
           merchandiseId: item.merchandise.id,
           quantity: type === "plus" ? item.quantity + 1 : item.quantity - 1,
         }).then((result) => {

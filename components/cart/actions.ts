@@ -82,16 +82,22 @@ export async function addItem(
 
 export async function removeItem(
   prevState: unknown,
-  merchandiseId: string,
+  payload: { lineItemId: string | undefined; merchandiseId: string },
 ): Promise<{ cart: Cart } | string> {
   if (!isShopifyConfigured) return "Store is not yet configured";
 
-  try {
-    const currentCart = await getCart();
+  const { lineItemId, merchandiseId } = payload;
 
-    if (!currentCart) {
-      return "Error fetching cart";
+  try {
+    // Use client-provided line item ID to skip getCart() (cache may be stale)
+    if (lineItemId) {
+      const cart = await removeFromCart([lineItemId]);
+      return { cart };
     }
+
+    // Fallback: fetch cart to find the line item ID
+    const currentCart = await getCart();
+    if (!currentCart) return "Error fetching cart";
 
     const lineItem = currentCart.lines.find(
       (line) => line.merchandise.id === merchandiseId,
@@ -112,20 +118,30 @@ export async function removeItem(
 export async function updateItemQuantity(
   prevState: unknown,
   payload: {
+    lineItemId: string | undefined;
     merchandiseId: string;
     quantity: number;
   },
 ): Promise<{ cart: Cart } | string> {
   if (!isShopifyConfigured) return "Store is not yet configured";
 
-  const { merchandiseId, quantity } = payload;
+  const { lineItemId, merchandiseId, quantity } = payload;
 
   try {
-    const currentCart = await getCart();
-
-    if (!currentCart) {
-      return "Error fetching cart";
+    // Use client-provided line item ID to skip getCart() (cache may be stale)
+    if (lineItemId) {
+      let cart: Cart;
+      if (quantity === 0) {
+        cart = await removeFromCart([lineItemId]);
+      } else {
+        cart = await updateCart([{ id: lineItemId, merchandiseId, quantity }]);
+      }
+      return { cart };
     }
+
+    // Fallback: fetch cart to find the line item ID
+    const currentCart = await getCart();
+    if (!currentCart) return "Error fetching cart";
 
     const lineItem = currentCart.lines.find(
       (line) => line.merchandise.id === merchandiseId,

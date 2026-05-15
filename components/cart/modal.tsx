@@ -252,7 +252,37 @@ export default function CartModal() {
     }
     addItem(null, variantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
-        setServerCart(result.cart);
+        const confirmed = result.cart;
+        setServerCart((prev) => {
+          if (!prev) return confirmed;
+          // Merge: update/add items from the confirmed result while keeping
+          // any other optimistic lines that are still in-flight (concurrent adds).
+          const mergedLines = prev.lines.map((prevLine) => {
+            const confirmedLine = confirmed.lines.find(
+              (l) => l.merchandise.id === prevLine.merchandise.id,
+            );
+            return confirmedLine ?? prevLine;
+          });
+          for (const confirmedLine of confirmed.lines) {
+            if (!mergedLines.some((l) => l.merchandise.id === confirmedLine.merchandise.id)) {
+              mergedLines.push(confirmedLine);
+            }
+          }
+          const subtotal = mergedLines.reduce(
+            (s, l) => s + parseFloat(l.cost.totalAmount.amount), 0,
+          );
+          const currencyCode = confirmed.cost.totalAmount.currencyCode;
+          return {
+            ...confirmed,
+            lines: mergedLines,
+            totalQuantity: mergedLines.reduce((s, l) => s + l.quantity, 0),
+            cost: {
+              ...confirmed.cost,
+              subtotalAmount: { amount: subtotal.toFixed(2), currencyCode },
+              totalAmount: { amount: subtotal.toFixed(2), currencyCode },
+            },
+          };
+        });
       }
     }).catch(() => {});
   }, [favProducts, setServerCart]);

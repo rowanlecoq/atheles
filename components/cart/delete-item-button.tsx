@@ -21,7 +21,7 @@ export function DeleteItemButton({
       aria-label="Remove cart item"
       onClick={() => {
         optimisticUpdate(merchandiseId, "delete");
-        removeItem(null, merchandiseId).then((result) => {
+        removeItem(null, { lineItemId: item.id, merchandiseId }).then((result) => {
           if (result && typeof result === "object" && "cart" in result) {
             setServerCart(result.cart);
           }
