@@ -76,8 +76,18 @@ export async function addItem(
         cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
       }
     } else {
+      if (!existingCart) {
+        // No cart cookie yet — create one and set the cookie so addToCart can use it.
+        const newCart = await createCart();
+        if (newCart.id) {
+          (await cookies()).set("cartId", newCart.id);
+        }
+      }
       cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     }
+    // Invalidate the server-side cart cache so the next RSC render (e.g. on
+    // navigation) fetches the updated Shopify cart instead of a stale snapshot.
+    updateTag(TAGS.cart);
     return { cart };
   } catch (e) {
     console.error("addItem error:", e);
