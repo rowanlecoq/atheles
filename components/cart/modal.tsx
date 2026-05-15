@@ -191,7 +191,7 @@ function FavoritesCarousel({
 }
 
 export default function CartModal() {
-  const { cart, updateCartItem, addCartItem, clearDiscount, clearItemPatch, setServerCart } = useCart();
+  const { cart, updateCartItem, clearDiscount, clearItemPatch, setServerCart } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
@@ -240,6 +240,11 @@ export default function CartModal() {
           ? prev.lines.map((l) => (l.merchandise.id === vid ? newLine : l))
           : [...prev.lines, newLine];
         const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
+        // Preserve the existing discount in the optimistic total so the displayed
+        // price doesn't jump to the full undiscounted amount while the server confirms.
+        const prevSubtotal = parseFloat(prev.cost.subtotalAmount.amount);
+        const prevDiscount = Math.max(0, prevSubtotal - parseFloat(prev.cost.totalAmount.amount));
+        const newTotal = Math.max(0, subtotal - prevDiscount);
         return {
           ...prev,
           lines,
@@ -247,7 +252,7 @@ export default function CartModal() {
           cost: {
             ...prev.cost,
             subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: price.currencyCode },
-            totalAmount: { amount: subtotal.toFixed(2), currencyCode: price.currencyCode },
+            totalAmount: { amount: newTotal.toFixed(2), currencyCode: price.currencyCode },
           },
         };
       });
@@ -274,6 +279,12 @@ export default function CartModal() {
             (s, l) => s + parseFloat(l.cost.totalAmount.amount), 0,
           );
           const currencyCode = confirmed.cost.totalAmount.currencyCode;
+          // Subtract Shopify-confirmed discount allocations so the merged total
+          // stays accurate even when mergedLines includes in-flight optimistic items.
+          const confirmedDiscount = (confirmed.discountAllocations ?? []).reduce(
+            (sum, a) => sum + parseFloat(a.discountedAmount.amount), 0,
+          );
+          const mergedTotal = Math.max(0, subtotal - confirmedDiscount);
           return {
             ...confirmed,
             lines: mergedLines,
@@ -281,7 +292,7 @@ export default function CartModal() {
             cost: {
               ...confirmed.cost,
               subtotalAmount: { amount: subtotal.toFixed(2), currencyCode },
-              totalAmount: { amount: subtotal.toFixed(2), currencyCode },
+              totalAmount: { amount: mergedTotal.toFixed(2), currencyCode },
             },
           };
         });
@@ -303,16 +314,69 @@ export default function CartModal() {
   }, []);
 
   // Mirror optimistic add-to-cart from product pages into this cart instance.
-  // useOptimistic is component-local, so AddToCart's dispatch doesn't reach
-  // CartModal — this bridges the gap so the item appears instantly on open.
+  // Uses setServerCart directly (not addCartItem/useOptimistic) so there is no
+  // pending action to re-apply when the confirmed cart arrives — preventing the
+  // qty=2 flash that occurred when useOptimistic re-applied ADD_ITEM on top of
+  // the already-confirmed serverCart.
   useEffect(() => {
     const handleOptimisticAdd = (e: Event) => {
       const { variant, product } = (e as CustomEvent).detail;
-      addCartItem(variant, product);
+      clearItemPatch(variant.id);
+      setServerCart((prev) => {
+        const base = prev ?? {
+          id: undefined,
+          checkoutUrl: "",
+          totalQuantity: 0,
+          lines: [] as NonNullable<typeof prev>["lines"],
+          cost: {
+            subtotalAmount: { amount: "0", currencyCode: variant.price.currencyCode },
+            totalAmount: { amount: "0", currencyCode: variant.price.currencyCode },
+            totalTaxAmount: { amount: "0", currencyCode: variant.price.currencyCode },
+          },
+          discountCodes: [],
+          discountAllocations: [],
+        } as NonNullable<typeof prev>;
+        const existing = base.lines.find((l) => l.merchandise.id === variant.id);
+        const qty = (existing?.quantity ?? 0) + 1;
+        const itemTotal = (parseFloat(variant.price.amount) * qty).toFixed(2);
+        const newLine = {
+          id: existing?.id,
+          quantity: qty,
+          cost: { totalAmount: { amount: itemTotal, currencyCode: variant.price.currencyCode } },
+          merchandise: {
+            id: variant.id,
+            title: variant.title,
+            selectedOptions: variant.selectedOptions,
+            product: {
+              id: product.id,
+              handle: product.handle,
+              title: product.title,
+              featuredImage: product.featuredImage,
+            },
+          },
+        } as typeof base.lines[number];
+        const lines = existing
+          ? base.lines.map((l) => (l.merchandise.id === variant.id ? newLine : l))
+          : [...base.lines, newLine];
+        const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
+        const prevSubtotal = parseFloat(base.cost.subtotalAmount.amount);
+        const prevDiscount = Math.max(0, prevSubtotal - parseFloat(base.cost.totalAmount.amount));
+        const newTotal = Math.max(0, subtotal - prevDiscount);
+        return {
+          ...base,
+          lines,
+          totalQuantity: lines.reduce((s, l) => s + l.quantity, 0),
+          cost: {
+            ...base.cost,
+            subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: variant.price.currencyCode },
+            totalAmount: { amount: newTotal.toFixed(2), currencyCode: variant.price.currencyCode },
+          },
+        };
+      });
     };
     window.addEventListener("cart:add-optimistic", handleOptimisticAdd);
     return () => window.removeEventListener("cart:add-optimistic", handleOptimisticAdd);
-  }, [addCartItem]);
+  }, [clearItemPatch, setServerCart]);
 
   // Sync applied discount code from cart on first open only
   useEffect(() => {

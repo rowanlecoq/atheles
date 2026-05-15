@@ -12,7 +12,7 @@ import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
 function ProductCard({ product }: { product: Product }) {
-  const { addCartItem } = useCart();
+  const { addCartItem, setServerCart } = useCart();
   const [showSizes, setShowSizes] = useState(false);
   const [added, setAdded] = useState(false);
   const addedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -32,7 +32,11 @@ function ProductCard({ product }: { product: Product }) {
       new CustomEvent("cart:add-optimistic", { detail: { variant, product } }),
     );
     window.dispatchEvent(new Event("open-cart"));
-    addItem(null, variantId).catch(() => {});
+    addItem(null, variantId).then((result) => {
+      if (result && typeof result === "object" && "cart" in result) {
+        setServerCart(result.cart);
+      }
+    }).catch(() => {});
     setShowSizes(false);
     setAdded(true);
     if (addedTimerRef.current) clearTimeout(addedTimerRef.current);
