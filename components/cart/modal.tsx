@@ -13,6 +13,7 @@ import LoadingDots from "components/loading-dots";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
 import { createUrl } from "lib/utils";
+import type { Product, ProductVariant } from "lib/shopify/types";
 import Image from "next/image";
 import Link from "next/link";
 import { Fragment, useCallback, useEffect, useRef, useState } from "react";
@@ -211,6 +212,30 @@ export default function CartModal() {
   const closeCart = () => setIsOpen(false);
 
   const handleAddFav = useCallback(async (handle: string, variantId: string) => {
+    // Optimistic add so the item appears instantly and the card disappears from the carousel.
+    // Safe now that addItem returns the confirmed cart and setServerCart is called directly —
+    // the RSC re-render can no longer race in with stale data and revert the state.
+    const favProduct = favProducts.find((p) => p.handle === handle);
+    if (favProduct?.firstVariantId) {
+      const price = favProduct.firstVariantPrice ?? favProduct.priceRange.maxVariantPrice;
+      addCartItem(
+        {
+          id: favProduct.firstVariantId,
+          title: favProduct.firstVariantTitle ?? "Default Title",
+          price,
+          selectedOptions: favProduct.firstVariantOptions ?? [],
+        } as unknown as ProductVariant,
+        {
+          id: favProduct.id ?? "",
+          handle: favProduct.handle,
+          title: favProduct.title,
+          featuredImage: favProduct.featuredImage
+            ? { url: favProduct.featuredImage.url, altText: "" }
+            : { url: "", altText: "" },
+        } as unknown as Product,
+      );
+    }
+
     setAddingFav(handle);
     try {
       const result = await addItem(null, variantId);
@@ -219,7 +244,7 @@ export default function CartModal() {
       }
     } catch {}
     setAddingFav(null);
-  }, [setServerCart]);
+  }, [addCartItem, favProducts, setServerCart]);
 
   useEffect(() => {
     if (!cart) {
