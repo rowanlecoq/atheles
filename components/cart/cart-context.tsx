@@ -288,6 +288,11 @@ export function useCart() {
       for (const [id, qty] of next) {
         const serverItem = serverCart.lines.find((l) => l.merchandise.id === id);
         if (serverItem && serverItem.quantity === qty) {
+          // Server confirmed the quantity — patch no longer needed
+          next.delete(id);
+          changed = true;
+        } else if (!serverItem && qty <= 0) {
+          // Server confirmed the deletion — clean up sentinel
           next.delete(id);
           changed = true;
         }
@@ -364,10 +369,11 @@ export function useCart() {
   }, [optimisticCart, qtyPatch, serverCart]);
 
   const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
-    updateOptimisticCart({
-      type: "UPDATE_ITEM",
-      payload: { merchandiseId, updateType },
-    });
+    // Drive display via qtyPatch only — do NOT dispatch UPDATE_ITEM through
+    // useOptimistic. If we did, useOptimistic would re-apply the pending action
+    // on top of every setServerCart call. For example: server confirms qty=19,
+    // useOptimistic re-applies the still-pending UPDATE_ITEM(-1) → shows 18 (or 0
+    // if near the boundary), causing the item to flash or disappear briefly.
     setQtyPatch((prev) => {
       const currentItem = optimisticCart?.lines.find(
         (l) => l.merchandise.id === merchandiseId,
@@ -382,8 +388,9 @@ export function useCart() {
         MAX_ITEM_QUANTITY,
       );
       const next = new Map(prev);
-      if (newQty <= 0) next.delete(merchandiseId);
-      else next.set(merchandiseId, newQty);
+      // For delete/zero: store sentinel 0 so the useMemo hides the item immediately.
+      // The sentinel is cleaned up once the server confirms the item is gone.
+      next.set(merchandiseId, Math.max(0, newQty));
       return next;
     });
   };
