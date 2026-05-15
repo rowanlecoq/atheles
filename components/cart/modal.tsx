@@ -191,7 +191,7 @@ function FavoritesCarousel({
 }
 
 export default function CartModal() {
-  const { cart, updateCartItem, addCartItem, clearDiscount, setServerCart } = useCart();
+  const { cart, updateCartItem, addCartItem, clearDiscount, clearItemPatch, setServerCart } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
@@ -210,6 +210,8 @@ export default function CartModal() {
     const favProduct = favProducts.find((p) => p.handle === handle);
     if (favProduct?.firstVariantId) {
       const vid = favProduct.firstVariantId;
+      // Clear any stale delete sentinel so the optimistic add is immediately visible
+      clearItemPatch(vid);
       const price = favProduct.firstVariantPrice ?? favProduct.priceRange.maxVariantPrice;
       setServerCart((prev) => {
         if (!prev) return prev;
@@ -285,7 +287,7 @@ export default function CartModal() {
         });
       }
     }).catch(() => {});
-  }, [favProducts, setServerCart]);
+  }, [favProducts, clearItemPatch, setServerCart]);
 
   useEffect(() => {
     if (!cart) {

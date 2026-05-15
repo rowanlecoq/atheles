@@ -92,6 +92,8 @@ export async function removeItem(
     // Use client-provided line item ID to skip getCart() (cache may be stale)
     if (lineItemId) {
       const cart = await removeFromCart([lineItemId]);
+      // Invalidate so addItem's getCart() sees the updated cart on re-add
+      updateTag(TAGS.cart);
       return { cart };
     }
 
@@ -105,6 +107,7 @@ export async function removeItem(
 
     if (lineItem && lineItem.id) {
       const cart = await removeFromCart([lineItem.id]);
+      updateTag(TAGS.cart);
       return { cart };
     } else {
       return "Item not found in cart";

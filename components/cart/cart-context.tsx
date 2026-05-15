@@ -245,14 +245,19 @@ export function CartProvider({
   }, []);
 
   // Persist patch to sessionStorage whenever it changes (after hydration).
+  // Sentinels (qty <= 0) are intentionally excluded — they only need to survive
+  // within the current React render cycle, not across page reloads. Persisting
+  // them would cause items to stay hidden after a refresh even if the server
+  // confirms they're back in the cart.
   useEffect(() => {
     if (!patchHydrated) return;
-    if (qtyPatch.size === 0) {
+    const persistable = [...qtyPatch.entries()].filter(([, qty]) => qty > 0);
+    if (persistable.length === 0) {
       sessionStorage.removeItem("atheles-qty-patch");
     } else {
       sessionStorage.setItem(
         "atheles-qty-patch",
-        JSON.stringify(Object.fromEntries(qtyPatch)),
+        JSON.stringify(Object.fromEntries(persistable)),
       );
     }
   }, [qtyPatch, patchHydrated]);
@@ -293,6 +298,11 @@ export function useCart() {
           changed = true;
         } else if (!serverItem && qty <= 0) {
           // Server confirmed the deletion — clean up sentinel
+          next.delete(id);
+          changed = true;
+        } else if (serverItem && qty <= 0) {
+          // Stale delete sentinel — item was re-added to the server cart;
+          // remove the sentinel so the item becomes visible again
           next.delete(id);
           changed = true;
         }
@@ -407,6 +417,15 @@ export function useCart() {
     });
   };
 
+  const clearItemPatch = (merchandiseId: string) => {
+    setQtyPatch((prev) => {
+      if (!prev.has(merchandiseId)) return prev;
+      const next = new Map(prev);
+      next.delete(merchandiseId);
+      return next;
+    });
+  };
+
   // Optimistically zeroes out discount so the total updates instantly on remove.
   // The server action (removeDiscountCode) catches up in the background.
   const clearDiscount = () => {
@@ -414,7 +433,7 @@ export function useCart() {
   };
 
   return useMemo(
-    () => ({ cart, updateCartItem, addCartItem, clearDiscount, setServerCart, patchHydrated }),
+    () => ({ cart, updateCartItem, addCartItem, clearDiscount, clearItemPatch, setServerCart, patchHydrated }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [cart, patchHydrated, setServerCart],
   );
