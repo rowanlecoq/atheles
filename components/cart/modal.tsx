@@ -48,12 +48,10 @@ type FavProduct = {
 
 function FavoritesCarousel({
   products,
-  addingFav,
   onAdd,
   onClose,
 }: {
   products: FavProduct[];
-  addingFav: string | null;
   onAdd: (handle: string, variantId: string) => void;
   onClose: () => void;
 }) {
@@ -131,7 +129,6 @@ function FavoritesCarousel({
               {canAdd ? (
                 <button
                   type="button"
-                  disabled={addingFav === p.handle}
                   onClick={() => {
                     if (!p.firstVariantId) return;
                     onAdd(p.handle, p.firstVariantId);
@@ -146,9 +143,9 @@ function FavoritesCarousel({
                         <span className="text-[8px] text-brand-grey">ATHELES</span>
                       </div>
                     )}
-                    <div className={`absolute inset-0 flex items-center justify-center transition-colors ${addingFav === p.handle ? "bg-brand-dark/50" : "bg-brand-dark/0 group-hover/card:bg-brand-dark/40"}`}>
-                      <span className={`text-xs font-medium uppercase tracking-wider text-white transition-opacity ${addingFav === p.handle ? "opacity-100" : "opacity-0 group-hover/card:opacity-100"}`}>
-                        {addingFav === p.handle ? "adding..." : "+ add"}
+                    <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/0 transition-colors group-hover/card:bg-brand-dark/40">
+                      <span className="text-xs font-medium uppercase tracking-wider text-white opacity-0 transition-opacity group-hover/card:opacity-100">
+                        + add
                       </span>
                     </div>
                   </div>
@@ -205,17 +202,11 @@ export default function CartModal() {
   const discountSyncedRef = useRef(false);
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
-  const [addingFav, setAddingFav] = useState<string | null>(null);
   const favCacheRef = useRef<{ products: FavProduct[] } | null>(null);
   const openCart = () => setIsOpen(true);
   const closeCart = () => setIsOpen(false);
 
-  const handleAddFav = useCallback(async (handle: string, variantId: string) => {
-    // Update serverCart directly rather than dispatching through useOptimistic.
-    // Using addCartItem (useOptimistic) caused the flicker: when setServerCart(result.cart)
-    // arrived with the confirmed qty=1, useOptimistic re-applied the still-pending ADD_ITEM
-    // action on top of it, briefly showing qty=2 before settling back to 1.
-    // Bypassing useOptimistic entirely means serverCart IS the display — no re-apply possible.
+  const handleAddFav = useCallback((handle: string, variantId: string) => {
     const favProduct = favProducts.find((p) => p.handle === handle);
     if (favProduct?.firstVariantId) {
       const vid = favProduct.firstVariantId;
@@ -259,15 +250,11 @@ export default function CartModal() {
         };
       });
     }
-
-    setAddingFav(handle);
-    try {
-      const result = await addItem(null, variantId);
+    addItem(null, variantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
         setServerCart(result.cart);
       }
-    } catch {}
-    setAddingFav(null);
+    }).catch(() => {});
   }, [favProducts, setServerCart]);
 
   useEffect(() => {
@@ -493,7 +480,6 @@ export default function CartModal() {
                     <div className="mt-2 border-t border-brand-dark-gold/20 px-1 pb-4 pt-5">
                       <FavoritesCarousel
                         products={filteredFavProducts}
-                        addingFav={addingFav}
                         onAdd={handleAddFav}
                         onClose={closeCart}
                       />
@@ -622,7 +608,6 @@ export default function CartModal() {
                     <div className="border-t border-brand-dark-gold/20 pt-3">
                       <FavoritesCarousel
                         products={filteredFavProducts}
-                        addingFav={addingFav}
                         onAdd={handleAddFav}
                         onClose={closeCart}
                       />
@@ -655,9 +640,13 @@ export default function CartModal() {
                           <div className="flex items-center justify-between rounded-lg border border-brand-gold/30 bg-brand-gold/5 px-3 py-2">
                             <div className="flex items-center gap-2">
                               <span className="text-sm text-brand-gold">{appliedCode.code}</span>
-                              {totalDiscount > 0 && (
+                              {totalDiscount > 0 ? (
                                 <span className="rounded bg-green-500/10 px-1.5 py-0.5 text-[10px] text-green-400">
                                   -{new Intl.NumberFormat(undefined, { style: "currency", currency: cart.cost.totalAmount.currencyCode, currencyDisplay: "narrowSymbol" }).format(totalDiscount)} off
+                                </span>
+                              ) : (
+                                <span className="rounded bg-brand-gold/10 px-1.5 py-0.5 text-[10px] text-brand-gold">
+                                  applies at checkout
                                 </span>
                               )}
                             </div>

@@ -73,7 +73,6 @@ export async function addItem(
     } else {
       cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     }
-    updateTag(TAGS.cart);
     return { cart };
   } catch (e) {
     console.error("addItem error:", e);
@@ -100,7 +99,6 @@ export async function removeItem(
 
     if (lineItem && lineItem.id) {
       const cart = await removeFromCart([lineItem.id]);
-      updateTag(TAGS.cart);
       return { cart };
     } else {
       return "Item not found in cart";
@@ -146,7 +144,6 @@ export async function updateItemQuantity(
       return "Item not found in cart";
     }
 
-    updateTag(TAGS.cart);
     return { cart };
   } catch (e) {
     console.error("updateItemQuantity error:", e);

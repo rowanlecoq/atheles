@@ -287,7 +287,7 @@ export function useCart() {
       let changed = false;
       for (const [id, qty] of next) {
         const serverItem = serverCart.lines.find((l) => l.merchandise.id === id);
-        if (!serverItem || serverItem.quantity === qty) {
+        if (serverItem && serverItem.quantity === qty) {
           next.delete(id);
           changed = true;
         }
