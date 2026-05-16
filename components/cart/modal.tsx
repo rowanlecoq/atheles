@@ -12,6 +12,7 @@ import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 import LoadingDots from "components/loading-dots";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
+import type { Product, ProductVariant } from "lib/shopify/types";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -191,7 +192,7 @@ function FavoritesCarousel({
 }
 
 export default function CartModal() {
-  const { cart, updateCartItem, clearDiscount, clearItemPatch, setServerCart } = useCart();
+  const { cart, updateCartItem, addCartItem, mergeConfirm, removeDiscountOptimistic } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountCode, setDiscountCode] = useState("");
@@ -204,6 +205,7 @@ export default function CartModal() {
   const [tierName, setTierName] = useState<string | null>(null);
   const favCacheRef = useRef<{ products: FavProduct[] } | null>(null);
   const closedAtRef = useRef(0);
+
   const openCart = () => {
     if (Date.now() - closedAtRef.current < 500) return;
     setIsOpen(true);
@@ -215,109 +217,37 @@ export default function CartModal() {
 
   const handleAddFav = useCallback((handle: string, variantId: string) => {
     const favProduct = favProducts.find((p) => p.handle === handle);
-    if (favProduct?.firstVariantId) {
-      const vid = favProduct.firstVariantId;
-      // Clear any stale delete sentinel so the optimistic add is immediately visible
-      clearItemPatch(vid);
-      const price = favProduct.firstVariantPrice ?? favProduct.priceRange.maxVariantPrice;
-      setServerCart((prev) => {
-        const base = prev ?? {
-          id: undefined,
-          checkoutUrl: "",
-          totalQuantity: 0,
-          lines: [] as NonNullable<typeof prev>["lines"],
-          cost: {
-            subtotalAmount: { amount: "0", currencyCode: price.currencyCode },
-            totalAmount: { amount: "0", currencyCode: price.currencyCode },
-            totalTaxAmount: { amount: "0", currencyCode: price.currencyCode },
-          },
-          discountCodes: [],
-          discountAllocations: [],
-        } as NonNullable<typeof prev>;
-        const existing = base.lines.find((l) => l.merchandise.id === vid);
-        const qty = (existing?.quantity ?? 0) + 1;
-        const itemTotal = (parseFloat(price.amount) * qty).toFixed(2);
-        const newLine = {
-          id: existing?.id,
-          quantity: qty,
-          cost: { totalAmount: { amount: itemTotal, currencyCode: price.currencyCode } },
-          merchandise: {
-            id: vid,
-            title: favProduct.firstVariantTitle ?? "Default Title",
-            selectedOptions: favProduct.firstVariantOptions ?? [],
-            product: {
-              id: favProduct.id ?? "",
-              handle: favProduct.handle,
-              title: favProduct.title,
-              featuredImage: favProduct.featuredImage
-                ? { url: favProduct.featuredImage.url, altText: "" }
-                : { url: "", altText: "" },
-            },
-          },
-        } as typeof base.lines[number];
-        const lines = existing
-          ? base.lines.map((l) => (l.merchandise.id === vid ? newLine : l))
-          : [...base.lines, newLine];
-        const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
-        // Preserve the existing discount in the optimistic total so the displayed
-        // price doesn't jump to the full undiscounted amount while the server confirms.
-        const prevSubtotal = parseFloat(base.cost.subtotalAmount.amount);
-        const prevDiscount = Math.max(0, prevSubtotal - parseFloat(base.cost.totalAmount.amount));
-        const newTotal = Math.max(0, subtotal - prevDiscount);
-        return {
-          ...base,
-          lines,
-          totalQuantity: lines.reduce((s, l) => s + l.quantity, 0),
-          cost: {
-            ...base.cost,
-            subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: price.currencyCode },
-            totalAmount: { amount: newTotal.toFixed(2), currencyCode: price.currencyCode },
-          },
-        };
-      });
-    }
+    if (!favProduct?.firstVariantId) return;
+
+    const vid = favProduct.firstVariantId;
+    const price = favProduct.firstVariantPrice ?? favProduct.priceRange.maxVariantPrice;
+
+    // Build synthetic variant/product to pass to the shared addCartItem updater.
+    const syntheticVariant = {
+      id: vid,
+      title: favProduct.firstVariantTitle ?? "Default Title",
+      availableForSale: favProduct.availableForSale ?? true,
+      selectedOptions: favProduct.firstVariantOptions ?? [],
+      price: { amount: price.amount, currencyCode: price.currencyCode },
+    } as ProductVariant;
+
+    const syntheticProduct = {
+      id: favProduct.id ?? "",
+      handle: favProduct.handle,
+      title: favProduct.title,
+      featuredImage: favProduct.featuredImage
+        ? { url: favProduct.featuredImage.url, altText: "" }
+        : { url: "", altText: "" },
+    } as Product;
+
+    addCartItem(syntheticVariant, syntheticProduct);
+
     addItem(null, variantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
-        const confirmed = result.cart;
-        setServerCart((prev) => {
-          if (!prev) return confirmed;
-          // Merge: update/add items from the confirmed result while keeping
-          // any other optimistic lines that are still in-flight (concurrent adds).
-          const mergedLines = prev.lines.map((prevLine) => {
-            const confirmedLine = confirmed.lines.find(
-              (l) => l.merchandise.id === prevLine.merchandise.id,
-            );
-            return confirmedLine ?? prevLine;
-          });
-          for (const confirmedLine of confirmed.lines) {
-            if (!mergedLines.some((l) => l.merchandise.id === confirmedLine.merchandise.id)) {
-              mergedLines.push(confirmedLine);
-            }
-          }
-          const subtotal = mergedLines.reduce(
-            (s, l) => s + parseFloat(l.cost.totalAmount.amount), 0,
-          );
-          const currencyCode = confirmed.cost.totalAmount.currencyCode;
-          // Subtract Shopify-confirmed discount allocations so the merged total
-          // stays accurate even when mergedLines includes in-flight optimistic items.
-          const confirmedDiscount = (confirmed.discountAllocations ?? []).reduce(
-            (sum, a) => sum + parseFloat(a.discountedAmount.amount), 0,
-          );
-          const mergedTotal = Math.max(0, subtotal - confirmedDiscount);
-          return {
-            ...confirmed,
-            lines: mergedLines,
-            totalQuantity: mergedLines.reduce((s, l) => s + l.quantity, 0),
-            cost: {
-              ...confirmed.cost,
-              subtotalAmount: { amount: subtotal.toFixed(2), currencyCode },
-              totalAmount: { amount: mergedTotal.toFixed(2), currencyCode },
-            },
-          };
-        });
+        mergeConfirm(result.cart);
       }
     }).catch(() => {});
-  }, [favProducts, clearItemPatch, setServerCart]);
+  }, [favProducts, addCartItem, mergeConfirm]);
 
   useEffect(() => {
     if (!cart) {
@@ -325,77 +255,16 @@ export default function CartModal() {
     }
   }, [cart]);
 
-  // Listen for custom open-cart events (from quick-add etc.)
+  // Listen for open-cart events from add-to-cart buttons on product pages.
+  // Respects the 500ms cooldown to prevent re-opening after the user closes the cart.
   useEffect(() => {
-    const handleOpenCart = () => setIsOpen(true);
+    const handleOpenCart = () => {
+      if (Date.now() - closedAtRef.current < 500) return;
+      setIsOpen(true);
+    };
     window.addEventListener("open-cart", handleOpenCart);
     return () => window.removeEventListener("open-cart", handleOpenCart);
   }, []);
-
-  // Mirror optimistic add-to-cart from product pages into this cart instance.
-  // Uses setServerCart directly (not addCartItem/useOptimistic) so there is no
-  // pending action to re-apply when the confirmed cart arrives — preventing the
-  // qty=2 flash that occurred when useOptimistic re-applied ADD_ITEM on top of
-  // the already-confirmed serverCart.
-  useEffect(() => {
-    const handleOptimisticAdd = (e: Event) => {
-      const { variant, product } = (e as CustomEvent).detail;
-      clearItemPatch(variant.id);
-      setServerCart((prev) => {
-        const base = prev ?? {
-          id: undefined,
-          checkoutUrl: "",
-          totalQuantity: 0,
-          lines: [] as NonNullable<typeof prev>["lines"],
-          cost: {
-            subtotalAmount: { amount: "0", currencyCode: variant.price.currencyCode },
-            totalAmount: { amount: "0", currencyCode: variant.price.currencyCode },
-            totalTaxAmount: { amount: "0", currencyCode: variant.price.currencyCode },
-          },
-          discountCodes: [],
-          discountAllocations: [],
-        } as NonNullable<typeof prev>;
-        const existing = base.lines.find((l) => l.merchandise.id === variant.id);
-        const qty = (existing?.quantity ?? 0) + 1;
-        const itemTotal = (parseFloat(variant.price.amount) * qty).toFixed(2);
-        const newLine = {
-          id: existing?.id,
-          quantity: qty,
-          cost: { totalAmount: { amount: itemTotal, currencyCode: variant.price.currencyCode } },
-          merchandise: {
-            id: variant.id,
-            title: variant.title,
-            selectedOptions: variant.selectedOptions,
-            product: {
-              id: product.id,
-              handle: product.handle,
-              title: product.title,
-              featuredImage: product.featuredImage,
-            },
-          },
-        } as typeof base.lines[number];
-        const lines = existing
-          ? base.lines.map((l) => (l.merchandise.id === variant.id ? newLine : l))
-          : [...base.lines, newLine];
-        const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
-        const prevSubtotal = parseFloat(base.cost.subtotalAmount.amount);
-        const prevDiscount = Math.max(0, prevSubtotal - parseFloat(base.cost.totalAmount.amount));
-        const newTotal = Math.max(0, subtotal - prevDiscount);
-        return {
-          ...base,
-          lines,
-          totalQuantity: lines.reduce((s, l) => s + l.quantity, 0),
-          cost: {
-            ...base.cost,
-            subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: variant.price.currencyCode },
-            totalAmount: { amount: newTotal.toFixed(2), currencyCode: variant.price.currencyCode },
-          },
-        };
-      });
-    };
-    window.addEventListener("cart:add-optimistic", handleOptimisticAdd);
-    return () => window.removeEventListener("cart:add-optimistic", handleOptimisticAdd);
-  }, [clearItemPatch, setServerCart]);
 
   // Sync applied discount code from cart on first open only
   useEffect(() => {
@@ -736,8 +605,6 @@ export default function CartModal() {
                     const totalDiscount = cart.discountAllocations?.reduce(
                       (sum, a) => sum + parseFloat(a.discountedAmount.amount || "0"), 0
                     ) || 0;
-                    const subtotal = parseFloat(cart.cost.subtotalAmount.amount);
-                    const hasDiscount = !!appliedCode && totalDiscount > 0;
 
                     return (
                       <div className="pt-2">
@@ -772,11 +639,9 @@ export default function CartModal() {
                                 setDiscountConfirmed(false);
                                 setDiscountCode("");
                                 setDiscountError("");
-                                // Optimistically zero out the discount so total
-                                // updates instantly without waiting for Shopify.
-                                clearDiscount();
+                                removeDiscountOptimistic();
                                 removeDiscountCode().then((confirmedCart) => {
-                                  if (confirmedCart) setServerCart(confirmedCart);
+                                  if (confirmedCart) mergeConfirm(confirmedCart);
                                 }).catch(() => {});
                               }}
                               className="text-xs text-brand-grey hover:text-red-400"
@@ -813,9 +678,7 @@ export default function CartModal() {
                                         setDiscountError("invalid or expired code.");
                                         removeDiscountCode().catch(() => {});
                                       } else if (result.cart) {
-                                        // Use the returned cart immediately — no need to wait
-                                        // for the next cartPromise refresh cycle.
-                                        setServerCart(result.cart);
+                                        mergeConfirm(result.cart);
                                         setDiscountConfirmed(true);
                                       }
                                     }).catch(() => {
@@ -846,7 +709,7 @@ export default function CartModal() {
                                       setDiscountError("invalid or expired code.");
                                       removeDiscountCode().catch(() => {});
                                     } else if (result.cart) {
-                                      setServerCart(result.cart);
+                                      mergeConfirm(result.cart);
                                       setDiscountConfirmed(true);
                                     }
                                   }).catch(() => {

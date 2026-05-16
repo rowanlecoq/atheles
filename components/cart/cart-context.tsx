@@ -1,153 +1,64 @@
 "use client";
 
-import type {
-  Cart,
-  CartItem,
-} from "lib/shopify/types";
-import React, {
-  createContext,
-  use,
-  useContext,
-  useEffect,
-  useMemo,
-  useOptimistic,
-  useRef,
-  useState,
-} from "react";
+import type { Cart, CartItem, Product, ProductVariant } from "lib/shopify/types";
+import React, { createContext, use, useContext, useMemo, useRef, useState } from "react";
 
 export const MAX_ITEM_QUANTITY = 20;
 
 type UpdateType = "plus" | "minus" | "delete";
 
-type CartAction =
-  | {
-      type: "UPDATE_ITEM";
-      payload: { merchandiseId: string; updateType: UpdateType };
-    }
-  | { type: "REMOVE_DISCOUNT" };
-
 type CartContextType = {
-  serverCart: Cart | undefined;
-  setServerCart: React.Dispatch<React.SetStateAction<Cart | undefined>>;
-  qtyPatch: Map<string, number>;
-  setQtyPatch: React.Dispatch<React.SetStateAction<Map<string, number>>>;
-  patchHydrated: boolean;
+  cart: Cart | undefined;
+  setCart: React.Dispatch<React.SetStateAction<Cart | undefined>>;
 };
 
 const CartContext = createContext<CartContextType | undefined>(undefined);
 
-function calculateItemCost(quantity: number, price: string): string {
-  return (Number(price) * quantity).toFixed(2);
-}
-
-function updateCartItemHelper(
-  item: CartItem,
-  updateType: UpdateType,
-): CartItem | null {
-  if (updateType === "delete") return null;
-
-  const newQuantity = Math.min(
-    updateType === "plus" ? item.quantity + 1 : item.quantity - 1,
-    MAX_ITEM_QUANTITY,
-  );
-  if (newQuantity === 0) return null;
-
-  const singleItemAmount = Number(item.cost.totalAmount.amount) / item.quantity;
-  const newTotalAmount = calculateItemCost(
-    newQuantity,
-    singleItemAmount.toString(),
-  );
-
-  return {
-    ...item,
-    quantity: newQuantity,
-    cost: {
-      ...item.cost,
-      totalAmount: { ...item.cost.totalAmount, amount: newTotalAmount },
-    },
-  };
-}
-
-
-function updateCartTotals(
-  lines: CartItem[],
-): Pick<Cart, "totalQuantity" | "cost"> {
-  const totalQuantity = lines.reduce((sum, item) => sum + item.quantity, 0);
-  const totalAmount = lines.reduce(
-    (sum, item) => sum + Number(item.cost.totalAmount.amount),
-    0,
-  );
-  const currencyCode = lines[0]?.cost.totalAmount.currencyCode ?? "USD";
-
-  return {
-    totalQuantity,
-    cost: {
-      subtotalAmount: { amount: totalAmount.toFixed(2), currencyCode },
-      totalAmount: { amount: totalAmount.toFixed(2), currencyCode },
-      totalTaxAmount: { amount: "0", currencyCode },
-    },
-  };
-}
-
-function createEmptyCart(): Cart {
+function buildEmptyCart(currencyCode = "USD"): Cart {
   return {
     id: undefined,
     checkoutUrl: "",
     totalQuantity: 0,
     lines: [],
     cost: {
-      subtotalAmount: { amount: "0", currencyCode: "USD" },
-      totalAmount: { amount: "0", currencyCode: "USD" },
-      totalTaxAmount: { amount: "0", currencyCode: "USD" },
+      subtotalAmount: { amount: "0", currencyCode },
+      totalAmount: { amount: "0", currencyCode },
+      totalTaxAmount: { amount: "0", currencyCode },
     },
     discountCodes: [],
     discountAllocations: [],
   };
 }
 
-function cartReducer(state: Cart | undefined, action: CartAction): Cart {
-  const currentCart = state || createEmptyCart();
-
-  switch (action.type) {
-    case "UPDATE_ITEM": {
-      const { merchandiseId, updateType } = action.payload;
-      const updatedLines = currentCart.lines
-        .map((item) =>
-          item.merchandise.id === merchandiseId
-            ? updateCartItemHelper(item, updateType)
-            : item,
-        )
-        .filter(Boolean) as CartItem[];
-
-      if (updatedLines.length === 0) {
-        return {
-          ...currentCart,
-          lines: [],
-          totalQuantity: 0,
-          cost: {
-            ...currentCart.cost,
-            totalAmount: { ...currentCart.cost.totalAmount, amount: "0" },
-          },
-        };
-      }
-
-      return { ...currentCart, ...updateCartTotals(updatedLines), lines: updatedLines };
-    }
-    case "REMOVE_DISCOUNT": {
-      return {
-        ...currentCart,
-        discountCodes: [],
-        discountAllocations: [],
-        cost: {
-          ...currentCart.cost,
-          // Restore total to subtotal (no discount applied)
-          totalAmount: currentCart.cost.subtotalAmount,
-        },
-      };
-    }
-    default:
-      return currentCart;
-  }
+// Recompute subtotal/total from lines, preserving base cart metadata.
+// Existing discountAllocations are kept so the discount amount doesn't
+// disappear mid-operation — confirmed discount data arrives with the
+// next server response.
+function withTotals(base: Cart, lines: CartItem[]): Cart {
+  const subtotal = lines.reduce(
+    (s, l) => s + parseFloat(l.cost.totalAmount.amount),
+    0,
+  );
+  const currencyCode =
+    lines[0]?.cost.totalAmount.currencyCode ??
+    base.cost.totalAmount.currencyCode;
+  const discount = (base.discountAllocations ?? []).reduce(
+    (s, a) => s + parseFloat(a.discountedAmount.amount),
+    0,
+  );
+  return {
+    ...base,
+    lines,
+    totalQuantity: lines.reduce((s, l) => s + l.quantity, 0),
+    cost: {
+      ...base.cost,
+      subtotalAmount: { amount: subtotal.toFixed(2), currencyCode },
+      totalAmount: {
+        amount: Math.max(0, subtotal - discount).toFixed(2),
+        currencyCode,
+      },
+    },
+  };
 }
 
 export function CartProvider({
@@ -157,213 +68,142 @@ export function CartProvider({
   children: React.ReactNode;
   cartPromise: Promise<Cart | undefined>;
 }) {
-  // Keep a ref to the INITIAL promise so use() is only ever called on it.
-  // The initial promise is pre-resolved by Next.js RSC (no suspension in practice).
-  // All subsequent cart re-fetches (triggered by server actions calling updateTag)
-  // are handled via useEffect → setState so consumers NEVER suspend after mount.
-  const initialPromiseRef = useRef(cartPromise);
-  const initialCart = use(initialPromiseRef.current);
-
-  const [serverCart, setServerCart] = useState<Cart | undefined>(initialCart);
-  const [qtyPatch, setQtyPatch] = useState<Map<string, number>>(new Map());
-  const [patchHydrated, setPatchHydrated] = useState(false);
-
-  // Intentionally not subscribing to cartPromise changes from RSC re-renders.
-  // Every cart operation (add/remove/update/discount) returns its confirmed cart
-  // directly and calls setServerCart from the callback. RSC re-renders triggered
-  // by Next.js after server actions fire getCart() with a stale cache (no
-  // updateTag), so the resolved value is unreliable and causes items to vanish.
-
-  // Load persisted quantities from sessionStorage after mount.
-  // sessionStorage (not localStorage) is used intentionally: it survives
-  // soft Next.js navigation within a tab but is cleared on hard reload /
-  // new tab, preventing stale patches from previous sessions overriding
-  // the server cart and causing quantity/price glitches.
-  useEffect(() => {
-    try {
-      const stored = sessionStorage.getItem("atheles-qty-patch");
-      if (stored) {
-        const obj = JSON.parse(stored) as Record<string, number>;
-        setQtyPatch(new Map(Object.entries(obj).map(([k, v]) => [k, Number(v)])));
-      }
-    } catch {}
-    setPatchHydrated(true);
-  }, []);
-
-  // Persist patch to sessionStorage whenever it changes (after hydration).
-  // Sentinels (qty <= 0) are intentionally excluded — they only need to survive
-  // within the current React render cycle, not across page reloads. Persisting
-  // them would cause items to stay hidden after a refresh even if the server
-  // confirms they're back in the cart.
-  useEffect(() => {
-    if (!patchHydrated) return;
-    const persistable = [...qtyPatch.entries()].filter(([, qty]) => qty > 0);
-    if (persistable.length === 0) {
-      sessionStorage.removeItem("atheles-qty-patch");
-    } else {
-      sessionStorage.setItem(
-        "atheles-qty-patch",
-        JSON.stringify(Object.fromEntries(persistable)),
-      );
-    }
-  }, [qtyPatch, patchHydrated]);
+  // Pin the initial RSC promise so use() is only ever called once.
+  // RSC re-renders pass new cartPromise props but we intentionally ignore them:
+  // every cart operation returns its confirmed cart and applies it via setCart,
+  // so RSC-fetched stale cache data cannot wipe optimistic state.
+  const initialRef = useRef(cartPromise);
+  const initialCart = use(initialRef.current);
+  const [cart, setCart] = useState<Cart | undefined>(initialCart);
 
   return (
-    <CartContext.Provider value={{ serverCart, setServerCart, qtyPatch, setQtyPatch, patchHydrated }}>
+    <CartContext.Provider value={{ cart, setCart }}>
       {children}
     </CartContext.Provider>
   );
 }
 
 export function useCart() {
-  const context = useContext(CartContext);
-  if (context === undefined) {
-    throw new Error("useCart must be used within a CartProvider");
-  }
+  const ctx = useContext(CartContext);
+  if (!ctx) throw new Error("useCart must be used within a CartProvider");
+  const { cart, setCart } = ctx;
 
-  const { serverCart, setServerCart, qtyPatch, setQtyPatch, patchHydrated } = context;
-
-  // serverCart is plain state — no use(), no suspension possible.
-  const [optimisticCart, updateOptimisticCart] = useOptimistic(
-    serverCart,
-    cartReducer,
-  );
-
-  // When serverCart is refreshed from Shopify, clear patch entries it has confirmed.
-  useEffect(() => {
-    if (!serverCart) return;
-    setQtyPatch((prev) => {
-      if (prev.size === 0) return prev;
-      const next = new Map(prev);
-      let changed = false;
-      for (const [id, qty] of next) {
-        const serverItem = serverCart.lines.find((l) => l.merchandise.id === id);
-        if (serverItem && serverItem.quantity === qty) {
-          // Server confirmed the quantity — patch no longer needed
-          next.delete(id);
-          changed = true;
-        } else if (!serverItem && qty <= 0) {
-          // Server confirmed the deletion — clean up sentinel
-          next.delete(id);
-          changed = true;
-        }
-      }
-      return changed ? next : prev;
-    });
-  }, [serverCart, setQtyPatch]);
-
-  // Merge qtyPatch on top of optimisticCart.
-  // Discount allocations are scaled proportionally using serverCart as the baseline —
-  // NOT optimisticCart, which already has the new quantities baked in (scale ≈ 1).
-  const cart = useMemo(() => {
-    if (!optimisticCart || qtyPatch.size === 0) return optimisticCart;
-
-    const updatedLines = optimisticCart.lines
-      .map((item) => {
-        const overrideQty = qtyPatch.get(item.merchandise.id);
-        if (overrideQty === undefined) return item;
-        if (overrideQty <= 0) return null;
-        const singlePrice = Number(item.cost.totalAmount.amount) / item.quantity;
-        return {
-          ...item,
-          quantity: overrideQty,
-          cost: {
-            ...item.cost,
-            totalAmount: {
-              ...item.cost.totalAmount,
-              amount: (singlePrice * overrideQty).toFixed(2),
-            },
-          },
-        };
-      })
-      .filter(Boolean) as CartItem[];
-
-    const patchedSubtotal = updatedLines.reduce(
-      (sum, item) => sum + Number(item.cost.totalAmount.amount),
-      0,
-    );
-
-    // Base the discount scale on the server-confirmed subtotal, not the
-    // already-updated optimistic subtotal (which would give scale = 1).
-    const baseSubtotal = Number(serverCart?.cost.subtotalAmount.amount ?? "0");
-    const discountScale = baseSubtotal > 0 ? patchedSubtotal / baseSubtotal : 1;
-
-    const scaledAllocations = (optimisticCart.discountAllocations ?? []).map(
-      (a) => ({
-        ...a,
-        discountedAmount: {
-          ...a.discountedAmount,
-          amount: (parseFloat(a.discountedAmount.amount) * discountScale).toFixed(2),
-        },
-      }),
-    );
-
-    const totalDiscount = scaledAllocations.reduce(
-      (sum, a) => sum + parseFloat(a.discountedAmount.amount),
-      0,
-    );
-    const currencyCode =
-      updatedLines[0]?.cost.totalAmount.currencyCode ?? "USD";
-    const patchedTotal = Math.max(0, patchedSubtotal - totalDiscount);
-
-    return {
-      ...optimisticCart,
-      lines: updatedLines,
-      totalQuantity: updatedLines.reduce((sum, item) => sum + item.quantity, 0),
-      discountAllocations: scaledAllocations,
-      cost: {
-        ...optimisticCart.cost,
-        subtotalAmount: { amount: patchedSubtotal.toFixed(2), currencyCode },
-        totalAmount: { amount: patchedTotal.toFixed(2), currencyCode },
-      },
-    };
-  }, [optimisticCart, qtyPatch, serverCart]);
-
-  const updateCartItem = (merchandiseId: string, updateType: UpdateType) => {
-    // Drive display via qtyPatch only — do NOT dispatch UPDATE_ITEM through
-    // useOptimistic. If we did, useOptimistic would re-apply the pending action
-    // on top of every setServerCart call. For example: server confirms qty=19,
-    // useOptimistic re-applies the still-pending UPDATE_ITEM(-1) → shows 18 (or 0
-    // if near the boundary), causing the item to flash or disappear briefly.
-    setQtyPatch((prev) => {
-      const currentItem = optimisticCart?.lines.find(
-        (l) => l.merchandise.id === merchandiseId,
+  // Optimistically add an item. Safe to call before the server action fires.
+  function addCartItem(variant: ProductVariant, product: Product) {
+    setCart((prev) => {
+      const base = prev ?? buildEmptyCart(variant.price.currencyCode);
+      const existing = base.lines.find(
+        (l) => l.merchandise.id === variant.id,
       );
-      const baseQty = prev.get(merchandiseId) ?? currentItem?.quantity ?? 1;
-      const newQty = Math.min(
-        updateType === "plus"
-          ? baseQty + 1
-          : updateType === "minus"
-            ? baseQty - 1
-            : 0,
+      const qty = Math.min(
+        (existing?.quantity ?? 0) + 1,
         MAX_ITEM_QUANTITY,
       );
-      const next = new Map(prev);
-      // For delete/zero: store sentinel 0 so the useMemo hides the item immediately.
-      // The sentinel is cleaned up once the server confirms the item is gone.
-      next.set(merchandiseId, Math.max(0, newQty));
-      return next;
+      const itemTotal = (parseFloat(variant.price.amount) * qty).toFixed(2);
+      const newLine: CartItem = {
+        id: existing?.id,
+        quantity: qty,
+        cost: {
+          totalAmount: {
+            amount: itemTotal,
+            currencyCode: variant.price.currencyCode,
+          },
+        },
+        merchandise: {
+          id: variant.id,
+          title: variant.title,
+          selectedOptions: variant.selectedOptions,
+          product: {
+            id: product.id,
+            handle: product.handle,
+            title: product.title,
+            featuredImage: product.featuredImage,
+          },
+        },
+      };
+      const lines = existing
+        ? base.lines.map((l) =>
+            l.merchandise.id === variant.id ? newLine : l,
+          )
+        : [...base.lines, newLine];
+      return withTotals(base, lines);
     });
-  };
+  }
 
-  const clearItemPatch = (merchandiseId: string) => {
-    setQtyPatch((prev) => {
-      if (!prev.has(merchandiseId)) return prev;
-      const next = new Map(prev);
-      next.delete(merchandiseId);
-      return next;
+  // Optimistically update or delete an item quantity.
+  function updateCartItem(merchandiseId: string, updateType: UpdateType) {
+    setCart((prev) => {
+      if (!prev) return prev;
+      const lines = prev.lines
+        .map((l) => {
+          if (l.merchandise.id !== merchandiseId) return l;
+          if (updateType === "delete") return null;
+          const qty = Math.min(
+            updateType === "plus" ? l.quantity + 1 : l.quantity - 1,
+            MAX_ITEM_QUANTITY,
+          );
+          if (qty <= 0) return null;
+          const singlePrice =
+            parseFloat(l.cost.totalAmount.amount) / l.quantity;
+          return {
+            ...l,
+            quantity: qty,
+            cost: {
+              ...l.cost,
+              totalAmount: {
+                ...l.cost.totalAmount,
+                amount: (singlePrice * qty).toFixed(2),
+              },
+            },
+          };
+        })
+        .filter(Boolean) as CartItem[];
+      return withTotals(prev, lines);
     });
-  };
+  }
 
-  // Optimistically zeroes out discount so the total updates instantly on remove.
-  // The server action (removeDiscountCode) catches up in the background.
-  const clearDiscount = () => {
-    updateOptimisticCart({ type: "REMOVE_DISCOUNT" });
-  };
+  // Apply a server-confirmed cart while preserving any concurrent in-flight
+  // optimistic adds (items in current cart not yet present in confirmed cart).
+  function mergeConfirm(confirmed: Cart) {
+    setCart((prev) => {
+      if (!prev) return confirmed;
+      const confirmedIds = new Set(
+        confirmed.lines.map((l) => l.merchandise.id),
+      );
+      const extraLines = prev.lines.filter(
+        (l) => !confirmedIds.has(l.merchandise.id),
+      );
+      if (extraLines.length === 0) return confirmed;
+      return withTotals(confirmed, [...confirmed.lines, ...extraLines]);
+    });
+  }
+
+  // Optimistically zero out the discount so the total updates instantly.
+  function removeDiscountOptimistic() {
+    setCart((prev) => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        discountCodes: [],
+        discountAllocations: [],
+        cost: {
+          ...prev.cost,
+          totalAmount: { ...prev.cost.subtotalAmount },
+        },
+      };
+    });
+  }
 
   return useMemo(
-    () => ({ cart, updateCartItem, clearDiscount, clearItemPatch, setServerCart, patchHydrated }),
+    () => ({
+      cart,
+      setCart,
+      addCartItem,
+      updateCartItem,
+      mergeConfirm,
+      removeDiscountOptimistic,
+    }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [cart, patchHydrated, setServerCart],
+    [cart, setCart],
   );
 }

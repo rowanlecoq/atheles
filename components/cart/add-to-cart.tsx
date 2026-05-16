@@ -9,7 +9,7 @@ import { useCart } from "./cart-context";
 
 export function AddToCart({ product }: { product: Product }) {
   const { variants, availableForSale } = product;
-  const { setServerCart } = useCart();
+  const { addCartItem, mergeConfirm } = useCart();
   const searchParams = useSearchParams();
   const [state, setState] = useState<"idle" | "added">("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -33,35 +33,12 @@ export function AddToCart({ product }: { product: Product }) {
   const handleAddToCart = () => {
     if (!selectedVariantId || !finalVariant || state === "added") return;
 
-    window.dispatchEvent(
-      new CustomEvent("cart:add-optimistic", {
-        detail: { variant: finalVariant, product },
-      }),
-    );
+    addCartItem(finalVariant, product);
     window.dispatchEvent(new Event("open-cart"));
+
     addItem(null, selectedVariantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
-        const confirmed = result.cart;
-        setServerCart((prev) => {
-          if (!prev) return confirmed;
-          const confirmedIds = new Set(confirmed.lines.map((l) => l.merchandise.id));
-          const extraLines = prev.lines.filter((l) => !confirmedIds.has(l.merchandise.id));
-          if (extraLines.length === 0) return confirmed;
-          const mergedLines = [...confirmed.lines, ...extraLines];
-          const subtotal = mergedLines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
-          const currencyCode = confirmed.cost.totalAmount.currencyCode;
-          const discount = (confirmed.discountAllocations ?? []).reduce((s, a) => s + parseFloat(a.discountedAmount.amount), 0);
-          return {
-            ...confirmed,
-            lines: mergedLines,
-            totalQuantity: mergedLines.reduce((s, l) => s + l.quantity, 0),
-            cost: {
-              ...confirmed.cost,
-              subtotalAmount: { amount: subtotal.toFixed(2), currencyCode },
-              totalAmount: { amount: Math.max(0, subtotal - discount).toFixed(2), currencyCode },
-            },
-          };
-        });
+        mergeConfirm(result.cart);
       }
     }).catch(() => {});
 

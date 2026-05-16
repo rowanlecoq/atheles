@@ -20,7 +20,7 @@ export function EditItemQuantityButton({
     updateType: "plus" | "minus",
   ) => void;
 }) {
-  const { setServerCart } = useCart();
+  const { mergeConfirm } = useCart();
   const atMax = type === "plus" && item.quantity >= MAX_ITEM_QUANTITY;
 
   return (
@@ -39,7 +39,7 @@ export function EditItemQuantityButton({
           quantity: type === "plus" ? item.quantity + 1 : item.quantity - 1,
         }).then((result) => {
           if (result && typeof result === "object" && "cart" in result) {
-            setServerCart(result.cart);
+            mergeConfirm(result.cart);
           }
         }).catch(() => {});
       }}

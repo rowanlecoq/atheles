@@ -12,7 +12,7 @@ export function DeleteItemButton({
   item: CartItem;
   optimisticUpdate: (merchandiseId: string, updateType: "delete") => void;
 }) {
-  const { setServerCart } = useCart();
+  const { mergeConfirm } = useCart();
   const merchandiseId = item.merchandise.id;
 
   return (
@@ -23,7 +23,7 @@ export function DeleteItemButton({
         optimisticUpdate(merchandiseId, "delete");
         removeItem(null, { lineItemId: item.id, merchandiseId }).then((result) => {
           if (result && typeof result === "object" && "cart" in result) {
-            setServerCart(result.cart);
+            mergeConfirm(result.cart);
           }
         }).catch(() => {});
       }}
