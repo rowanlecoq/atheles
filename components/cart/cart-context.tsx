@@ -92,6 +92,7 @@ export function useCart() {
         merchandise: {
           id: variant.id,
           title: variant.title,
+          availableForSale: variant.availableForSale,
           selectedOptions: variant.selectedOptions,
           product: {
             id: product.id,
