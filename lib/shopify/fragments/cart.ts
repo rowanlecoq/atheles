@@ -44,6 +44,7 @@ const cartFragment = /* GraphQL */ `
               id
               title
               availableForSale
+              quantityAvailable
               selectedOptions {
                 name
                 value

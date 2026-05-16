@@ -12,7 +12,7 @@ import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 import LoadingDots from "components/loading-dots";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
-import type { CartItem } from "lib/shopify/types";
+import type { CartItem, Product, ProductVariant } from "lib/shopify/types";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -109,7 +109,8 @@ function CartLineItem({ item }: { item: CartItem }) {
     }
   };
 
-  const atMax = item.quantity >= MAX_ITEM_QUANTITY || item.merchandise.availableForSale === false;
+  const stockLimit = typeof item.merchandise.quantityAvailable === "number" ? item.merchandise.quantityAvailable : MAX_ITEM_QUANTITY;
+  const atMax = item.quantity >= Math.min(stockLimit, MAX_ITEM_QUANTITY) || item.merchandise.availableForSale === false;
 
   return (
     <li className="flex gap-3 py-4 border-b border-white/5">
@@ -186,10 +187,12 @@ function FavoritesCarousel({
   products,
   onAdd,
   onClose,
+  addingHandle,
 }: {
   products: FavProduct[];
   onAdd: (p: FavProduct) => void;
   onClose: () => void;
+  addingHandle: string | null;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
 
@@ -210,12 +213,13 @@ function FavoritesCarousel({
       <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {products.map((p) => {
           const canAdd = !!p.firstVariantId && !!p.availableForSale;
+          const isAdding = addingHandle === p.handle;
           return (
             <button
               key={p.handle}
               type="button"
-              disabled={!canAdd}
-              onClick={() => canAdd && onAdd(p)}
+              disabled={!canAdd || isAdding}
+              onClick={() => canAdd && !isAdding && onAdd(p)}
               className="group/card flex-none w-[110px] rounded-lg border border-white/5 bg-white/3 p-1.5 text-left transition-colors hover:border-brand-gold/30 disabled:opacity-40"
             >
               <div className="relative aspect-square w-full overflow-hidden rounded-md mb-1.5">
@@ -233,7 +237,12 @@ function FavoritesCarousel({
                     <span className="text-[8px] text-white/30">ATHELES</span>
                   </div>
                 )}
-                {!canAdd && (
+                {isAdding && (
+                  <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/60 rounded-md">
+                    <div className="h-5 w-5 animate-spin rounded-full border-2 border-white/20 border-t-brand-gold" />
+                  </div>
+                )}
+                {!canAdd && !isAdding && (
                   <div className="absolute inset-0 flex items-center justify-center">
                     <span className="text-[9px] uppercase tracking-wider text-red-400/80">sold out</span>
                   </div>
@@ -257,8 +266,9 @@ function FavoritesCarousel({
 // ─── Main modal ───────────────────────────────────────────────────────────────
 
 export default function CartModal() {
-  const { cart, setCart } = useCart();
+  const { cart, setCart, addCartItem } = useCart();
   const [isOpen, setIsOpen] = useState(false);
+  const [addingHandle, setAddingHandle] = useState<string | null>(null);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountInput, setDiscountInput] = useState("");
   const [discountError, setDiscountError] = useState("");
@@ -359,12 +369,40 @@ export default function CartModal() {
 
   const handleAddFav = useCallback((p: FavProduct) => {
     if (!p.firstVariantId) return;
+    setAddingHandle(p.handle);
+    const price = p.firstVariantPrice ?? p.priceRange.maxVariantPrice;
+    const syntheticVariant: ProductVariant = {
+      id: p.firstVariantId,
+      title: p.firstVariantTitle ?? "Default Title",
+      availableForSale: p.availableForSale ?? true,
+      selectedOptions: p.firstVariantOptions ?? [],
+      price,
+    };
+    const syntheticProduct: Product = {
+      id: p.id ?? p.handle,
+      handle: p.handle,
+      title: p.title,
+      availableForSale: p.availableForSale ?? true,
+      description: "",
+      descriptionHtml: "",
+      options: [],
+      priceRange: p.priceRange,
+      variants: [],
+      featuredImage: p.featuredImage
+        ? { url: p.featuredImage.url, altText: p.title, width: 800, height: 800 }
+        : { url: "", altText: p.title, width: 0, height: 0 },
+      images: [],
+      seo: { title: "", description: "" },
+      tags: [],
+      updatedAt: "",
+    };
+    addCartItem(syntheticVariant, syntheticProduct);
     addItem(null, p.firstVariantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
         setCart(result.cart);
       }
-    }).catch(() => {});
-  }, [setCart]);
+    }).catch(() => {}).finally(() => setAddingHandle(null));
+  }, [addCartItem, setCart]);
 
   const applyDiscount = async (code: string) => {
     if (!code.trim() || applyingDiscount) return;
@@ -513,7 +551,7 @@ export default function CartModal() {
                       </div>
                     </div>
                     {filteredFavs.length > 0 && (
-                      <FavoritesCarousel products={filteredFavs} onAdd={handleAddFav} onClose={closeCart} />
+                      <FavoritesCarousel products={filteredFavs} onAdd={handleAddFav} onClose={closeCart} addingHandle={addingHandle} />
                     )}
                     <div className="pb-4" />
                   </div>
@@ -539,7 +577,7 @@ export default function CartModal() {
 
                     {/* Favorites */}
                     {filteredFavs.length > 0 && (
-                      <FavoritesCarousel products={filteredFavs} onAdd={handleAddFav} onClose={closeCart} />
+                      <FavoritesCarousel products={filteredFavs} onAdd={handleAddFav} onClose={closeCart} addingHandle={addingHandle} />
                     )}
 
                     {/* Spacer so content doesn't hide behind sticky footer */}
