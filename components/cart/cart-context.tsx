@@ -168,50 +168,11 @@ export function CartProvider({
   const [qtyPatch, setQtyPatch] = useState<Map<string, number>>(new Map());
   const [patchHydrated, setPatchHydrated] = useState(false);
 
-  // Subscribe to future cartPromise changes without causing any suspension.
-  // Uses a merge updater rather than a direct replacement: if the RSC-fetched
-  // cart is missing items that are currently in serverCart (recently added items
-  // that haven't propagated to Shopify yet at fetch time), those items are kept.
-  // This prevents updateTag-triggered RSC re-renders from wiping out optimistic
-  // adds before Shopify confirms them, causing items to vanish or prices to drop.
-  useEffect(() => {
-    if (cartPromise === initialPromiseRef.current) return;
-    let cancelled = false;
-    cartPromise.then((data) => {
-      if (cancelled) return;
-      setServerCart((current) => {
-        if (!data) return current;
-        if (!current) return data;
-        const rscIds = new Set(data.lines.map((l) => l.merchandise.id));
-        const extraLines = current.lines.filter((l) => !rscIds.has(l.merchandise.id));
-        if (extraLines.length === 0) return data;
-        const mergedLines = [...data.lines, ...extraLines];
-        const subtotal = mergedLines.reduce(
-          (s, l) => s + parseFloat(l.cost.totalAmount.amount),
-          0,
-        );
-        const currencyCode = data.cost.totalAmount.currencyCode;
-        const confirmedDiscount = (data.discountAllocations ?? []).reduce(
-          (s, a) => s + parseFloat(a.discountedAmount.amount),
-          0,
-        );
-        return {
-          ...data,
-          lines: mergedLines,
-          totalQuantity: mergedLines.reduce((s, l) => s + l.quantity, 0),
-          cost: {
-            ...data.cost,
-            subtotalAmount: { amount: subtotal.toFixed(2), currencyCode },
-            totalAmount: {
-              amount: Math.max(0, subtotal - confirmedDiscount).toFixed(2),
-              currencyCode,
-            },
-          },
-        };
-      });
-    });
-    return () => { cancelled = true; };
-  }, [cartPromise]);
+  // Intentionally not subscribing to cartPromise changes from RSC re-renders.
+  // Every cart operation (add/remove/update/discount) returns its confirmed cart
+  // directly and calls setServerCart from the callback. RSC re-renders triggered
+  // by Next.js after server actions fire getCart() with a stale cache (no
+  // updateTag), so the resolved value is unreliable and causes items to vanish.
 
   // Load persisted quantities from sessionStorage after mount.
   // sessionStorage (not localStorage) is used intentionally: it survives

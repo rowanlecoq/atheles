@@ -775,7 +775,9 @@ export default function CartModal() {
                                 // Optimistically zero out the discount so total
                                 // updates instantly without waiting for Shopify.
                                 clearDiscount();
-                                removeDiscountCode().catch(() => {});
+                                removeDiscountCode().then((confirmedCart) => {
+                                  if (confirmedCart) setServerCart(confirmedCart);
+                                }).catch(() => {});
                               }}
                               className="text-xs text-brand-grey hover:text-red-400"
                             >

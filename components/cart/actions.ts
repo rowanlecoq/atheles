@@ -1,6 +1,5 @@
 "use server";
 
-import { TAGS } from "lib/constants";
 import { getCustomerByToken } from "lib/auth/shopify-customer";
 import {
   addToCart,
@@ -12,7 +11,6 @@ import {
 } from "lib/shopify";
 import type { Cart } from "lib/shopify/types";
 import { isShopifyConfigured } from "lib/shopify/is-configured";
-import { updateTag } from "next/cache";
 import { cookies } from "next/headers";
 import { redirect } from "next/navigation";
 
@@ -259,7 +257,6 @@ export async function applyDiscountCode(code: string): Promise<{
 
     // Apply to Shopify cart
     const cart = await updateCartDiscountCodes([code]);
-    updateTag(TAGS.cart);
 
     // Check if the code was actually applicable
     const applied = cart.discountCodes?.find(
@@ -277,14 +274,15 @@ export async function applyDiscountCode(code: string): Promise<{
   }
 }
 
-export async function removeDiscountCode(): Promise<void> {
-  if (!isShopifyConfigured) return;
+export async function removeDiscountCode(): Promise<Cart | null> {
+  if (!isShopifyConfigured) return null;
 
   try {
-    await updateCartDiscountCodes([]);
-    updateTag(TAGS.cart);
+    const cart = await updateCartDiscountCodes([]);
+    return cart;
   } catch (e) {
     console.error("removeDiscountCode error:", e);
+    return null;
   }
 }
 
