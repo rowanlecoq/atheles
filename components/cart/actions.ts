@@ -85,9 +85,6 @@ export async function addItem(
       }
       cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
     }
-    // Invalidate the server-side cart cache so the next RSC render (e.g. on
-    // navigation) fetches the updated Shopify cart instead of a stale snapshot.
-    updateTag(TAGS.cart);
     return { cart };
   } catch (e) {
     console.error("addItem error:", e);

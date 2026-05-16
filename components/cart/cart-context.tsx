@@ -230,7 +230,7 @@ export function CartProvider({
     cartPromise.then((data) => {
       if (cancelled) return;
       setServerCart((current) => {
-        if (!data) return undefined;
+        if (!data) return current;
         if (!current) return data;
         const rscIds = new Set(data.lines.map((l) => l.merchandise.id));
         const extraLines = current.lines.filter((l) => !rscIds.has(l.merchandise.id));
