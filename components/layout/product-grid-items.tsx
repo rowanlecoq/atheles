@@ -12,7 +12,7 @@ import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
 function ProductCard({ product }: { product: Product }) {
-  const { addCartItem, mergeConfirm } = useCart();
+  const { addCartItem, mergeConfirmAdd } = useCart();
   const [showSizes, setShowSizes] = useState(false);
   const [added, setAdded] = useState(false);
   const addedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -29,10 +29,9 @@ function ProductCard({ product }: { product: Product }) {
     if (!variant || added) return;
     addCartItem(variant, product);
     window.dispatchEvent(new Event("open-cart"));
-
     addItem(null, variantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
-        mergeConfirm(result.cart);
+        mergeConfirmAdd(result.cart);
       }
     }).catch(() => {});
     setShowSizes(false);
@@ -101,7 +100,6 @@ function ProductCard({ product }: { product: Product }) {
                 const rawSize = variant.selectedOptions.find(
                   (o) => o.name.toLowerCase() === "size",
                 )?.value || variant.title;
-                // Abbreviate size names for compact display
                 const abbrev: Record<string, string> = {
                   "extra small": "XS", "xs": "XS",
                   "small": "S", "s": "S",

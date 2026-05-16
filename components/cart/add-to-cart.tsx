@@ -9,7 +9,7 @@ import { useCart } from "./cart-context";
 
 export function AddToCart({ product }: { product: Product }) {
   const { variants, availableForSale } = product;
-  const { addCartItem, mergeConfirm } = useCart();
+  const { addCartItem, mergeConfirmAdd } = useCart();
   const searchParams = useSearchParams();
   const [state, setState] = useState<"idle" | "added">("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -38,7 +38,7 @@ export function AddToCart({ product }: { product: Product }) {
 
     addItem(null, selectedVariantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
-        mergeConfirm(result.cart);
+        mergeConfirmAdd(result.cart);
       }
     }).catch(() => {});
 
@@ -80,11 +80,9 @@ export function AddToCart({ product }: { product: Product }) {
             animation: "cartShimmer 2s ease-in-out infinite",
           }} />
         )}
-
         <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
           {state === "added" ? "Added!" : selectedVariantId ? "Add To Cart" : "Select a Size"}
         </span>
-
       </button>
 
       {availableForSale && pointsEarned > 0 && (

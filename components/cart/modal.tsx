@@ -1,18 +1,18 @@
 "use client";
 
-import clsx from "clsx";
 import { Dialog, Transition } from "@headlessui/react";
 import {
+  MinusIcon,
+  PlusIcon,
   ShoppingCartIcon,
-  XMarkIcon,
-  HeartIcon as HeartOutlineIcon,
   TagIcon,
+  XMarkIcon,
 } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 import LoadingDots from "components/loading-dots";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
-import type { Product, ProductVariant } from "lib/shopify/types";
+import type { CartItem, Product, ProductVariant } from "lib/shopify/types";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -24,15 +24,11 @@ import {
   createCartAndSetCookie,
   redirectToCheckout,
   removeDiscountCode,
+  removeItem,
+  updateItemQuantity,
 } from "./actions";
-import { useCart } from "./cart-context";
-import { DeleteItemButton } from "./delete-item-button";
-import { EditItemQuantityButton } from "./edit-item-quantity-button";
+import { MAX_ITEM_QUANTITY, useCart } from "./cart-context";
 import OpenCart from "./open-cart";
-
-type MerchandiseSearchParams = {
-  [key: string]: string;
-};
 
 type FavProduct = {
   id?: string;
@@ -47,143 +43,203 @@ type FavProduct = {
   availableForSale?: boolean;
 };
 
+// ─── Cart line item ────────────────────────────────────────────────────────────
+
+function CartLineItem({ item }: { item: CartItem }) {
+  const { setCart } = useCart();
+  const [removing, setRemoving] = useState(false);
+  const [qtyPending, setQtyPending] = useState<"plus" | "minus" | null>(null);
+
+  const searchParams: Record<string, string> = {};
+  item.merchandise.selectedOptions.forEach(({ name, value }) => {
+    if (value !== DEFAULT_OPTION) searchParams[name.toLowerCase()] = value;
+  });
+  const url = createUrl(
+    `/product/${item.merchandise.product.handle}`,
+    new URLSearchParams(searchParams),
+  );
+
+  const handleRemove = async () => {
+    setRemoving(true);
+    try {
+      const result = await removeItem(null, {
+        lineItemId: item.id,
+        merchandiseId: item.merchandise.id,
+      });
+      if (result && typeof result === "object" && "cart" in result) {
+        setCart(result.cart);
+      }
+    } catch {
+      setRemoving(false);
+    }
+  };
+
+  const handleQty = async (type: "plus" | "minus") => {
+    if (qtyPending) return;
+    const newQty = type === "plus" ? item.quantity + 1 : item.quantity - 1;
+    setQtyPending(type);
+    try {
+      const result = await updateItemQuantity(null, {
+        lineItemId: item.id,
+        merchandiseId: item.merchandise.id,
+        quantity: newQty,
+      });
+      if (result && typeof result === "object" && "cart" in result) {
+        setCart(result.cart);
+      }
+    } catch {
+      // quantity snaps back
+    }
+    setQtyPending(null);
+  };
+
+  if (removing) return null;
+
+  return (
+    <li className="flex gap-3 py-4 border-b border-white/5">
+      {/* Thumbnail */}
+      <div className="relative h-20 w-20 flex-none overflow-hidden rounded-lg bg-white/5">
+        <Image
+          src={item.merchandise.product.featuredImage.url}
+          alt={item.merchandise.product.featuredImage.altText || item.merchandise.product.title}
+          fill
+          sizes="80px"
+          className="object-cover"
+          priority
+        />
+      </div>
+
+      {/* Info + controls */}
+      <div className="flex flex-1 flex-col justify-between min-w-0">
+        <div className="flex items-start justify-between gap-2">
+          <div className="min-w-0">
+            <a href={url} className="block text-sm font-medium text-white leading-snug line-clamp-2 hover:text-brand-gold transition-colors">
+              {item.merchandise.product.title}
+            </a>
+            {item.merchandise.title !== DEFAULT_OPTION && (
+              <p className="mt-0.5 text-xs text-white/40">{item.merchandise.title}</p>
+            )}
+          </div>
+          <button
+            type="button"
+            onClick={handleRemove}
+            aria-label="Remove item"
+            className="flex-none mt-0.5 text-white/30 hover:text-red-400 transition-colors"
+          >
+            <XMarkIcon className="h-4 w-4" />
+          </button>
+        </div>
+
+        <div className="flex items-center justify-between mt-2">
+          {/* Qty controls */}
+          <div className="flex items-center gap-1 rounded-full border border-white/10 px-1">
+            <button
+              type="button"
+              onClick={() => handleQty("minus")}
+              disabled={!!qtyPending}
+              aria-label="Decrease quantity"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-white/50 hover:text-white transition-colors disabled:opacity-30"
+            >
+              {qtyPending === "minus" ? (
+                <span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
+              ) : (
+                <MinusIcon className="h-3 w-3" />
+              )}
+            </button>
+            <span className="w-5 text-center text-sm text-white tabular-nums">{item.quantity}</span>
+            <button
+              type="button"
+              onClick={() => handleQty("plus")}
+              disabled={!!qtyPending || item.quantity >= MAX_ITEM_QUANTITY}
+              aria-label="Increase quantity"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-white/50 hover:text-white transition-colors disabled:opacity-30"
+            >
+              {qtyPending === "plus" ? (
+                <span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
+              ) : (
+                <PlusIcon className="h-3 w-3" />
+              )}
+            </button>
+          </div>
+          {/* Line total */}
+          <Price
+            className="text-sm font-medium text-white"
+            amount={item.cost.totalAmount.amount}
+            currencyCode={item.cost.totalAmount.currencyCode}
+          />
+        </div>
+      </div>
+    </li>
+  );
+}
+
+// ─── Favorites carousel ────────────────────────────────────────────────────────
+
 function FavoritesCarousel({
   products,
   onAdd,
   onClose,
 }: {
   products: FavProduct[];
-  onAdd: (handle: string, variantId: string) => void;
+  onAdd: (p: FavProduct) => void;
   onClose: () => void;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
-  const [canScrollLeft, setCanScrollLeft] = useState(false);
-  const [canScrollRight, setCanScrollRight] = useState(false);
-
-  const checkScroll = useCallback(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    setCanScrollLeft(el.scrollLeft > 4);
-    setCanScrollRight(el.scrollLeft + el.clientWidth < el.scrollWidth - 4);
-  }, []);
-
-  useEffect(() => {
-    const el = scrollRef.current;
-    if (!el) return;
-    checkScroll();
-    el.addEventListener("scroll", checkScroll, { passive: true });
-    return () => el.removeEventListener("scroll", checkScroll);
-  }, [checkScroll, products.length]);
-
-  const scroll = (dir: "left" | "right") => {
-    scrollRef.current?.scrollBy({ left: dir === "left" ? -144 : 144, behavior: "smooth" });
-  };
 
   return (
-    <div>
-      <div className="mb-2 flex items-center justify-between">
+    <div className="pt-4 border-t border-white/5">
+      <div className="flex items-center justify-between mb-3">
         <Link
           href="/favorites"
           onClick={onClose}
-          className="group flex items-center gap-1.5"
+          className="flex items-center gap-1.5 group"
         >
-          <HeartOutlineIcon className="h-3.5 w-3.5 text-brand-gold group-hover:hidden" />
-          <HeartSolidIcon className="hidden h-3.5 w-3.5 text-brand-gold group-hover:block" />
-          <p className="text-xs uppercase tracking-wider text-brand-grey transition-colors group-hover:text-brand-gold">
+          <HeartSolidIcon className="h-3.5 w-3.5 text-brand-gold" />
+          <span className="text-xs uppercase tracking-wider text-white/40 group-hover:text-brand-gold transition-colors">
             from your favorites
-          </p>
+          </span>
         </Link>
-        {/* Desktop scroll arrows — hidden on mobile where touch scrolling works */}
-        <div className="hidden items-center gap-1 md:flex">
-          <button
-            type="button"
-            onClick={() => scroll("left")}
-            disabled={!canScrollLeft}
-            aria-label="Scroll favorites left"
-            className="flex h-6 w-6 items-center justify-center rounded border border-brand-dark-gold/20 text-brand-grey transition-colors hover:border-brand-gold/40 hover:text-brand-gold disabled:pointer-events-none disabled:opacity-20"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
-              <polyline points="15 18 9 12 15 6" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            onClick={() => scroll("right")}
-            disabled={!canScrollRight}
-            aria-label="Scroll favorites right"
-            className="flex h-6 w-6 items-center justify-center rounded border border-brand-dark-gold/20 text-brand-grey transition-colors hover:border-brand-gold/40 hover:text-brand-gold disabled:pointer-events-none disabled:opacity-20"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} strokeLinecap="round" strokeLinejoin="round" className="h-3 w-3">
-              <polyline points="9 18 15 12 9 6" />
-            </svg>
-          </button>
-        </div>
       </div>
       <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
         {products.map((p) => {
           const canAdd = !!p.firstVariantId && !!p.availableForSale;
           return (
-            <div
+            <button
               key={p.handle}
-              className="group/card flex w-[130px] flex-none flex-col rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-2 transition-colors hover:border-brand-gold/30"
+              type="button"
+              disabled={!canAdd}
+              onClick={() => canAdd && onAdd(p)}
+              className="group/card flex-none w-[110px] rounded-lg border border-white/5 bg-white/3 p-1.5 text-left transition-colors hover:border-brand-gold/30 disabled:opacity-40"
             >
-              {canAdd ? (
-                <button
-                  type="button"
-                  onClick={() => {
-                    if (!p.firstVariantId) return;
-                    onAdd(p.handle, p.firstVariantId);
-                  }}
-                  className="text-left"
-                >
-                  <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
-                    {p.featuredImage?.url ? (
-                      <Image src={p.featuredImage.url} alt={p.title} fill priority className="object-cover" sizes="130px" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
-                        <span className="text-[8px] text-brand-grey">ATHELES</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 flex items-center justify-center bg-brand-dark/0 transition-colors group-hover/card:bg-brand-dark/40">
-                      <span className="text-xs font-medium uppercase tracking-wider text-white opacity-0 transition-opacity group-hover/card:opacity-100">
-                        + add
-                      </span>
-                    </div>
+              <div className="relative aspect-square w-full overflow-hidden rounded-md mb-1.5">
+                {p.featuredImage?.url ? (
+                  <Image
+                    src={p.featuredImage.url}
+                    alt={p.title}
+                    fill
+                    sizes="110px"
+                    className={`object-cover transition-opacity ${!canAdd ? "opacity-50" : "group-hover/card:opacity-80"}`}
+                    priority
+                  />
+                ) : (
+                  <div className="h-full w-full bg-white/5 flex items-center justify-center">
+                    <span className="text-[8px] text-white/30">ATHELES</span>
                   </div>
-                  <p className="truncate text-[10px] text-white group-hover/card:text-brand-gold">{p.title}</p>
-                </button>
-              ) : (
-                <div>
-                  <div className="relative mb-1.5 aspect-square w-full overflow-hidden rounded">
-                    {p.featuredImage?.url ? (
-                      <Image src={p.featuredImage.url} alt={p.title} fill priority className="object-cover opacity-50" sizes="130px" />
-                    ) : (
-                      <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20">
-                        <span className="text-[8px] text-brand-grey">ATHELES</span>
-                      </div>
-                    )}
-                    <div className="absolute inset-0 flex items-center justify-center">
-                      <span className="text-[10px] uppercase tracking-wider text-red-400">sold out</span>
-                    </div>
+                )}
+                {!canAdd && (
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <span className="text-[9px] uppercase tracking-wider text-red-400/80">sold out</span>
                   </div>
-                  <p className="truncate text-[10px] text-white/50">{p.title}</p>
-                </div>
-              )}
-              <div className="mt-1 flex items-center justify-between">
-                <Price
-                  className="text-[10px] text-brand-grey"
-                  amount={p.priceRange.maxVariantPrice.amount}
-                  currencyCode={p.priceRange.maxVariantPrice.currencyCode}
-                />
-                <Link
-                  href={`/product/${p.handle}`}
-                  onClick={onClose}
-                  className="text-[10px] text-brand-gold transition-colors hover:text-brand-pale-gold"
-                >
-                  view
-                </Link>
+                )}
               </div>
-            </div>
+              <p className="truncate text-[10px] text-white/60 group-hover/card:text-white transition-colors">{p.title}</p>
+              <p className="text-[10px] text-brand-gold mt-0.5">
+                {p.firstVariantPrice
+                  ? new Intl.NumberFormat(undefined, { style: "currency", currency: p.firstVariantPrice.currencyCode, currencyDisplay: "narrowSymbol" }).format(parseFloat(p.firstVariantPrice.amount))
+                  : new Intl.NumberFormat(undefined, { style: "currency", currency: p.priceRange.maxVariantPrice.currencyCode, currencyDisplay: "narrowSymbol" }).format(parseFloat(p.priceRange.maxVariantPrice.amount))
+                }
+              </p>
+            </button>
           );
         })}
       </div>
@@ -191,185 +247,185 @@ function FavoritesCarousel({
   );
 }
 
+// ─── Main modal ───────────────────────────────────────────────────────────────
+
 export default function CartModal() {
-  const { cart, updateCartItem, addCartItem, mergeConfirm, removeDiscountOptimistic } = useCart();
+  const { cart, setCart, addCartItem, mergeConfirmAdd } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
-  const [discountCode, setDiscountCode] = useState("");
+  const [discountInput, setDiscountInput] = useState("");
   const [discountError, setDiscountError] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
-  const [appliedCodeLocal, setAppliedCodeLocal] = useState<string | null>(null);
+  const [appliedCode, setAppliedCode] = useState<string | null>(null);
   const [discountConfirmed, setDiscountConfirmed] = useState(false);
-  const discountSyncedRef = useRef(false);
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
-  const favCacheRef = useRef<{ products: FavProduct[] } | null>(null);
+  const favCacheRef = useRef<FavProduct[] | null>(null);
+  const discountSyncedRef = useRef(false);
   const closedAtRef = useRef(0);
 
-  const openCart = () => {
+  const openCart = useCallback(() => {
     if (Date.now() - closedAtRef.current < 500) return;
     setIsOpen(true);
-  };
-  const closeCart = () => {
+  }, []);
+
+  const closeCart = useCallback(() => {
     closedAtRef.current = Date.now();
     setIsOpen(false);
-  };
+  }, []);
 
-  const handleAddFav = useCallback((handle: string, variantId: string) => {
-    const favProduct = favProducts.find((p) => p.handle === handle);
-    if (!favProduct?.firstVariantId) return;
+  // Ensure a cart cookie exists
+  useEffect(() => {
+    if (!cart) createCartAndSetCookie();
+  }, [cart]);
 
-    const vid = favProduct.firstVariantId;
-    const price = favProduct.firstVariantPrice ?? favProduct.priceRange.maxVariantPrice;
+  // open-cart event from add-to-cart buttons (respects cooldown)
+  useEffect(() => {
+    const handler = () => openCart();
+    window.addEventListener("open-cart", handler);
+    return () => window.removeEventListener("open-cart", handler);
+  }, [openCart]);
 
-    // Build synthetic variant/product to pass to the shared addCartItem updater.
+  // Sync applied discount code when cart opens
+  useEffect(() => {
+    if (!isOpen) { discountSyncedRef.current = false; return; }
+    if (discountSyncedRef.current) return;
+    discountSyncedRef.current = true;
+    const active = cart?.discountCodes?.find((dc) => dc.applicable);
+    const hasAmount = (cart?.discountAllocations ?? []).reduce(
+      (s, a) => s + parseFloat(a.discountedAmount?.amount || "0"), 0,
+    ) > 0;
+    if (active && hasAmount) { setAppliedCode(active.code); setDiscountConfirmed(true); }
+  }, [isOpen, cart?.discountCodes, cart?.discountAllocations]);
+
+  // Confirm discount once Shopify allocations arrive
+  useEffect(() => {
+    if (!appliedCode || discountConfirmed) return;
+    const hasAmount = (cart?.discountAllocations ?? []).reduce(
+      (s, a) => s + parseFloat(a.discountedAmount?.amount || "0"), 0,
+    ) > 0;
+    if (hasAmount) setDiscountConfirmed(true);
+  }, [appliedCode, discountConfirmed, cart?.discountAllocations]);
+
+  // Tier / free shipping
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!document.cookie.includes("atheles-logged-in=1")) {
+      setFreeShipping(false); setTierName(null); return;
+    }
+    const apply = (totalSpent: string, isAthlete?: boolean) => {
+      if (isAthlete) { setTierName("ATHLETE"); setFreeShipping(true); return; }
+      const pts = Math.floor(parseFloat(totalSpent || "0") * 50);
+      const tier =
+        pts >= 50000 ? "CHAMPION" : pts >= 30000 ? "PLATINUM" :
+        pts >= 15000 ? "GOLD" : pts >= 5000 ? "SILVER" : "BRONZE";
+      setTierName(tier); setFreeShipping(tier === "CHAMPION");
+    };
+    try {
+      const cached = localStorage.getItem("atheles-session");
+      if (cached) { const u = JSON.parse(cached); apply(u.totalSpent, u.isAthlete); return; }
+    } catch {}
+    fetch("/api/auth/session")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d?.user) apply(d.user.totalSpent, d.user.isAthlete); })
+      .catch(() => {});
+  }, [isOpen]);
+
+  // Load favorites once per open
+  useEffect(() => {
+    if (!isOpen) return;
+    if (favCacheRef.current) { setFavProducts(favCacheRef.current); return; }
+    try {
+      const handles: string[] = JSON.parse(localStorage.getItem("atheles-favorites") || "[]");
+      if (!handles.length) { setFavProducts([]); return; }
+      fetch("/api/products/by-handles", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ handles: handles.slice(0, 6) }),
+      })
+        .then((r) => r.ok ? r.json() : { products: [] })
+        .then((d) => { const p = d.products || []; favCacheRef.current = p; setFavProducts(p); })
+        .catch(() => {});
+    } catch { setFavProducts([]); }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isOpen]);
+
+  const handleAddFav = useCallback((p: FavProduct) => {
+    if (!p.firstVariantId) return;
+    const price = p.firstVariantPrice ?? p.priceRange.maxVariantPrice;
     const syntheticVariant = {
-      id: vid,
-      title: favProduct.firstVariantTitle ?? "Default Title",
-      availableForSale: favProduct.availableForSale ?? true,
-      selectedOptions: favProduct.firstVariantOptions ?? [],
+      id: p.firstVariantId,
+      title: p.firstVariantTitle ?? "Default Title",
+      availableForSale: p.availableForSale ?? true,
+      selectedOptions: p.firstVariantOptions ?? [],
       price: { amount: price.amount, currencyCode: price.currencyCode },
     } as ProductVariant;
-
     const syntheticProduct = {
-      id: favProduct.id ?? "",
-      handle: favProduct.handle,
-      title: favProduct.title,
-      featuredImage: favProduct.featuredImage
-        ? { url: favProduct.featuredImage.url, altText: "" }
+      id: p.id ?? "",
+      handle: p.handle,
+      title: p.title,
+      featuredImage: p.featuredImage
+        ? { url: p.featuredImage.url, altText: "" }
         : { url: "", altText: "" },
     } as Product;
 
     addCartItem(syntheticVariant, syntheticProduct);
-
-    addItem(null, variantId).then((result) => {
+    addItem(null, p.firstVariantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
-        mergeConfirm(result.cart);
+        mergeConfirmAdd(result.cart);
       }
     }).catch(() => {});
-  }, [favProducts, addCartItem, mergeConfirm]);
+  }, [addCartItem, mergeConfirmAdd]);
 
-  useEffect(() => {
-    if (!cart) {
-      createCartAndSetCookie();
-    }
-  }, [cart]);
-
-  // Listen for open-cart events from add-to-cart buttons on product pages.
-  // Respects the 500ms cooldown to prevent re-opening after the user closes the cart.
-  useEffect(() => {
-    const handleOpenCart = () => {
-      if (Date.now() - closedAtRef.current < 500) return;
-      setIsOpen(true);
-    };
-    window.addEventListener("open-cart", handleOpenCart);
-    return () => window.removeEventListener("open-cart", handleOpenCart);
-  }, []);
-
-  // Sync applied discount code from cart on first open only
-  useEffect(() => {
-    if (!isOpen) {
-      discountSyncedRef.current = false;
-      return;
-    }
-    if (discountSyncedRef.current) return;
-    discountSyncedRef.current = true;
-    const fromCart = cart?.discountCodes?.find((dc) => dc.applicable);
-    const hasDiscount = (cart?.discountAllocations?.reduce(
-      (sum, a) => sum + parseFloat(a.discountedAmount?.amount || "0"), 0
-    ) || 0) > 0;
-    if (fromCart && hasDiscount) {
-      setAppliedCodeLocal(fromCart.code);
-      setDiscountConfirmed(true);
-    }
-  }, [isOpen, cart?.discountCodes, cart?.discountAllocations]);
-
-  // Watch for cart discount to confirm after optimistic apply
-  useEffect(() => {
-    if (!appliedCodeLocal || discountConfirmed) return;
-    const hasDiscount = (cart?.discountAllocations?.reduce(
-      (sum, a) => sum + parseFloat(a.discountedAmount?.amount || "0"), 0
-    ) || 0) > 0;
-    if (hasDiscount) setDiscountConfirmed(true);
-  }, [appliedCodeLocal, discountConfirmed, cart?.discountAllocations]);
-
-  // Check user tier for free shipping
-  useEffect(() => {
-    if (!isOpen) return;
-    if (!document.cookie.includes("atheles-logged-in=1")) {
-      setFreeShipping(false);
-      setTierName(null);
-      return;
-    }
-    const applyTier = (totalSpent: string, isAthlete?: boolean) => {
-      if (isAthlete) {
-        setTierName("ATHLETE");
-        setFreeShipping(true);
-        return;
-      }
-      const points = Math.floor(parseFloat(totalSpent || "0") * 50);
-      const tier = points >= 50000 ? "CHAMPION" : points >= 30000 ? "PLATINUM" : points >= 15000 ? "GOLD" : points >= 5000 ? "SILVER" : "BRONZE";
-      setTierName(tier);
-      setFreeShipping(tier === "CHAMPION");
-    };
-    // Try cache first
+  const applyDiscount = async (code: string) => {
+    if (!code.trim() || applyingDiscount) return;
+    setApplyingDiscount(true);
+    setDiscountError("");
+    setAppliedCode(code);
+    setDiscountInput("");
     try {
-      const cached = localStorage.getItem("atheles-session");
-      if (cached) {
-        const u = JSON.parse(cached);
-        applyTier(u.totalSpent, u.isAthlete);
-        return;
+      const result = await applyDiscountCode(code);
+      if (!result.success) {
+        setAppliedCode(null); setDiscountConfirmed(false);
+        setDiscountError(result.error || "failed to apply code.");
+      } else if (!result.applicable) {
+        setAppliedCode(null); setDiscountConfirmed(false);
+        setDiscountError("invalid or expired code.");
+        removeDiscountCode().catch(() => {});
+      } else if (result.cart) {
+        setCart(result.cart);
+        setDiscountConfirmed(true);
       }
-    } catch {}
-    fetch("/api/auth/session")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((data) => {
-        if (data?.user) {
-          applyTier(data.user.totalSpent, data.user.isAthlete);
-        }
-      })
-      .catch(() => {});
-  }, [isOpen]);
-
-  // Load favorited products once when cart opens
-  useEffect(() => {
-    if (!isOpen) return;
-    // Use cache if already loaded this session
-    if (favCacheRef.current) {
-      setFavProducts(favCacheRef.current.products);
-      return;
-    }
-    try {
-      const stored = localStorage.getItem("atheles-favorites");
-      const favHandles: string[] = stored ? JSON.parse(stored) : [];
-      if (favHandles.length === 0) {
-        setFavProducts([]);
-        return;
-      }
-      const limited = favHandles.slice(0, 6);
-      fetch("/api/products/by-handles", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ handles: limited }),
-      })
-        .then((r) => (r.ok ? r.json() : { products: [] }))
-        .then((d) => {
-          const products = d.products || [];
-          favCacheRef.current = { products };
-          setFavProducts(products);
-        })
-        .catch(() => {});
     } catch {
-      setFavProducts([]);
+      setAppliedCode(null); setDiscountConfirmed(false);
+      setDiscountError("failed to apply code.");
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [isOpen]);
+    setApplyingDiscount(false);
+  };
 
-  const hasItems = cart && cart.lines.length > 0;
+  const removeDiscount = async () => {
+    const prev = cart;
+    setAppliedCode(null); setDiscountConfirmed(false);
+    setDiscountInput(""); setDiscountError("");
+    // Optimistically zero out discount
+    if (prev) {
+      setCart({
+        ...prev,
+        discountCodes: [],
+        discountAllocations: [],
+        cost: { ...prev.cost, totalAmount: { ...prev.cost.subtotalAmount } },
+      });
+    }
+    const confirmed = await removeDiscountCode().catch(() => null);
+    if (confirmed) setCart(confirmed);
+  };
 
-  // Filter out favorites that are already in the cart
-  const cartHandles = new Set(cart?.lines.map((line) => line.merchandise.product.handle) || []);
-  const filteredFavProducts = favProducts.filter((p) => !cartHandles.has(p.handle));
+  const cartHandles = new Set(cart?.lines.map((l) => l.merchandise.product.handle));
+  const filteredFavs = favProducts.filter((p) => !cartHandles.has(p.handle));
+  const hasItems = !!cart?.lines.length;
+  const totalDiscount = (cart?.discountAllocations ?? []).reduce(
+    (s, a) => s + parseFloat(a.discountedAmount.amount || "0"), 0,
+  );
 
   return (
     <>
@@ -381,383 +437,230 @@ export default function CartModal() {
       >
         <OpenCart quantity={cart?.totalQuantity} />
       </button>
+
       <Transition show={isOpen}>
         <Dialog onClose={closeCart} className="relative z-50">
-          {/* Desktop backdrop — subtle dark overlay that animates with the cart, click to close */}
+          {/* Backdrop */}
           <Transition.Child
             as={Fragment}
-            enter="transition-opacity ease-in-out duration-300"
+            enter="transition-opacity ease-out duration-300"
             enterFrom="opacity-0"
             enterTo="opacity-100"
-            leave="transition-opacity ease-in-out duration-200"
+            leave="transition-opacity ease-in duration-200"
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div
-              className="fixed inset-0 hidden bg-black/30 lg:block"
-              aria-hidden="true"
-              onClick={closeCart}
-            />
+            <div className="fixed inset-0 hidden bg-black/50 lg:block" aria-hidden="true" onClick={closeCart} />
           </Transition.Child>
-          {/* Mobile: transparent click-outside (panel is full-width so rarely hit, but keeps Dialog functional) */}
           <div className="fixed inset-0 lg:hidden" onClick={closeCart} />
+
+          {/* Panel */}
           <Transition.Child
             as={Fragment}
-            enter="transition-all ease-in-out duration-300"
+            enter="transition-transform ease-out duration-300"
             enterFrom="translate-x-full"
             enterTo="translate-x-0"
-            leave="transition-all ease-in-out duration-200"
+            leave="transition-transform ease-in duration-200"
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed bottom-0 right-0 top-0 flex h-full w-full flex-col overflow-y-auto border-l border-brand-dark-gold/30 bg-brand-dark p-4 text-white sm:p-6 md:w-[390px] will-change-transform">
+            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-[#0a0a0a] text-white md:w-[400px] will-change-transform">
+
               {/* Header */}
-              <div className="flex items-center justify-between">
-                <p className="font-heading text-lg font-semibold text-brand-gold">
-                  My Cart
-                </p>
+              <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
+                <div className="flex items-center gap-2">
+                  <ShoppingCartIcon className="h-5 w-5 text-brand-gold" />
+                  <span className="font-heading font-semibold text-brand-gold tracking-wide">
+                    My Cart
+                  </span>
+                  {cart?.totalQuantity ? (
+                    <span className="ml-1 rounded-full bg-brand-gold/10 px-2 py-0.5 text-xs text-brand-gold">
+                      {cart.totalQuantity}
+                    </span>
+                  ) : null}
+                </div>
                 <button
                   type="button"
-                  aria-label="Close cart"
                   onClick={closeCart}
+                  aria-label="Close cart"
+                  className="flex h-9 w-9 items-center justify-center rounded-full text-white/40 hover:text-white transition-colors"
                 >
-                  <CloseCart />
+                  <XMarkIcon className="h-5 w-5" />
                 </button>
               </div>
 
-              {!hasItems ? (
-                <div className="flex h-full flex-col">
-                  {/* Empty state */}
-                  <div className="flex flex-1 flex-col items-center justify-center px-4">
-                    {/* Shopping bag icon */}
-                    <div className="mb-6 flex h-24 w-24 items-center justify-center rounded-full bg-brand-dark-gold/10">
-                      <ShoppingCartIcon className="h-12 w-12 text-brand-grey/60" />
+              {/* Body */}
+              <div className="flex flex-1 flex-col overflow-y-auto px-5">
+                {!hasItems ? (
+                  /* ── Empty state ── */
+                  <div className="flex flex-1 flex-col">
+                    <div className="flex flex-1 flex-col items-center justify-center gap-4 text-center">
+                      <div className="flex h-20 w-20 items-center justify-center rounded-full bg-white/5">
+                        <ShoppingCartIcon className="h-9 w-9 text-white/20" />
+                      </div>
+                      <div>
+                        <p className="font-heading text-base uppercase tracking-widest text-white/60">
+                          Your cart is empty
+                        </p>
+                        <p className="mt-1 text-sm text-white/30">
+                          Add something from our collection.
+                        </p>
+                      </div>
+                      <div className="flex w-full flex-col gap-2 pt-2">
+                        <Link
+                          href="/search/mens"
+                          onClick={closeCart}
+                          className="flex items-center justify-center rounded-full bg-brand-gold py-3 text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
+                        >
+                          Shop Mens
+                        </Link>
+                        <Link
+                          href="/search"
+                          onClick={closeCart}
+                          className="flex items-center justify-center rounded-full border border-white/10 py-3 text-sm uppercase tracking-wider text-white/50 transition-colors hover:border-brand-gold/50 hover:text-white"
+                        >
+                          Browse All
+                        </Link>
+                      </div>
                     </div>
-                    <p className="font-heading text-lg uppercase tracking-wider text-brand-pale-gold">
-                      your cart is currently empty.
-                    </p>
-                    <p className="mt-2 text-sm text-brand-grey">
-                      explore our collection and find something you love.
-                    </p>
-
-                    {/* Quick shop links */}
-                    <div className="mt-6 flex w-full flex-col gap-2.5">
-                      <Link
-                        href="/search/mens"
-                        onClick={closeCart}
-                        className="flex min-h-[44px] items-center justify-center rounded-full bg-brand-gold px-6 py-3 text-center text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
-                      >
-                        shop mens
-                      </Link>
-                      <Link
-                        href="/search"
-                        onClick={closeCart}
-                        className="flex min-h-[44px] items-center justify-center rounded-full border border-brand-dark-gold/30 px-6 py-3 text-center text-sm uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
-                      >
-                        browse all
-                      </Link>
-                    </div>
+                    {filteredFavs.length > 0 && (
+                      <FavoritesCarousel products={filteredFavs} onAdd={handleAddFav} onClose={closeCart} />
+                    )}
+                    <div className="pb-4" />
                   </div>
-
-                  {/* Favorites section in empty cart too */}
-                  {filteredFavProducts.length > 0 && (
-                    <div className="mt-2 border-t border-brand-dark-gold/20 px-1 pb-4 pt-5">
-                      <FavoritesCarousel
-                        products={filteredFavProducts}
-                        onAdd={handleAddFav}
-                        onClose={closeCart}
-                      />
+                ) : (
+                  /* ── Has items ── */
+                  <div className="flex flex-1 flex-col">
+                    {/* Urgency nudge */}
+                    <div className="mt-3 flex items-center gap-2 rounded-lg bg-brand-gold/5 px-3 py-2.5 border border-brand-gold/10">
+                      <span className="text-brand-gold text-xs">🔱</span>
+                      <p className="text-xs text-white/50">
+                        items are <span className="text-white/70">not reserved</span> — checkout soon to secure yours.
+                      </p>
                     </div>
-                  )}
-                </div>
-              ) : (
-                <div className="flex h-full flex-col">
-                  {/* Urgency nudge */}
-                  <div className="mt-3 flex items-start gap-2.5 rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3.5 py-2.5">
-                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="mt-0.5 h-4 w-4 flex-none text-brand-gold">
-                      <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clipRule="evenodd" />
-                    </svg>
-                    <p className="text-xs leading-relaxed text-brand-grey">
-                      items are not reserved 🔱 checkout soon to secure yours.
-                    </p>
-                  </div>
 
-                  {/* Cart items */}
-                  <ul className="mt-3 grow">
-                    {cart.lines
-                      .sort((a, b) =>
-                        a.merchandise.product.title.localeCompare(
-                          b.merchandise.product.title,
-                        ),
-                      )
-                      .map((item) => {
-                        const merchandiseSearchParams =
-                          {} as MerchandiseSearchParams;
+                    {/* Cart lines */}
+                    <ul className="mt-1">
+                      {[...cart.lines]
+                        .sort((a, b) => a.merchandise.product.title.localeCompare(b.merchandise.product.title))
+                        .map((item) => (
+                          <CartLineItem key={item.merchandise.id} item={item} />
+                        ))}
+                    </ul>
 
-                        item.merchandise.selectedOptions.forEach(
-                          ({ name, value }) => {
-                            if (value !== DEFAULT_OPTION) {
-                              merchandiseSearchParams[name.toLowerCase()] =
-                                value;
-                            }
-                          },
-                        );
+                    {/* Favorites */}
+                    {filteredFavs.length > 0 && (
+                      <FavoritesCarousel products={filteredFavs} onAdd={handleAddFav} onClose={closeCart} />
+                    )}
 
-                        const merchandiseUrl = createUrl(
-                          `/product/${item.merchandise.product.handle}`,
-                          new URLSearchParams(merchandiseSearchParams),
-                        );
+                    {/* Spacer so content doesn't hide behind sticky footer */}
+                    <div className="flex-1" />
 
-                        return (
-                          <li
-                            key={item.merchandise.id}
-                            className="flex w-full flex-col border-b border-brand-dark-gold/20"
-                          >
-                            <div className="relative flex w-full flex-row justify-between gap-3 py-4 pl-14 pr-1">
-                              <div className="absolute left-0 top-1/2 z-40 -translate-y-1/2">
-                                <DeleteItemButton
-                                  item={item}
-                                  optimisticUpdate={updateCartItem}
-                                />
-                              </div>
-                              <div className="flex min-w-0 flex-row">
-                                <div className="relative h-16 w-16 overflow-hidden rounded-md border border-brand-dark-gold/20 bg-brand-medium-grey/30">
-                                  <Image
-                                    className="h-full w-full object-cover"
-                                    width={64}
-                                    height={64}
-                                    priority
-                                    alt={
-                                      item.merchandise.product.featuredImage
-                                        .altText ||
-                                      item.merchandise.product.title
-                                    }
-                                    src={
-                                      item.merchandise.product.featuredImage.url
-                                    }
-                                  />
-                                </div>
-                                <a
-                                  href={merchandiseUrl}
-                                  onClick={closeCart}
-                                  className="z-30 ml-3 flex min-w-0 flex-row"
-                                >
-                                  <div className="flex min-w-0 flex-1 flex-col text-base">
-                                    <span className="line-clamp-2 text-sm leading-tight">
-                                      {item.merchandise.product.title}
-                                    </span>
-                                    {item.merchandise.title !==
-                                    DEFAULT_OPTION ? (
-                                      <p className="line-clamp-1 text-xs text-brand-grey">
-                                        {item.merchandise.title}
-                                      </p>
-                                    ) : null}
-                                  </div>
-                                </a>
-                              </div>
-                              <div className="flex h-16 flex-col justify-between">
-                                <Price
-                                  className="flex justify-end space-y-2 text-right text-sm"
-                                  amount={item.cost.totalAmount.amount}
-                                  currencyCode={
-                                    item.cost.totalAmount.currencyCode
-                                  }
-                                />
-                                <div className="ml-auto flex h-9 flex-row items-center rounded-full border border-brand-dark-gold/30">
-                                  <EditItemQuantityButton
-                                    item={item}
-                                    type="minus"
-                                    optimisticUpdate={updateCartItem}
-                                  />
-                                  <p className="w-6 text-center">
-                                    <span className="w-full text-xs">
-                                      {item.quantity}
-                                    </span>
-                                  </p>
-                                  <EditItemQuantityButton
-                                    item={item}
-                                    type="plus"
-                                    optimisticUpdate={updateCartItem}
-                                  />
-                                </div>
-                              </div>
-                            </div>
-                          </li>
-                        );
-                      })}
-                  </ul>
-
-                  {/* Favorites section */}
-                  {filteredFavProducts.length > 0 && (
-                    <div className="border-t border-brand-dark-gold/20 pt-3">
-                      <FavoritesCarousel
-                        products={filteredFavProducts}
-                        onAdd={handleAddFav}
-                        onClose={closeCart}
-                      />
-                    </div>
-                  )}
-
-                  {/* Discount code */}
-                  {(() => {
-                    const appliedCode = appliedCodeLocal && discountConfirmed ? { code: appliedCodeLocal, applicable: true } : null;
-                    const pendingCode = appliedCodeLocal && !discountConfirmed;
-                    const totalDiscount = cart.discountAllocations?.reduce(
-                      (sum, a) => sum + parseFloat(a.discountedAmount.amount || "0"), 0
-                    ) || 0;
-
-                    return (
-                      <div className="pt-2">
-                        <div className="mb-2 flex items-center gap-1.5">
-                          <TagIcon className="h-3.5 w-3.5 text-brand-gold" />
-                          <p className="text-xs uppercase tracking-wider text-brand-grey">
-                            discount code
-                          </p>
+                    {/* Discount code */}
+                    <div className="pt-4 pb-2">
+                      <div className="flex items-center gap-1.5 mb-2">
+                        <TagIcon className="h-3.5 w-3.5 text-white/30" />
+                        <span className="text-xs uppercase tracking-wider text-white/30">Discount</span>
+                      </div>
+                      {applyingDiscount ? (
+                        <div className="flex items-center justify-center py-3 rounded-lg border border-white/5 bg-white/3">
+                          <span className="text-xs text-white/40">Applying {appliedCode}…</span>
                         </div>
-                        {pendingCode ? (
-                          <div className="flex items-center justify-center rounded-lg border border-brand-dark-gold/20 px-3 py-3">
-                            <span className="text-xs text-brand-grey">applying {appliedCodeLocal}...</span>
-                          </div>
-                        ) : appliedCode ? (
-                          <div className="flex items-center justify-between rounded-lg border border-brand-gold/30 bg-brand-gold/5 px-3 py-2">
-                            <div className="flex items-center gap-2">
-                              <span className="text-sm text-brand-gold">{appliedCode.code}</span>
-                              {totalDiscount > 0 ? (
-                                <span className="rounded bg-green-500/10 px-1.5 py-0.5 text-[10px] text-green-400">
-                                  -{new Intl.NumberFormat(undefined, { style: "currency", currency: cart.cost.totalAmount.currencyCode, currencyDisplay: "narrowSymbol" }).format(totalDiscount)} off
-                                </span>
-                              ) : (
-                                <span className="rounded bg-brand-gold/10 px-1.5 py-0.5 text-[10px] text-brand-gold">
-                                  applies at checkout
-                                </span>
-                              )}
-                            </div>
-                            <button
-                              type="button"
-                              onClick={() => {
-                                setAppliedCodeLocal(null);
-                                setDiscountConfirmed(false);
-                                setDiscountCode("");
-                                setDiscountError("");
-                                removeDiscountOptimistic();
-                                removeDiscountCode().then((confirmedCart) => {
-                                  if (confirmedCart) mergeConfirm(confirmedCart);
-                                }).catch(() => {});
-                              }}
-                              className="text-xs text-brand-grey hover:text-red-400"
-                            >
-                              remove
-                            </button>
-                          </div>
-                        ) : (
-                          <div>
-                            <div className="flex gap-2">
-                              <input
-                                type="text"
-                                value={discountCode}
-                                onChange={(e) => {
-                                  setDiscountCode(e.target.value);
-                                  setDiscountError("");
-                                }}
-                                placeholder="Enter code"
-                                onKeyDown={(e) => {
-                                  if (e.key === "Enter" && discountCode.trim() && !applyingDiscount) {
-                                    e.preventDefault();
-                                    (e.target as HTMLInputElement).blur();
-                                    const code = discountCode.trim();
-                                    setDiscountError("");
-                                    setApplyingDiscount(true);
-                                    setAppliedCodeLocal(code);
-                                    setDiscountCode("");
-                                    applyDiscountCode(code).then((result) => {
-                                      if (!result.success) {
-                                        setAppliedCodeLocal(null); setDiscountConfirmed(false);
-                                        setDiscountError(result.error || "failed to apply code.");
-                                      } else if (!result.applicable) {
-                                        setAppliedCodeLocal(null); setDiscountConfirmed(false);
-                                        setDiscountError("invalid or expired code.");
-                                        removeDiscountCode().catch(() => {});
-                                      } else if (result.cart) {
-                                        mergeConfirm(result.cart);
-                                        setDiscountConfirmed(true);
-                                      }
-                                    }).catch(() => {
-                                      setAppliedCodeLocal(null); setDiscountConfirmed(false);
-                                      setDiscountError("failed to apply code.");
-                                    }).finally(() => setApplyingDiscount(false));
-                                  }
-                                }}
-                                enterKeyHint="done"
-                                className="flex-1 rounded-lg border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-base text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-                              />
-                              <button
-                                type="button"
-                                disabled={!discountCode.trim() || applyingDiscount}
-                                onClick={() => {
-                                  const code = discountCode.trim();
-                                  if (!code || applyingDiscount) return;
-                                  setDiscountError("");
-                                  setApplyingDiscount(true);
-                                  setAppliedCodeLocal(code);
-                                  setDiscountCode("");
-                                  applyDiscountCode(code).then((result) => {
-                                    if (!result.success) {
-                                      setAppliedCodeLocal(null); setDiscountConfirmed(false);
-                                      setDiscountError(result.error || "failed to apply code.");
-                                    } else if (!result.applicable) {
-                                      setAppliedCodeLocal(null); setDiscountConfirmed(false);
-                                      setDiscountError("invalid or expired code.");
-                                      removeDiscountCode().catch(() => {});
-                                    } else if (result.cart) {
-                                      mergeConfirm(result.cart);
-                                      setDiscountConfirmed(true);
-                                    }
-                                  }).catch(() => {
-                                    setAppliedCodeLocal(null); setDiscountConfirmed(false);
-                                    setDiscountError("failed to apply code.");
-                                  }).finally(() => setApplyingDiscount(false));
-                                }}
-                                className="rounded-lg border border-brand-gold/40 px-4 py-2 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:cursor-not-allowed disabled:opacity-30"
-                              >
-                                {applyingDiscount ? "..." : "apply"}
-                              </button>
-                            </div>
-                            {discountError && (
-                              <p className="mt-1.5 text-xs text-red-400">{discountError}</p>
+                      ) : appliedCode && discountConfirmed ? (
+                        <div className="flex items-center justify-between rounded-lg border border-brand-gold/20 bg-brand-gold/5 px-3 py-2.5">
+                          <div className="flex items-center gap-2">
+                            <TagIcon className="h-3.5 w-3.5 text-brand-gold" />
+                            <span className="text-sm text-brand-gold">{appliedCode}</span>
+                            {totalDiscount > 0 && (
+                              <span className="text-[10px] text-green-400 bg-green-500/10 rounded px-1.5 py-0.5">
+                                −{new Intl.NumberFormat(undefined, { style: "currency", currency: cart.cost.totalAmount.currencyCode, currencyDisplay: "narrowSymbol" }).format(totalDiscount)}
+                              </span>
                             )}
                           </div>
-                        )}
-                      </div>
-                    );
-                  })()}
-
-                  {/* Summary */}
-                  <div className="pt-3 text-sm text-brand-grey">
-                    <div className="mb-2 flex items-center justify-between">
-                      <p>Shipping</p>
-                      {freeShipping ? (
-                        <div className="flex items-center gap-1.5">
-                          <span className="text-xs text-green-400">Free</span>
-                          <span className="rounded bg-brand-gold/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-brand-gold">
-                            {tierName}
-                          </span>
+                          <button
+                            type="button"
+                            onClick={removeDiscount}
+                            className="text-xs text-white/30 hover:text-red-400 transition-colors"
+                          >
+                            remove
+                          </button>
                         </div>
                       ) : (
-                        <p className="text-right text-xs">Calculated at checkout</p>
+                        <div>
+                          <div className="flex gap-2">
+                            <input
+                              type="text"
+                              value={discountInput}
+                              onChange={(e) => { setDiscountInput(e.target.value); setDiscountError(""); }}
+                              onKeyDown={(e) => {
+                                if (e.key === "Enter") {
+                                  e.preventDefault();
+                                  (e.target as HTMLInputElement).blur();
+                                  applyDiscount(discountInput.trim());
+                                }
+                              }}
+                              placeholder="Enter code"
+                              enterKeyHint="done"
+                              className="flex-1 rounded-lg border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+                            />
+                            <button
+                              type="button"
+                              disabled={!discountInput.trim() || applyingDiscount}
+                              onClick={() => applyDiscount(discountInput.trim())}
+                              className="rounded-lg border border-brand-gold/30 px-4 py-2.5 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:cursor-not-allowed disabled:opacity-30"
+                            >
+                              Apply
+                            </button>
+                          </div>
+                          {discountError && (
+                            <p className="mt-1.5 text-xs text-red-400">{discountError}</p>
+                          )}
+                        </div>
                       )}
                     </div>
-                    <div className="mb-3 flex items-center justify-between border-t border-brand-dark-gold/20 pt-2">
-                      <p className="font-medium text-white">Total</p>
-                      <Price
-                        className="text-right text-base font-medium text-brand-gold"
-                        amount={cart.cost.totalAmount.amount}
-                        currencyCode={cart.cost.totalAmount.currencyCode}
-                      />
+
+                    {/* Summary */}
+                    <div className="border-t border-white/5 pt-3 pb-2 space-y-2 text-sm">
+                      <div className="flex items-center justify-between text-white/40">
+                        <span>Subtotal</span>
+                        <Price amount={cart.cost.subtotalAmount.amount} currencyCode={cart.cost.subtotalAmount.currencyCode} />
+                      </div>
+                      {totalDiscount > 0 && (
+                        <div className="flex items-center justify-between text-green-400">
+                          <span>Discount</span>
+                          <span>
+                            −{new Intl.NumberFormat(undefined, { style: "currency", currency: cart.cost.totalAmount.currencyCode, currencyDisplay: "narrowSymbol" }).format(totalDiscount)}
+                          </span>
+                        </div>
+                      )}
+                      <div className="flex items-center justify-between text-white/40">
+                        <span>Shipping</span>
+                        {freeShipping ? (
+                          <span className="flex items-center gap-1.5 text-green-400">
+                            Free
+                            <span className="rounded bg-brand-gold/10 px-1.5 py-0.5 text-[10px] uppercase tracking-wider text-brand-gold">{tierName}</span>
+                          </span>
+                        ) : (
+                          <span className="text-right text-xs">At checkout</span>
+                        )}
+                      </div>
+                      <div className="flex items-center justify-between border-t border-white/5 pt-2">
+                        <span className="font-medium text-white">Total</span>
+                        <Price
+                          className="text-base font-semibold text-brand-gold"
+                          amount={cart.cost.totalAmount.amount}
+                          currencyCode={cart.cost.totalAmount.currencyCode}
+                        />
+                      </div>
                     </div>
                   </div>
+                )}
+              </div>
 
-                  {/* Checkout button */}
-                  <form action={redirectToCheckout} className="pb-1">
+              {/* Checkout footer — only when items exist */}
+              {hasItems && (
+                <div className="px-5 py-4 border-t border-white/5">
+                  <form action={redirectToCheckout}>
                     <CheckoutButton />
                   </form>
                 </div>
@@ -770,34 +673,19 @@ export default function CartModal() {
   );
 }
 
-function CloseCart({ className }: { className?: string }) {
-  return (
-    <div className="relative flex h-11 w-11 items-center justify-center rounded-md text-brand-grey transition-colors hover:text-brand-gold">
-      <XMarkIcon
-        className={clsx(
-          "h-6 w-6 transition-colors",
-          className,
-        )}
-      />
-    </div>
-  );
-}
-
 function CheckoutButton() {
   const { pending } = useFormStatus();
-
   return (
     <button
-      className="group tap-target relative flex min-h-[44px] w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brand-gold p-3 text-center font-heading text-sm font-medium uppercase text-brand-dark"
       type="submit"
       disabled={pending}
+      className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brand-gold py-3.5 font-heading text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-60"
     >
       {!pending && (
         <div
           className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
           style={{
-            background:
-              "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
+            background: "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
             animation: "cartShimmer 2s ease-in-out infinite",
           }}
         />
@@ -805,14 +693,9 @@ function CheckoutButton() {
       {pending ? (
         <LoadingDots className="bg-brand-dark" />
       ) : (
-        <>
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" className="relative z-10 h-4 w-4 flex-none">
-            <path fillRule="evenodd" d="M10 1a4.5 4.5 0 00-4.5 4.5V9H5a2 2 0 00-2 2v6a2 2 0 002 2h10a2 2 0 002-2v-6a2 2 0 00-2-2h-.5V5.5A4.5 4.5 0 0010 1zm3 8V5.5a3 3 0 10-6 0V9h6z" clipRule="evenodd" />
-          </svg>
-          <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
-            Checkout Securely
-          </span>
-        </>
+        <span className="relative z-10 transition-all duration-300 group-hover:tracking-[0.2em]">
+          Checkout Securely
+        </span>
       )}
     </button>
   );
