@@ -386,7 +386,7 @@ export default function CartModal() {
       description: "",
       descriptionHtml: "",
       options: [],
-      priceRange: p.priceRange,
+      priceRange: { maxVariantPrice: p.priceRange.maxVariantPrice, minVariantPrice: p.priceRange.maxVariantPrice },
       variants: [],
       featuredImage: p.featuredImage
         ? { url: p.featuredImage.url, altText: p.title, width: 800, height: 800 }
