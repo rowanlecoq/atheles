@@ -12,7 +12,7 @@ import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 import LoadingDots from "components/loading-dots";
 import Price from "components/price";
 import { DEFAULT_OPTION } from "lib/constants";
-import type { CartItem, Product, ProductVariant } from "lib/shopify/types";
+import type { CartItem } from "lib/shopify/types";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
@@ -109,7 +109,7 @@ function CartLineItem({ item }: { item: CartItem }) {
     }
   };
 
-  const atMax = item.quantity >= MAX_ITEM_QUANTITY || !item.merchandise.availableForSale;
+  const atMax = item.quantity >= MAX_ITEM_QUANTITY || item.merchandise.availableForSale === false;
 
   return (
     <li className="flex gap-3 py-4 border-b border-white/5">
@@ -257,7 +257,7 @@ function FavoritesCarousel({
 // ─── Main modal ───────────────────────────────────────────────────────────────
 
 export default function CartModal() {
-  const { cart, setCart, addCartItem, mergeConfirmAdd } = useCart();
+  const { cart, setCart } = useCart();
   const [isOpen, setIsOpen] = useState(false);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
   const [discountInput, setDiscountInput] = useState("");
@@ -359,30 +359,12 @@ export default function CartModal() {
 
   const handleAddFav = useCallback((p: FavProduct) => {
     if (!p.firstVariantId) return;
-    const price = p.firstVariantPrice ?? p.priceRange.maxVariantPrice;
-    const syntheticVariant = {
-      id: p.firstVariantId,
-      title: p.firstVariantTitle ?? "Default Title",
-      availableForSale: p.availableForSale ?? true,
-      selectedOptions: p.firstVariantOptions ?? [],
-      price: { amount: price.amount, currencyCode: price.currencyCode },
-    } as ProductVariant;
-    const syntheticProduct = {
-      id: p.id ?? "",
-      handle: p.handle,
-      title: p.title,
-      featuredImage: p.featuredImage
-        ? { url: p.featuredImage.url, altText: "" }
-        : { url: "", altText: "" },
-    } as Product;
-
-    addCartItem(syntheticVariant, syntheticProduct);
     addItem(null, p.firstVariantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
-        mergeConfirmAdd(result.cart);
+        setCart(result.cart);
       }
     }).catch(() => {});
-  }, [addCartItem, mergeConfirmAdd]);
+  }, [setCart]);
 
   const applyDiscount = async (code: string) => {
     if (!code.trim() || applyingDiscount) return;
