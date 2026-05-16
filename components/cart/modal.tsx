@@ -46,9 +46,7 @@ type FavProduct = {
 // ─── Cart line item ────────────────────────────────────────────────────────────
 
 function CartLineItem({ item }: { item: CartItem }) {
-  const { setCart } = useCart();
-  const [removing, setRemoving] = useState(false);
-  const [qtyPending, setQtyPending] = useState<"plus" | "minus" | null>(null);
+  const { cart, setCart } = useCart();
 
   const searchParams: Record<string, string> = {};
   item.merchandise.selectedOptions.forEach(({ name, value }) => {
@@ -59,41 +57,59 @@ function CartLineItem({ item }: { item: CartItem }) {
     new URLSearchParams(searchParams),
   );
 
+  // Recompute cart totals after a lines change.
+  const applyLines = (prev: NonNullable<typeof cart>, lines: CartItem[]) => {
+    const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
+    const discount = (prev.discountAllocations ?? []).reduce(
+      (s, a) => s + parseFloat(a.discountedAmount.amount), 0,
+    );
+    const cc = prev.cost.totalAmount.currencyCode;
+    return {
+      ...prev,
+      lines,
+      totalQuantity: lines.reduce((s, l) => s + l.quantity, 0),
+      cost: {
+        ...prev.cost,
+        subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: cc },
+        totalAmount: { amount: Math.max(0, subtotal - discount).toFixed(2), currencyCode: cc },
+      },
+    };
+  };
+
   const handleRemove = async () => {
-    setRemoving(true);
+    const snapshot = cart;
+    // Optimistic: remove immediately so favorites carousel updates instantly.
+    setCart((prev) => prev ? applyLines(prev, prev.lines.filter(l => l.merchandise.id !== item.merchandise.id)) : prev);
     try {
-      const result = await removeItem(null, {
-        lineItemId: item.id,
-        merchandiseId: item.merchandise.id,
-      });
-      if (result && typeof result === "object" && "cart" in result) {
-        setCart(result.cart);
-      }
+      const result = await removeItem(null, { lineItemId: item.id, merchandiseId: item.merchandise.id });
+      if (result && typeof result === "object" && "cart" in result) setCart(result.cart);
     } catch {
-      setRemoving(false);
+      setCart(snapshot);
     }
   };
 
   const handleQty = async (type: "plus" | "minus") => {
-    if (qtyPending) return;
+    const snapshot = cart;
     const newQty = type === "plus" ? item.quantity + 1 : item.quantity - 1;
-    setQtyPending(type);
-    try {
-      const result = await updateItemQuantity(null, {
-        lineItemId: item.id,
-        merchandiseId: item.merchandise.id,
-        quantity: newQty,
+    setCart((prev) => {
+      if (!prev) return prev;
+      if (newQty <= 0) return applyLines(prev, prev.lines.filter(l => l.merchandise.id !== item.merchandise.id));
+      const lines = prev.lines.map(l => {
+        if (l.merchandise.id !== item.merchandise.id) return l;
+        const unitPrice = parseFloat(l.cost.totalAmount.amount) / l.quantity;
+        return { ...l, quantity: newQty, cost: { ...l.cost, totalAmount: { ...l.cost.totalAmount, amount: (unitPrice * newQty).toFixed(2) } } };
       });
-      if (result && typeof result === "object" && "cart" in result) {
-        setCart(result.cart);
-      }
+      return applyLines(prev, lines);
+    });
+    try {
+      const result = await updateItemQuantity(null, { lineItemId: item.id, merchandiseId: item.merchandise.id, quantity: newQty });
+      if (result && typeof result === "object" && "cart" in result) setCart(result.cart);
     } catch {
-      // quantity snaps back
+      setCart(snapshot);
     }
-    setQtyPending(null);
   };
 
-  if (removing) return null;
+  const atMax = item.quantity >= MAX_ITEM_QUANTITY || !item.merchandise.availableForSale;
 
   return (
     <li className="flex gap-3 py-4 border-b border-white/5">
@@ -136,29 +152,20 @@ function CartLineItem({ item }: { item: CartItem }) {
             <button
               type="button"
               onClick={() => handleQty("minus")}
-              disabled={!!qtyPending}
               aria-label="Decrease quantity"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-white/50 hover:text-white transition-colors disabled:opacity-30"
+              className="flex h-7 w-7 items-center justify-center rounded-full text-white/50 hover:text-white transition-colors"
             >
-              {qtyPending === "minus" ? (
-                <span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
-              ) : (
-                <MinusIcon className="h-3 w-3" />
-              )}
+              <MinusIcon className="h-3 w-3" />
             </button>
             <span className="w-5 text-center text-sm text-white tabular-nums">{item.quantity}</span>
             <button
               type="button"
-              onClick={() => handleQty("plus")}
-              disabled={!!qtyPending || item.quantity >= MAX_ITEM_QUANTITY}
-              aria-label="Increase quantity"
-              className="flex h-7 w-7 items-center justify-center rounded-full text-white/50 hover:text-white transition-colors disabled:opacity-30"
+              onClick={() => !atMax && handleQty("plus")}
+              disabled={atMax}
+              aria-label={atMax ? (item.merchandise.availableForSale ? "Maximum quantity reached" : "Out of stock") : "Increase quantity"}
+              className="flex h-7 w-7 items-center justify-center rounded-full text-white/50 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-25"
             >
-              {qtyPending === "plus" ? (
-                <span className="h-3 w-3 animate-spin rounded-full border border-white/30 border-t-white" />
-              ) : (
-                <PlusIcon className="h-3 w-3" />
-              )}
+              <PlusIcon className="h-3 w-3" />
             </button>
           </div>
           {/* Line total */}
@@ -464,7 +471,7 @@ export default function CartModal() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-[#0a0a0a] text-white md:w-[400px] will-change-transform">
+            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform">
 
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">

@@ -28,6 +28,7 @@ export type CartItem = {
   merchandise: {
     id: string;
     title: string;
+    availableForSale: boolean;
     selectedOptions: {
       name: string;
       value: string;
