@@ -203,8 +203,15 @@ export default function CartModal() {
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
   const favCacheRef = useRef<{ products: FavProduct[] } | null>(null);
-  const openCart = () => setIsOpen(true);
-  const closeCart = () => setIsOpen(false);
+  const closedAtRef = useRef(0);
+  const openCart = () => {
+    if (Date.now() - closedAtRef.current < 500) return;
+    setIsOpen(true);
+  };
+  const closeCart = () => {
+    closedAtRef.current = Date.now();
+    setIsOpen(false);
+  };
 
   const handleAddFav = useCallback((handle: string, variantId: string) => {
     const favProduct = favProducts.find((p) => p.handle === handle);

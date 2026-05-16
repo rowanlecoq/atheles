@@ -12,7 +12,7 @@ import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
 function ProductCard({ product }: { product: Product }) {
-  const { addCartItem, setServerCart } = useCart();
+  const { setServerCart } = useCart();
   const [showSizes, setShowSizes] = useState(false);
   const [added, setAdded] = useState(false);
   const addedTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -27,14 +27,33 @@ function ProductCard({ product }: { product: Product }) {
   const handleAdd = (variantId: string) => {
     const variant = product.variants.find((v) => v.id === variantId);
     if (!variant || added) return;
-    addCartItem(variant, product);
     window.dispatchEvent(
       new CustomEvent("cart:add-optimistic", { detail: { variant, product } }),
     );
     window.dispatchEvent(new Event("open-cart"));
     addItem(null, variantId).then((result) => {
       if (result && typeof result === "object" && "cart" in result) {
-        setServerCart(result.cart);
+        const confirmed = result.cart;
+        setServerCart((prev) => {
+          if (!prev) return confirmed;
+          const confirmedIds = new Set(confirmed.lines.map((l) => l.merchandise.id));
+          const extraLines = prev.lines.filter((l) => !confirmedIds.has(l.merchandise.id));
+          if (extraLines.length === 0) return confirmed;
+          const mergedLines = [...confirmed.lines, ...extraLines];
+          const subtotal = mergedLines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
+          const currencyCode = confirmed.cost.totalAmount.currencyCode;
+          const discount = (confirmed.discountAllocations ?? []).reduce((s, a) => s + parseFloat(a.discountedAmount.amount), 0);
+          return {
+            ...confirmed,
+            lines: mergedLines,
+            totalQuantity: mergedLines.reduce((s, l) => s + l.quantity, 0),
+            cost: {
+              ...confirmed.cost,
+              subtotalAmount: { amount: subtotal.toFixed(2), currencyCode },
+              totalAmount: { amount: Math.max(0, subtotal - discount).toFixed(2), currencyCode },
+            },
+          };
+        });
       }
     }).catch(() => {});
     setShowSizes(false);

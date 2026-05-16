@@ -3,8 +3,6 @@
 import type {
   Cart,
   CartItem,
-  Product,
-  ProductVariant,
 } from "lib/shopify/types";
 import React, {
   createContext,
@@ -25,10 +23,6 @@ type CartAction =
   | {
       type: "UPDATE_ITEM";
       payload: { merchandiseId: string; updateType: UpdateType };
-    }
-  | {
-      type: "ADD_ITEM";
-      payload: { variant: ProductVariant; product: Product };
     }
   | { type: "REMOVE_DISCOUNT" };
 
@@ -74,36 +68,6 @@ function updateCartItemHelper(
   };
 }
 
-function createOrUpdateCartItem(
-  existingItem: CartItem | undefined,
-  variant: ProductVariant,
-  product: Product,
-): CartItem {
-  const quantity = existingItem ? existingItem.quantity + 1 : 1;
-  const totalAmount = calculateItemCost(quantity, variant.price.amount);
-
-  return {
-    id: existingItem?.id,
-    quantity,
-    cost: {
-      totalAmount: {
-        amount: totalAmount,
-        currencyCode: variant.price.currencyCode,
-      },
-    },
-    merchandise: {
-      id: variant.id,
-      title: variant.title,
-      selectedOptions: variant.selectedOptions,
-      product: {
-        id: product.id,
-        handle: product.handle,
-        title: product.title,
-        featuredImage: product.featuredImage,
-      },
-    },
-  };
-}
 
 function updateCartTotals(
   lines: CartItem[],
@@ -166,20 +130,6 @@ function cartReducer(state: Cart | undefined, action: CartAction): Cart {
           },
         };
       }
-
-      return { ...currentCart, ...updateCartTotals(updatedLines), lines: updatedLines };
-    }
-    case "ADD_ITEM": {
-      const { variant, product } = action.payload;
-      const existingItem = currentCart.lines.find(
-        (item) => item.merchandise.id === variant.id,
-      );
-      const updatedItem = createOrUpdateCartItem(existingItem, variant, product);
-      const updatedLines = existingItem
-        ? currentCart.lines.map((item) =>
-            item.merchandise.id === variant.id ? updatedItem : item,
-          )
-        : [...currentCart.lines, updatedItem];
 
       return { ...currentCart, ...updateCartTotals(updatedLines), lines: updatedLines };
     }
@@ -435,18 +385,6 @@ export function useCart() {
     });
   };
 
-  const addCartItem = (variant: ProductVariant, product: Product) => {
-    updateOptimisticCart({ type: "ADD_ITEM", payload: { variant, product } });
-    // Clear any stale patch for this variant so an old persisted quantity
-    // doesn't override the freshly-added quantity (qty 1 from a clean add).
-    setQtyPatch((prev) => {
-      if (!prev.has(variant.id)) return prev;
-      const next = new Map(prev);
-      next.delete(variant.id);
-      return next;
-    });
-  };
-
   const clearItemPatch = (merchandiseId: string) => {
     setQtyPatch((prev) => {
       if (!prev.has(merchandiseId)) return prev;
@@ -463,7 +401,7 @@ export function useCart() {
   };
 
   return useMemo(
-    () => ({ cart, updateCartItem, addCartItem, clearDiscount, clearItemPatch, setServerCart, patchHydrated }),
+    () => ({ cart, updateCartItem, clearDiscount, clearItemPatch, setServerCart, patchHydrated }),
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [cart, patchHydrated, setServerCart],
   );
