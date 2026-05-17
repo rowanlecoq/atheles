@@ -46,8 +46,17 @@ export function AddToCart({ product }: { product: Product }) {
     : 1; // Unknown stock (null from both APIs) — conservative cap
   const atStockLimit = currentQtyInCart >= stockCap;
 
+  // When stock count is known from the product API, the optimistic atStockLimit
+  // check is already sufficient — re-enable after the 700ms "Added!" period.
+  // When stock is unknown (null), keep locked until server confirms the real
+  // count via mergeConfirmAdd, since that's what populates quantityAvailable.
+  const stockIsKnown = typeof finalVariant?.quantityAvailable === "number";
+  const isLocked = stockIsKnown
+    ? state === "added"
+    : state === "added" || addingInProgress;
+
   const handleAddToCart = () => {
-    if (!selectedVariantId || !finalVariant || state === "added" || atStockLimit || addingRef.current) return;
+    if (!selectedVariantId || !finalVariant || isLocked || atStockLimit || addingRef.current) return;
 
     addingRef.current = true;
     setAddingInProgress(true);
@@ -86,7 +95,7 @@ export function AddToCart({ product }: { product: Product }) {
       <button
         type="button"
         onClick={handleAddToCart}
-        disabled={!selectedVariantId || state === "added" || atStockLimit || addingInProgress}
+        disabled={!selectedVariantId || isLocked || atStockLimit}
         aria-label={selectedVariantId ? "Add to cart" : "Please select a size"}
         className={clsx(
           "group relative flex w-full items-center justify-center overflow-hidden rounded-full p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300",
