@@ -349,7 +349,6 @@ export default function CartModal() {
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
   const favCacheRef = useRef<FavProduct[] | null>(null);
-  const discountSyncedRef = useRef(false);
   const closedAtRef = useRef(0);
 
   const openCart = useCallback(() => {
@@ -374,26 +373,22 @@ export default function CartModal() {
     return () => window.removeEventListener("open-cart", handler);
   }, [openCart]);
 
-  // Sync applied discount code when cart opens
+  // Sync applied discount code from cart state whenever we don't already have
+  // one locally. Runs on every discountCodes change so late-loading cart data
+  // and confirmed carts are all caught.
   useEffect(() => {
-    if (!isOpen) { discountSyncedRef.current = false; return; }
-    if (discountSyncedRef.current) return;
-    discountSyncedRef.current = true;
+    if (!isOpen || appliedCode) return;
     const active = cart?.discountCodes?.find((dc) => dc.applicable);
-    const hasAmount = (cart?.discountAllocations ?? []).reduce(
-      (s, a) => s + parseFloat(a.discountedAmount?.amount || "0"), 0,
-    ) > 0;
-    if (active && hasAmount) { setAppliedCode(active.code); setDiscountConfirmed(true); }
-  }, [isOpen, cart?.discountCodes, cart?.discountAllocations]);
+    if (active) { setAppliedCode(active.code); setDiscountConfirmed(true); }
+  }, [isOpen, appliedCode, cart?.discountCodes]);
 
-  // Confirm discount once Shopify allocations arrive
+  // Confirm discount once the cost difference shows a real reduction
+  // (uses cost delta so it works even when discountAllocations hasn't updated yet).
   useEffect(() => {
-    if (!appliedCode || discountConfirmed) return;
-    const hasAmount = (cart?.discountAllocations ?? []).reduce(
-      (s, a) => s + parseFloat(a.discountedAmount?.amount || "0"), 0,
-    ) > 0;
-    if (hasAmount) setDiscountConfirmed(true);
-  }, [appliedCode, discountConfirmed, cart?.discountAllocations]);
+    if (!appliedCode || discountConfirmed || !cart) return;
+    const hasDiscount = parseFloat(cart.cost.subtotalAmount.amount) > parseFloat(cart.cost.totalAmount.amount);
+    if (hasDiscount) setDiscountConfirmed(true);
+  }, [appliedCode, discountConfirmed, cart?.cost.subtotalAmount.amount, cart?.cost.totalAmount.amount]);
 
   // Tier / free shipping
   useEffect(() => {
@@ -521,9 +516,11 @@ export default function CartModal() {
   const cartHandles = new Set(cart?.lines.map((l) => l.merchandise.product.handle));
   const filteredFavs = favProducts.filter((p) => !cartHandles.has(p.handle));
   const hasItems = !!cart?.lines.length;
-  const totalDiscount = (cart?.discountAllocations ?? []).reduce(
-    (s, a) => s + parseFloat(a.discountedAmount.amount || "0"), 0,
-  );
+  // Derive discount from the cost delta so it updates immediately with every
+  // optimistic operation, rather than waiting for discountAllocations to settle.
+  const totalDiscount = cart
+    ? Math.max(0, parseFloat(cart.cost.subtotalAmount.amount) - parseFloat(cart.cost.totalAmount.amount))
+    : 0;
 
   return (
     <>
