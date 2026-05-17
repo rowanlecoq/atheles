@@ -118,9 +118,11 @@ function CartLineItem({ item }: { item: CartItem }) {
   // Recompute cart totals after a lines change.
   const applyLines = (prev: NonNullable<typeof cart>, lines: CartItem[]) => {
     const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
-    const discount = (prev.discountAllocations ?? []).reduce(
-      (s, a) => s + parseFloat(a.discountedAmount.amount), 0,
-    );
+    const prevSubtotal = parseFloat(prev.cost.subtotalAmount.amount);
+    const prevTotal = parseFloat(prev.cost.totalAmount.amount);
+    const total = prevSubtotal > 0
+      ? Math.max(0, subtotal * (prevTotal / prevSubtotal))
+      : subtotal;
     const cc = prev.cost.totalAmount.currencyCode;
     return {
       ...prev,
@@ -129,7 +131,7 @@ function CartLineItem({ item }: { item: CartItem }) {
       cost: {
         ...prev.cost,
         subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: cc },
-        totalAmount: { amount: Math.max(0, subtotal - discount).toFixed(2), currencyCode: cc },
+        totalAmount: { amount: total.toFixed(2), currencyCode: cc },
       },
     };
   };

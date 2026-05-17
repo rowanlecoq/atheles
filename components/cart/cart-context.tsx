@@ -32,10 +32,14 @@ function withTotals(base: Cart, lines: CartItem[]): Cart {
   const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
   const currencyCode =
     lines[0]?.cost.totalAmount.currencyCode ?? base.cost.totalAmount.currencyCode;
-  const discount = (base.discountAllocations ?? []).reduce(
-    (s, a) => s + parseFloat(a.discountedAmount.amount),
-    0,
-  );
+  // Scale total proportionally so any applied discount rate reflects immediately
+  // (same formula as applyConfirmed). Exact for % codes; approximates fixed-amount
+  // codes until Shopify confirms, which is close enough for optimistic display.
+  const baseSubtotal = parseFloat(base.cost.subtotalAmount.amount);
+  const baseTotal = parseFloat(base.cost.totalAmount.amount);
+  const total = baseSubtotal > 0
+    ? Math.max(0, subtotal * (baseTotal / baseSubtotal))
+    : subtotal;
   return {
     ...base,
     lines,
@@ -43,7 +47,7 @@ function withTotals(base: Cart, lines: CartItem[]): Cart {
     cost: {
       ...base.cost,
       subtotalAmount: { amount: subtotal.toFixed(2), currencyCode },
-      totalAmount: { amount: Math.max(0, subtotal - discount).toFixed(2), currencyCode },
+      totalAmount: { amount: total.toFixed(2), currencyCode },
     },
   };
 }
