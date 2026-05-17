@@ -34,13 +34,15 @@ export function AddToCart({ product }: { product: Product }) {
   // Stock-aware limit: compare current optimistic cart qty against quantityAvailable.
   // Cart line's quantityAvailable is authoritative — Shopify returns real counts there
   // even for "coming soon" products where the product API returns null.
+  // If both sources return null (Shopify configured for unlimited selling), cap at 1
+  // so pre-launch items can't be stacked arbitrarily.
   const cartLine = cart?.lines.find((l) => l.merchandise.id === selectedVariantId);
   const currentQtyInCart = cartLine?.quantity ?? 0;
   const stockCap = typeof finalVariant?.quantityAvailable === "number"
     ? Math.min(finalVariant.quantityAvailable, MAX_ITEM_QUANTITY)
     : typeof cartLine?.merchandise.quantityAvailable === "number"
     ? Math.min(cartLine.merchandise.quantityAvailable, MAX_ITEM_QUANTITY)
-    : MAX_ITEM_QUANTITY;
+    : 1; // Unknown stock (null from both APIs) — conservative cap
   const atStockLimit = currentQtyInCart >= stockCap;
 
   const handleAddToCart = () => {

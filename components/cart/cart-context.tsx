@@ -84,11 +84,12 @@ export function useCart() {
       const base = prev ?? buildEmptyCart(variant.price.currencyCode);
       const existing = base.lines.find((l) => l.merchandise.id === variant.id);
       // Enforce stock limit immediately so rapid adds can't exceed inventory.
+      // Fall back to 1 when both sources are null (Shopify "continue selling" policy).
       const stockLimit = typeof variant.quantityAvailable === "number"
         ? variant.quantityAvailable
         : typeof existing?.merchandise.quantityAvailable === "number"
         ? existing.merchandise.quantityAvailable
-        : MAX_ITEM_QUANTITY;
+        : 1;
       const cap = Math.min(stockLimit, MAX_ITEM_QUANTITY);
       const currentQty = existing?.quantity ?? 0;
       if (currentQty >= cap) return prev; // already at limit, no-op
