@@ -53,16 +53,20 @@ function applyConfirmed(prev: import("lib/shopify/types").Cart | undefined, conf
   if (!prev) return confirmed;
 
   // Iterate prev to decide WHICH items exist — confirmed is only consulted for
-  // updated field values. This prevents a stale confirmed cart (from a concurrent
-  // mutation that raced ahead on Shopify) from resurrecting items the user
-  // already removed optimistically, or evicting in-flight optimistic adds.
+  // updated field values (id, merchandise data, quantityAvailable).
+  //
+  // Key insight: optimistic removes delete items from prev *before* any confirm
+  // arrives, so a legitimately removed item is never present in prev when we get
+  // here. Therefore the only case where an item is in prev-but-absent-from-confirmed
+  // is a stale confirmed cart from a concurrent mutation that Shopify processed
+  // before the item was added. We must keep it — dropping it is what causes the
+  // rare "add from favorites bounces back" race.
   const lines: import("lib/shopify/types").CartItem[] = [];
   for (const prevLine of prev.lines) {
     const confirmedLine = confirmed.lines.find((l) => l.merchandise.id === prevLine.merchandise.id);
     if (confirmedLine) {
-      // Use confirmed data for id/merchandise, but keep prev's quantity and cost.
-      // prev may have a more recent optimistic qty change from a concurrent mutation
-      // that hasn't confirmed yet — using confirmed's qty would revert it.
+      // Use confirmed for id/merchandise, keep prev's qty and cost (may reflect a
+      // more recent optimistic change that hasn't reached this confirm yet).
       const qa = confirmedLine.merchandise.quantityAvailable ?? prevLine.merchandise.quantityAvailable;
       lines.push({
         ...confirmedLine,
@@ -70,11 +74,13 @@ function applyConfirmed(prev: import("lib/shopify/types").Cart | undefined, conf
         cost: prevLine.cost,
         merchandise: { ...confirmedLine.merchandise, quantityAvailable: qa },
       });
-    } else if (prevLine.id === undefined) {
-      // Not in confirmed but has no server id — it's an in-flight optimistic add; keep it.
+    } else {
+      // Not in this confirmed cart — keep with prev data regardless of whether
+      // it has a server id or not. Could be:
+      //   - id=undefined: in-flight add awaiting its own confirm
+      //   - real id: this confirm is stale; a faster confirm already gave it an id
       lines.push(prevLine);
     }
-    // In prev with real id but absent from confirmed → this action removed it; drop it.
   }
 
   const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
@@ -653,11 +659,7 @@ export default function CartModal() {
                         <TagIcon className="h-3.5 w-3.5 text-white/30" />
                         <span className="text-xs uppercase tracking-wider text-white/30">Discount</span>
                       </div>
-                      {applyingDiscount ? (
-                        <div className="flex items-center justify-center py-3 rounded-lg border border-white/5 bg-white/3">
-                          <span className="text-xs text-white/40">Applying {appliedCode}…</span>
-                        </div>
-                      ) : appliedCode && discountConfirmed ? (
+                      {appliedCode && discountConfirmed ? (
                         <div className="flex items-center justify-between rounded-lg border border-brand-gold/20 bg-brand-gold/5 px-3 py-2.5">
                           <div className="flex items-center gap-2">
                             <TagIcon className="h-3.5 w-3.5 text-brand-gold" />
@@ -681,10 +683,10 @@ export default function CartModal() {
                           <div className="flex gap-2">
                             <input
                               type="text"
-                              value={discountInput}
-                              onChange={(e) => { setDiscountInput(e.target.value); setDiscountError(""); }}
+                              value={applyingDiscount ? (appliedCode ?? discountInput) : discountInput}
+                              onChange={(e) => { if (!applyingDiscount) { setDiscountInput(e.target.value); setDiscountError(""); } }}
                               onKeyDown={(e) => {
-                                if (e.key === "Enter") {
+                                if (e.key === "Enter" && !applyingDiscount) {
                                   e.preventDefault();
                                   (e.target as HTMLInputElement).blur();
                                   applyDiscount(discountInput.trim());
@@ -692,15 +694,16 @@ export default function CartModal() {
                               }}
                               placeholder="enter code"
                               enterKeyHint="done"
-                              className="flex-1 rounded-lg border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+                              disabled={applyingDiscount}
+                              className="flex-1 rounded-lg border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none disabled:opacity-60"
                             />
                             <button
                               type="button"
-                              disabled={!discountInput.trim() || applyingDiscount}
-                              onClick={() => applyDiscount(discountInput.trim())}
-                              className="rounded-lg border border-brand-gold/30 px-4 py-2.5 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:cursor-not-allowed disabled:opacity-30"
+                              disabled={(!discountInput.trim() && !applyingDiscount) || applyingDiscount}
+                              onClick={() => !applyingDiscount && applyDiscount(discountInput.trim())}
+                              className="min-w-[64px] flex items-center justify-center rounded-lg border border-brand-gold/30 px-4 py-2.5 text-xs uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:cursor-not-allowed disabled:opacity-50"
                             >
-                              Apply
+                              {applyingDiscount ? <LoadingDots className="bg-brand-gold" /> : "Apply"}
                             </button>
                           </div>
                           {discountError && (
