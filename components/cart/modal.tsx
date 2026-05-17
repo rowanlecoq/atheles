@@ -51,26 +51,31 @@ type FavProduct = {
 function applyConfirmed(prev: import("lib/shopify/types").Cart | undefined, confirmed: import("lib/shopify/types").Cart): import("lib/shopify/types").Cart {
   if (!prev) return confirmed;
 
-  const lines = confirmed.lines.map((newLine) => {
-    if (newLine.merchandise.quantityAvailable !== null) return newLine;
-    const prevLine = prev.lines.find((l) => l.merchandise.id === newLine.merchandise.id);
-    return typeof prevLine?.merchandise.quantityAvailable === "number"
-      ? { ...newLine, merchandise: { ...newLine.merchandise, quantityAvailable: prevLine.merchandise.quantityAvailable } }
-      : newLine;
-  });
+  // Iterate prev to decide WHICH items exist — confirmed is only consulted for
+  // updated field values. This prevents a stale confirmed cart (from a concurrent
+  // mutation that raced ahead on Shopify) from resurrecting items the user
+  // already removed optimistically, or evicting in-flight optimistic adds.
+  const lines: import("lib/shopify/types").CartItem[] = [];
+  for (const prevLine of prev.lines) {
+    const confirmedLine = confirmed.lines.find((l) => l.merchandise.id === prevLine.merchandise.id);
+    if (confirmedLine) {
+      // Use confirmed data (latest qty/id/price), but keep quantityAvailable when confirmed returns null.
+      const qa = confirmedLine.merchandise.quantityAvailable ?? prevLine.merchandise.quantityAvailable;
+      lines.push({ ...confirmedLine, merchandise: { ...confirmedLine.merchandise, quantityAvailable: qa } });
+    } else if (prevLine.id === undefined) {
+      // Not in confirmed but has no server id — it's an in-flight optimistic add; keep it.
+      lines.push(prevLine);
+    }
+    // In prev with real id but absent from confirmed → this action removed it; drop it.
+  }
 
-  const confirmedIds = new Set(confirmed.lines.map((l) => l.merchandise.id));
-  const inFlight = prev.lines.filter((l) => !confirmedIds.has(l.merchandise.id) && l.id === undefined);
-  const allLines = inFlight.length > 0 ? [...lines, ...inFlight] : lines;
-
-  if (allLines === lines) return { ...confirmed, lines };
-  const subtotal = allLines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
+  const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
   const discount = (confirmed.discountAllocations ?? []).reduce((s, a) => s + parseFloat(a.discountedAmount.amount), 0);
   const cc = confirmed.cost.totalAmount.currencyCode;
   return {
     ...confirmed,
-    lines: allLines,
-    totalQuantity: allLines.reduce((s, l) => s + l.quantity, 0),
+    lines,
+    totalQuantity: lines.reduce((s, l) => s + l.quantity, 0),
     cost: {
       ...confirmed.cost,
       subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: cc },
