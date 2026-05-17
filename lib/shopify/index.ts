@@ -136,9 +136,15 @@ const reshapeCart = (cart: ShopifyCart): Cart => {
     };
   }
 
+  const lines = removeEdgesAndNodes(cart.lines);
+  // Temporary: log quantityAvailable so we can see what Shopify returns
+  lines.forEach((l) => {
+    console.log("[cart] line", l.merchandise.id, "qty:", l.quantity, "quantityAvailable:", l.merchandise.quantityAvailable, "availableForSale:", l.merchandise.availableForSale);
+  });
+
   return {
     ...cart,
-    lines: removeEdgesAndNodes(cart.lines),
+    lines,
   };
 };
 
