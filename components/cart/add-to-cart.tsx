@@ -13,6 +13,7 @@ export function AddToCart({ product }: { product: Product }) {
   const searchParams = useSearchParams();
   const [state, setState] = useState<"idle" | "added">("idle");
   const [addingInProgress, setAddingInProgress] = useState(false);
+  const addingRef = useRef(false); // synchronous guard — useState updates are async
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   useEffect(() => {
@@ -46,8 +47,9 @@ export function AddToCart({ product }: { product: Product }) {
   const atStockLimit = currentQtyInCart >= stockCap;
 
   const handleAddToCart = () => {
-    if (!selectedVariantId || !finalVariant || state === "added" || atStockLimit || addingInProgress) return;
+    if (!selectedVariantId || !finalVariant || state === "added" || atStockLimit || addingRef.current) return;
 
+    addingRef.current = true;
     setAddingInProgress(true);
     addCartItem(finalVariant, product);
     window.dispatchEvent(new Event("open-cart"));
@@ -57,6 +59,7 @@ export function AddToCart({ product }: { product: Product }) {
         mergeConfirmAdd(result.cart);
       }
     }).catch(() => {}).finally(() => {
+      addingRef.current = false;
       setAddingInProgress(false);
     });
 
