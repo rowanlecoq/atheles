@@ -17,35 +17,35 @@ type Particle = {
 // Per-theme particle config — gold, midnight, sunset use star shapes for sparkle
 const THEMES = {
   gold: {
-    count: 40,
+    count: 22,
     colors: [[255, 210, 60], [220, 185, 90], [255, 240, 160], [190, 160, 80]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.72,
     speed: 0.06, isStar: true,
   },
   water: {
-    count: 38,
+    count: 22,
     colors: [[0, 225, 240], [0, 170, 230], [120, 245, 255], [0, 195, 215]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.24,
     speed: 0.12, isStar: false,
   },
   tropical: {
-    count: 40,
+    count: 22,
     colors: [[20, 230, 110], [0, 195, 255], [255, 175, 30], [80, 255, 160]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.06, maxAlpha: 0.55,
     speed: 0.14, isStar: false,
   },
   midnight: {
-    count: 60,
+    count: 28,
     colors: [[255, 255, 255], [225, 185, 255], [255, 185, 225], [210, 165, 255]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.78,
     speed: 0.04, isStar: true,
   },
   sunset: {
-    count: 40,
+    count: 22,
     colors: [[255, 90, 145], [255, 145, 50], [200, 75, 225], [255, 125, 90]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.72,
@@ -185,7 +185,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   if (hasFilter) ctx.filter = "blur(20px)";
 
   if (theme === "water") {
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 5; i++) {
       const angle   = (-10 + i * 3) * (Math.PI / 180);
       const stripH  = 30 + (i % 4) * 10;
       const opacity = 0.055 + (i % 3) * 0.018;
@@ -198,7 +198,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "tropical") {
-    for (let i = 0; i < 8; i++) {
+    for (let i = 0; i < 5; i++) {
       const angle  = (-6 + i * 3.5) * (Math.PI / 180);
       const stripH = 28 + (i % 4) * 12;
       const opacity = 0.052 + (i % 3) * 0.018;
@@ -212,7 +212,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "sunset") {
-    for (let i = 0; i < 6; i++) {
+    for (let i = 0; i < 3; i++) {
       const angle   = (-12 + i * 4.5) * (Math.PI / 180);
       const stripH  = 28 + i * 7;
       const opacity = 0.048 + i * 0.010;

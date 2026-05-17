@@ -11,7 +11,8 @@ export function Gallery({
 }) {
   const [imageIndex, setImageIndex] = useState(0);
   const [isZoomed, setIsZoomed] = useState(false);
-  const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
+  const zoomOriginRef = useRef({ x: 50, y: 50 });
+  const zoomDivRef = useRef<HTMLDivElement>(null);
   const scrollRef = useRef<HTMLDivElement>(null);
   const isProgScrollRef = useRef(false);
   const scrollTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -120,10 +121,10 @@ export function Gallery({
             if (e.pointerType === "touch") return;
             if (!isZoomed) {
               const rect = e.currentTarget.getBoundingClientRect();
-              setZoomOrigin({
+              zoomOriginRef.current = {
                 x: ((e.clientX - rect.left) / rect.width) * 100,
                 y: ((e.clientY - rect.top) / rect.height) * 100,
-              });
+              };
               setIsZoomed(true);
             } else {
               setIsZoomed(false);
@@ -132,10 +133,12 @@ export function Gallery({
           onPointerMove={(e) => {
             if (e.pointerType === "touch" || !isZoomed) return;
             const rect = e.currentTarget.getBoundingClientRect();
-            setZoomOrigin({
-              x: ((e.clientX - rect.left) / rect.width) * 100,
-              y: ((e.clientY - rect.top) / rect.height) * 100,
-            });
+            const x = ((e.clientX - rect.left) / rect.width) * 100;
+            const y = ((e.clientY - rect.top) / rect.height) * 100;
+            zoomOriginRef.current = { x, y };
+            if (zoomDivRef.current) {
+              zoomDivRef.current.style.transformOrigin = `${x}% ${y}%`;
+            }
           }}
           onPointerLeave={(e) => {
             if (e.pointerType !== "touch") setIsZoomed(false);
@@ -143,10 +146,11 @@ export function Gallery({
         >
           {images[imageIndex] && (
             <div
+              ref={zoomDivRef}
               className="absolute inset-0 transition-transform duration-200"
               style={
                 isZoomed
-                  ? { transform: "scale(2.5)", transformOrigin: `${zoomOrigin.x}% ${zoomOrigin.y}%` }
+                  ? { transform: "scale(2.5)", transformOrigin: `${zoomOriginRef.current.x}% ${zoomOriginRef.current.y}%` }
                   : undefined
               }
             >

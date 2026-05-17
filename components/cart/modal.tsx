@@ -497,18 +497,14 @@ export default function CartModal() {
   };
 
   const removeDiscount = async () => {
-    const prev = cart;
     setAppliedCode(null); setDiscountConfirmed(false);
     setDiscountInput(""); setDiscountError("");
-    // Optimistically zero out discount
-    if (prev) {
-      setCart({
-        ...prev,
-        discountCodes: [],
-        discountAllocations: [],
-        cost: { ...prev.cost, totalAmount: { ...prev.cost.subtotalAmount } },
-      });
-    }
+    setCart((prev) => prev ? {
+      ...prev,
+      discountCodes: [],
+      discountAllocations: [],
+      cost: { ...prev.cost, totalAmount: { ...prev.cost.subtotalAmount } },
+    } : prev);
     const confirmed = await removeDiscountCode().catch(() => null);
     if (confirmed) setCart((prev) => applyConfirmed(prev, confirmed));
   };

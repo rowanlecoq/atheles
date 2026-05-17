@@ -35,8 +35,8 @@ function drawStar(
 }
 
 // Grid dimensions — guarantees even spread across the viewport
-const COLS = 10;
-const ROWS = 9;
+const COLS = 8;
+const ROWS = 5;
 
 export function SparkleBackground() {
   const canvasRef = useRef<HTMLCanvasElement>(null);
