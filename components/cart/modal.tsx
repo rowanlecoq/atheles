@@ -8,6 +8,7 @@ import {
   TagIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
+import { HeartIcon as HeartOutlineIcon } from "@heroicons/react/24/outline";
 import { HeartIcon as HeartSolidIcon } from "@heroicons/react/24/solid";
 import LoadingDots from "components/loading-dots";
 import Price from "components/price";
@@ -249,14 +250,15 @@ function FavoritesCarousel({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="pt-4 border-t border-white/5">
+    <div className="pt-4">
       <div className="flex items-center justify-between mb-3">
         <Link
           href="/favorites"
           onClick={onClose}
           className="flex items-center gap-1.5 group"
         >
-          <HeartSolidIcon className="h-3.5 w-3.5 text-brand-gold" />
+          <HeartOutlineIcon className="h-3.5 w-3.5 text-brand-gold group-hover:hidden" />
+          <HeartSolidIcon className="hidden h-3.5 w-3.5 text-brand-gold group-hover:block" />
           <span className="text-xs uppercase tracking-wider text-white/40 group-hover:text-brand-gold transition-colors">
             from your favorites
           </span>
@@ -543,7 +545,7 @@ export default function CartModal() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform">
+            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-gold/30">
 
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
@@ -612,9 +614,8 @@ export default function CartModal() {
                   <div className="flex flex-1 flex-col">
                     {/* Urgency nudge */}
                     <div className="mt-3 flex items-center gap-2 rounded-lg bg-brand-gold/5 px-3 py-2.5 border border-brand-gold/10">
-                      <span className="text-brand-gold text-xs">🔱</span>
                       <p className="text-xs text-white/50">
-                        items are <span className="text-white/70">not reserved</span> — checkout soon to secure yours.
+                        items are not reserved 🔱 checkout soon to secure yours.
                       </p>
                     </div>
 
@@ -678,7 +679,7 @@ export default function CartModal() {
                                   applyDiscount(discountInput.trim());
                                 }
                               }}
-                              placeholder="Enter code"
+                              placeholder="enter code"
                               enterKeyHint="done"
                               className="flex-1 rounded-lg border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
                             />
