@@ -82,7 +82,21 @@ function CartLineItem({ item }: { item: CartItem }) {
     setCart((prev) => prev ? applyLines(prev, prev.lines.filter(l => l.merchandise.id !== item.merchandise.id)) : prev);
     try {
       const result = await removeItem(null, { lineItemId: item.id, merchandiseId: item.merchandise.id });
-      if (result && typeof result === "object" && "cart" in result) setCart(result.cart);
+      if (result && typeof result === "object" && "cart" in result) {
+        setCart((prev) => {
+          const confirmed = result.cart;
+          if (!prev) return confirmed;
+          const lines = confirmed.lines.map((newLine) => {
+            if (newLine.merchandise.quantityAvailable !== null) return newLine;
+            const prevLine = prev.lines.find((l) => l.merchandise.id === newLine.merchandise.id);
+            if (typeof prevLine?.merchandise.quantityAvailable === "number") {
+              return { ...newLine, merchandise: { ...newLine.merchandise, quantityAvailable: prevLine.merchandise.quantityAvailable } };
+            }
+            return newLine;
+          });
+          return { ...confirmed, lines };
+        });
+      }
     } catch {
       setCart(snapshot);
     }
@@ -103,7 +117,24 @@ function CartLineItem({ item }: { item: CartItem }) {
     });
     try {
       const result = await updateItemQuantity(null, { lineItemId: item.id, merchandiseId: item.merchandise.id, quantity: newQty });
-      if (result && typeof result === "object" && "cart" in result) setCart(result.cart);
+      if (result && typeof result === "object" && "cart" in result) {
+        // Preserve quantityAvailable from prev state — Shopify mutation responses
+        // sometimes return null for this field even when the initial cart load had
+        // a real inventory count. Without this, the + button re-enables after each click.
+        setCart((prev) => {
+          const confirmed = result.cart;
+          if (!prev) return confirmed;
+          const lines = confirmed.lines.map((newLine) => {
+            if (newLine.merchandise.quantityAvailable !== null) return newLine;
+            const prevLine = prev.lines.find((l) => l.merchandise.id === newLine.merchandise.id);
+            if (typeof prevLine?.merchandise.quantityAvailable === "number") {
+              return { ...newLine, merchandise: { ...newLine.merchandise, quantityAvailable: prevLine.merchandise.quantityAvailable } };
+            }
+            return newLine;
+          });
+          return { ...confirmed, lines };
+        });
+      }
     } catch {
       setCart(snapshot);
     }
