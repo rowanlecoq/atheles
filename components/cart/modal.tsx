@@ -179,7 +179,7 @@ function CartLineItem({ item }: { item: CartItem }) {
     }
   };
 
-  const stockLimit = typeof item.merchandise.quantityAvailable === "number" ? item.merchandise.quantityAvailable : MAX_ITEM_QUANTITY;
+  const stockLimit = typeof item.merchandise.quantityAvailable === "number" ? item.merchandise.quantityAvailable : 1;
   const atMax = item.quantity >= Math.min(stockLimit, MAX_ITEM_QUANTITY) || item.merchandise.availableForSale === false;
 
   return (
