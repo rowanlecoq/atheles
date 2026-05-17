@@ -59,9 +59,16 @@ function applyConfirmed(prev: import("lib/shopify/types").Cart | undefined, conf
   for (const prevLine of prev.lines) {
     const confirmedLine = confirmed.lines.find((l) => l.merchandise.id === prevLine.merchandise.id);
     if (confirmedLine) {
-      // Use confirmed data (latest qty/id/price), but keep quantityAvailable when confirmed returns null.
+      // Use confirmed data for id/merchandise, but keep prev's quantity and cost.
+      // prev may have a more recent optimistic qty change from a concurrent mutation
+      // that hasn't confirmed yet — using confirmed's qty would revert it.
       const qa = confirmedLine.merchandise.quantityAvailable ?? prevLine.merchandise.quantityAvailable;
-      lines.push({ ...confirmedLine, merchandise: { ...confirmedLine.merchandise, quantityAvailable: qa } });
+      lines.push({
+        ...confirmedLine,
+        quantity: prevLine.quantity,
+        cost: prevLine.cost,
+        merchandise: { ...confirmedLine.merchandise, quantityAvailable: qa },
+      });
     } else if (prevLine.id === undefined) {
       // Not in confirmed but has no server id — it's an in-flight optimistic add; keep it.
       lines.push(prevLine);
