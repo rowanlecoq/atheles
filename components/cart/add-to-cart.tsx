@@ -5,11 +5,11 @@ import { addItem } from "components/cart/actions";
 import type { Product, ProductVariant } from "lib/shopify/types";
 import { useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState } from "react";
-import { useCart } from "./cart-context";
+import { MAX_ITEM_QUANTITY, useCart } from "./cart-context";
 
 export function AddToCart({ product }: { product: Product }) {
   const { variants, availableForSale } = product;
-  const { addCartItem, mergeConfirmAdd } = useCart();
+  const { addCartItem, mergeConfirmAdd, cart } = useCart();
   const searchParams = useSearchParams();
   const [state, setState] = useState<"idle" | "added">("idle");
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -30,8 +30,15 @@ export function AddToCart({ product }: { product: Product }) {
   const price = parseFloat(product.priceRange.maxVariantPrice.amount);
   const pointsEarned = Math.floor(price * 50);
 
+  // Stock-aware limit: compare current optimistic cart qty against quantityAvailable.
+  const currentQtyInCart = cart?.lines.find((l) => l.merchandise.id === selectedVariantId)?.quantity ?? 0;
+  const stockCap = typeof finalVariant?.quantityAvailable === "number"
+    ? Math.min(finalVariant.quantityAvailable, MAX_ITEM_QUANTITY)
+    : MAX_ITEM_QUANTITY;
+  const atStockLimit = currentQtyInCart >= stockCap;
+
   const handleAddToCart = () => {
-    if (!selectedVariantId || !finalVariant || state === "added") return;
+    if (!selectedVariantId || !finalVariant || state === "added" || atStockLimit) return;
 
     addCartItem(finalVariant, product);
     window.dispatchEvent(new Event("open-cart"));
@@ -65,7 +72,7 @@ export function AddToCart({ product }: { product: Product }) {
       <button
         type="button"
         onClick={handleAddToCart}
-        disabled={!selectedVariantId || state === "added"}
+        disabled={!selectedVariantId || state === "added" || atStockLimit}
         aria-label={selectedVariantId ? "Add to cart" : "Please select a size"}
         className={clsx(
           "group relative flex w-full items-center justify-center overflow-hidden rounded-full p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300",
@@ -81,7 +88,7 @@ export function AddToCart({ product }: { product: Product }) {
           }} />
         )}
         <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
-          {state === "added" ? "Added!" : selectedVariantId ? "Add To Cart" : "Select a Size"}
+          {state === "added" ? "Added!" : atStockLimit ? "Max Quantity" : selectedVariantId ? "Add To Cart" : "Select a Size"}
         </span>
       </button>
 

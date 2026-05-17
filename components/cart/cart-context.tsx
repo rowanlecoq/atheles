@@ -83,7 +83,16 @@ export function useCart() {
     setCart((prev) => {
       const base = prev ?? buildEmptyCart(variant.price.currencyCode);
       const existing = base.lines.find((l) => l.merchandise.id === variant.id);
-      const qty = Math.min((existing?.quantity ?? 0) + 1, MAX_ITEM_QUANTITY);
+      // Enforce stock limit immediately so rapid adds can't exceed inventory.
+      const stockLimit = typeof variant.quantityAvailable === "number"
+        ? variant.quantityAvailable
+        : typeof existing?.merchandise.quantityAvailable === "number"
+        ? existing.merchandise.quantityAvailable
+        : MAX_ITEM_QUANTITY;
+      const cap = Math.min(stockLimit, MAX_ITEM_QUANTITY);
+      const currentQty = existing?.quantity ?? 0;
+      if (currentQty >= cap) return prev; // already at limit, no-op
+      const qty = currentQty + 1;
       const newLine: CartItem = {
         id: existing?.id,
         quantity: qty,
@@ -116,19 +125,32 @@ export function useCart() {
     });
   }
 
-  // Apply a server-confirmed cart for ADD operations only.
-  // Preserves items that are still in-flight — optimistically added but not yet
-  // in the confirmed cart, identified by having no server-assigned line ID.
-  // Never use this for removes or updates; call setCart(result) directly there.
+  // Apply a server-confirmed cart after an ADD, preserving all items currently
+  // in prev (in-flight adds from concurrent operations, items from stale confirms).
+  // Uses the same "iterate prev" strategy as applyConfirmed in modal.tsx.
   function mergeConfirmAdd(confirmed: Cart) {
     setCart((prev) => {
       if (!prev) return confirmed;
-      const confirmedIds = new Set(confirmed.lines.map((l) => l.merchandise.id));
-      const inFlight = prev.lines.filter(
-        (l) => !confirmedIds.has(l.merchandise.id) && l.id === undefined,
-      );
-      if (inFlight.length === 0) return confirmed;
-      return withTotals(confirmed, [...confirmed.lines, ...inFlight]);
+      const lines: CartItem[] = [];
+      for (const prevLine of prev.lines) {
+        const confirmedLine = confirmed.lines.find((l) => l.merchandise.id === prevLine.merchandise.id);
+        if (confirmedLine) {
+          // Take id/merchandise from confirmed (real server id, updated quantityAvailable),
+          // keep qty/cost from prev (may reflect a more recent optimistic change).
+          const qa = confirmedLine.merchandise.quantityAvailable ?? prevLine.merchandise.quantityAvailable;
+          lines.push({
+            ...confirmedLine,
+            quantity: prevLine.quantity,
+            cost: prevLine.cost,
+            merchandise: { ...confirmedLine.merchandise, quantityAvailable: qa },
+          });
+        } else {
+          // Not in this confirmed cart — keep with prev data.
+          // Either an in-flight add (id=undefined) or a stale confirm that raced ahead.
+          lines.push(prevLine);
+        }
+      }
+      return withTotals(confirmed, lines);
     });
   }
 
