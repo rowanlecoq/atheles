@@ -75,10 +75,16 @@ export async function addItem(
       }
     } else {
       if (!existingCart) {
-        // No cart cookie yet — create one and set the cookie so addToCart can use it.
-        const newCart = await createCart();
-        if (newCart.id) {
-          (await cookies()).set("cartId", newCart.id);
+        // Only create a new cart when there's genuinely no cartId cookie.
+        // If getCart() returned undefined because the fetch failed (rate limit,
+        // transient error) but a cartId cookie exists, reuse that cart —
+        // creating a new one would abandon all existing items.
+        const cartId = (await cookies()).get("cartId")?.value;
+        if (!cartId) {
+          const newCart = await createCart();
+          if (newCart.id) {
+            (await cookies()).set("cartId", newCart.id);
+          }
         }
       }
       cart = await addToCart([{ merchandiseId: selectedVariantId, quantity: 1 }]);
