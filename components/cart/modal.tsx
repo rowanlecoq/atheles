@@ -78,7 +78,16 @@ function applyConfirmed(prev: import("lib/shopify/types").Cart | undefined, conf
   }
 
   const subtotal = lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
-  const discount = (confirmed.discountAllocations ?? []).reduce((s, a) => s + parseFloat(a.discountedAmount.amount), 0);
+  // Scale the confirmed total proportionally rather than subtracting raw discount
+  // allocations. confirmed's allocations may be stale (from a concurrent mutation
+  // that raced Shopify) and were computed for a different line set. Proportional
+  // scaling preserves the effective discount rate exactly for % codes and
+  // approximates well for fixed-amount codes until the next confirm.
+  const confirmedSubtotal = confirmed.lines.reduce((s, l) => s + parseFloat(l.cost.totalAmount.amount), 0);
+  const confirmedTotal = parseFloat(confirmed.cost.totalAmount.amount);
+  const total = confirmedSubtotal > 0
+    ? Math.max(0, subtotal * (confirmedTotal / confirmedSubtotal))
+    : subtotal;
   const cc = confirmed.cost.totalAmount.currencyCode;
   return {
     ...confirmed,
@@ -87,7 +96,7 @@ function applyConfirmed(prev: import("lib/shopify/types").Cart | undefined, conf
     cost: {
       ...confirmed.cost,
       subtotalAmount: { amount: subtotal.toFixed(2), currencyCode: cc },
-      totalAmount: { amount: Math.max(0, subtotal - discount).toFixed(2), currencyCode: cc },
+      totalAmount: { amount: total.toFixed(2), currencyCode: cc },
     },
   };
 }
@@ -474,7 +483,7 @@ export default function CartModal() {
         setDiscountError("invalid or expired code.");
         removeDiscountCode().catch(() => {});
       } else if (result.cart) {
-        setCart(result.cart);
+        setCart((prev) => applyConfirmed(prev, result.cart!));
         setDiscountConfirmed(true);
       }
     } catch {
@@ -498,7 +507,7 @@ export default function CartModal() {
       });
     }
     const confirmed = await removeDiscountCode().catch(() => null);
-    if (confirmed) setCart(confirmed);
+    if (confirmed) setCart((prev) => applyConfirmed(prev, confirmed));
   };
 
   const cartHandles = new Set(cart?.lines.map((l) => l.merchandise.product.handle));
@@ -545,7 +554,7 @@ export default function CartModal() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-gold/30">
+            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20">
 
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
