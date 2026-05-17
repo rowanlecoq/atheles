@@ -93,7 +93,9 @@ export function useCart() {
           id: variant.id,
           title: variant.title,
           availableForSale: variant.availableForSale,
-          quantityAvailable: existing?.merchandise.quantityAvailable,
+          quantityAvailable: typeof variant.quantityAvailable === "number"
+            ? variant.quantityAvailable
+            : existing?.merchandise.quantityAvailable,
           selectedOptions: variant.selectedOptions,
           product: {
             id: product.id,
