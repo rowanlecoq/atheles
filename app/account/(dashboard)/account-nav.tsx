@@ -5,7 +5,6 @@ import { usePathname } from "next/navigation";
 
 const accountNav = [
   { title: "orders", path: "/account" },
-  { title: "addresses", path: "/account/addresses" },
   { title: "help & faq", path: "/account/order-help" },
 ];
 
