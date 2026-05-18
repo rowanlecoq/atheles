@@ -3,6 +3,7 @@
 import { PlusIcon, XMarkIcon, PencilIcon, CheckIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { AddressSearch } from "components/address-search";
+import { CountrySelect } from "components/country-select";
 
 type Address = {
   id: string;
@@ -94,7 +95,7 @@ function AddressForm({ initial, onSave, onCancel, saving }: {
         </div>
         <div>
           <label className={labelCls}>country</label>
-          <input className={inputCls} autoComplete="country-name" placeholder="country" value={form.country} onChange={set("country")} />
+          <CountrySelect value={form.country} onChange={(v) => setForm((p) => ({ ...p, country: v }))} inputClassName={inputCls} />
         </div>
       </div>
       <div className="flex gap-2 pt-1">

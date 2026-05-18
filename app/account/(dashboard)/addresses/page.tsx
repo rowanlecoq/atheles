@@ -4,6 +4,7 @@ import { PlusIcon, XMarkIcon, PencilIcon, CheckIcon, MapPinIcon } from "@heroico
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
 import { AddressSearch } from "components/address-search";
+import { CountrySelect } from "components/country-select";
 
 type Address = {
   id: string;
@@ -89,7 +90,7 @@ function AddressForm({
         </div>
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">Country</label>
-          <input className="address-input" placeholder="Country" autoComplete="country-name" value={form.country ?? ""} onChange={set("country")} />
+          <CountrySelect value={form.country ?? ""} onChange={(v) => setForm((p) => ({ ...p, country: v }))} inputClassName="address-input" />
         </div>
       </div>
       <div className="space-y-1">
