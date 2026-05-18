@@ -251,7 +251,6 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // Between ocean and sunset: 7 beams, 3.5°/step angle, stripH 28+(i%3)*10, 14% spacing
     for (let i = 0; i < 7; i++) {
       const angle   = (-10 + i * 3.5) * (Math.PI / 180);
       const stripH  = 28 + (i % 3) * 10;
@@ -263,12 +262,25 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
     }
+    // bottom-left corner fills — angles match main bottom rays (~+9°–+11°)
+    const blFill = [
+      [0.10, 0.80,  9, 22, 0.045, "210,178,102"],
+      [0.06, 0.90, 11, 26, 0.050, "152,118,44"],
+      [0.15, 0.96, 11, 18, 0.038, "232,200,124"],
+    ] as const;
+    for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
+      const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
+      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        hasFilter);
+    }
   }
 
   if (theme === "midnight") {
-    // 10 beams, cy extends above and below canvas so tails fill all corners naturally
+    // All-positive angles (+8°→+20°) keep the diagonal feel; extended cy fills corners via beam tails
     for (let i = 0; i < 10; i++) {
-      const angle   = (-9 + i * 2.5) * (Math.PI / 180);
+      const angle   = (8 + i * 1.2) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
       const opacity = 0.085 + (i % 3) * 0.022;
       const cy = h * (-0.15 + i * 0.135) + Math.sin(time * 0.18 + i * 1.6) * 12;
