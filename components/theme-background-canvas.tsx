@@ -238,12 +238,13 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // Small consistent angle step so beams tile evenly across the full canvas
+    // Fixed 15° diagonal. cy spans -0.2h → 1.15h so off-bottom beams'
+    // tails sweep into the bottom-left corner, giving full canvas coverage.
     for (let i = 0; i < 10; i++) {
-      const angle   = (-6 + i * 2.0) * (Math.PI / 180);
+      const angle   = 15 * (Math.PI / 180);
       const stripH  = 14 + (i % 3) * 5;
       const opacity = 0.13 + (i % 3) * 0.026;
-      const cy = h * (0.03 + i * 0.09) + Math.sin(time * 0.18 + i * 1.6) * 12;
+      const cy = h * (-0.20 + i * 0.15) + Math.sin(time * 0.18 + i * 1.6) * 12;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
