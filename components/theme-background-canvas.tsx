@@ -64,8 +64,8 @@ type RLayer = readonly [number,number,number,number,number,number,number,number,
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
   gold: { base: '#0d0900', radial: [
-    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.11, 0.88],  // wide flat elliptical ambient
-    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.20, 0.72],  // brand-gold (#ccb173) core
+    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.15, 0.88],  // wide flat elliptical ambient
+    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.26, 0.72],  // brand-gold (#ccb173) core
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.22, 1.00, 0.40,  20, 100, 200, 0.14, 0.48],
@@ -84,11 +84,11 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.28, 0.90, 0.62, 0.48,  10, 142,  82, 0.22, 0.58],  // lower-left dark teal
   ]},
   midnight: { base: '#03000a', radial: [
-    [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.22, 0.72],  // top-left node
-    [0.35, 0.30, 0.72, 0.68, 108,  64, 245, 0.20, 0.75],  // upper-mid node
-    [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.25, 0.75],  // center node (brightest)
-    [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.21, 0.72],  // lower-right node
-    [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.17, 0.70],  // lower-left ambient
+    [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.15, 0.72],  // top-left node
+    [0.35, 0.30, 0.72, 0.68, 108,  64, 245, 0.13, 0.75],  // upper-mid node
+    [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.17, 0.75],  // center node (brightest)
+    [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.14, 0.72],  // lower-right node
+    [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.11, 0.70],  // lower-left ambient
   ]},
   sunset: { base: '#0e0206', radial: [
     [0.50, 1.18, 1.10, 0.40, 255, 140,  20, 0.22, 0.48],  // orange bottom horizon
@@ -254,19 +254,19 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     for (let i = 0; i < 7; i++) {
       const angle   = (-10 + i * 3.5) * (Math.PI / 180);
       const stripH  = 28 + (i % 3) * 10;
-      const opacity = 0.060 + (i % 3) * 0.020;
+      const opacity = 0.082 + (i % 3) * 0.026;
       const cy = h * (0.05 + i * 0.14) + Math.sin(time * 0.22 + i * 1.4) * 14;
-      const rgb = i % 3 === 0 ? "152,118,44" : i % 3 === 1 ? "210,178,102" : "232,200,124";
+      const rgb = i % 3 === 0 ? "192,158,78" : i % 3 === 1 ? "218,186,108" : "242,212,138";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    // bottom-left corner fills — angles match main bottom rays (~+9°–+11°)
+    // bottom-left corner fills
     const blFill = [
-      [0.10, 0.80,  9, 22, 0.045, "210,178,102"],
-      [0.06, 0.90, 11, 26, 0.050, "152,118,44"],
-      [0.15, 0.96, 11, 18, 0.038, "232,200,124"],
+      [0.10, 0.80,  9, 22, 0.065, "218,186,108"],
+      [0.06, 0.90, 11, 26, 0.070, "192,158,78"],
+      [0.15, 0.96, 11, 18, 0.055, "242,212,138"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
       const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
@@ -290,15 +290,15 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    // Corner fills — same diagonal angle (~13°), anchored at each corner so tails reach in
+    // Corner fills — anchored right at canvas edges so they actually reach the corners
     const cornerFills = [
-      [0.05, -0.04, 13, 20, 0.052, "108,65,242"],   // top-left
-      [0.95, -0.04, 13, 20, 0.052, "88,52,228"],    // top-right
-      [0.05,  1.04, 13, 20, 0.052, "130,85,255"],   // bottom-left
-      [0.95,  1.04, 13, 20, 0.052, "108,65,242"],   // bottom-right
+      [0.05, 0.00, 13, 38, 0.095, "108,65,242"],   // top-left
+      [0.95, 0.00, 13, 38, 0.095, "88,52,228"],    // top-right
+      [0.05, 1.00, 13, 38, 0.095, "130,85,255"],   // bottom-left
+      [0.95, 1.00, 13, 38, 0.095, "108,65,242"],   // bottom-right
     ] as const;
     for (const [cx, cyF, deg, sH, op, rgb] of cornerFills) {
-      const cy = h * cyF + Math.sin(time * 0.18 + cx * 8) * 6;
+      const cy = h * cyF + Math.sin(time * 0.18 + cx * 8) * 5;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
