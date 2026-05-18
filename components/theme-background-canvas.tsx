@@ -63,9 +63,9 @@ type ThemeKey = keyof typeof THEMES;
 type RLayer = readonly [number,number,number,number,number,number,number,number,number];
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
-  gold: { base: '#0d0800', radial: [
-    [0.50, 0.50, 1.20, 1.00, 218, 168,  42, 0.32, 0.82],  // wide ambient wash
-    [0.50, 0.50, 0.70, 0.65, 242, 198,  58, 0.58, 0.64],  // bright golden core
+  gold: { base: '#0d0900', radial: [
+    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.26, 0.88],  // wide flat elliptical ambient
+    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.48, 0.72],  // brand-gold (#ccb173) core
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.00, 1.00, 0.50,  20, 100, 200, 0.40, 0.60],
@@ -82,11 +82,11 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.18, 0.65, 0.82, 0.68,  16, 210, 140, 0.45, 0.62],  // left green
   ]},
   midnight: { base: '#03000a', radial: [
-    [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.58, 0.72],  // top-left node
-    [0.35, 0.30, 0.72, 0.68, 108,  64, 245, 0.55, 0.75],  // upper-mid node
-    [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.60, 0.75],  // center node (brightest)
-    [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.55, 0.72],  // lower-right node
-    [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.48, 0.70],  // lower-left ambient
+    [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.33, 0.72],  // top-left node
+    [0.35, 0.30, 0.72, 0.68, 108,  64, 245, 0.30, 0.75],  // upper-mid node
+    [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.36, 0.75],  // center node (brightest)
+    [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.32, 0.72],  // lower-right node
+    [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.26, 0.70],  // lower-left ambient
   ]},
   sunset: { base: '#0e0206', radial: [
     [0.50, 1.00, 1.00, 0.50, 249, 115,  22, 0.45, 0.60],  // orange bottom
