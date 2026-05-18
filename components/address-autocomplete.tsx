@@ -46,9 +46,11 @@ export function AddressAutocomplete({
         const place = ac.getPlace();
         if (!place.address_components) return;
         const get = (type: string) =>
-          place.address_components!.find((c) => c.types.includes(type))?.long_name ?? "";
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (place.address_components as any[])!.find((c: any) => c.types.includes(type))?.long_name ?? "";
         const getShort = (type: string) =>
-          place.address_components!.find((c) => c.types.includes(type))?.short_name ?? "";
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          (place.address_components as any[])!.find((c: any) => c.types.includes(type))?.short_name ?? "";
         const address1 = [get("street_number"), get("route")].filter(Boolean).join(" ");
         onPlaceSelect({
           address1,
