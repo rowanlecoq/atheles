@@ -64,8 +64,8 @@ type RLayer = readonly [number,number,number,number,number,number,number,number,
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
   gold: { base: '#0d0900', radial: [
-    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.15, 0.88],  // wide flat elliptical ambient
-    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.26, 0.72],  // brand-gold (#ccb173) core
+    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.12, 0.88],  // wide flat elliptical ambient
+    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.19, 0.72],  // brand-gold (#ccb173) core
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.22, 1.00, 0.40,  20, 100, 200, 0.14, 0.48],
@@ -256,7 +256,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       const stripH  = 28 + (i % 3) * 10;
       const opacity = 0.095 + (i % 3) * 0.030;
       const cy = h * (0.05 + i * 0.14) + Math.sin(time * 0.22 + i * 1.4) * 14;
-      const rgb = i % 3 === 0 ? "228,200,110" : i % 3 === 1 ? "252,230,145" : "255,246,178";
+      const rgb = i % 3 === 0 ? "238,194,88" : i % 3 === 1 ? "252,216,112" : "255,232,142";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
@@ -264,9 +264,9 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     }
     // bottom-left corner fills
     const blFill = [
-      [0.10, 0.80,  9, 22, 0.080, "252,230,145"],
-      [0.06, 0.90, 11, 26, 0.085, "228,200,110"],
-      [0.15, 0.96, 11, 18, 0.068, "255,246,178"],
+      [0.10, 0.80,  9, 22, 0.080, "252,216,112"],
+      [0.06, 0.90, 11, 26, 0.085, "238,194,88"],
+      [0.15, 0.96, 11, 18, 0.068, "255,232,142"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
       const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
@@ -278,28 +278,27 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // 12 beams, stripH 40-70px so effective coverage (stripH+40px blur) always exceeds 0.09h spacing
-    for (let i = 0; i < 12; i++) {
-      const angle   = (8 + i * 1.0) * (Math.PI / 180);
-      const stripH  = 40 + (i % 4) * 10;
+    // 13 beams at 0.08h spacing — stripH 28-58px, effective 68-98px always > 61px spacing → no gaps
+    for (let i = 0; i < 13; i++) {
+      const angle   = (8 + i * 0.9) * (Math.PI / 180);
+      const stripH  = 28 + (i % 4) * 10;
       const opacity = 0.085 + (i % 3) * 0.022;
-      const cy = h * (-0.10 + i * 0.09) + Math.sin(time * 0.18 + i * 1.6) * 5;
+      const cy = h * (-0.10 + i * 0.08) + Math.sin(time * 0.18 + i * 1.6) * 4;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    // Corner fills — large stripH + high opacity so they're actually visible
+    // Corner fills anchored at canvas edges, same diagonal angle
     const cornerFills = [
-      [0.05, 0.00, 13, 60, 0.130, "108,65,242"],   // top-left
-      [0.95, 0.00, 13, 60, 0.130, "88,52,228"],    // top-right
-      [0.05, 1.00, 13, 60, 0.130, "130,85,255"],   // bottom-left
-      [0.95, 1.00, 13, 60, 0.130, "108,65,242"],   // bottom-right
+      [0.05, 0.00, 13, 48, 0.120, "108,65,242"],
+      [0.95, 0.00, 13, 48, 0.120, "88,52,228"],
+      [0.05, 1.00, 13, 48, 0.120, "130,85,255"],
+      [0.95, 1.00, 13, 48, 0.120, "108,65,242"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, rgb] of cornerFills) {
-      const cy = h * cyF;
-      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
+      drawBeam(ctx, w, cx, h * cyF, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
