@@ -3,7 +3,6 @@
 import { PlusIcon, XMarkIcon, PencilIcon, CheckIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
-import { AddressAutocomplete } from "components/address-autocomplete";
 
 type Address = {
   id: string;
@@ -45,59 +44,44 @@ function AddressForm({
       <div className="grid grid-cols-2 gap-2.5">
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">First name</label>
-          <input className="address-input" placeholder="First" value={form.firstName ?? ""} onChange={set("firstName")} />
+          <input className="address-input" placeholder="First" autoComplete="given-name" value={form.firstName ?? ""} onChange={set("firstName")} />
         </div>
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">Last name</label>
-          <input className="address-input" placeholder="Last" value={form.lastName ?? ""} onChange={set("lastName")} />
+          <input className="address-input" placeholder="Last" autoComplete="family-name" value={form.lastName ?? ""} onChange={set("lastName")} />
         </div>
       </div>
       <div className="space-y-1">
         <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">Address</label>
-        <AddressAutocomplete
-          className="address-input"
-          placeholder="Start typing your address…"
-          value={form.address1 ?? ""}
-          onChange={(v) => setForm((p) => ({ ...p, address1: v }))}
-          onPlaceSelect={(place) =>
-            setForm((p) => ({
-              ...p,
-              address1: place.address1 || p.address1,
-              city: place.city || p.city,
-              province: place.province || p.province,
-              zip: place.zip || p.zip,
-              country: place.country || p.country,
-            }))
-          }
-        />
+        <input className="address-input" placeholder="Street address" autoComplete="address-line1" value={form.address1 ?? ""} onChange={set("address1")} />
       </div>
       <div className="space-y-1">
         <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">Apt / Unit (optional)</label>
-        <input className="address-input" placeholder="Apartment, suite, unit…" value={form.address2 ?? ""} onChange={set("address2")} />
+        <input className="address-input" placeholder="Apartment, suite, unit…" autoComplete="address-line2" value={form.address2 ?? ""} onChange={set("address2")} />
       </div>
       <div className="grid grid-cols-2 gap-2.5">
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">City</label>
-          <input className="address-input" placeholder="City" value={form.city ?? ""} onChange={set("city")} />
+          <input className="address-input" placeholder="City" autoComplete="address-level2" value={form.city ?? ""} onChange={set("city")} />
         </div>
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">State / Province</label>
-          <input className="address-input" placeholder="State" value={form.province ?? ""} onChange={set("province")} />
+          <input className="address-input" placeholder="State" autoComplete="address-level1" value={form.province ?? ""} onChange={set("province")} />
         </div>
       </div>
       <div className="grid grid-cols-2 gap-2.5">
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">ZIP / Postal</label>
-          <input className="address-input" placeholder="ZIP" value={form.zip ?? ""} onChange={set("zip")} />
+          <input className="address-input" placeholder="ZIP" autoComplete="postal-code" value={form.zip ?? ""} onChange={set("zip")} />
         </div>
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">Country</label>
-          <input className="address-input" placeholder="Country" value={form.country ?? ""} onChange={set("country")} />
+          <input className="address-input" placeholder="Country" autoComplete="country-name" value={form.country ?? ""} onChange={set("country")} />
         </div>
       </div>
       <div className="space-y-1">
         <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">Phone (optional)</label>
-        <input className="address-input" placeholder="+1 (555) 000-0000" value={form.phone ?? ""} onChange={set("phone")} />
+        <input className="address-input" placeholder="+1 (555) 000-0000" autoComplete="tel" value={form.phone ?? ""} onChange={set("phone")} />
       </div>
       <div className="flex gap-2 pt-2">
         <button
