@@ -374,6 +374,21 @@ export default function CartModal() {
     return () => window.removeEventListener("open-cart", handler);
   }, [openCart]);
 
+  // Keep favorites carousel in sync when user adds/removes favorites elsewhere
+  useEffect(() => {
+    const handler = () => {
+      try {
+        const handles: string[] = JSON.parse(localStorage.getItem("atheles-favorites") || "[]");
+        const handleSet = new Set(handles);
+        const updated = (favCacheRef.current ?? []).filter((p) => handleSet.has(p.handle));
+        favCacheRef.current = updated;
+        setFavProducts(updated);
+      } catch {}
+    };
+    window.addEventListener("favorites-changed", handler);
+    return () => window.removeEventListener("favorites-changed", handler);
+  }, []);
+
   // Clear per-user cached data when account switches
   useEffect(() => {
     const handler = () => {
