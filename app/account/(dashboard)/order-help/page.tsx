@@ -9,26 +9,29 @@ export default function OrderHelpPage() {
         help
       </h2>
 
-      <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
-        need help with an order?
-      </h3>
-      <div className="mb-6 space-y-3">
-        <HelpItem
-          question="problem with your order?"
-          answer="if something arrived damaged, incorrect, or didn't show up — reach out to us and we'll sort it out."
-          link={{ href: "/contact", label: "contact us" }}
-        />
-        <HelpItem
-          question="returns & exchanges"
-          answer="check our returns policy for details on how to return or exchange an item."
-          link={{ href: "/returns", label: "view policy" }}
-        />
+      <div className="mb-6">
+        <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
+          need help with an order?
+        </h3>
+        <div className="space-y-3">
+          <HelpItem
+            question="problem with your order?"
+            answer="if something arrived damaged, incorrect, or didn't show up — reach out to us and we'll sort it out."
+            link={{ href: "/contact", label: "contact us" }}
+          />
+          <HelpItem
+            question="returns & exchanges"
+            answer="check our returns policy for details on how to return or exchange an item."
+            link={{ href: "/returns", label: "view policy" }}
+          />
+        </div>
       </div>
 
-      <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
-        frequently asked questions
-      </h3>
-      <div className="space-y-3">
+      <div>
+        <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
+          frequently asked questions
+        </h3>
+        <div className="space-y-3">
         <HelpItem
           question="where is my order?"
           answer="once your order ships, you'll receive a tracking email. delivery typically takes 5–10 business days for standard shipping. if it's been longer than expected, reach out to us."
@@ -59,6 +62,7 @@ export default function OrderHelpPage() {
           answer="we're here to help. send us a message and we'll get back to you as soon as possible."
           link={{ href: "/contact", label: "contact us" }}
         />
+        </div>
       </div>
       </FadeIn>
     </div>

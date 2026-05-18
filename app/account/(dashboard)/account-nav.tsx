@@ -23,7 +23,7 @@ export function AccountNav() {
                 className={`block rounded-lg px-4 py-3 text-sm transition-colors ${
                   active
                     ? "bg-brand-gold/10 text-brand-gold border border-brand-gold/20"
-                    : "bg-brand-dark border border-white/[0.08] text-brand-grey hover:text-white"
+                    : "bg-brand-dark border border-white/[0.08] text-brand-grey hover:text-brand-gold"
                 }`}
               >
                 {item.title}
