@@ -64,8 +64,8 @@ type RLayer = readonly [number,number,number,number,number,number,number,number,
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
   gold: { base: '#0d0900', radial: [
-    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.26, 0.88],  // wide flat elliptical ambient
-    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.48, 0.72],  // brand-gold (#ccb173) core
+    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.18, 0.88],  // wide flat elliptical ambient
+    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.34, 0.72],  // brand-gold (#ccb173) core
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.00, 1.00, 0.50,  20, 100, 200, 0.40, 0.60],
@@ -82,11 +82,11 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.18, 0.65, 0.82, 0.68,  16, 210, 140, 0.45, 0.62],  // left green
   ]},
   midnight: { base: '#03000a', radial: [
-    [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.33, 0.72],  // top-left node
-    [0.35, 0.30, 0.72, 0.68, 108,  64, 245, 0.30, 0.75],  // upper-mid node
-    [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.36, 0.75],  // center node (brightest)
-    [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.32, 0.72],  // lower-right node
-    [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.26, 0.70],  // lower-left ambient
+    [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.22, 0.72],  // top-left node
+    [0.35, 0.30, 0.72, 0.68, 108,  64, 245, 0.20, 0.75],  // upper-mid node
+    [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.25, 0.75],  // center node (brightest)
+    [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.21, 0.72],  // lower-right node
+    [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.17, 0.70],  // lower-left ambient
   ]},
   sunset: { base: '#0e0206', radial: [
     [0.50, 1.00, 1.00, 0.50, 249, 115,  22, 0.45, 0.60],  // orange bottom
@@ -223,13 +223,13 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // Sunset-style: cycling warm gold shades, progressive stripH, wider angle spread
-    for (let i = 0; i < 6; i++) {
-      const angle   = (-12 + i * 4.5) * (Math.PI / 180);
-      const stripH  = 28 + i * 7;
-      const opacity = 0.055 + i * 0.012;
-      const cy = h * (0.06 + i * 0.16) + Math.sin(time * 0.22 + i * 1.3) * 14;
-      const rgb = i % 3 === 0 ? "155,118,45" : i % 3 === 1 ? "204,172,100" : "232,198,122";
+    // Between ocean and sunset: 7 beams, 3.5°/step angle, stripH 28+(i%3)*10, 14% spacing
+    for (let i = 0; i < 7; i++) {
+      const angle   = (-10 + i * 3.5) * (Math.PI / 180);
+      const stripH  = 28 + (i % 3) * 10;
+      const opacity = 0.060 + (i % 3) * 0.020;
+      const cy = h * (0.05 + i * 0.14) + Math.sin(time * 0.22 + i * 1.4) * 14;
+      const rgb = i % 3 === 0 ? "152,118,44" : i % 3 === 1 ? "210,178,102" : "232,200,124";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
@@ -238,12 +238,12 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // Slightly diagonal: angle range shifted +8° from ocean so rays lean right
-    for (let i = 0; i < 11; i++) {
-      const angle   = (-2 + i * 2.2) * (Math.PI / 180);
+    // More spread: wider angle step (3.2°) and wider vertical spacing (9%)
+    for (let i = 0; i < 10; i++) {
+      const angle   = (-4 + i * 3.2) * (Math.PI / 180);
       const stripH  = 14 + (i % 3) * 5;
       const opacity = 0.13 + (i % 3) * 0.026;
-      const cy = h * (0.03 + i * 0.08) + Math.sin(time * 0.18 + i * 1.6) * 12;
+      const cy = h * (0.03 + i * 0.09) + Math.sin(time * 0.18 + i * 1.6) * 12;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
