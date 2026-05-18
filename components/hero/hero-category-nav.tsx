@@ -57,7 +57,9 @@ export function HeroCategoryNav() {
       <nav className="py-4">
         <div className="flex items-center justify-center gap-6 lg:gap-8">
           {categories.map((cat, i) => {
-            const hasDropdown = cat.subcategories.length > 0 || cat.comingSoon;
+            // TODO: restore coming-soon items (Accessories, Womens) when ready to launch
+            if (cat.comingSoon) return null;
+            const hasDropdown = cat.subcategories.length > 0;
             return (
               <div
                 key={cat.title}
@@ -65,14 +67,7 @@ export function HeroCategoryNav() {
                 onMouseEnter={hasDropdown ? () => handleEnter(i) : undefined}
                 onMouseLeave={hasDropdown ? handleLeave : undefined}
               >
-                {cat.comingSoon ? (
-                  <span
-                    className="relative block cursor-default py-1 text-sm uppercase tracking-[0.2em] text-brand-pale-gold/50"
-                    title="Coming Soon"
-                  >
-                    {cat.title}
-                  </span>
-                ) : (
+                {(
                   <Link
                     href={cat.href}
                     className={`group relative block py-1 text-sm uppercase tracking-[0.2em] transition-colors duration-200 ${
@@ -95,9 +90,9 @@ export function HeroCategoryNav() {
         </div>
       </nav>
 
-      {/* Dropdown panels */}
+      {/* Dropdown panels — coming-soon categories excluded until launch */}
       {categories
-        .filter((c) => c.subcategories.length > 0 || c.comingSoon)
+        .filter((c) => c.subcategories.length > 0 && !c.comingSoon)
         .map((cat) => {
           const i = categories.indexOf(cat);
           return (
@@ -112,23 +107,17 @@ export function HeroCategoryNav() {
               onMouseLeave={handleLeave}
             >
               <div className="mx-auto w-fit px-8 py-5">
-                {cat.comingSoon ? (
-                  <p className="text-center font-heading text-sm italic tracking-wide text-brand-gold">
-                    Coming Soon
-                  </p>
-                ) : (
-                  <div className="flex items-center justify-center gap-8">
-                    {cat.subcategories.map((sub) => (
-                      <Link
-                        key={sub.title}
-                        href={sub.href}
-                        className="text-center text-sm uppercase tracking-wider text-brand-grey transition-colors duration-200 hover:text-brand-gold"
-                      >
-                        {sub.title}
-                      </Link>
-                    ))}
-                  </div>
-                )}
+                <div className="flex items-center justify-center gap-8">
+                  {cat.subcategories.map((sub) => (
+                    <Link
+                      key={sub.title}
+                      href={sub.href}
+                      className="text-center text-sm uppercase tracking-wider text-brand-grey transition-colors duration-200 hover:text-brand-gold"
+                    >
+                      {sub.title}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
           );
