@@ -428,7 +428,7 @@ export default function CartModal() {
       .then((d) => {
         if (!d?.addresses?.length) { setDeliveryAddress(null); return; }
         const def = d.addresses.find((a: { id: string }) => a.id === d.defaultAddressId) ?? d.addresses[0];
-        const parts = [def.address1, def.city, def.province].filter(Boolean);
+        const parts = [def.address1, def.zip].filter(Boolean);
         const addr = parts.join(", ");
         setDeliveryAddress(addr);
         try { localStorage.setItem("atheles-delivery-address", addr); } catch {}
@@ -607,7 +607,7 @@ export default function CartModal() {
                 <Link
                   href="/profile"
                   onClick={closeCart}
-                  className="flex items-center gap-2 border-b border-white/5 px-5 py-2.5 transition-colors hover:bg-white/[0.02]"
+                  className="group flex items-center gap-2 border-b border-white/5 px-5 py-2.5 transition-colors hover:bg-white/[0.02]"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 flex-none text-brand-gold/60">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
@@ -615,7 +615,7 @@ export default function CartModal() {
                   <span className="min-w-0 flex-1 truncate text-xs text-brand-grey/60">
                     delivering to <span className="text-brand-pale-gold">{deliveryAddress}</span>
                   </span>
-                  <span className="flex-none whitespace-nowrap text-[10px] text-brand-grey/30">change</span>
+                  <span className="flex-none whitespace-nowrap text-[10px] text-brand-grey/40 transition-colors group-hover:text-brand-gold">change</span>
                 </Link>
               )}
 
