@@ -223,23 +223,24 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // Thin strips so the dark gaps between rays stay visible after blur
-    for (let i = 0; i < 7; i++) {
-      const angle   = (-10 + i * 3) * (Math.PI / 180);
-      const stripH  = 14 + (i % 3) * 5;
-      const opacity = 0.13 + (i % 3) * 0.026;
-      const cy = h * (0.05 + i * 0.13) + Math.sin(time * 0.22 + i * 1.4) * 14;
+    // Sunset-style: cycling warm gold shades, progressive stripH, wider angle spread
+    for (let i = 0; i < 6; i++) {
+      const angle   = (-12 + i * 4.5) * (Math.PI / 180);
+      const stripH  = 28 + i * 7;
+      const opacity = 0.055 + i * 0.012;
+      const cy = h * (0.06 + i * 0.16) + Math.sin(time * 0.22 + i * 1.3) * 14;
+      const rgb = i % 3 === 0 ? "155,118,45" : i % 3 === 1 ? "204,172,100" : "232,198,122";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
-        (o) => `rgba(155,122,52,${o.toFixed(4)})`,
-        (o) => `rgba(218,185,108,${o.toFixed(4)})`,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
     }
   }
 
   if (theme === "midnight") {
-    // Same gentle progressive angle as ocean/tropical — more rays at tighter spacing
+    // Slightly diagonal: angle range shifted +8° from ocean so rays lean right
     for (let i = 0; i < 11; i++) {
-      const angle   = (-10 + i * 2.2) * (Math.PI / 180);
+      const angle   = (-2 + i * 2.2) * (Math.PI / 180);
       const stripH  = 14 + (i % 3) * 5;
       const opacity = 0.13 + (i % 3) * 0.026;
       const cy = h * (0.03 + i * 0.08) + Math.sin(time * 0.18 + i * 1.6) * 12;
