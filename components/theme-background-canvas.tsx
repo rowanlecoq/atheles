@@ -251,13 +251,13 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // Same cy spacing as ocean (0.12h, 8 beams → last at 0.89h) so fills sit cleanly below.
-    // Edge/mid use different RGB so each beam has a bright gold core over an amber edge.
-    for (let i = 0; i < 8; i++) {
-      const angle   = (-10 + i * 3) * (Math.PI / 180);
+    // 7 beams, range shifted right vs ocean (-4°→+14°) for a warm angled-sun feel.
+    // Amber edge → bright yellow-gold core gives each beam visible depth.
+    for (let i = 0; i < 7; i++) {
+      const angle   = (-4 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
       const opacity = 0.062 + (i % 3) * 0.020;
-      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.30 + i * 1.4) * 18;
+      const cy = h * (0.06 + i * 0.14) + Math.sin(time * 0.30 + i * 1.4) * 18;
       const eRgb = i % 3 === 0 ? "195,148,40" : i % 3 === 1 ? "210,162,52" : "185,140,38";
       const mRgb = i % 3 === 0 ? "255,220,100" : i % 3 === 1 ? "255,235,130" : "248,212,90";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
@@ -265,13 +265,14 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
+    // last main beam ends at ~0.90h; fills sit cleanly below
     const goldFill = [
-      [0.10, 0.91,  8, 16, 0.038, "255,220,100", "195,148,40"],
-      [0.06, 0.95, 10, 20, 0.042, "248,212,90",  "185,140,38"],
-      [0.15, 0.98, 11, 14, 0.032, "255,235,130", "210,162,52"],
+      [0.10, 0.92,  9, 18, 0.038, "255,220,100", "195,148,40"],
+      [0.06, 0.96, 11, 22, 0.042, "248,212,90",  "185,140,38"],
+      [0.14, 0.99, 10, 15, 0.032, "255,235,130", "210,162,52"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of goldFill) {
-      const cy = h * cyF + Math.sin(time * 0.30 + cx * 10) * 8;
+      const cy = h * cyF + Math.sin(time * 0.30 + cx * 10) * 6;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
@@ -280,11 +281,11 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // Diagonal 6°→22° with varied angles for shading. 4-color rotation adds a pale
-    // lavender-white (220,185,255) as the extra unique midnight accent.
-    // Same 0.12h cy spacing as ocean keeps fills cleanly below main beams.
+    // Range -3°→+21° (step 3.4°) mirrors ocean's 21° spread but shifted toward
+    // positive so beams feel diagonal. The first beam's negative angle naturally
+    // sweeps left at the bottom, filling the bottom-left corner without separate hacks.
     for (let i = 0; i < 8; i++) {
-      const angle   = (6 + i * 2.3) * (Math.PI / 180);
+      const angle   = (-3 + i * 3.4) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
       const opacity = 0.072 + (i % 4) * 0.018;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.22 + i * 1.6) * 10;
@@ -295,13 +296,14 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
+    // last main beam at ~0.89h; fills below
     const midFill = [
-      [0.10, 0.91, 15, 18, 0.040, "190,155,255", "110,70,230"],
-      [0.06, 0.95, 17, 22, 0.044, "175,140,255", "100,60,220"],
-      [0.15, 0.98, 19, 16, 0.034, "220,185,255",  "80,50,200"],
+      [0.08, 0.92, 16, 20, 0.044, "190,155,255", "110,70,230"],
+      [0.03, 0.96, 18, 24, 0.048, "175,140,255", "100,60,220"],
+      [0.14, 0.99, 14, 16, 0.036, "220,185,255",  "80,50,200"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of midFill) {
-      const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
+      const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 6;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
