@@ -75,11 +75,13 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.50, 0.35, 0.70, 0.60,  30, 180, 220, 0.30, 0.60], // cx centred (was 0.30)
   ]},
   tropical: { base: '#020d06', radial: [
-    [0.50, 1.00, 1.20, 0.55,  16, 210, 140, 0.50, 0.65],  // bottom wide green wash
+    [0.50, 0.85, 1.20, 0.50,  16, 210, 140, 0.30, 0.65],  // bottom green wash — softer, off-edge
     [0.78, 0.72, 0.72, 0.55, 255, 190,  50, 0.40, 0.58],  // lower-right amber haze
     [0.50, 0.48, 0.68, 0.68,  20, 220, 175, 0.38, 0.58],  // centre teal
     [0.48, 0.22, 0.68, 0.72, 255, 170,  11, 0.42, 0.62],  // upper-centre amber
     [0.18, 0.65, 0.82, 0.68,  16, 210, 140, 0.45, 0.62],  // left green
+    [0.72, 0.88, 0.65, 0.52, 255, 162,  18, 0.38, 0.60],  // lower-right amber accent
+    [0.28, 0.90, 0.62, 0.48,  20, 200, 145, 0.28, 0.62],  // lower-left soft teal
   ]},
   midnight: { base: '#03000a', radial: [
     [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.22, 0.72],  // top-left node
