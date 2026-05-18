@@ -348,6 +348,7 @@ export default function CartModal() {
   const [discountConfirmed, setDiscountConfirmed] = useState(false);
   const [freeShipping, setFreeShipping] = useState(false);
   const [tierName, setTierName] = useState<string | null>(null);
+  const [deliveryAddress, setDeliveryAddress] = useState<string | null>(null);
   const favCacheRef = useRef<FavProduct[] | null>(null);
   const closedAtRef = useRef(0);
 
@@ -411,6 +412,21 @@ export default function CartModal() {
     fetch("/api/auth/session")
       .then((r) => r.ok ? r.json() : null)
       .then((d) => { if (d?.user) apply(d.user.totalSpent, d.user.isAthlete); })
+      .catch(() => {});
+  }, [isOpen]);
+
+  // Load default delivery address for logged-in users
+  useEffect(() => {
+    if (!isOpen) return;
+    if (!document.cookie.includes("atheles-logged-in=1")) { setDeliveryAddress(null); return; }
+    fetch("/api/auth/addresses")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => {
+        if (!d?.addresses?.length) { setDeliveryAddress(null); return; }
+        const def = d.addresses.find((a: { id: string }) => a.id === d.defaultAddressId) ?? d.addresses[0];
+        const parts = [def.address1, def.city, def.province].filter(Boolean);
+        setDeliveryAddress(parts.join(", "));
+      })
       .catch(() => {});
   }, [isOpen]);
 
@@ -579,6 +595,23 @@ export default function CartModal() {
                   <XMarkIcon className="h-5 w-5" />
                 </button>
               </div>
+
+              {/* Delivering to */}
+              {deliveryAddress && (
+                <Link
+                  href="/profile"
+                  onClick={closeCart}
+                  className="flex items-center gap-2 border-b border-white/5 px-5 py-2.5 transition-colors hover:bg-white/[0.02]"
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 flex-none text-brand-gold/60">
+                    <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
+                  </svg>
+                  <span className="text-xs text-brand-grey/60">
+                    delivering to <span className="text-brand-pale-gold">{deliveryAddress}</span>
+                  </span>
+                  <span className="ml-auto text-[10px] text-brand-grey/30">change →</span>
+                </Link>
+              )}
 
               {/* Body */}
               <div className="flex flex-1 flex-col overflow-y-auto px-5">

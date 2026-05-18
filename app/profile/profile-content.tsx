@@ -214,6 +214,7 @@ export default function ProfileContent() {
   const [themeSaving, setThemeSaving] = useState(false);
   const [discordSuccess, setDiscordSuccess] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [addAddressTick, setAddAddressTick] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -1574,8 +1575,17 @@ export default function ProfileContent() {
 
       {/* Address Book */}
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
-        <h2 className="mb-4 font-heading text-xl text-brand-pale-gold sm:text-lg">address book</h2>
-        <ProfileAddressBook />
+        <div className="mb-4 flex items-center justify-between">
+          <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">address book</h2>
+          <button
+            type="button"
+            onClick={() => setAddAddressTick((n) => n + 1)}
+            className="text-xs text-brand-gold transition-colors hover:text-brand-light-gold"
+          >
+            + add address
+          </button>
+        </div>
+        <ProfileAddressBook triggerAdd={addAddressTick} />
       </div>
 
       {/* Quick Links */}

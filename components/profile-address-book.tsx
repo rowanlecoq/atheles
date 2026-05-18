@@ -1,6 +1,6 @@
 "use client";
 
-import { PlusIcon, XMarkIcon, PencilIcon, CheckIcon, MapPinIcon } from "@heroicons/react/24/outline";
+import { XMarkIcon, PencilIcon, CheckIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
 import { AddressSearch } from "components/address-search";
 import { CountrySelect } from "components/country-select";
@@ -119,7 +119,7 @@ function AddressForm({ initial, onSave, onCancel, saving }: {
   );
 }
 
-export function ProfileAddressBook() {
+export function ProfileAddressBook({ triggerAdd }: { triggerAdd?: number }) {
   const [addresses, setAddresses] = useState<Address[]>([]);
   const [defaultId, setDefaultId] = useState<string | null>(null);
   const [loading, setLoading] = useState(true);
@@ -127,6 +127,11 @@ export function ProfileAddressBook() {
   const [editId, setEditId] = useState<string | null>(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!triggerAdd) return;
+    setShowAdd(true); setEditId(null); setError("");
+  }, [triggerAdd]);
 
   useEffect(() => {
     fetch("/api/auth/addresses")
@@ -193,7 +198,6 @@ export function ProfileAddressBook() {
 
   return (
     <div className="space-y-3">
-      {/* Add form */}
       {showAdd && (
         <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
           <p className="mb-4 text-sm uppercase tracking-wider text-brand-pale-gold">new address</p>
@@ -254,7 +258,7 @@ export function ProfileAddressBook() {
                       <button
                         type="button"
                         onClick={() => handleSetDefault(addr.id)}
-                        className="mt-1 text-xs text-brand-grey/50 transition-colors hover:text-brand-gold"
+                        className="mt-1 text-xs text-brand-grey/50 underline-offset-2 transition-colors hover:text-brand-gold hover:underline"
                       >
                         set as default →
                       </button>
@@ -288,16 +292,6 @@ export function ProfileAddressBook() {
       )}
 
       {error && <p className="text-xs text-red-400">{error}</p>}
-
-      {!showAdd && !editId && (
-        <button
-          type="button"
-          onClick={() => { setShowAdd(true); setError(""); }}
-          className="flex items-center gap-1 text-xs text-brand-gold transition-colors hover:text-brand-light-gold"
-        >
-          <PlusIcon className="h-3.5 w-3.5" /> add address
-        </button>
-      )}
     </div>
   );
 }
