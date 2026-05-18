@@ -91,7 +91,7 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.17, 0.70],  // lower-left ambient
   ]},
   sunset: { base: '#0e0206', radial: [
-    [0.50, 1.00, 1.10, 0.42, 255, 140,  20, 0.44, 0.55],  // orange bottom horizon
+    [0.50, 1.18, 1.10, 0.40, 255, 140,  20, 0.22, 0.48],  // orange bottom horizon
     [0.20, 0.12, 0.55, 0.52, 147,  51, 234, 0.50, 0.60],  // violet upper-left
     [0.78, 0.28, 0.65, 0.55, 255,  80, 150, 0.52, 0.60],  // hot pink upper-right
     [0.15, 0.52, 0.60, 0.55, 219,  39, 119, 0.44, 0.55],  // deep pink mid-left
@@ -101,7 +101,7 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [147,  51, 234, 0.28, 0.00],  // violet at top
     [147,  51, 234, 0.00, 0.35],  // fade to transparent
     [249, 115,  22, 0.00, 0.68],  // transparent
-    [255, 140,  20, 0.34, 1.00],  // orange at bottom
+    [255, 140,  20, 0.20, 1.00],  // orange at bottom
   ]},
 };
 
@@ -190,6 +190,19 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       const opacity = 0.060 + (i % 3) * 0.022;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
+        (o) => `rgba(34,211,238,${o.toFixed(4)})`,
+        (o) => `rgba(6,182,212,${o.toFixed(4)})`,
+        hasFilter);
+    }
+    // small bottom-left fill rays
+    const blFill = [
+      [0.10, 0.80, -16, 16, 0.040],
+      [0.06, 0.90, -12, 20, 0.044],
+      [0.15, 0.96,  -8, 14, 0.034],
+    ] as const;
+    for (const [cx, cyF, deg, sH, op] of blFill) {
+      const cy = h * cyF + Math.sin(time * 0.3 + cx * 10) * 8;
+      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(34,211,238,${o.toFixed(4)})`,
         (o) => `rgba(6,182,212,${o.toFixed(4)})`,
         hasFilter);
