@@ -64,11 +64,11 @@ type RLayer = readonly [number,number,number,number,number,number,number,number,
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
   gold: { base: '#110e04', radial: [
-    [0.50, 1.00, 1.00, 0.50, 180, 140,  60, 0.40, 0.60],
-    [0.50, 0.30, 0.65, 0.50, 220, 200, 140, 0.16, 0.55], // cx centred (was 0.60)
-    [0.50, 0.50, 0.55, 0.55, 220, 200, 140, 0.18, 0.55],
-    [0.70, 0.65, 0.60, 0.70, 180, 140,  60, 0.26, 0.60],
-    [0.50, 0.35, 0.70, 0.60, 193, 163, 104, 0.34, 0.60], // cx centred (was 0.30)
+    [0.20, 0.90, 0.95, 0.55, 175, 138,  52, 0.22, 0.75],  // bottom-left warm anchor
+    [0.80, 0.80, 0.85, 0.55, 160, 118,  42, 0.18, 0.75],  // bottom-right warm anchor
+    [0.50, 0.55, 1.15, 0.40, 148, 110,  38, 0.16, 0.80],  // wide low-center wash
+    [0.25, 0.30, 0.70, 0.65, 205, 175,  85, 0.12, 0.80],  // upper-left soft gold
+    [0.75, 0.25, 0.65, 0.60, 190, 155,  65, 0.12, 0.80],  // upper-right soft gold
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.00, 1.00, 0.50,  20, 100, 200, 0.40, 0.60],
@@ -85,11 +85,11 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.18, 0.65, 0.82, 0.68,  16, 210, 140, 0.45, 0.62],  // left green
   ]},
   midnight: { base: '#04000a', radial: [
-    [0.50, 1.00, 1.00, 0.50,  70,  50, 200, 0.50, 0.60],
-    [0.50, 0.15, 0.55, 0.45, 100,  30, 200, 0.45, 0.55], // cx centred, cy lifted (was 0.20,0.05)
-    [0.50, 0.50, 0.55, 0.55, 110,  60, 240, 0.42, 0.55],
-    [0.70, 0.65, 0.60, 0.70,  80,  80, 220, 0.55, 0.60],
-    [0.50, 0.35, 0.70, 0.60,  50,  30, 140, 0.70, 0.60], // cx centred (was 0.30)
+    [0.20, 0.85, 0.90, 0.55,  55,  35, 185, 0.24, 0.75],  // bottom-left blue-purple
+    [0.80, 0.75, 0.85, 0.55,  75,  45, 210, 0.20, 0.75],  // bottom-right purple
+    [0.50, 0.55, 1.10, 0.38,  45,  25, 155, 0.18, 0.80],  // wide low-center wash
+    [0.15, 0.35, 0.65, 0.65,  90,  55, 220, 0.14, 0.80],  // left-mid violet
+    [0.82, 0.30, 0.60, 0.60,  85,  40, 195, 0.14, 0.80],  // right-mid violet
   ]},
   sunset: { base: '#0e0206', radial: [
     [0.50, 1.00, 1.00, 0.50, 249, 115,  22, 0.45, 0.60],  // orange bottom
