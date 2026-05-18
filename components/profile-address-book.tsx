@@ -2,6 +2,7 @@
 
 import { PlusIcon, XMarkIcon, PencilIcon, CheckIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { useEffect, useState } from "react";
+import { AddressSearch } from "components/address-search";
 
 type Address = {
   id: string;
@@ -44,6 +45,18 @@ function AddressForm({ initial, onSave, onCancel, saving }: {
 
   return (
     <div className="space-y-4">
+      <AddressSearch
+        onSelect={(place) =>
+          setForm((p) => ({
+            ...p,
+            address1: place.address1 || p.address1,
+            city: place.city || p.city,
+            province: place.province || p.province,
+            zip: place.zip || p.zip,
+            country: place.country || p.country,
+          }))
+        }
+      />
       <div className="grid grid-cols-2 gap-3">
         <div>
           <label className={labelCls}>first name</label>

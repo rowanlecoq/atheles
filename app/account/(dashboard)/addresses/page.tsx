@@ -3,6 +3,7 @@
 import { PlusIcon, XMarkIcon, PencilIcon, CheckIcon, MapPinIcon } from "@heroicons/react/24/outline";
 import { CheckCircleIcon } from "@heroicons/react/24/solid";
 import { useEffect, useState } from "react";
+import { AddressSearch } from "components/address-search";
 
 type Address = {
   id: string;
@@ -41,6 +42,18 @@ function AddressForm({
 
   return (
     <div className="space-y-2.5">
+      <AddressSearch
+        onSelect={(place) =>
+          setForm((p) => ({
+            ...p,
+            address1: place.address1 || p.address1,
+            city: place.city || p.city,
+            province: place.province || p.province,
+            zip: place.zip || p.zip,
+            country: place.country || p.country,
+          }))
+        }
+      />
       <div className="grid grid-cols-2 gap-2.5">
         <div className="space-y-1">
           <label className="text-[10px] uppercase tracking-wider text-brand-grey/60">First name</label>
