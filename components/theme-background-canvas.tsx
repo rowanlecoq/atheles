@@ -63,9 +63,9 @@ type ThemeKey = keyof typeof THEMES;
 type RLayer = readonly [number,number,number,number,number,number,number,number,number];
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
-  gold: { base: '#080600', radial: [
-    [0.50, 0.50, 1.55, 0.80, 140, 114,  58, 0.10, 0.88],  // wide ambient — kept dim so rays pop
-    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.16, 0.72],  // brand-gold core
+  gold: { base: '#0d0900', radial: [
+    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.22, 0.88],  // wide flat elliptical ambient
+    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.32, 0.72],  // brand-gold (#ccb173) core
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.22, 1.00, 0.40,  20, 100, 200, 0.14, 0.48],
@@ -251,26 +251,14 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // Same structure as ocean — 8 beams, 0.12h step — but gold colors and higher opacity
+    // 8 beams from cy=0 to cy=h, higher opacity so rays pop against warm background
     for (let i = 0; i < 8; i++) {
       const angle   = (-10 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.110 + (i % 3) * 0.028;
-      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.22 + i * 1.4) * 20;
-      const rgb = i % 3 === 0 ? "235,192,85" : i % 3 === 1 ? "252,214,108" : "255,230,138";
+      const opacity = 0.130 + (i % 3) * 0.032;
+      const cy = h * (i / 7) + Math.sin(time * 0.22 + i * 1.4) * 10;
+      const rgb = i % 3 === 0 ? "238,196,90" : i % 3 === 1 ? "255,220,118" : "255,240,158";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        hasFilter);
-    }
-    const blFill = [
-      [0.10, 0.80,  8, 16, 0.075, "252,214,108"],
-      [0.06, 0.90, 10, 20, 0.080, "235,192,85"],
-      [0.15, 0.96, 11, 14, 0.062, "255,230,138"],
-    ] as const;
-    for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
-      const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
-      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
@@ -278,27 +266,14 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // Same structure as ocean — 8 beams, 0.12h step — all-positive angles keep diagonal feel
-    for (let i = 0; i < 8; i++) {
-      const angle   = (8 + i * 2) * (Math.PI / 180);
+    // 9 beams, cy=0 to cy=h, all-positive diagonal (+12°→+20°), low oscillation so beams don't drift
+    for (let i = 0; i < 9; i++) {
+      const angle   = (12 + i * 1) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
       const opacity = 0.068 + (i % 3) * 0.022;
-      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.18 + i * 1.6) * 20;
+      const cy = h * (i / 8) + Math.sin(time * 0.18 + i * 1.6) * 6;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        hasFilter);
-    }
-    // Bottom-left corner fills — positive angles match main bottom rays
-    const blFill = [
-      [0.10, 0.80, 14, 16, 0.048, "130,85,255"],
-      [0.06, 0.90, 16, 20, 0.052, "88,52,228"],
-      [0.15, 0.96, 18, 14, 0.040, "108,65,242"],
-    ] as const;
-    for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
-      const cy = h * cyF + Math.sin(time * 0.18 + cx * 10) * 8;
-      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
