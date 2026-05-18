@@ -57,8 +57,12 @@ export function CountrySelect({
           onChange={(e) => {
             const v = e.target.value;
             setQuery(v);
-            setOpen(true);
-            if (COUNTRIES.includes(v)) onChange(v);
+            if (COUNTRIES.includes(v)) {
+              onChange(v);
+              setOpen(false);
+            } else {
+              setOpen(true);
+            }
           }}
           onBlur={() => {
             if (COUNTRIES.includes(query)) {
@@ -70,7 +74,7 @@ export function CountrySelect({
               setQuery(value);
             }
           }}
-          onFocus={() => setOpen(true)}
+          onFocus={() => { if (!COUNTRIES.includes(query)) setOpen(true); }}
         />
         <ChevronDownIcon
           className={`pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-grey/40 transition-transform ${open ? "rotate-180" : ""}`}
