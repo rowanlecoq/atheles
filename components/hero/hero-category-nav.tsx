@@ -65,21 +65,30 @@ export function HeroCategoryNav() {
                 onMouseEnter={hasDropdown ? () => handleEnter(i) : undefined}
                 onMouseLeave={hasDropdown ? handleLeave : undefined}
               >
-                <Link
-                  href={cat.href}
-                  className={`group relative block py-1 text-sm uppercase tracking-[0.2em] transition-colors duration-200 ${
-                    activeIndex === i
-                      ? "text-brand-gold"
-                      : "text-brand-pale-gold hover:text-brand-gold"
-                  }`}
-                >
-                  {cat.title}
+                {cat.comingSoon ? (
                   <span
-                    className={`absolute -bottom-0.5 left-0 h-px bg-brand-gold transition-all duration-300 ${
-                      activeIndex === i ? "w-full" : "w-0 group-hover:w-full"
+                    className="relative block cursor-default py-1 text-sm uppercase tracking-[0.2em] text-brand-pale-gold/50"
+                    title="Coming Soon"
+                  >
+                    {cat.title}
+                  </span>
+                ) : (
+                  <Link
+                    href={cat.href}
+                    className={`group relative block py-1 text-sm uppercase tracking-[0.2em] transition-colors duration-200 ${
+                      activeIndex === i
+                        ? "text-brand-gold"
+                        : "text-brand-pale-gold hover:text-brand-gold"
                     }`}
-                  />
-                </Link>
+                  >
+                    {cat.title}
+                    <span
+                      className={`absolute -bottom-0.5 left-0 h-px bg-brand-gold transition-all duration-300 ${
+                        activeIndex === i ? "w-full" : "w-0 group-hover:w-full"
+                      }`}
+                    />
+                  </Link>
+                )}
               </div>
             );
           })}
