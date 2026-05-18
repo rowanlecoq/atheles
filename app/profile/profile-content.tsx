@@ -1488,7 +1488,7 @@ export default function ProfileContent() {
                 if (editing) setNewsletter(!newsletter);
               }}
               disabled={!editing}
-              className={`relative h-6 w-11 overflow-hidden rounded-full transition-colors ${
+              className={`relative h-6 w-11 rounded-full transition-colors ${
                 newsletter ? "bg-brand-gold" : "bg-brand-dark-gold/30"
               } ${!editing ? "opacity-60" : "cursor-pointer"}`}
               aria-label="Toggle newsletter subscription"
@@ -1566,7 +1566,7 @@ export default function ProfileContent() {
             <button
               type="button"
               onClick={() => handleThemeChange(selectedTheme, !themeGlobal)}
-              className={`relative h-6 w-11 overflow-hidden rounded-full transition-colors ${
+              className={`relative h-6 w-11 rounded-full transition-colors ${
                 themeGlobal ? "bg-brand-gold" : "bg-brand-dark-gold/30"
               } cursor-pointer`}
               aria-label="Toggle site-wide background"
