@@ -37,6 +37,8 @@ export default function LoginForm() {
         }
         keysToRemove.forEach((k) => sessionStorage.removeItem(k));
         localStorage.removeItem("atheles-session");
+        localStorage.removeItem("atheles-delivery-address");
+        localStorage.removeItem("atheles-favorites");
 
         // Cache new session
         if (data.user) {

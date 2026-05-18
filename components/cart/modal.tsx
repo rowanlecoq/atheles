@@ -374,6 +374,21 @@ export default function CartModal() {
     return () => window.removeEventListener("open-cart", handler);
   }, [openCart]);
 
+  // Clear per-user cached data when account switches
+  useEffect(() => {
+    const handler = () => {
+      favCacheRef.current = null;
+      setFavProducts([]);
+      setDeliveryAddress(null);
+      setTierName(null);
+      setFreeShipping(false);
+      setAppliedCode(null);
+      setDiscountConfirmed(false);
+    };
+    window.addEventListener("user-logout", handler);
+    return () => window.removeEventListener("user-logout", handler);
+  }, []);
+
   // Sync applied discount code from cart state whenever we don't already have
   // one locally. Runs on every discountCodes change so late-loading cart data
   // and confirmed carts are all caught.

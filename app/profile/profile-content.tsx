@@ -382,6 +382,8 @@ export default function ProfileContent() {
       if (s) { const u = JSON.parse(s); if (u.email) localStorage.removeItem(`atheles-avatar-${u.email}`); }
     } catch {}
     try { localStorage.removeItem("atheles-session"); } catch {}
+    try { localStorage.removeItem("atheles-delivery-address"); } catch {}
+    try { localStorage.removeItem("atheles-favorites"); } catch {}
     document.body.removeAttribute("data-bg");
     document.cookie = "atheles-logged-in=; max-age=0; path=/";
     invalidateSessionCache();
