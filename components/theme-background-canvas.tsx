@@ -223,31 +223,27 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // Sunbeam fan: angles spread wide (-20° to +16°) so beams radiate outward
-    const goldAngles = [-20, -11, -3, 5, 11, 16];
-    const goldThick  = [38, 20, 44, 22, 40, 18];
-    const goldAlpha  = [0.18, 0.13, 0.20, 0.14, 0.17, 0.12];
-    for (let i = 0; i < 6; i++) {
-      const angle  = (goldAngles[i]! + Math.sin(time * 0.20 + i) * 1.5) * (Math.PI / 180);
-      const stripH = goldThick[i]!;
-      const opacity = goldAlpha[i]!;
-      const cy = h * (0.05 + i * 0.15) + Math.sin(time * 0.22 + i * 1.4) * 14;
+    // Progressive gentle angles like ocean — no crossover, same strip sizes
+    for (let i = 0; i < 8; i++) {
+      const angle   = (-8 + i * 2.6) * (Math.PI / 180);
+      const stripH  = 30 + (i % 4) * 10;
+      const opacity = 0.055 + (i % 3) * 0.018;
+      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.22 + i * 1.4) * 14;
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(155,122,52,${o.toFixed(4)})`,
-        (o) => `rgba(222,188,110,${o.toFixed(4)})`,
+        (o) => `rgba(218,185,108,${o.toFixed(4)})`,
         hasFilter);
     }
   }
 
   if (theme === "midnight") {
-    // Tight parallel diagonal streaks at 42° — aurora/moonbeam style
-    const midnightRgb = ["88,52,228", "145,95,255", "108,65,242"];
-    for (let i = 0; i < 6; i++) {
-      const angle   = 42 * (Math.PI / 180);
-      const stripH  = 14 + (i % 2) * 10;
-      const opacity = 0.18 + (i % 3) * 0.04;
-      const cy = h * (0.05 + i * 0.15) + Math.sin(time * 0.16 + i * 1.8) * 14;
-      const rgb = midnightRgb[i % 3]!;
+    // More rays (9), all at a consistent ~38° diagonal, same strip sizes as other themes
+    for (let i = 0; i < 9; i++) {
+      const angle   = (36 + (i % 3) * 2) * (Math.PI / 180);
+      const stripH  = 30 + (i % 4) * 10;
+      const opacity = 0.055 + (i % 3) * 0.018;
+      const cy = h * (0.04 + i * 0.10) + Math.sin(time * 0.18 + i * 1.6) * 12;
+      const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
