@@ -63,9 +63,10 @@ type ThemeKey = keyof typeof THEMES;
 type RLayer = readonly [number,number,number,number,number,number,number,number,number];
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
-  gold: { base: '#0d0900', radial: [
-    [0.50, 0.55, 1.55, 0.80, 185, 155, 60, 0.30, 0.88],   // wide ambient, brighter amber-gold
-    [0.50, 0.50, 0.92, 0.75, 230, 195, 90, 0.50, 0.72],   // core, clearly gold not brown
+  gold: { base: '#0a0700', radial: [
+    [0.50, 0.62, 1.45, 0.80, 190, 158, 88,  0.20, 0.88],  // wide soft warm ambient
+    [0.50, 0.48, 0.88, 0.72, 210, 182, 118, 0.32, 0.72],  // brand-gold core (#ccb173 range)
+    [0.50, 0.28, 0.55, 0.48, 228, 200, 138, 0.14, 0.65],  // bright upper highlight
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.22, 1.00, 0.40,  20, 100, 200, 0.14, 0.48],
@@ -83,13 +84,14 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.72, 0.88, 0.65, 0.52, 255, 162,  18, 0.24, 0.56],  // lower-right amber accent
     [0.28, 0.90, 0.62, 0.48,  10, 142,  82, 0.22, 0.58],  // lower-left dark teal
   ]},
-  midnight: { base: '#03000a', radial: [
-    [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.22, 0.72],  // top-left node
-    [0.35, 0.30, 0.72, 0.68, 108,  64, 245, 0.20, 0.75],  // upper-mid node
-    [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.25, 0.75],  // center node (brightest)
-    [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.21, 0.72],  // lower-right node
-    [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.17, 0.70],  // lower-left ambient
-    [0.06, 0.88, 0.58, 0.52,  85,  48, 220, 0.20, 0.68],  // bottom-left fill blob
+  midnight: { base: '#02000c', radial: [
+    [0.12, 0.10, 0.62, 0.55,  55,  18, 205, 0.20, 0.72],  // deep indigo top-left
+    [0.42, 0.28, 0.70, 0.64,  95,  28, 232, 0.18, 0.75],  // purple upper-center
+    [0.72, 0.50, 0.74, 0.68,  15,  52, 210, 0.22, 0.75],  // cobalt blue center-right
+    [0.82, 0.78, 0.60, 0.58,  80,  20, 218, 0.20, 0.72],  // deep violet lower-right
+    [0.22, 0.70, 0.62, 0.58,  38,  10, 185, 0.16, 0.70],  // navy lower-left
+    [0.50, 0.42, 0.68, 0.60, 110,  40, 240, 0.14, 0.68],  // bright violet center
+    [0.06, 0.88, 0.55, 0.50,  58,  14, 200, 0.18, 0.68],  // bottom-left fill
   ]},
   sunset: { base: '#0e0206', radial: [
     [0.50, 1.18, 1.10, 0.40, 255, 140,  20, 0.22, 0.48],  // orange bottom horizon
@@ -252,28 +254,27 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // 8 beams, ocean's exact cy spacing (0.12h) and stripH — proven full coverage.
-    // Angles shifted right (-6°→+15°) vs ocean's symmetric fan for a warm-sun character.
+    // 8 beams, ocean coverage geometry. Colors stay close to brand gold #ccb173
+    // (204,177,115) — edge slightly deeper, mid slightly brighter, never yellow.
     for (let i = 0; i < 8; i++) {
-      const angle   = (-6 + i * 3) * (Math.PI / 180);
+      const angle   = (-8 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.078 + (i % 3) * 0.024;
-      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.30 + i) * 20;
-      const eRgb = i % 3 === 0 ? "230,185,65"  : i % 3 === 1 ? "240,200,75"  : "220,175,58";
-      const mRgb = i % 3 === 0 ? "255,248,155" : i % 3 === 1 ? "255,252,175" : "255,240,140";
+      const opacity = 0.052 + (i % 3) * 0.018;
+      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.28 + i) * 20;
+      const eRgb = i % 3 === 0 ? "192,162,88"  : i % 3 === 1 ? "200,170,96"  : "184,154,80";
+      const mRgb = i % 3 === 0 ? "222,194,128" : i % 3 === 1 ? "230,202,136" : "216,188,120";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    // ocean fill positions exactly — same geometry that gives ocean full bottom-left coverage
     const goldFill = [
-      [0.10, 0.80,  8, 16, 0.054, "255,248,155", "230,185,65"],
-      [0.06, 0.90, 10, 20, 0.058, "255,240,140", "220,175,58"],
-      [0.15, 0.96, 11, 14, 0.046, "255,252,175", "240,200,75"],
+      [0.10, 0.80,  8, 16, 0.038, "222,194,128", "192,162,88"],
+      [0.06, 0.90, 10, 20, 0.042, "216,188,120", "184,154,80"],
+      [0.15, 0.96, 11, 14, 0.032, "230,202,136", "200,170,96"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of goldFill) {
-      const cy = h * cyF + Math.sin(time * 0.30 + cx * 10) * 8;
+      const cy = h * cyF + Math.sin(time * 0.28 + cx * 10) * 8;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
@@ -282,26 +283,24 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // 8 beams, ocean's cy spacing. Angles -5°→+16° (shifted 5° toward positive
-    // vs ocean) for diagonal character while keeping the same proven coverage geometry.
-    // 4-color rotation adds pale lavender-white as a unique midnight accent.
+    // 8 beams, ocean coverage geometry. 4-color palette mixes indigo-purple,
+    // cobalt blue, deep violet, and soft lavender for a rich multi-tone night sky.
     for (let i = 0; i < 8; i++) {
       const angle   = (-5 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.080 + (i % 4) * 0.018;
+      const opacity = 0.062 + (i % 4) * 0.016;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.22 + i) * 14;
-      const eRgb = i % 4 === 0 ? "100,60,220"  : i % 4 === 1 ? "130,90,245"  : i % 4 === 2 ? "80,50,200"   : "155,100,255";
-      const mRgb = i % 4 === 0 ? "175,140,255" : i % 4 === 1 ? "205,170,255" : i % 4 === 2 ? "220,185,255" : "190,155,255";
+      const eRgb = i % 4 === 0 ? "75,35,200"   : i % 4 === 1 ? "15,55,205"   : i % 4 === 2 ? "90,22,215"   : "120,68,238";
+      const mRgb = i % 4 === 0 ? "155,118,255" : i % 4 === 1 ? "80,138,255"  : i % 4 === 2 ? "148,92,248"  : "188,155,255";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    // ocean fill positions, angles shifted to match midnight's diagonal range
     const midFill = [
-      [0.10, 0.80, 12, 16, 0.052, "190,155,255", "110,70,230"],
-      [0.06, 0.90, 14, 20, 0.056, "175,140,255", "100,60,220"],
-      [0.15, 0.96, 16, 14, 0.044, "220,185,255",  "80,50,200"],
+      [0.10, 0.80, 12, 16, 0.044, "155,118,255", "75,35,200"],
+      [0.06, 0.90, 14, 20, 0.048, "80,138,255",  "15,55,205"],
+      [0.15, 0.96, 16, 14, 0.038, "148,92,248",  "90,22,215"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of midFill) {
       const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
