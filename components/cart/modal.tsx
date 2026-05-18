@@ -525,7 +525,7 @@ export default function CartModal() {
       ...prev,
       discountCodes: [],
       discountAllocations: [],
-      cost: { ...prev.cost, totalAmount: { ...prev.cost.subtotalAmount } },
+      cost: { ...prev.cost, totalAmount: { amount: prev.cost.subtotalAmount.amount, currencyCode: prev.cost.subtotalAmount.currencyCode } },
     } : prev);
     const confirmed = await removeDiscountCode().catch(() => null);
     if (confirmed) setCart((prev) => applyConfirmed(prev, confirmed));

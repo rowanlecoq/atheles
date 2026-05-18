@@ -48,7 +48,7 @@ export function AddressSearch({
       setLoading(true);
       try {
         const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(trimmed)}&format=jsonv2&addressdetails=1&limit=5`;
-        const res = await fetch(url, { headers: { "Accept-Language": "en" } });
+        const res = await fetch(url, { headers: { "Accept-Language": "en", "User-Agent": "atheles.co storefront" } });
         const data = await res.json();
         const parsed: AddressResult[] = (data as Record<string, unknown>[])
           .filter((item) => (item.address as Record<string, string>)?.road || (item.address as Record<string, string>)?.street)
