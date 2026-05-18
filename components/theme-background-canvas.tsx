@@ -254,9 +254,9 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     for (let i = 0; i < 7; i++) {
       const angle   = (-10 + i * 3.5) * (Math.PI / 180);
       const stripH  = 28 + (i % 3) * 10;
-      const opacity = 0.082 + (i % 3) * 0.026;
+      const opacity = 0.090 + (i % 3) * 0.028;
       const cy = h * (0.05 + i * 0.14) + Math.sin(time * 0.22 + i * 1.4) * 14;
-      const rgb = i % 3 === 0 ? "192,158,78" : i % 3 === 1 ? "218,186,108" : "242,212,138";
+      const rgb = i % 3 === 0 ? "214,186,104" : i % 3 === 1 ? "246,220,138" : "255,236,162";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
@@ -264,9 +264,9 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     }
     // bottom-left corner fills
     const blFill = [
-      [0.10, 0.80,  9, 22, 0.065, "218,186,108"],
-      [0.06, 0.90, 11, 26, 0.070, "192,158,78"],
-      [0.15, 0.96, 11, 18, 0.055, "242,212,138"],
+      [0.10, 0.80,  9, 22, 0.072, "246,220,138"],
+      [0.06, 0.90, 11, 26, 0.078, "214,186,104"],
+      [0.15, 0.96, 11, 18, 0.060, "255,236,162"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
       const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
@@ -278,12 +278,12 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // Main diagonal sweep — all positive angles keep the diagonal feel
-    for (let i = 0; i < 10; i++) {
-      const angle   = (8 + i * 1.2) * (Math.PI / 180);
+    // Main diagonal sweep — 11 beams at tighter 0.115 spacing to close visible gaps
+    for (let i = 0; i < 11; i++) {
+      const angle   = (8 + i * 1.1) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
       const opacity = 0.085 + (i % 3) * 0.022;
-      const cy = h * (-0.15 + i * 0.135) + Math.sin(time * 0.18 + i * 1.6) * 12;
+      const cy = h * (-0.10 + i * 0.115) + Math.sin(time * 0.18 + i * 1.6) * 7;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
