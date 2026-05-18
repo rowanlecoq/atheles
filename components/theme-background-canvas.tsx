@@ -238,9 +238,9 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // More spread: wider angle step (3.2°) and wider vertical spacing (9%)
+    // Small consistent angle step so beams tile evenly across the full canvas
     for (let i = 0; i < 10; i++) {
-      const angle   = (-4 + i * 3.2) * (Math.PI / 180);
+      const angle   = (-6 + i * 2.0) * (Math.PI / 180);
       const stripH  = 14 + (i % 3) * 5;
       const opacity = 0.13 + (i % 3) * 0.026;
       const cy = h * (0.03 + i * 0.09) + Math.sin(time * 0.18 + i * 1.6) * 12;
