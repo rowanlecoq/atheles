@@ -64,8 +64,8 @@ type RLayer = readonly [number,number,number,number,number,number,number,number,
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
   gold: { base: '#0d0900', radial: [
-    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.22, 0.88],  // wide flat elliptical ambient
-    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.32, 0.72],  // brand-gold (#ccb173) core
+    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.18, 0.88],  // wide flat elliptical ambient
+    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.34, 0.72],  // brand-gold (#ccb173) core
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.22, 1.00, 0.40,  20, 100, 200, 0.14, 0.48],
@@ -84,11 +84,11 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.28, 0.90, 0.62, 0.48,  10, 142,  82, 0.22, 0.58],  // lower-left dark teal
   ]},
   midnight: { base: '#03000a', radial: [
-    [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.20, 0.72],  // top-left node
-    [0.35, 0.30, 0.72, 0.68, 108,  64, 245, 0.18, 0.75],  // upper-mid node
-    [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.23, 0.75],  // center node (brightest)
-    [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.19, 0.72],  // lower-right node
-    [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.15, 0.70],  // lower-left ambient
+    [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.22, 0.72],  // top-left node
+    [0.35, 0.30, 0.72, 0.68, 108,  64, 245, 0.20, 0.75],  // upper-mid node
+    [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.25, 0.75],  // center node (brightest)
+    [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.21, 0.72],  // lower-right node
+    [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.17, 0.70],  // lower-left ambient
   ]},
   sunset: { base: '#0e0206', radial: [
     [0.50, 1.18, 1.10, 0.40, 255, 140,  20, 0.22, 0.48],  // orange bottom horizon
@@ -251,13 +251,13 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // 8 beams from cy=0 to cy=h, higher opacity so rays pop against warm background
-    for (let i = 0; i < 8; i++) {
-      const angle   = (-10 + i * 3) * (Math.PI / 180);
-      const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.130 + (i % 3) * 0.032;
-      const cy = h * (i / 7) + Math.sin(time * 0.22 + i * 1.4) * 10;
-      const rgb = i % 3 === 0 ? "238,196,90" : i % 3 === 1 ? "255,220,118" : "255,240,158";
+    // Between ocean and sunset: 7 beams, 3.5°/step angle, stripH 28+(i%3)*10, 14% spacing
+    for (let i = 0; i < 7; i++) {
+      const angle   = (-10 + i * 3.5) * (Math.PI / 180);
+      const stripH  = 28 + (i % 3) * 10;
+      const opacity = 0.060 + (i % 3) * 0.020;
+      const cy = h * (0.05 + i * 0.14) + Math.sin(time * 0.22 + i * 1.4) * 14;
+      const rgb = i % 3 === 0 ? "152,118,44" : i % 3 === 1 ? "210,178,102" : "232,200,124";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
@@ -266,12 +266,13 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // 9 beams, cy=0 to cy=h, all-positive diagonal (+12°→+20°), low oscillation so beams don't drift
-    for (let i = 0; i < 9; i++) {
-      const angle   = (12 + i * 1) * (Math.PI / 180);
-      const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.068 + (i % 3) * 0.022;
-      const cy = h * (i / 8) + Math.sin(time * 0.18 + i * 1.6) * 6;
+    // Fixed 15° diagonal. cy spans -0.2h → 1.15h so off-bottom beams'
+    // tails sweep into the bottom-left corner, giving full canvas coverage.
+    for (let i = 0; i < 10; i++) {
+      const angle   = 15 * (Math.PI / 180);
+      const stripH  = 14 + (i % 3) * 5;
+      const opacity = 0.13 + (i % 3) * 0.026;
+      const cy = h * (-0.20 + i * 0.15) + Math.sin(time * 0.18 + i * 1.6) * 12;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
