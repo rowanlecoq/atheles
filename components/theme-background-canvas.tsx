@@ -223,30 +223,26 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    for (let i = 0; i < 7; i++) {
-      const angle   = (-9 + i * 3.0) * (Math.PI / 180);
-      const stripH  = 30 + i * 9;
-      const opacity = 0.08 + i * 0.014;
-      const cy = h * (0.06 + i * 0.15) + Math.sin(time * 0.22 + i * 1.4) * 14;
+    for (let i = 0; i < 6; i++) {
+      const angle   = (-8 + i * 3.2) * (Math.PI / 180);
+      const stripH  = 26 + i * 8;
+      const opacity = 0.042 + i * 0.008;
+      const cy = h * (0.08 + i * 0.16) + Math.sin(time * 0.22 + i * 1.4) * 14;
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(176,144,70,${o.toFixed(4)})`,
-        (o) => `rgba(215,180,105,${o.toFixed(4)})`,
+        (o) => `rgba(210,175,100,${o.toFixed(4)})`,
         hasFilter);
     }
   }
 
   if (theme === "midnight") {
-    // Beams run along the same top-left → bottom-right diagonal as the blobs
     for (let i = 0; i < 6; i++) {
-      const t  = i / 5;
-      const cx = 0.12 + t * 0.72;                                    // 0.12 → 0.84
-      const baseCy = (0.12 + t * 0.68) * h;                         // 0.12h → 0.80h
-      const angle  = 30 * (Math.PI / 180);                          // fixed diagonal
-      const stripH = 28 + i * 8;
-      const opacity = 0.075 + i * 0.012;
-      const cy = baseCy + Math.sin(time * 0.18 + i * 1.6) * 12;
-      const rgb = i % 2 === 0 ? "100,60,240" : "125,80,255";
-      drawBeam(ctx, w, cx, cy, angle, stripH, opacity,
+      const angle   = (-10 + i * 3.8) * (Math.PI / 180);
+      const stripH  = 22 + i * 7;
+      const opacity = 0.038 + i * 0.007;
+      const cy = h * (0.06 + i * 0.17) + Math.sin(time * 0.18 + i * 1.6) * 12;
+      const rgb = i % 2 === 0 ? "100,60,240" : "120,75,252";
+      drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
