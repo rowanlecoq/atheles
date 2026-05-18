@@ -420,6 +420,14 @@ export default function CartModal() {
   // Clear per-user cached data when account switches
   useEffect(() => {
     const handler = () => {
+      // Clear user-keyed address cache so next user never sees stale data
+      try {
+        const session = localStorage.getItem("atheles-session");
+        if (session) {
+          const email = JSON.parse(session).email;
+          if (email) localStorage.removeItem(`atheles-delivery-${email}`);
+        }
+      } catch {}
       favCacheRef.current = null;
       setFavProducts([]);
       setDeliveryAddress(null);
@@ -473,10 +481,24 @@ export default function CartModal() {
       .catch(() => {});
   }, [isOpen]);
 
-  // Load default delivery address — always fetch to confirm correct user
+  // Load default delivery address — show user-keyed cache instantly, then refresh
   useEffect(() => {
     if (!isOpen) return;
     if (!document.cookie.includes("atheles-logged-in=1")) { setDeliveryAddress(null); return; }
+
+    // Show cached address immediately only if it belongs to the current user
+    let currentEmail: string | null = null;
+    try {
+      const session = localStorage.getItem("atheles-session");
+      if (session) {
+        currentEmail = JSON.parse(session).email ?? null;
+        if (currentEmail) {
+          const cached = localStorage.getItem(`atheles-delivery-${currentEmail}`);
+          if (cached) setDeliveryAddress(cached);
+        }
+      }
+    } catch {}
+
     fetch("/api/auth/addresses")
       .then((r) => r.ok ? r.json() : null)
       .then((d) => {
@@ -485,7 +507,9 @@ export default function CartModal() {
         const parts = [def.address1, def.zip].filter(Boolean);
         const addr = parts.join(", ");
         setDeliveryAddress(addr);
-        try { localStorage.setItem("atheles-delivery-address", addr); } catch {}
+        try {
+          if (currentEmail) localStorage.setItem(`atheles-delivery-${currentEmail}`, addr);
+        } catch {}
       })
       .catch(() => {});
   }, [isOpen]);
