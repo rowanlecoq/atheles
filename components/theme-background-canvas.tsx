@@ -254,9 +254,9 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     for (let i = 0; i < 7; i++) {
       const angle   = (-10 + i * 3.5) * (Math.PI / 180);
       const stripH  = 28 + (i % 3) * 10;
-      const opacity = 0.090 + (i % 3) * 0.028;
+      const opacity = 0.095 + (i % 3) * 0.030;
       const cy = h * (0.05 + i * 0.14) + Math.sin(time * 0.22 + i * 1.4) * 14;
-      const rgb = i % 3 === 0 ? "214,186,104" : i % 3 === 1 ? "246,220,138" : "255,236,162";
+      const rgb = i % 3 === 0 ? "228,200,110" : i % 3 === 1 ? "252,230,145" : "255,246,178";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
@@ -264,9 +264,9 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     }
     // bottom-left corner fills
     const blFill = [
-      [0.10, 0.80,  9, 22, 0.072, "246,220,138"],
-      [0.06, 0.90, 11, 26, 0.078, "214,186,104"],
-      [0.15, 0.96, 11, 18, 0.060, "255,236,162"],
+      [0.10, 0.80,  9, 22, 0.080, "252,230,145"],
+      [0.06, 0.90, 11, 26, 0.085, "228,200,110"],
+      [0.15, 0.96, 11, 18, 0.068, "255,246,178"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
       const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
@@ -278,27 +278,27 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // Main diagonal sweep — 11 beams at tighter 0.115 spacing to close visible gaps
-    for (let i = 0; i < 11; i++) {
-      const angle   = (8 + i * 1.1) * (Math.PI / 180);
-      const stripH  = 24 + (i % 4) * 8;
+    // 12 beams, stripH 40-70px so effective coverage (stripH+40px blur) always exceeds 0.09h spacing
+    for (let i = 0; i < 12; i++) {
+      const angle   = (8 + i * 1.0) * (Math.PI / 180);
+      const stripH  = 40 + (i % 4) * 10;
       const opacity = 0.085 + (i % 3) * 0.022;
-      const cy = h * (-0.10 + i * 0.115) + Math.sin(time * 0.18 + i * 1.6) * 7;
+      const cy = h * (-0.10 + i * 0.09) + Math.sin(time * 0.18 + i * 1.6) * 5;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    // Corner fills — anchored right at canvas edges so they actually reach the corners
+    // Corner fills — large stripH + high opacity so they're actually visible
     const cornerFills = [
-      [0.05, 0.00, 13, 38, 0.095, "108,65,242"],   // top-left
-      [0.95, 0.00, 13, 38, 0.095, "88,52,228"],    // top-right
-      [0.05, 1.00, 13, 38, 0.095, "130,85,255"],   // bottom-left
-      [0.95, 1.00, 13, 38, 0.095, "108,65,242"],   // bottom-right
+      [0.05, 0.00, 13, 60, 0.130, "108,65,242"],   // top-left
+      [0.95, 0.00, 13, 60, 0.130, "88,52,228"],    // top-right
+      [0.05, 1.00, 13, 60, 0.130, "130,85,255"],   // bottom-left
+      [0.95, 1.00, 13, 60, 0.130, "108,65,242"],   // bottom-right
     ] as const;
     for (const [cx, cyF, deg, sH, op, rgb] of cornerFills) {
-      const cy = h * cyF + Math.sin(time * 0.18 + cx * 8) * 5;
+      const cy = h * cyF;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
