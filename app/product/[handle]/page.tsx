@@ -68,7 +68,7 @@ export default async function ProductPage(props: {
     "@id": productUrl,
     name: product.title,
     description: product.description,
-    image: product.featuredImage.url,
+    image: product.featuredImage?.url || product.images?.[0]?.url || "",
     url: productUrl,
     brand: {
       "@type": "Brand",

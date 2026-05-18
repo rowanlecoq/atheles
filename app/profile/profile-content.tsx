@@ -379,7 +379,13 @@ export default function ProfileContent() {
     try { localStorage.removeItem("atheles-bg-theme"); } catch {}
     try {
       const s = localStorage.getItem("atheles-session");
-      if (s) { const u = JSON.parse(s); if (u.email) localStorage.removeItem(`atheles-avatar-${u.email}`); }
+      if (s) {
+        const u = JSON.parse(s);
+        if (u.email) {
+          localStorage.removeItem(`atheles-avatar-${u.email}`);
+          localStorage.removeItem(`atheles-delivery-${u.email}`);
+        }
+      }
     } catch {}
     try { localStorage.removeItem("atheles-session"); } catch {}
     try { localStorage.removeItem("atheles-delivery-address"); } catch {}

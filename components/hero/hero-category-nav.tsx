@@ -16,7 +16,7 @@ const categories: Category[] = [
     href: "/search/mens",
     subcategories: [
       { title: "Compressions", href: "/search/compressions" },
-      { title: "Tees", href: "/search/t-shirts" },
+      { title: "Tees", href: "/search/tees" },
       { title: "Sweatpants", href: "/search/sweatpants" },
     ],
   },

@@ -101,7 +101,7 @@ function AddressForm({
         <button
           type="button"
           onClick={() => onSave(form)}
-          disabled={saving || !form.address1?.trim() || !form.city?.trim()}
+          disabled={saving || !form.firstName?.trim() || !form.address1?.trim() || !form.city?.trim()}
           className="flex items-center gap-1.5 rounded-full bg-brand-gold px-5 py-2 text-xs font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-40"
         >
           {saving ? "Saving…" : <><CheckIcon className="h-3.5 w-3.5" /> Save address</>}

@@ -36,6 +36,14 @@ export default function LoginForm() {
           }
         }
         keysToRemove.forEach((k) => sessionStorage.removeItem(k));
+        // Clear email-keyed delivery cache for previous user
+        try {
+          const prev = localStorage.getItem("atheles-session");
+          if (prev) {
+            const prevEmail = JSON.parse(prev).email;
+            if (prevEmail) localStorage.removeItem(`atheles-delivery-${prevEmail}`);
+          }
+        } catch {}
         localStorage.removeItem("atheles-session");
         localStorage.removeItem("atheles-delivery-address");
         localStorage.removeItem("atheles-favorites");
