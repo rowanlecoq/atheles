@@ -763,7 +763,7 @@ export default function ProfileContent() {
 
       {/* Avatar & Name — translate-only entrance, no opacity animation */}
       <motion.div
-        className="mb-10 flex flex-col items-center text-center"
+        className="mb-10 flex flex-col items-center rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-6 pb-6 pt-8 text-center"
         initial={{ opacity: 0, y: 16 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
