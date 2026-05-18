@@ -430,14 +430,10 @@ export default function CartModal() {
       .catch(() => {});
   }, [isOpen]);
 
-  // Load default delivery address — show cached value instantly, then refresh
+  // Load default delivery address — always fetch to confirm correct user
   useEffect(() => {
     if (!isOpen) return;
     if (!document.cookie.includes("atheles-logged-in=1")) { setDeliveryAddress(null); return; }
-    try {
-      const cached = localStorage.getItem("atheles-delivery-address");
-      if (cached) setDeliveryAddress(cached);
-    } catch {}
     fetch("/api/auth/addresses")
       .then((r) => r.ok ? r.json() : null)
       .then((d) => {
