@@ -64,8 +64,8 @@ type RLayer = readonly [number,number,number,number,number,number,number,number,
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
   gold: { base: '#0d0900', radial: [
-    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.18, 0.88],  // wide flat elliptical ambient
-    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.34, 0.72],  // brand-gold (#ccb173) core
+    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.11, 0.88],  // wide flat elliptical ambient
+    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.20, 0.72],  // brand-gold (#ccb173) core
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.22, 1.00, 0.40,  20, 100, 200, 0.14, 0.48],
@@ -278,7 +278,7 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // All-positive angles (+8°→+20°) keep the diagonal feel; extended cy fills corners via beam tails
+    // Main diagonal sweep — all positive angles keep the diagonal feel
     for (let i = 0; i < 10; i++) {
       const angle   = (8 + i * 1.2) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
@@ -286,6 +286,20 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       const cy = h * (-0.15 + i * 0.135) + Math.sin(time * 0.18 + i * 1.6) * 12;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        hasFilter);
+    }
+    // Corner fills — same diagonal angle (~13°), anchored at each corner so tails reach in
+    const cornerFills = [
+      [0.05, -0.04, 13, 20, 0.052, "108,65,242"],   // top-left
+      [0.95, -0.04, 13, 20, 0.052, "88,52,228"],    // top-right
+      [0.05,  1.04, 13, 20, 0.052, "130,85,255"],   // bottom-left
+      [0.95,  1.04, 13, 20, 0.052, "108,65,242"],   // bottom-right
+    ] as const;
+    for (const [cx, cyF, deg, sH, op, rgb] of cornerFills) {
+      const cy = h * cyF + Math.sin(time * 0.18 + cx * 8) * 6;
+      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
