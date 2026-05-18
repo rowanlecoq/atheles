@@ -372,8 +372,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                   <li aria-hidden="true" className="py-2">
                     <div className="h-px w-full bg-brand-dark-gold/20" />
                   </li>
-                  {/* TODO: restore coming-soon items (Accessories, Womens) when ready to launch */}
-                  {categoryLinks.filter((item) => !item.comingSoon).map((item, idx, arr) => (
+                  {categoryLinks.map((item, idx, arr) => (
                     <CategoryItem
                       key={item.title}
                       item={item}

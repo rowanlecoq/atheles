@@ -77,9 +77,7 @@ export function CategoryNav() {
       <nav className="category-nav-bar border-b border-brand-dark-gold/20 bg-brand-dark/90 backdrop-blur-sm">
         <div className="mx-auto flex items-center justify-center gap-8 px-6 py-2.5">
           {categories.map((cat, i) => {
-            // TODO: restore coming-soon items (Accessories, Womens) when ready to launch
-            if (cat.comingSoon) return null;
-            const hasDropdown = cat.subcategories.length > 0;
+            const hasDropdown = cat.subcategories.length > 0 && !cat.comingSoon;
             const current = isActive(cat);
             return (
               <div
@@ -88,7 +86,11 @@ export function CategoryNav() {
                 onMouseEnter={hasDropdown ? () => handleEnter(i) : undefined}
                 onMouseLeave={hasDropdown ? handleLeave : undefined}
               >
-                {(
+                {cat.comingSoon ? (
+                  <span className="relative block cursor-default py-1 text-xs uppercase tracking-[0.2em] text-brand-grey/40">
+                    {cat.title}
+                  </span>
+                ) : (
                   <Link
                     href={cat.href}
                     className={`group relative block py-1 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
@@ -98,7 +100,6 @@ export function CategoryNav() {
                     }`}
                   >
                     {cat.title}
-                    {/* Animated underline */}
                     <span
                       className={`absolute -bottom-0.5 left-0 h-px bg-brand-gold transition-all duration-300 ${
                         activeIndex === i || current

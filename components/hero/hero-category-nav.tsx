@@ -57,9 +57,7 @@ export function HeroCategoryNav() {
       <nav className="py-4">
         <div className="flex items-center justify-center gap-6 lg:gap-8">
           {categories.map((cat, i) => {
-            // TODO: restore coming-soon items (Accessories, Womens) when ready to launch
-            if (cat.comingSoon) return null;
-            const hasDropdown = cat.subcategories.length > 0;
+            const hasDropdown = cat.subcategories.length > 0 && !cat.comingSoon;
             return (
               <div
                 key={cat.title}
@@ -67,7 +65,11 @@ export function HeroCategoryNav() {
                 onMouseEnter={hasDropdown ? () => handleEnter(i) : undefined}
                 onMouseLeave={hasDropdown ? handleLeave : undefined}
               >
-                {(
+                {cat.comingSoon ? (
+                  <span className="relative block cursor-default py-1 text-sm uppercase tracking-[0.2em] text-brand-pale-gold/40">
+                    {cat.title}
+                  </span>
+                ) : (
                   <Link
                     href={cat.href}
                     className={`group relative block py-1 text-sm uppercase tracking-[0.2em] transition-colors duration-200 ${
