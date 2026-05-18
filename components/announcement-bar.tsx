@@ -64,7 +64,7 @@ export function AnnouncementBar() {
   };
 
   return (
-    <div className={`announcement-bar-root flex h-8 items-center overflow-hidden bg-transparent ${entered ? "animate-announcement-bar-enter" : "navbar-pre-enter"}`}>
+    <div className={`announcement-bar-root flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-transparent ${entered ? "animate-announcement-bar-enter" : "navbar-pre-enter"}`}>
       {/* Spacer balances the pause button on the right */}
       <div className="min-w-[44px] flex-none" />
 
