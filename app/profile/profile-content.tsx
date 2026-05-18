@@ -1582,7 +1582,7 @@ export default function ProfileContent() {
             onClick={() => setAddAddressTick((n) => n + 1)}
             className="text-xs text-brand-gold transition-colors hover:text-brand-light-gold"
           >
-            + add address
+            add address
           </button>
         </div>
         <ProfileAddressBook triggerAdd={addAddressTick} />
