@@ -22,6 +22,7 @@ function PathFilterListItem({ item, onSelect }: { item: PathFilterItemType } & I
     <li>
       <DynamicTag
         href={createUrl(item.path, newParams)}
+        scroll={false}
         onClick={() => onSelect?.()}
         className={clsx(
           "flex w-full items-center gap-2.5 lowercase rounded-md px-3 py-2 text-sm transition-colors",
@@ -72,7 +73,7 @@ function SortFilterListItem({ item, onSelect, optimisticSlug }: { item: SortFilt
       {active ? (
         <span className={className}>{radio}{item.title}</span>
       ) : (
-        <Link href={href} onClick={() => onSelect?.(item.slug || "")} className={className}>
+        <Link href={href} scroll={false} onClick={() => onSelect?.(item.slug || "")} className={className}>
           {radio}{item.title}
         </Link>
       )}
