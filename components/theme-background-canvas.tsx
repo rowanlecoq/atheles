@@ -266,26 +266,14 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    for (let i = 0; i < 8; i++) {
-      const angle   = (-8 + i * 3.5) * (Math.PI / 180);
+    // 10 beams, cy extends above and below canvas so tails fill all corners naturally
+    for (let i = 0; i < 10; i++) {
+      const angle   = (-9 + i * 2.5) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.080 + (i % 3) * 0.022;
-      const cy = h * (0.05 + i * 0.13) + Math.sin(time * 0.18 + i * 1.6) * 12;
+      const opacity = 0.085 + (i % 3) * 0.022;
+      const cy = h * (-0.15 + i * 0.135) + Math.sin(time * 0.18 + i * 1.6) * 12;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        hasFilter);
-    }
-    // bottom-left corner fills — positive angles match bottom rays (~+10°–+16°)
-    const blFill = [
-      [0.10, 0.80, 10, 18, 0.055, "108,65,242"],
-      [0.06, 0.90, 13, 22, 0.060, "88,52,228"],
-      [0.15, 0.96, 16, 16, 0.048, "130,85,255"],
-    ] as const;
-    for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
-      const cy = h * cyF + Math.sin(time * 0.18 + cx * 10) * 8;
-      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
