@@ -68,7 +68,7 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.34, 0.72],  // brand-gold (#ccb173) core
   ]},
   water: { base: '#020a10', radial: [
-    [0.50, 1.12, 1.00, 0.45,  20, 100, 200, 0.24, 0.52],
+    [0.50, 1.22, 1.00, 0.40,  20, 100, 200, 0.14, 0.48],
     [0.50, 0.70, 0.65, 0.50,   0, 160, 200, 0.16, 0.55], // cx centred (was 0.15)
     [0.50, 0.50, 0.55, 0.55,  40, 210, 240, 0.18, 0.55],
     [0.70, 0.65, 0.60, 0.70,  20, 100, 200, 0.26, 0.60],
@@ -91,7 +91,7 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.17, 0.70],  // lower-left ambient
   ]},
   sunset: { base: '#0e0206', radial: [
-    [0.50, 1.12, 1.00, 0.45, 249, 115,  22, 0.28, 0.52],  // orange bottom
+    [0.50, 1.00, 1.10, 0.42, 255, 140,  20, 0.44, 0.55],  // orange bottom horizon
     [0.20, 0.12, 0.55, 0.52, 147,  51, 234, 0.50, 0.60],  // violet upper-left
     [0.78, 0.28, 0.65, 0.55, 255,  80, 150, 0.52, 0.60],  // hot pink upper-right
     [0.15, 0.52, 0.60, 0.55, 219,  39, 119, 0.44, 0.55],  // deep pink mid-left
@@ -101,7 +101,7 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [147,  51, 234, 0.28, 0.00],  // violet at top
     [147,  51, 234, 0.00, 0.35],  // fade to transparent
     [249, 115,  22, 0.00, 0.68],  // transparent
-    [249, 115,  22, 0.24, 1.00],  // orange at bottom
+    [255, 140,  20, 0.34, 1.00],  // orange at bottom
   ]},
 };
 
@@ -186,8 +186,8 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   if (theme === "water") {
     for (let i = 0; i < 8; i++) {
       const angle   = (-10 + i * 3) * (Math.PI / 180);
-      const stripH  = 16 + (i % 4) * 6;
-      const opacity = 0.055 + (i % 3) * 0.018;
+      const stripH  = 24 + (i % 4) * 8;
+      const opacity = 0.060 + (i % 3) * 0.022;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(34,211,238,${o.toFixed(4)})`,
@@ -213,8 +213,8 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   if (theme === "sunset") {
     for (let i = 0; i < 6; i++) {
       const angle   = (-12 + i * 4.5) * (Math.PI / 180);
-      const stripH  = 18 + i * 4;
-      const opacity = 0.052 + i * 0.010;
+      const stripH  = 24 + i * 5;
+      const opacity = 0.058 + i * 0.012;
       const cy = h * (0.06 + i * 0.16) + Math.sin(time * 0.28 + i * 1.3) * 14;
       const rgb = i % 3 === 0 ? "147,51,234" : i % 3 === 1 ? "255,80,150" : "255,130,60";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
