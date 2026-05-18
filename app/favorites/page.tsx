@@ -147,12 +147,9 @@ export default function FavoritesPage() {
   return (
     <div className="mx-auto max-w-4xl px-4 py-16 sm:px-6">
       <FadeIn direction="up">
-        <h1 className="mb-2 font-heading text-3xl uppercase tracking-wider text-brand-gold sm:text-4xl">
-          your favorites.
+        <h1 className="mb-8 font-heading text-3xl uppercase tracking-wider text-brand-gold sm:text-4xl">
+          your favorites
         </h1>
-      </FadeIn>
-      <FadeIn direction="none" delay={0.1}>
-        <div className="mb-8 h-px w-24 bg-brand-dark-gold/40" />
       </FadeIn>
 
       {(() => {
