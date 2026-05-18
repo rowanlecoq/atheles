@@ -1573,7 +1573,7 @@ export default function ProfileContent() {
       </div>
 
       {/* Address Book */}
-      <div className="mt-8 space-y-3">
+      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
         <h2 className="mb-4 font-heading text-xl text-brand-pale-gold sm:text-lg">address book</h2>
         <ProfileAddressBook />
       </div>
