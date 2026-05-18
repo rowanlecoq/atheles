@@ -6,9 +6,28 @@ export default function OrderHelpPage() {
     <div>
       <FadeIn direction="up">
       <h2 className="mb-6 font-heading text-2xl text-brand-light-gold">
-        order help
+        help
       </h2>
 
+      <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
+        need help with an order?
+      </h3>
+      <div className="mb-6 space-y-3">
+        <HelpItem
+          question="problem with your order?"
+          answer="if something arrived damaged, incorrect, or didn't show up — reach out to us and we'll sort it out."
+          link={{ href: "/contact", label: "contact us" }}
+        />
+        <HelpItem
+          question="returns & exchanges"
+          answer="check our returns policy for details on how to return or exchange an item."
+          link={{ href: "/returns", label: "view policy" }}
+        />
+      </div>
+
+      <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
+        frequently asked questions
+      </h3>
       <div className="space-y-3">
         <HelpItem
           question="where is my order?"

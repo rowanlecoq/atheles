@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 
 const accountNav = [
   { title: "orders", path: "/account" },
-  { title: "help & faq", path: "/account/order-help" },
+  { title: "help", path: "/account/order-help" },
 ];
 
 export function AccountNav() {
@@ -22,8 +22,8 @@ export function AccountNav() {
                 href={item.path}
                 className={`block rounded-lg px-4 py-2.5 text-sm transition-colors ${
                   active
-                    ? "bg-brand-gold/10 text-brand-gold"
-                    : "border border-brand-dark-gold/20 text-brand-grey hover:border-brand-gold/40 hover:text-brand-gold"
+                    ? "bg-brand-gold/10 text-brand-gold border border-brand-gold/20"
+                    : "bg-white/[0.06] border border-white/[0.08] text-brand-grey hover:bg-white/[0.09] hover:text-white"
                 }`}
               >
                 {item.title}

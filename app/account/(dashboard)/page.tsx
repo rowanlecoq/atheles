@@ -56,24 +56,6 @@ export default function AccountDashboard() {
         </div>
       </div>
 
-      {/* Problem section */}
-      <div>
-        <h3 className="mb-4 font-heading text-lg text-brand-pale-gold">
-          need help with an order?
-        </h3>
-        <div className="space-y-3">
-          <InfoCard
-            title="problem with your order?"
-            description="if something arrived damaged, incorrect, or didn't show up — reach out to us and we'll sort it out."
-            link={{ href: "/contact", label: "contact us" }}
-          />
-          <InfoCard
-            title="returns & exchanges"
-            description="check our returns policy for details on how to return or exchange an item."
-            link={{ href: "/returns", label: "view policy" }}
-          />
-        </div>
-      </div>
       </FadeIn>
     </div>
   );
