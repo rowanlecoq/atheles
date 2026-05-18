@@ -223,12 +223,12 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // Progressive gentle angles like ocean — no crossover, same strip sizes
-    for (let i = 0; i < 8; i++) {
-      const angle   = (-8 + i * 2.6) * (Math.PI / 180);
-      const stripH  = 30 + (i % 4) * 10;
-      const opacity = 0.055 + (i % 3) * 0.018;
-      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.22 + i * 1.4) * 14;
+    // Thin strips so the dark gaps between rays stay visible after blur
+    for (let i = 0; i < 7; i++) {
+      const angle   = (-10 + i * 3) * (Math.PI / 180);
+      const stripH  = 14 + (i % 3) * 5;
+      const opacity = 0.13 + (i % 3) * 0.026;
+      const cy = h * (0.05 + i * 0.13) + Math.sin(time * 0.22 + i * 1.4) * 14;
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(155,122,52,${o.toFixed(4)})`,
         (o) => `rgba(218,185,108,${o.toFixed(4)})`,
@@ -237,12 +237,12 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // More rays (9), all at a consistent ~38° diagonal, same strip sizes as other themes
-    for (let i = 0; i < 9; i++) {
-      const angle   = (36 + (i % 3) * 2) * (Math.PI / 180);
-      const stripH  = 30 + (i % 4) * 10;
-      const opacity = 0.055 + (i % 3) * 0.018;
-      const cy = h * (0.04 + i * 0.10) + Math.sin(time * 0.18 + i * 1.6) * 12;
+    // Same gentle progressive angle as ocean/tropical — more rays at tighter spacing
+    for (let i = 0; i < 11; i++) {
+      const angle   = (-10 + i * 2.2) * (Math.PI / 180);
+      const stripH  = 14 + (i % 3) * 5;
+      const opacity = 0.13 + (i % 3) * 0.026;
+      const cy = h * (0.03 + i * 0.08) + Math.sin(time * 0.18 + i * 1.6) * 12;
       const rgb = i % 3 === 0 ? "88,52,228" : i % 3 === 1 ? "130,85,255" : "108,65,242";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
