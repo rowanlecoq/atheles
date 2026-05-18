@@ -251,25 +251,24 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // 7 beams, range shifted right vs ocean (-4°→+14°) for a warm angled-sun feel.
-    // Amber edge → bright yellow-gold core gives each beam visible depth.
+    // 7 beams shifted right (-4°→+14°). Edge is bright warm-gold (not dark amber)
+    // so rays visibly contrast against the brownish blob background.
     for (let i = 0; i < 7; i++) {
       const angle   = (-4 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.062 + (i % 3) * 0.020;
+      const opacity = 0.085 + (i % 3) * 0.022;
       const cy = h * (0.06 + i * 0.14) + Math.sin(time * 0.30 + i * 1.4) * 18;
-      const eRgb = i % 3 === 0 ? "195,148,40" : i % 3 === 1 ? "210,162,52" : "185,140,38";
-      const mRgb = i % 3 === 0 ? "255,220,100" : i % 3 === 1 ? "255,235,130" : "248,212,90";
+      const eRgb = i % 3 === 0 ? "235,195,75" : i % 3 === 1 ? "245,205,85" : "228,188,68";
+      const mRgb = i % 3 === 0 ? "255,248,160" : i % 3 === 1 ? "255,252,180" : "255,244,148";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    // last main beam ends at ~0.90h; fills sit cleanly below
     const goldFill = [
-      [0.10, 0.92,  9, 18, 0.038, "255,220,100", "195,148,40"],
-      [0.06, 0.96, 11, 22, 0.042, "248,212,90",  "185,140,38"],
-      [0.14, 0.99, 10, 15, 0.032, "255,235,130", "210,162,52"],
+      [0.10, 0.92,  9, 18, 0.048, "255,248,160", "235,195,75"],
+      [0.05, 0.96, 11, 24, 0.052, "255,244,148", "228,188,68"],
+      [0.14, 1.00, 10, 28, 0.044, "255,252,180", "245,205,85"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of goldFill) {
       const cy = h * cyF + Math.sin(time * 0.30 + cx * 10) * 6;
@@ -281,9 +280,10 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // Range -3°→+21° (step 3.4°) mirrors ocean's 21° spread but shifted toward
-    // positive so beams feel diagonal. The first beam's negative angle naturally
-    // sweeps left at the bottom, filling the bottom-left corner without separate hacks.
+    // -3°→+21° keeps the diagonal feel while the one negative-angle beam
+    // covers the upper canvas. Four fills target the bottom-left geometrically:
+    // cy=1.02h places a beam center just below the canvas edge so the blurred
+    // halo lands exactly on the bottom-left corner.
     for (let i = 0; i < 8; i++) {
       const angle   = (-3 + i * 3.4) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
@@ -296,14 +296,14 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    // last main beam at ~0.89h; fills below
     const midFill = [
-      [0.08, 0.92, 16, 20, 0.044, "190,155,255", "110,70,230"],
-      [0.03, 0.96, 18, 24, 0.048, "175,140,255", "100,60,220"],
-      [0.14, 0.99, 14, 16, 0.036, "220,185,255",  "80,50,200"],
+      [0.10, 0.92, 14, 20, 0.042, "190,155,255", "110,70,230"],
+      [0.04, 0.96, 15, 28, 0.048, "175,140,255", "100,60,220"],
+      [0.01, 0.99, 16, 32, 0.052, "220,185,255",  "80,50,200"],
+      [0.02, 1.02, 14, 36, 0.056, "205,170,255", "130,90,245"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of midFill) {
-      const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 6;
+      const cy = h * cyF;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
