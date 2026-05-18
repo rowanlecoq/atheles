@@ -53,9 +53,24 @@ export function CountrySelect({
           className={inputClassName}
           placeholder="country"
           value={query}
-          onChange={(e) => { setQuery(e.target.value); setOpen(true); }}
+          autoComplete="country-name"
+          onChange={(e) => {
+            const v = e.target.value;
+            setQuery(v);
+            setOpen(true);
+            if (COUNTRIES.includes(v)) onChange(v);
+          }}
+          onBlur={() => {
+            if (COUNTRIES.includes(query)) {
+              onChange(query);
+            } else if (!COUNTRIES.includes(value)) {
+              onChange("");
+              setQuery("");
+            } else {
+              setQuery(value);
+            }
+          }}
           onFocus={() => setOpen(true)}
-          autoComplete="off"
         />
         <ChevronDownIcon
           className={`pointer-events-none absolute right-2.5 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-grey/40 transition-transform ${open ? "rotate-180" : ""}`}
