@@ -675,7 +675,8 @@ export async function setDefaultCustomerAddress(accessToken: string, addressId: 
   if (errors.length > 0) return { success: false, error: errors[0]!.message };
   return { success: true };
 }
-: Promise<{
+
+export async function getCustomerByToken(accessToken: string): Promise<{
   id: string;
   email: string;
   firstName: string | null;
