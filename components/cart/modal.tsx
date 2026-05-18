@@ -255,11 +255,13 @@ function CartLineItem({ item }: { item: CartItem }) {
 
 function FavoritesCarousel({
   products,
+  loading,
   onAdd,
   onClose,
   addingHandle,
 }: {
   products: FavProduct[];
+  loading?: boolean;
   onAdd: (p: FavProduct) => void;
   onClose: () => void;
   addingHandle: string | null;
@@ -282,6 +284,17 @@ function FavoritesCarousel({
         </Link>
       </div>
       <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+        {loading && products.length === 0 && (
+          <>
+            {[0, 1, 2].map((i) => (
+              <div key={i} className="flex-none w-[110px] rounded-lg border border-white/5 bg-white/3 p-1.5 animate-pulse">
+                <div className="aspect-square w-full rounded-md bg-white/10 mb-1.5" />
+                <div className="h-2.5 w-3/4 rounded bg-white/10 mb-1" />
+                <div className="h-2.5 w-1/2 rounded bg-white/10" />
+              </div>
+            ))}
+          </>
+        )}
         {products.map((p) => {
           const canAdd = !!p.firstVariantId && !!p.availableForSale;
           const isAdding = addingHandle === p.handle;
@@ -341,6 +354,7 @@ export default function CartModal() {
   const [isOpen, setIsOpen] = useState(false);
   const [addingHandle, setAddingHandle] = useState<string | null>(null);
   const [favProducts, setFavProducts] = useState<FavProduct[]>([]);
+  const [favLoading, setFavLoading] = useState(false);
   const [discountInput, setDiscountInput] = useState("");
   const [discountError, setDiscountError] = useState("");
   const [applyingDiscount, setApplyingDiscount] = useState(false);
@@ -520,7 +534,8 @@ export default function CartModal() {
     if (favCacheRef.current) { setFavProducts(favCacheRef.current); return; }
     try {
       const handles: string[] = JSON.parse(localStorage.getItem("atheles-favorites") || "[]");
-      if (!handles.length) { setFavProducts([]); return; }
+      if (!handles.length) { setFavProducts([]); setFavLoading(false); return; }
+      setFavLoading(true);
       fetch("/api/products/by-handles", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -528,8 +543,9 @@ export default function CartModal() {
       })
         .then((r) => r.ok ? r.json() : { products: [] })
         .then((d) => { const p = d.products || []; favCacheRef.current = p; setFavProducts(p); })
-        .catch(() => {});
-    } catch { setFavProducts([]); }
+        .catch(() => {})
+        .finally(() => setFavLoading(false));
+    } catch { setFavProducts([]); setFavLoading(false); }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [isOpen]);
 
@@ -731,8 +747,8 @@ export default function CartModal() {
                         </Link>
                       </div>
                     </div>
-                    {filteredFavs.length > 0 && (
-                      <FavoritesCarousel products={filteredFavs} onAdd={handleAddFav} onClose={closeCart} addingHandle={addingHandle} />
+                    {(favLoading || filteredFavs.length > 0) && (
+                      <FavoritesCarousel products={filteredFavs} loading={favLoading} onAdd={handleAddFav} onClose={closeCart} addingHandle={addingHandle} />
                     )}
                     <div className="pb-4" />
                   </div>
@@ -756,8 +772,8 @@ export default function CartModal() {
                     </ul>
 
                     {/* Favorites */}
-                    {filteredFavs.length > 0 && (
-                      <FavoritesCarousel products={filteredFavs} onAdd={handleAddFav} onClose={closeCart} addingHandle={addingHandle} />
+                    {(favLoading || filteredFavs.length > 0) && (
+                      <FavoritesCarousel products={filteredFavs} loading={favLoading} onAdd={handleAddFav} onClose={closeCart} addingHandle={addingHandle} />
                     )}
 
                     {/* Spacer so content doesn't hide behind sticky footer */}
