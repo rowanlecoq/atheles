@@ -9,6 +9,8 @@ import ImageCropModal from "components/image-crop-modal";
 import { useCurrency } from "components/currency-context";
 import { invalidateSessionCache } from "lib/session-cache";
 import { PROFILE_BACKGROUNDS } from "lib/profile-backgrounds";
+import { MapPinIcon, PlusIcon } from "@heroicons/react/24/outline";
+import { CheckCircleIcon } from "@heroicons/react/24/solid";
 
 type User = {
   id: string;
@@ -213,6 +215,8 @@ export default function ProfileContent() {
   const [themeSaving, setThemeSaving] = useState(false);
   const [discordSuccess, setDiscordSuccess] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
+  const [profileAddresses, setProfileAddresses] = useState<{ id: string; firstName: string | null; lastName: string | null; address1: string | null; city: string | null; province: string | null; zip: string | null; country: string | null }[]>([]);
+  const [profileDefaultId, setProfileDefaultId] = useState<string | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -364,6 +368,13 @@ export default function ProfileContent() {
         }, 100);
       });
   }, [router]);
+
+  useEffect(() => {
+    fetch("/api/auth/addresses")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => { if (d) { setProfileAddresses(d.addresses); setProfileDefaultId(d.defaultAddressId); } })
+      .catch(() => {});
+  }, []);
 
   const handleSignOut = async () => {
     // Clear ALL atheles keys from sessionStorage
@@ -1571,18 +1582,80 @@ export default function ProfileContent() {
         )}
       </div>
 
+      {/* Address Book */}
+      <div className="space-y-3">
+        <div className="flex items-center justify-between">
+          <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">address book</h2>
+          <Link
+            href="/account/addresses"
+            className="text-xs text-brand-grey/50 transition-colors hover:text-brand-gold"
+          >
+            manage all →
+          </Link>
+        </div>
+
+        {profileAddresses.length === 0 ? (
+          <Link
+            href="/account/addresses"
+            className="flex items-center gap-3 rounded-xl border border-dashed border-white/10 px-4 py-4 transition-colors hover:border-brand-gold/30"
+          >
+            <div className="flex h-8 w-8 flex-none items-center justify-center rounded-full bg-white/5 text-white/30">
+              <PlusIcon className="h-4 w-4" />
+            </div>
+            <span className="text-sm text-brand-grey/50">Add your first address</span>
+          </Link>
+        ) : (
+          <div className="space-y-2">
+            {[...profileAddresses].sort((a) => (a.id === profileDefaultId ? -1 : 1)).slice(0, 2).map((addr) => {
+              const isDefault = addr.id === profileDefaultId;
+              const name = [addr.firstName, addr.lastName].filter(Boolean).join(" ");
+              const line2 = [addr.city, addr.province, addr.zip].filter(Boolean).join(", ");
+              return (
+                <Link
+                  key={addr.id}
+                  href="/account/addresses"
+                  className={`flex items-start gap-3 rounded-xl border p-4 transition-colors ${
+                    isDefault
+                      ? "border-brand-gold/20 bg-gradient-to-br from-brand-gold/[0.06] to-transparent hover:border-brand-gold/30"
+                      : "border-white/[0.06] bg-white/[0.02] hover:border-white/10"
+                  }`}
+                >
+                  <div className={`mt-0.5 flex h-8 w-8 flex-none items-center justify-center rounded-full ${
+                    isDefault ? "bg-brand-gold/15 text-brand-gold" : "bg-white/5 text-white/30"
+                  }`}>
+                    <MapPinIcon className="h-3.5 w-3.5" />
+                  </div>
+                  <div className="min-w-0 flex-1">
+                    {isDefault && (
+                      <div className="mb-1 flex items-center gap-1 text-[10px] uppercase tracking-widest text-brand-gold">
+                        <CheckCircleIcon className="h-3 w-3" /> Default
+                      </div>
+                    )}
+                    {name && <p className="text-sm font-medium text-white">{name}</p>}
+                    {addr.address1 && <p className="text-xs text-brand-grey/60">{addr.address1}</p>}
+                    {line2 && <p className="text-xs text-brand-grey/50">{line2}</p>}
+                    {addr.country && <p className="text-xs text-brand-grey/40">{addr.country}</p>}
+                  </div>
+                </Link>
+              );
+            })}
+            {profileAddresses.length > 2 && (
+              <Link
+                href="/account/addresses"
+                className="block rounded-xl border border-dashed border-white/[0.06] px-4 py-3 text-center text-xs text-brand-grey/40 transition-colors hover:border-white/10 hover:text-brand-grey/60"
+              >
+                +{profileAddresses.length - 2} more address{profileAddresses.length - 2 > 1 ? "es" : ""}
+              </Link>
+            )}
+          </div>
+        )}
+      </div>
+
       {/* Quick Links */}
       <div className="space-y-3">
         <h2 className="mb-4 font-heading text-xl text-brand-pale-gold sm:text-lg">
           quick links
         </h2>
-        <Link
-          href="/account/addresses"
-          className="flex items-center justify-between rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 transition-colors hover:border-brand-gold/30"
-        >
-          <span className="text-sm text-white">address book</span>
-          <span className="text-xs text-brand-grey">&rarr;</span>
-        </Link>
         <Link
           href="/favorites"
           className="flex items-center justify-between rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 transition-colors hover:border-brand-gold/30"
