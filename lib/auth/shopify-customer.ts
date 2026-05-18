@@ -541,7 +541,141 @@ export async function recoverCustomerPassword(
   return { success: true };
 }
 
-export async function getCustomerByToken(accessToken: string): Promise<{
+export type CustomerAddress = {
+  id: string;
+  firstName: string | null;
+  lastName: string | null;
+  address1: string | null;
+  address2: string | null;
+  city: string | null;
+  province: string | null;
+  zip: string | null;
+  country: string | null;
+  phone: string | null;
+};
+
+export type AddressInput = Omit<CustomerAddress, "id">;
+
+export async function getCustomerAddresses(accessToken: string): Promise<{ addresses: CustomerAddress[]; defaultAddressId: string | null }> {
+  if (!endpoint) return { addresses: [], defaultAddressId: null };
+
+  const data = await shopifyCustomerFetch<{
+    customer: {
+      defaultAddress: { id: string } | null;
+      addresses: { nodes: CustomerAddress[] };
+    } | null;
+  }>(
+    `query customerAddresses($customerAccessToken: String!) {
+      customer(customerAccessToken: $customerAccessToken) {
+        defaultAddress { id }
+        addresses(first: 20) {
+          nodes { id firstName lastName address1 address2 city province zip country phone }
+        }
+      }
+    }`,
+    { customerAccessToken: accessToken },
+  );
+
+  return {
+    addresses: data.customer?.addresses.nodes ?? [],
+    defaultAddressId: data.customer?.defaultAddress?.id ?? null,
+  };
+}
+
+export async function createCustomerAddress(accessToken: string, address: AddressInput): Promise<{ id: string } | { error: string }> {
+  if (!endpoint) return { error: "store not configured" };
+
+  const data = await shopifyCustomerFetch<{
+    customerAddressCreate: {
+      customerAddress: { id: string } | null;
+      customerUserErrors: { message: string }[];
+    };
+  }>(
+    `mutation customerAddressCreate($customerAccessToken: String!, $address: MailingAddressInput!) {
+      customerAddressCreate(customerAccessToken: $customerAccessToken, address: $address) {
+        customerAddress { id }
+        customerUserErrors { message }
+      }
+    }`,
+    { customerAccessToken: accessToken, address },
+  );
+
+  const errors = data.customerAddressCreate.customerUserErrors;
+  if (errors.length > 0) return { error: errors[0]!.message };
+  const id = data.customerAddressCreate.customerAddress?.id;
+  if (!id) return { error: "failed to create address" };
+  return { id };
+}
+
+export async function updateCustomerAddress(accessToken: string, id: string, address: AddressInput): Promise<{ success: boolean; error?: string }> {
+  if (!endpoint) return { success: false, error: "store not configured" };
+
+  const data = await shopifyCustomerFetch<{
+    customerAddressUpdate: {
+      customerAddress: { id: string } | null;
+      customerUserErrors: { message: string }[];
+    };
+  }>(
+    `mutation customerAddressUpdate($customerAccessToken: String!, $id: ID!, $address: MailingAddressInput!) {
+      customerAddressUpdate(customerAccessToken: $customerAccessToken, id: $id, address: $address) {
+        customerAddress { id }
+        customerUserErrors { message }
+      }
+    }`,
+    { customerAccessToken: accessToken, id, address },
+  );
+
+  const errors = data.customerAddressUpdate.customerUserErrors;
+  if (errors.length > 0) return { success: false, error: errors[0]!.message };
+  return { success: true };
+}
+
+export async function deleteCustomerAddress(accessToken: string, id: string): Promise<{ success: boolean; error?: string }> {
+  if (!endpoint) return { success: false, error: "store not configured" };
+
+  const data = await shopifyCustomerFetch<{
+    customerAddressDelete: {
+      deletedCustomerAddressId: string | null;
+      customerUserErrors: { message: string }[];
+    };
+  }>(
+    `mutation customerAddressDelete($customerAccessToken: String!, $id: ID!) {
+      customerAddressDelete(customerAccessToken: $customerAccessToken, id: $id) {
+        deletedCustomerAddressId
+        customerUserErrors { message }
+      }
+    }`,
+    { customerAccessToken: accessToken, id },
+  );
+
+  const errors = data.customerAddressDelete.customerUserErrors;
+  if (errors.length > 0) return { success: false, error: errors[0]!.message };
+  return { success: true };
+}
+
+export async function setDefaultCustomerAddress(accessToken: string, addressId: string): Promise<{ success: boolean; error?: string }> {
+  if (!endpoint) return { success: false, error: "store not configured" };
+
+  const data = await shopifyCustomerFetch<{
+    customerDefaultAddressUpdate: {
+      customer: { id: string } | null;
+      customerUserErrors: { message: string }[];
+    };
+  }>(
+    `mutation customerDefaultAddressUpdate($customerAccessToken: String!, $addressId: ID!) {
+      customerDefaultAddressUpdate(customerAccessToken: $customerAccessToken, addressId: $addressId) {
+        customer { id }
+        customerUserErrors { message }
+      }
+    }`,
+    { customerAccessToken: accessToken, addressId },
+  );
+
+  const errors = data.customerDefaultAddressUpdate.customerUserErrors;
+  if (errors.length > 0) return { success: false, error: errors[0]!.message };
+  return { success: true };
+}
+: Promise<{
   id: string;
   email: string;
   firstName: string | null;
