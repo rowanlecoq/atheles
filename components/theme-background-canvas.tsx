@@ -251,55 +251,60 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
+    // Same cy spacing as ocean (0.12h, 8 beams → last at 0.89h) so fills sit cleanly below.
+    // Edge/mid use different RGB so each beam has a bright gold core over an amber edge.
     for (let i = 0; i < 8; i++) {
-      const angle   = (-11 + i * 3.2) * (Math.PI / 180);
-      const stripH  = 22 + (i % 4) * 8;
-      const opacity = 0.065 + (i % 3) * 0.022;
-      const cy = h * (0.04 + i * 0.13) + Math.sin(time * 0.30 + i * 1.4) * 16;
-      const rgb = i % 3 === 0 ? "240,200,80" : i % 3 === 1 ? "255,228,115" : "245,210,95";
+      const angle   = (-10 + i * 3) * (Math.PI / 180);
+      const stripH  = 24 + (i % 4) * 8;
+      const opacity = 0.062 + (i % 3) * 0.020;
+      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.30 + i * 1.4) * 18;
+      const eRgb = i % 3 === 0 ? "195,148,40" : i % 3 === 1 ? "210,162,52" : "185,140,38";
+      const mRgb = i % 3 === 0 ? "255,220,100" : i % 3 === 1 ? "255,235,130" : "248,212,90";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        (o) => `rgba(${eRgb},${o.toFixed(4)})`,
+        (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
     const goldFill = [
-      [0.10, 0.80,  8, 16, 0.042, "255,225,110"],
-      [0.06, 0.90, 10, 20, 0.046, "240,200,80"],
-      [0.15, 0.96, 12, 14, 0.036, "255,228,115"],
+      [0.10, 0.91,  8, 16, 0.038, "255,220,100", "195,148,40"],
+      [0.06, 0.95, 10, 20, 0.042, "248,212,90",  "185,140,38"],
+      [0.15, 0.98, 11, 14, 0.032, "255,235,130", "210,162,52"],
     ] as const;
-    for (const [cx, cyF, deg, sH, op, rgb] of goldFill) {
+    for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of goldFill) {
       const cy = h * cyF + Math.sin(time * 0.30 + cx * 10) * 8;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        (o) => `rgba(${eRgb},${o.toFixed(4)})`,
+        (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
   }
 
   if (theme === "midnight") {
-    // Angle varies 6°→22° — all beams clearly diagonal but with enough spread per beam
-    // to create visible shading contrast between adjacent rays (same technique as ocean).
+    // Diagonal 6°→22° with varied angles for shading. 4-color rotation adds a pale
+    // lavender-white (220,185,255) as the extra unique midnight accent.
+    // Same 0.12h cy spacing as ocean keeps fills cleanly below main beams.
     for (let i = 0; i < 8; i++) {
       const angle   = (6 + i * 2.3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.075 + (i % 3) * 0.022;
-      const cy = h * (0.04 + i * 0.13) + Math.sin(time * 0.22 + i * 1.6) * 10;
-      const rgb = i % 3 === 0 ? "160,120,255" : i % 3 === 1 ? "200,165,255" : "180,140,255";
+      const opacity = 0.072 + (i % 4) * 0.018;
+      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.22 + i * 1.6) * 10;
+      const eRgb = i % 4 === 0 ? "100,60,220" : i % 4 === 1 ? "130,90,245" : i % 4 === 2 ? "80,50,200" : "155,100,255";
+      const mRgb = i % 4 === 0 ? "175,140,255" : i % 4 === 1 ? "205,170,255" : i % 4 === 2 ? "220,185,255" : "190,155,255";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        (o) => `rgba(${eRgb},${o.toFixed(4)})`,
+        (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
     const midFill = [
-      [0.10, 0.80, 15, 18, 0.045, "180,140,255"],
-      [0.06, 0.90, 17, 22, 0.050, "160,120,255"],
-      [0.15, 0.96, 19, 16, 0.038, "200,165,255"],
+      [0.10, 0.91, 15, 18, 0.040, "190,155,255", "110,70,230"],
+      [0.06, 0.95, 17, 22, 0.044, "175,140,255", "100,60,220"],
+      [0.15, 0.98, 19, 16, 0.034, "220,185,255",  "80,50,200"],
     ] as const;
-    for (const [cx, cyF, deg, sH, op, rgb] of midFill) {
+    for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of midFill) {
       const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
-        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        (o) => `rgba(${eRgb},${o.toFixed(4)})`,
+        (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
   }
