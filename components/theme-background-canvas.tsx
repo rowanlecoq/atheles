@@ -223,26 +223,31 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    for (let i = 0; i < 8; i++) {
-      const angle   = (-10 + i * 3) * (Math.PI / 180);
-      const stripH  = 18 + (i % 3) * 8;
-      const opacity = 0.11 + (i % 3) * 0.022;
-      const cy = h * (0.04 + i * 0.13) + Math.sin(time * 0.22 + i * 1.4) * 14;
+    // Sunbeam fan: angles spread wide (-20° to +16°) so beams radiate outward
+    const goldAngles = [-20, -11, -3, 5, 11, 16];
+    const goldThick  = [38, 20, 44, 22, 40, 18];
+    const goldAlpha  = [0.18, 0.13, 0.20, 0.14, 0.17, 0.12];
+    for (let i = 0; i < 6; i++) {
+      const angle  = (goldAngles[i]! + Math.sin(time * 0.20 + i) * 1.5) * (Math.PI / 180);
+      const stripH = goldThick[i]!;
+      const opacity = goldAlpha[i]!;
+      const cy = h * (0.05 + i * 0.15) + Math.sin(time * 0.22 + i * 1.4) * 14;
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
-        (o) => `rgba(176,144,70,${o.toFixed(4)})`,
-        (o) => `rgba(218,182,108,${o.toFixed(4)})`,
+        (o) => `rgba(155,122,52,${o.toFixed(4)})`,
+        (o) => `rgba(222,188,110,${o.toFixed(4)})`,
         hasFilter);
     }
   }
 
   if (theme === "midnight") {
-    // Fixed steep angle so all beams are parallel diagonal lines (matching blob direction)
-    for (let i = 0; i < 8; i++) {
-      const angle   = 40 * (Math.PI / 180);
-      const stripH  = 18 + (i % 3) * 8;
-      const opacity = 0.10 + (i % 3) * 0.020;
-      const cy = h * (0.04 + i * 0.13) + Math.sin(time * 0.18 + i * 1.6) * 12;
-      const rgb = i % 2 === 0 ? "100,60,240" : "128,82,255";
+    // Tight parallel diagonal streaks at 42° — aurora/moonbeam style
+    const midnightRgb = ["88,52,228", "145,95,255", "108,65,242"];
+    for (let i = 0; i < 6; i++) {
+      const angle   = 42 * (Math.PI / 180);
+      const stripH  = 14 + (i % 2) * 10;
+      const opacity = 0.18 + (i % 3) * 0.04;
+      const cy = h * (0.05 + i * 0.15) + Math.sin(time * 0.16 + i * 1.8) * 14;
+      const rgb = midnightRgb[i % 3]!;
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
