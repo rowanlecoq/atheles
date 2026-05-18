@@ -514,12 +514,6 @@ body[data-bg="sunset"] {
   animation: beta-pulse 2.4s ease-in-out infinite;
 }
 
-/* Announcement bar transparent when theme active on desktop. */
-@media (pointer: fine) {
-  body[data-bg] .announcement-bar-root {
-    background-color: transparent !important;
-  }
-}
 
 
 
