@@ -380,9 +380,37 @@ export default function CartModal() {
       try {
         const handles: string[] = JSON.parse(localStorage.getItem("atheles-favorites") || "[]");
         const handleSet = new Set(handles);
-        const updated = (favCacheRef.current ?? []).filter((p) => handleSet.has(p.handle));
-        favCacheRef.current = updated;
-        setFavProducts(updated);
+        const cached = favCacheRef.current ?? [];
+        const cachedHandles = new Set(cached.map((p) => p.handle));
+
+        // Remove unfavorited items
+        const kept = cached.filter((p) => handleSet.has(p.handle));
+
+        // Find newly added handles not yet in cache
+        const newHandles = handles.filter((h) => !cachedHandles.has(h)).slice(0, 6);
+
+        if (newHandles.length === 0) {
+          favCacheRef.current = kept;
+          setFavProducts(kept);
+          return;
+        }
+
+        // Fetch newly added products and merge
+        fetch("/api/products/by-handles", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ handles: newHandles }),
+        })
+          .then((r) => r.ok ? r.json() : { products: [] })
+          .then((d) => {
+            const merged = [...kept, ...(d.products ?? [])];
+            favCacheRef.current = merged;
+            setFavProducts(merged);
+          })
+          .catch(() => {
+            favCacheRef.current = kept;
+            setFavProducts(kept);
+          });
       } catch {}
     };
     window.addEventListener("favorites-changed", handler);
