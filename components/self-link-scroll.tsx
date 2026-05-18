@@ -41,6 +41,7 @@ export function SelfLinkScroll() {
       if (
         url.origin === window.location.origin &&
         url.pathname === pathname &&
+        url.search === window.location.search &&
         !url.hash
       ) {
         e.preventDefault();
