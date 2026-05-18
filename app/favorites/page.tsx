@@ -161,7 +161,7 @@ export default function FavoritesPage() {
           return (
             <FadeIn delay={0.15} className="grid gap-3 sm:grid-cols-2">
               {Array.from({ length: Math.min(favorites.length || 2, 4) }).map((_, i) => (
-                <div key={i} className="flex items-center gap-4 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-3">
+                <div key={`skeleton-${i}`} className="flex items-center gap-4 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-3">
                   <div className="h-20 w-20 flex-none animate-pulse rounded bg-brand-dark-gold/15" />
                   <div className="flex-1 space-y-2">
                     <div className="h-4 w-3/4 animate-pulse rounded bg-brand-dark-gold/15" />

@@ -86,24 +86,33 @@ export function CategoryNav() {
                 onMouseEnter={hasDropdown ? () => handleEnter(i) : undefined}
                 onMouseLeave={hasDropdown ? handleLeave : undefined}
               >
-                <Link
-                  href={cat.href}
-                  className={`group relative block py-1 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
-                    activeIndex === i || current
-                      ? "text-brand-gold"
-                      : "text-brand-grey hover:text-brand-gold"
-                  }`}
-                >
-                  {cat.title}
-                  {/* Animated underline */}
+                {cat.comingSoon ? (
                   <span
-                    className={`absolute -bottom-0.5 left-0 h-px bg-brand-gold transition-all duration-300 ${
+                    className="relative block cursor-default py-1 text-xs uppercase tracking-[0.2em] text-brand-grey/50"
+                    title="Coming Soon"
+                  >
+                    {cat.title}
+                  </span>
+                ) : (
+                  <Link
+                    href={cat.href}
+                    className={`group relative block py-1 text-xs uppercase tracking-[0.2em] transition-colors duration-200 ${
                       activeIndex === i || current
-                        ? "w-full"
-                        : "w-0 group-hover:w-full"
+                        ? "text-brand-gold"
+                        : "text-brand-grey hover:text-brand-gold"
                     }`}
-                  />
-                </Link>
+                  >
+                    {cat.title}
+                    {/* Animated underline */}
+                    <span
+                      className={`absolute -bottom-0.5 left-0 h-px bg-brand-gold transition-all duration-300 ${
+                        activeIndex === i || current
+                          ? "w-full"
+                          : "w-0 group-hover:w-full"
+                      }`}
+                    />
+                  </Link>
+                )}
               </div>
             );
           })}

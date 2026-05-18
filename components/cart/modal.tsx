@@ -231,7 +231,7 @@ function CartLineItem({ item }: { item: CartItem }) {
             <span className="w-5 text-center text-sm text-white tabular-nums">{item.quantity}</span>
             <button
               type="button"
-              onClick={() => !atMax && handleQty("plus")}
+              onClick={() => handleQty("plus")}
               disabled={atMax}
               aria-label={atMax ? (item.merchandise.availableForSale ? "Maximum quantity reached" : "Out of stock") : "Increase quantity"}
               className="flex h-7 w-7 items-center justify-center rounded-full text-white/50 hover:text-white transition-colors disabled:cursor-not-allowed disabled:opacity-25"

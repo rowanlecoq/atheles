@@ -88,18 +88,22 @@ function CategoryItem({
   return (
     <li className={isLast ? "" : "border-b border-brand-dark-gold/10"}>
       <div className="flex items-center">
-        <Link
-          href={item.path}
-          onClick={onNavigate}
-          className="tap-target flex min-h-[52px] flex-1 items-center py-4 text-xl uppercase tracking-[0.12em] text-brand-grey transition-colors hover:text-brand-gold"
-        >
-          {item.title}
-          {item.comingSoon && (
-            <span className="ml-2 text-xs italic tracking-wide text-brand-dark-gold">
+        {item.comingSoon ? (
+          <span className="tap-target flex min-h-[52px] flex-1 cursor-default items-center py-4 text-xl uppercase tracking-[0.12em] text-brand-grey/40">
+            {item.title}
+            <span className="ml-2 text-xs italic tracking-wide text-brand-dark-gold/60">
               Soon
             </span>
-          )}
-        </Link>
+          </span>
+        ) : (
+          <Link
+            href={item.path}
+            onClick={onNavigate}
+            className="tap-target flex min-h-[52px] flex-1 items-center py-4 text-xl uppercase tracking-[0.12em] text-brand-grey transition-colors hover:text-brand-gold"
+          >
+            {item.title}
+          </Link>
+        )}
         {hasSubs && (
           <button
             type="button"
