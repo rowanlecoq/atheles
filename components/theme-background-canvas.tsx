@@ -75,13 +75,13 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.50, 0.35, 0.70, 0.60,  30, 180, 220, 0.30, 0.60], // cx centred (was 0.30)
   ]},
   tropical: { base: '#020d06', radial: [
-    [0.50, 0.85, 1.20, 0.50,  10, 130,  72, 0.38, 0.65],  // bottom dark forest green
-    [0.78, 0.72, 0.72, 0.55, 255, 190,  50, 0.40, 0.58],  // lower-right amber haze
-    [0.50, 0.48, 0.68, 0.68,  12, 155, 100, 0.38, 0.58],  // centre dark teal
-    [0.48, 0.22, 0.68, 0.72, 255, 170,  11, 0.42, 0.62],  // upper-centre amber
-    [0.18, 0.65, 0.82, 0.68,   8, 138,  78, 0.50, 0.62],  // left dark green
-    [0.72, 0.88, 0.65, 0.52, 255, 162,  18, 0.38, 0.60],  // lower-right amber accent
-    [0.28, 0.90, 0.62, 0.48,  10, 142,  82, 0.34, 0.62],  // lower-left dark teal
+    [0.50, 0.85, 1.20, 0.50,  10, 130,  72, 0.24, 0.60],  // bottom dark forest green
+    [0.78, 0.72, 0.72, 0.55, 255, 190,  50, 0.26, 0.55],  // lower-right amber haze
+    [0.50, 0.48, 0.68, 0.68,  12, 155, 100, 0.24, 0.55],  // centre dark teal
+    [0.48, 0.22, 0.68, 0.72, 255, 170,  11, 0.27, 0.58],  // upper-centre amber
+    [0.18, 0.65, 0.82, 0.68,   8, 138,  78, 0.32, 0.58],  // left dark green
+    [0.72, 0.88, 0.65, 0.52, 255, 162,  18, 0.24, 0.56],  // lower-right amber accent
+    [0.28, 0.90, 0.62, 0.48,  10, 142,  82, 0.22, 0.58],  // lower-left dark teal
   ]},
   midnight: { base: '#03000a', radial: [
     [0.10, 0.12, 0.65, 0.60,  88,  52, 228, 0.22, 0.72],  // top-left node
