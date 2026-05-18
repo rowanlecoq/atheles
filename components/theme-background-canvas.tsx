@@ -194,11 +194,11 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
         (o) => `rgba(6,182,212,${o.toFixed(4)})`,
         hasFilter);
     }
-    // small bottom-left fill rays
+    // small bottom-left fill rays — positive angles match main bottom rays (~+8°–+11°)
     const blFill = [
-      [0.10, 0.80, -16, 16, 0.040],
-      [0.06, 0.90, -12, 20, 0.044],
-      [0.15, 0.96,  -8, 14, 0.034],
+      [0.10, 0.80,  8, 16, 0.040],
+      [0.06, 0.90, 10, 20, 0.044],
+      [0.15, 0.96, 11, 14, 0.034],
     ] as const;
     for (const [cx, cyF, deg, sH, op] of blFill) {
       const cy = h * cyF + Math.sin(time * 0.3 + cx * 10) * 8;
@@ -231,6 +231,19 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
       const cy = h * (0.06 + i * 0.16) + Math.sin(time * 0.28 + i * 1.3) * 14;
       const rgb = i % 3 === 0 ? "147,51,234" : i % 3 === 1 ? "255,80,150" : "255,130,60";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        (o) => `rgba(${rgb},${o.toFixed(4)})`,
+        hasFilter);
+    }
+    // small bottom-left fill rays — positive angles match main bottom rays (~+6°–+10°)
+    const blFill = [
+      [0.10, 0.80,  6, 16, 0.040, "255,130,60"],
+      [0.06, 0.90,  8, 20, 0.044, "255,80,150"],
+      [0.15, 0.96, 10, 14, 0.034, "255,130,60"],
+    ] as const;
+    for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
+      const cy = h * cyF + Math.sin(time * 0.28 + cx * 10) * 8;
+      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
