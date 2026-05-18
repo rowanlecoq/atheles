@@ -64,8 +64,8 @@ type RLayer = readonly [number,number,number,number,number,number,number,number,
 type LStop  = readonly [number,number,number,number,number]; // r,g,b,a,pos
 const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
   gold: { base: '#0d0900', radial: [
-    [0.50, 0.55, 1.55, 0.80, 160, 134,  78, 0.18, 0.88],  // wide flat elliptical ambient
-    [0.50, 0.50, 0.92, 0.75, 204, 177, 115, 0.34, 0.72],  // brand-gold (#ccb173) core
+    [0.50, 0.55, 1.55, 0.80, 185, 155, 60, 0.30, 0.88],   // wide ambient, brighter amber-gold
+    [0.50, 0.50, 0.92, 0.75, 230, 195, 90, 0.50, 0.72],   // core, clearly gold not brown
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.22, 1.00, 0.40,  20, 100, 200, 0.14, 0.48],
@@ -89,6 +89,7 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
     [0.62, 0.52, 0.75, 0.70, 120,  75, 252, 0.25, 0.75],  // center node (brightest)
     [0.85, 0.80, 0.65, 0.62,  92,  54, 232, 0.21, 0.72],  // lower-right node
     [0.22, 0.75, 0.60, 0.58,  78,  46, 215, 0.17, 0.70],  // lower-left ambient
+    [0.06, 0.88, 0.58, 0.52,  85,  48, 220, 0.20, 0.68],  // bottom-left fill blob
   ]},
   sunset: { base: '#0e0206', radial: [
     [0.50, 1.18, 1.10, 0.40, 255, 140,  20, 0.22, 0.48],  // orange bottom horizon
@@ -251,27 +252,28 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // 7 beams shifted right (-4°→+14°). Edge is bright warm-gold (not dark amber)
-    // so rays visibly contrast against the brownish blob background.
-    for (let i = 0; i < 7; i++) {
-      const angle   = (-4 + i * 3) * (Math.PI / 180);
+    // 8 beams, ocean's exact cy spacing (0.12h) and stripH — proven full coverage.
+    // Angles shifted right (-6°→+15°) vs ocean's symmetric fan for a warm-sun character.
+    for (let i = 0; i < 8; i++) {
+      const angle   = (-6 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.085 + (i % 3) * 0.022;
-      const cy = h * (0.06 + i * 0.14) + Math.sin(time * 0.30 + i * 1.4) * 18;
-      const eRgb = i % 3 === 0 ? "235,195,75" : i % 3 === 1 ? "245,205,85" : "228,188,68";
-      const mRgb = i % 3 === 0 ? "255,248,160" : i % 3 === 1 ? "255,252,180" : "255,244,148";
+      const opacity = 0.078 + (i % 3) * 0.024;
+      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.30 + i) * 20;
+      const eRgb = i % 3 === 0 ? "230,185,65"  : i % 3 === 1 ? "240,200,75"  : "220,175,58";
+      const mRgb = i % 3 === 0 ? "255,248,155" : i % 3 === 1 ? "255,252,175" : "255,240,140";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
+    // ocean fill positions exactly — same geometry that gives ocean full bottom-left coverage
     const goldFill = [
-      [0.10, 0.92,  9, 18, 0.048, "255,248,160", "235,195,75"],
-      [0.05, 0.96, 11, 24, 0.052, "255,244,148", "228,188,68"],
-      [0.14, 1.00, 10, 28, 0.044, "255,252,180", "245,205,85"],
+      [0.10, 0.80,  8, 16, 0.054, "255,248,155", "230,185,65"],
+      [0.06, 0.90, 10, 20, 0.058, "255,240,140", "220,175,58"],
+      [0.15, 0.96, 11, 14, 0.046, "255,252,175", "240,200,75"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of goldFill) {
-      const cy = h * cyF + Math.sin(time * 0.30 + cx * 10) * 6;
+      const cy = h * cyF + Math.sin(time * 0.30 + cx * 10) * 8;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
@@ -280,30 +282,29 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "midnight") {
-    // -3°→+21° keeps the diagonal feel while the one negative-angle beam
-    // covers the upper canvas. Four fills target the bottom-left geometrically:
-    // cy=1.02h places a beam center just below the canvas edge so the blurred
-    // halo lands exactly on the bottom-left corner.
+    // 8 beams, ocean's cy spacing. Angles -5°→+16° (shifted 5° toward positive
+    // vs ocean) for diagonal character while keeping the same proven coverage geometry.
+    // 4-color rotation adds pale lavender-white as a unique midnight accent.
     for (let i = 0; i < 8; i++) {
-      const angle   = (-3 + i * 3.4) * (Math.PI / 180);
+      const angle   = (-5 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.072 + (i % 4) * 0.018;
-      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.22 + i * 1.6) * 10;
-      const eRgb = i % 4 === 0 ? "100,60,220" : i % 4 === 1 ? "130,90,245" : i % 4 === 2 ? "80,50,200" : "155,100,255";
+      const opacity = 0.080 + (i % 4) * 0.018;
+      const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.22 + i) * 14;
+      const eRgb = i % 4 === 0 ? "100,60,220"  : i % 4 === 1 ? "130,90,245"  : i % 4 === 2 ? "80,50,200"   : "155,100,255";
       const mRgb = i % 4 === 0 ? "175,140,255" : i % 4 === 1 ? "205,170,255" : i % 4 === 2 ? "220,185,255" : "190,155,255";
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
+    // ocean fill positions, angles shifted to match midnight's diagonal range
     const midFill = [
-      [0.10, 0.92, 14, 20, 0.042, "190,155,255", "110,70,230"],
-      [0.04, 0.96, 15, 28, 0.048, "175,140,255", "100,60,220"],
-      [0.01, 0.99, 16, 32, 0.052, "220,185,255",  "80,50,200"],
-      [0.02, 1.02, 14, 36, 0.056, "205,170,255", "130,90,245"],
+      [0.10, 0.80, 12, 16, 0.052, "190,155,255", "110,70,230"],
+      [0.06, 0.90, 14, 20, 0.056, "175,140,255", "100,60,220"],
+      [0.15, 0.96, 16, 14, 0.044, "220,185,255",  "80,50,200"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of midFill) {
-      const cy = h * cyF;
+      const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
       drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
