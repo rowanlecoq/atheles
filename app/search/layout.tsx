@@ -18,8 +18,8 @@ export default function SearchLayout({
       <SearchPageHeader />
 
       {/* Mobile filters */}
-      <FadeIn direction="up" duration={0.3}>
-        <div className="relative z-10 mx-auto max-w-(--breakpoint-2xl) pt-4 md:hidden">
+      <FadeIn direction="up" duration={0.3} className="relative z-20">
+        <div className="mx-auto max-w-(--breakpoint-2xl) pt-4 md:hidden">
           <div className="mb-2">
             <MobileCollections />
           </div>
