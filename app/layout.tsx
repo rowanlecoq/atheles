@@ -108,7 +108,6 @@ export default async function RootLayout({
               <KonamiLightning />
               <div id="thunder-shake-root">
                 <AnnouncementBar />
-                <ScrollProgress />
                 <Navbar />
                 <main className="relative z-[1] w-full">
                   <PageTransition>{children}</PageTransition>
