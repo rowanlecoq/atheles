@@ -58,39 +58,31 @@ export function SiteThemeProvider() {
         root.style.setProperty("--color-brand-light-gold", lighten(t.brandGold, 0.2));
         root.style.setProperty("--color-brand-gold-wash", darken(t.brandGold, 0.05));
 
-        // Apply gradient only after fonts are loaded — prevents colored boxes during FOUT
-        const applyGradient = () => {
-          let gradientStyle = document.getElementById("atheles-heading-gradient");
-          if (!gradientStyle) {
-            gradientStyle = document.createElement("style");
-            gradientStyle.id = "atheles-heading-gradient";
-            document.head.appendChild(gradientStyle);
-          }
-          if (t.headingStyle === "gradient") {
-            gradientStyle.textContent = `
-              .font-heading.text-brand-gold,
-              .font-heading.text-brand-dark-gold,
-              .font-heading.text-brand-pale-gold,
-              .font-heading.text-brand-light-gold,
-              h1.text-brand-gold, h2.text-brand-gold, h3.text-brand-gold,
-              h1.text-brand-dark-gold, h2.text-brand-dark-gold, h3.text-brand-dark-gold,
-              h1.text-brand-pale-gold, h2.text-brand-pale-gold, h3.text-brand-pale-gold,
-              h1.text-brand-light-gold, h2.text-brand-light-gold, h3.text-brand-light-gold {
-                background: linear-gradient(90deg, ${t.headingGradientFrom}, ${t.headingGradientTo}) !important;
-                -webkit-background-clip: text !important;
-                -webkit-text-fill-color: transparent !important;
-                background-clip: text !important;
-              }
-            `;
-          } else {
-            gradientStyle.textContent = "";
-          }
-        };
-
-        if (document.fonts?.ready) {
-          document.fonts.ready.then(applyGradient);
+        // Gradient heading support — inject a style tag for gradient text
+        let gradientStyle = document.getElementById("atheles-heading-gradient");
+        if (!gradientStyle) {
+          gradientStyle = document.createElement("style");
+          gradientStyle.id = "atheles-heading-gradient";
+          document.head.appendChild(gradientStyle);
+        }
+        if (t.headingStyle === "gradient") {
+          gradientStyle.textContent = `
+            .font-heading.text-brand-gold,
+            .font-heading.text-brand-dark-gold,
+            .font-heading.text-brand-pale-gold,
+            .font-heading.text-brand-light-gold,
+            h1.text-brand-gold, h2.text-brand-gold, h3.text-brand-gold,
+            h1.text-brand-dark-gold, h2.text-brand-dark-gold, h3.text-brand-dark-gold,
+            h1.text-brand-pale-gold, h2.text-brand-pale-gold, h3.text-brand-pale-gold,
+            h1.text-brand-light-gold, h2.text-brand-light-gold, h3.text-brand-light-gold {
+              background: linear-gradient(90deg, ${t.headingGradientFrom}, ${t.headingGradientTo}) !important;
+              -webkit-background-clip: text !important;
+              -webkit-text-fill-color: transparent !important;
+              background-clip: text !important;
+            }
+          `;
         } else {
-          applyGradient();
+          gradientStyle.textContent = "";
         }
 
         // Store for logo component

@@ -23,7 +23,7 @@ import { baseUrl } from "lib/utils";
 const playfair = localFont({
   src: "../public/fonts/PlayfairDisplay-Variable.ttf",
   variable: "--font-playfair",
-  display: "swap",
+  display: "block",
 });
 
 export const metadata = {
