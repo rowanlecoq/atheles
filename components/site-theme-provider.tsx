@@ -67,14 +67,15 @@ export function SiteThemeProvider() {
         }
         if (t.headingStyle === "gradient") {
           gradientStyle.textContent = `
-            .text-brand-gold, .text-brand-dark-gold, .text-brand-pale-gold, .text-brand-light-gold {
+            .font-heading.text-brand-gold,
+            .font-heading.text-brand-dark-gold,
+            .font-heading.text-brand-pale-gold,
+            .font-heading.text-brand-light-gold,
+            h1.text-brand-gold, h2.text-brand-gold, h3.text-brand-gold,
+            h1.text-brand-dark-gold, h2.text-brand-dark-gold, h3.text-brand-dark-gold,
+            h1.text-brand-pale-gold, h2.text-brand-pale-gold, h3.text-brand-pale-gold,
+            h1.text-brand-light-gold, h2.text-brand-light-gold, h3.text-brand-light-gold {
               background: linear-gradient(90deg, ${t.headingGradientFrom}, ${t.headingGradientTo}) !important;
-              -webkit-background-clip: text !important;
-              -webkit-text-fill-color: transparent !important;
-              background-clip: text !important;
-            }
-            .text-brand-dark-gold {
-              background: linear-gradient(90deg, ${t.headingGradientFrom}99, ${t.headingGradientTo}99) !important;
               -webkit-background-clip: text !important;
               -webkit-text-fill-color: transparent !important;
               background-clip: text !important;
