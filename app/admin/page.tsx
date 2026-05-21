@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import { TrashIcon } from "@heroicons/react/24/outline";
 
 export default function AdminDashboard() {
   const router = useRouter();
@@ -91,6 +92,75 @@ export default function AdminDashboard() {
           icon="🛍️"
           external
         />
+        <BlobCleanupCard />
+      </div>
+    </div>
+  );
+}
+
+function BlobCleanupCard() {
+  const [state, setState] = useState<"idle" | "scanning" | "deleting" | "done" | "error">("idle");
+  const [result, setResult] = useState<{ orphanCount?: number; deleted?: number } | null>(null);
+
+  const scan = async () => {
+    setState("scanning");
+    try {
+      const r = await fetch("/api/admin/blob-cleanup");
+      const d = await r.json();
+      setResult(d);
+      setState("idle");
+    } catch {
+      setState("error");
+    }
+  };
+
+  const cleanup = async () => {
+    setState("deleting");
+    try {
+      const r = await fetch("/api/admin/blob-cleanup", { method: "DELETE" });
+      const d = await r.json();
+      setResult(d);
+      setState("done");
+    } catch {
+      setState("error");
+    }
+  };
+
+  return (
+    <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
+      <span className="mb-3 block text-2xl">🗑️</span>
+      <h2 className="mb-1 text-sm font-medium text-white">blob storage cleanup</h2>
+      <p className="mb-4 text-xs leading-relaxed text-brand-grey">
+        remove old profile photos and unused files from vercel blob to free up space. runs automatically every sunday.
+      </p>
+
+      {result && state !== "deleting" && (
+        <p className="mb-3 text-xs text-brand-gold">
+          {state === "done"
+            ? `deleted ${result.deleted} orphaned file${result.deleted !== 1 ? "s" : ""}.`
+            : `found ${result.orphanCount} orphaned file${result.orphanCount !== 1 ? "s" : ""}.`}
+        </p>
+      )}
+      {state === "error" && <p className="mb-3 text-xs text-red-400">something went wrong.</p>}
+
+      <div className="flex gap-2">
+        <button
+          type="button"
+          onClick={scan}
+          disabled={state === "scanning" || state === "deleting"}
+          className="rounded-full border border-brand-dark-gold/30 px-3 py-1.5 text-xs text-brand-pale-gold transition-colors hover:border-brand-gold/50 hover:text-brand-gold disabled:opacity-40"
+        >
+          {state === "scanning" ? "scanning…" : "scan"}
+        </button>
+        <button
+          type="button"
+          onClick={cleanup}
+          disabled={state === "scanning" || state === "deleting"}
+          className="flex items-center gap-1.5 rounded-full bg-red-500/10 px-3 py-1.5 text-xs text-red-400 transition-colors hover:bg-red-500/20 disabled:opacity-40"
+        >
+          <TrashIcon className="h-3 w-3" />
+          {state === "deleting" ? "cleaning…" : "clean now"}
+        </button>
       </div>
     </div>
   );

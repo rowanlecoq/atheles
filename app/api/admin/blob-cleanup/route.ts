@@ -5,6 +5,7 @@ import { NextResponse } from "next/server";
 
 const blobToken = process.env.BLOB_READ_WRITE_TOKEN || "";
 const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
+const cronSecret = process.env.CRON_SECRET || "";
 const domain = process.env.SHOPIFY_STORE_DOMAIN
   ? process.env.SHOPIFY_STORE_DOMAIN.startsWith("https://")
     ? process.env.SHOPIFY_STORE_DOMAIN
@@ -12,7 +13,12 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
   : "";
 const adminEndpoint = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
 
-async function verifyAdmin() {
+async function verifyAdmin(request: Request) {
+  // Cron job auth via secret header
+  const auth = request.headers.get("authorization");
+  if (cronSecret && auth === `Bearer ${cronSecret}`) return true;
+
+  // Admin cookie auth
   const cookieStore = await cookies();
   const token = cookieStore.get("atheles-auth-token")?.value;
   if (!token) return false;
@@ -102,8 +108,8 @@ async function collectActiveUrls(): Promise<Set<string>> {
 }
 
 // GET — dry run: returns what would be deleted
-export async function GET() {
-  if (!(await verifyAdmin())) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+export async function GET(request: Request) {
+  if (!(await verifyAdmin(request))) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!blobToken) return NextResponse.json({ error: "blob not configured" }, { status: 500 });
 
   const active = await collectActiveUrls();
@@ -122,8 +128,8 @@ export async function GET() {
 }
 
 // DELETE — actually deletes orphaned blobs
-export async function DELETE() {
-  if (!(await verifyAdmin())) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+export async function DELETE(request: Request) {
+  if (!(await verifyAdmin(request))) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!blobToken) return NextResponse.json({ error: "blob not configured" }, { status: 500 });
 
   const active = await collectActiveUrls();

@@ -1,5 +1,11 @@
 {
   "buildCommand": "pnpm build",
   "outputDirectory": ".next",
-  "installCommand": "pnpm install"
+  "installCommand": "pnpm install",
+  "crons": [
+    {
+      "path": "/api/admin/blob-cleanup",
+      "schedule": "0 3 * * 0"
+    }
+  ]
 }
