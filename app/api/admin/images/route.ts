@@ -57,7 +57,7 @@ function normalizeSlot(val: unknown, key: string): SlotData {
 }
 
 function purgeCache() {
-  revalidateTag("site-images");
+  revalidateTag("site-images", "seconds");
   revalidatePath("/");
   revalidatePath("/search", "layout");
 }

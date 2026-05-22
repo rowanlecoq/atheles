@@ -60,7 +60,7 @@ export async function POST(request: Request) {
       else if (logoType === "small") current.logoSmall = logoUrl;
       const err = await writeMetafield("site_theme", current);
       if (err) return NextResponse.json({ error: err }, { status: 500 });
-      revalidateTag("site-theme");
+      revalidateTag("site-theme", "seconds");
       return NextResponse.json({ success: true, theme: current });
     }
 
@@ -68,7 +68,7 @@ export async function POST(request: Request) {
     if (theme) {
       const err = await writeMetafield("site_theme", theme);
       if (err) return NextResponse.json({ error: err }, { status: 500 });
-      revalidateTag("site-theme");
+      revalidateTag("site-theme", "seconds");
       return NextResponse.json({ success: true });
     }
 
