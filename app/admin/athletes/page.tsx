@@ -1,20 +1,14 @@
 "use client";
 
+import { upload } from "@vercel/blob/client";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 
 type Social = { platform: string; url: string };
 
 const SOCIAL_PLATFORMS = [
-  "tiktok",
-  "instagram",
-  "youtube",
-  "linkedin",
-  "snapchat",
-  "email",
-  "twitter",
-  "facebook",
-  "website",
+  "tiktok", "instagram", "youtube", "linkedin",
+  "snapchat", "email", "twitter", "facebook", "website",
 ];
 
 type Athlete = {
@@ -28,6 +22,33 @@ type Athlete = {
   hobbies: string[];
 };
 
+function getYouTubeId(url: string) {
+  const m = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]+)/);
+  return m?.[1] ?? null;
+}
+
+function isVideo(url: string) {
+  return url.includes("youtube.com") || url.includes("youtu.be") ||
+    url.includes("tiktok.com") || url.includes("instagram.com") ||
+    url.endsWith(".mp4") || url.endsWith(".webm");
+}
+
+function MediaThumb({ src }: { src: string }) {
+  const ytId = getYouTubeId(src);
+  if (ytId) return (
+    <div className="relative h-full w-full">
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img src={`https://img.youtube.com/vi/${ytId}/mqdefault.jpg`} alt="" className="h-full w-full object-cover" />
+      <div className="absolute inset-0 flex items-center justify-center bg-black/30"><span className="text-sm text-white">▶</span></div>
+    </div>
+  );
+  if (isVideo(src)) return (
+    <div className="flex h-full w-full items-center justify-center bg-white/5 text-lg text-brand-grey">▶</div>
+  );
+  {/* eslint-disable-next-line @next/next/no-img-element */}
+  return <img src={src} alt="" className="h-full w-full object-cover" />;
+}
+
 export default function AdminAthletesPage() {
   const router = useRouter();
   const [authorized, setAuthorized] = useState(false);
@@ -35,7 +56,8 @@ export default function AdminAthletesPage() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
-  const [uploading, setUploading] = useState<number | null>(null);
+  const [saveError, setSaveError] = useState("");
+  const [uploading, setUploading] = useState<string | null>(null); // "photo-{i}" | "gallery-{i}"
   const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
@@ -48,16 +70,19 @@ export default function AdminAthletesPage() {
             .then((r) => (r.ok ? r.json() : null))
             .then((d) => {
               if (d?.athletes) {
-                // Normalize old format (object socials) to new format (array)
                 setAthletes(d.athletes.map((a: Record<string, unknown>) => ({
-                  ...a,
+                  name: a.name || "",
+                  age: a.age || 18,
+                  role: a.role || "",
                   description: a.description || "",
-                  images: a.images || [],
+                  image: a.image || null,
+                  images: Array.isArray(a.images) ? a.images : [],
                   socials: Array.isArray(a.socials)
                     ? a.socials
-                    : Object.entries(a.socials || {})
+                    : Object.entries((a.socials as Record<string, string>) || {})
                         .filter(([, v]) => v)
-                        .map(([k, v]) => ({ platform: k, url: v as string })),
+                        .map(([k, v]) => ({ platform: k, url: v })),
+                  hobbies: Array.isArray(a.hobbies) ? a.hobbies : [],
                 })));
               }
             })
@@ -73,152 +98,117 @@ export default function AdminAthletesPage() {
   const save = async () => {
     setSaving(true);
     setSaved(false);
+    setSaveError("");
     try {
       const res = await fetch("/api/admin/athletes", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ athletes }),
       });
+      const d = await res.json();
       if (res.ok) {
         setSaved(true);
         setTimeout(() => setSaved(false), 3000);
+      } else {
+        setSaveError(d.error || "save failed");
       }
-    } catch {}
+    } catch {
+      setSaveError("save failed");
+    }
     setSaving(false);
   };
 
-  const updateAt = (index: number, field: string, value: unknown) => {
+  const update = (index: number, field: string, value: unknown) =>
     setAthletes((prev) => prev.map((a, i) => (i === index ? { ...a, [field]: value } : a)));
-  };
 
-  const removeAt = (index: number) => {
-    setAthletes((prev) => prev.filter((_, i) => i !== index));
-  };
-
-  const addNew = () => {
-    setAthletes((prev) => [...prev, {
-      name: "", age: 18, role: "athlete", description: "", image: null, images: [], socials: [], hobbies: [],
-    }]);
-  };
-
-  const addSocial = (athleteIdx: number) => {
-    setAthletes((prev) => prev.map((a, i) =>
-      i === athleteIdx ? { ...a, socials: [...a.socials, { platform: "", url: "" }] } : a
-    ));
-  };
-
-  const updateSocial = (athleteIdx: number, socialIdx: number, field: "platform" | "url", value: string) => {
-    setAthletes((prev) => prev.map((a, i) =>
-      i === athleteIdx ? {
-        ...a,
-        socials: a.socials.map((s, j) => j === socialIdx ? { ...s, [field]: value } : s),
-      } : a
-    ));
-  };
-
-  const removeSocial = (athleteIdx: number, socialIdx: number) => {
-    setAthletes((prev) => prev.map((a, i) =>
-      i === athleteIdx ? { ...a, socials: a.socials.filter((_, j) => j !== socialIdx) } : a
-    ));
-  };
-
-  const addHobby = (athleteIdx: number) => {
-    setAthletes((prev) => prev.map((a, i) =>
-      i === athleteIdx ? { ...a, hobbies: [...a.hobbies, ""] } : a
-    ));
-  };
-
-  const updateHobby = (athleteIdx: number, hobbyIdx: number, value: string) => {
-    setAthletes((prev) => prev.map((a, i) =>
-      i === athleteIdx ? { ...a, hobbies: a.hobbies.map((h, j) => j === hobbyIdx ? value : h) } : a
-    ));
-  };
-
-  const removeHobby = (athleteIdx: number, hobbyIdx: number) => {
-    setAthletes((prev) => prev.map((a, i) =>
-      i === athleteIdx ? { ...a, hobbies: a.hobbies.filter((_, j) => j !== hobbyIdx) } : a
-    ));
-  };
-
-  const addExtraImage = async (athleteIdx: number, file: File) => {
-    const isVideo = file.type.startsWith("video/");
-    const maxSize = isVideo ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
-    if (file.size > maxSize) {
-      setUploadError(`file too large (max ${isVideo ? "50" : "10"}mb).`);
-      setTimeout(() => setUploadError(""), 3000);
+  const uploadPhoto = async (athleteIdx: number, file: File) => {
+    if (file.size > 10 * 1024 * 1024) {
+      setUploadError("image must be under 10mb.");
+      setTimeout(() => setUploadError(""), 4000);
       return;
     }
-    setUploading(athleteIdx);
-    try {
-      const reader = new FileReader();
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
-      });
-      const res = await fetch("/api/admin/athletes/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: dataUrl }),
-      });
-      const d = await res.json();
-      if (d.url) {
-        setAthletes((prev) => prev.map((a, i) =>
-          i === athleteIdx ? { ...a, images: [...(a.images || []), d.url] } : a
-        ));
-      } else {
-        setUploadError(d.error || "upload failed.");
-        setTimeout(() => setUploadError(""), 3000);
-      }
-    } catch {
-      setUploadError("upload failed.");
-      setTimeout(() => setUploadError(""), 3000);
-    }
-    setUploading(null);
-  };
-
-  const removeExtraImage = (athleteIdx: number, imgIdx: number) => {
-    setAthletes((prev) => prev.map((a, i) =>
-      i === athleteIdx ? { ...a, images: (a.images || []).filter((_, j) => j !== imgIdx) } : a
-    ));
-  };
-
-  const handleImageUpload = async (index: number, file: File) => {
-    if (file.size > 5 * 1024 * 1024) {
-      setUploadError("image must be under 5mb.");
-      setTimeout(() => setUploadError(""), 3000);
-      return;
-    }
-    setUploading(index);
+    setUploading(`photo-${athleteIdx}`);
     setUploadError("");
-
     try {
-      // Convert to base64 directly (simpler, avoid canvas issues)
-      const reader = new FileReader();
-      const dataUrl = await new Promise<string>((resolve, reject) => {
-        reader.onload = () => resolve(reader.result as string);
-        reader.onerror = reject;
-        reader.readAsDataURL(file);
+      const ext = file.name.split(".").pop() || "jpg";
+      const blob = await upload(`athlete-${Date.now()}.${ext}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/athletes/upload",
       });
-
-      const res = await fetch("/api/admin/athletes/upload", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ image: dataUrl }),
-      });
-      const d = await res.json();
-      if (d.url) {
-        updateAt(index, "image", d.url);
-      } else {
-        setUploadError(d.error || "upload failed.");
-        setTimeout(() => setUploadError(""), 3000);
-      }
-    } catch {
-      setUploadError("upload failed.");
-      setTimeout(() => setUploadError(""), 3000);
+      update(athleteIdx, "image", blob.url);
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "upload failed.");
+      setTimeout(() => setUploadError(""), 4000);
     }
     setUploading(null);
   };
+
+  const uploadGalleryFile = async (athleteIdx: number, file: File) => {
+    const vid = file.type.startsWith("video/");
+    const maxSize = vid ? 50 * 1024 * 1024 : 10 * 1024 * 1024;
+    if (file.size > maxSize) {
+      setUploadError(`file too large (max ${vid ? "50" : "10"}mb).`);
+      setTimeout(() => setUploadError(""), 4000);
+      return;
+    }
+    setUploading(`gallery-${athleteIdx}`);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const blob = await upload(`athlete-gallery-${Date.now()}.${ext}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/athletes/upload",
+      });
+      setAthletes((prev) => prev.map((a, i) =>
+        i === athleteIdx ? { ...a, images: [...(a.images || []), blob.url] } : a,
+      ));
+    } catch (err) {
+      setUploadError(err instanceof Error ? err.message : "upload failed.");
+      setTimeout(() => setUploadError(""), 4000);
+    }
+    setUploading(null);
+  };
+
+  const addGalleryUrl = (athleteIdx: number, url: string) => {
+    if (!url) return;
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? { ...a, images: [...(a.images || []), url] } : a,
+    ));
+  };
+
+  const removeGallery = (athleteIdx: number, imgIdx: number) =>
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? { ...a, images: (a.images || []).filter((_, j) => j !== imgIdx) } : a,
+    ));
+
+  const addSocial = (i: number) =>
+    setAthletes((prev) => prev.map((a, idx) =>
+      idx === i ? { ...a, socials: [...a.socials, { platform: "", url: "" }] } : a,
+    ));
+
+  const updateSocial = (i: number, j: number, field: "platform" | "url", value: string) =>
+    setAthletes((prev) => prev.map((a, idx) =>
+      idx === i ? { ...a, socials: a.socials.map((s, k) => k === j ? { ...s, [field]: value } : s) } : a,
+    ));
+
+  const removeSocial = (i: number, j: number) =>
+    setAthletes((prev) => prev.map((a, idx) =>
+      idx === i ? { ...a, socials: a.socials.filter((_, k) => k !== j) } : a,
+    ));
+
+  const addHobby = (i: number) =>
+    setAthletes((prev) => prev.map((a, idx) =>
+      idx === i ? { ...a, hobbies: [...a.hobbies, ""] } : a,
+    ));
+
+  const updateHobby = (i: number, j: number, value: string) =>
+    setAthletes((prev) => prev.map((a, idx) =>
+      idx === i ? { ...a, hobbies: a.hobbies.map((h, k) => k === j ? value : h) } : a,
+    ));
+
+  const removeHobby = (i: number, j: number) =>
+    setAthletes((prev) => prev.map((a, idx) =>
+      idx === i ? { ...a, hobbies: a.hobbies.filter((_, k) => k !== j) } : a,
+    ));
 
   if (!authorized) {
     return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-brand-grey">checking access...</p></div>;
@@ -232,171 +222,124 @@ export default function AdminAthletesPage() {
         <p className="mt-1 text-sm text-brand-grey">edit the athletes shown on the /athletes page.</p>
       </div>
 
-      {uploadError && <p className="mb-4 text-xs text-red-400">{uploadError}</p>}
+      {uploadError && (
+        <div className="mb-4 rounded-lg border border-red-400/20 bg-red-400/5 px-4 py-2.5">
+          <p className="text-xs text-red-400">{uploadError}</p>
+        </div>
+      )}
 
       {loading ? (
-        <p className="text-sm text-brand-grey">loading...</p>
+        <div className="space-y-4">
+          {[0, 1].map((i) => (
+            <div key={i} className="h-48 animate-pulse rounded-lg bg-white/5" />
+          ))}
+        </div>
       ) : (
         <>
           <div className="space-y-6">
             {athletes.map((a, i) => (
               <div key={i} className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
                 <div className="mb-4 flex items-center justify-between">
-                  <span className="text-xs text-brand-gold">athlete {i + 1}</span>
-                  <button type="button" onClick={() => removeAt(i)} className="text-xs text-brand-grey hover:text-red-400">remove</button>
+                  <span className="text-xs font-medium text-brand-gold">athlete {i + 1}{a.name ? ` — ${a.name.toLowerCase()}` : ""}</span>
+                  <button type="button" onClick={() => setAthletes((prev) => prev.filter((_, idx) => idx !== i))} className="text-xs text-brand-grey hover:text-red-400">remove</button>
                 </div>
 
                 {/* Photo */}
-                <div className="mb-4">
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">photo</label>
-                  <div className="flex items-center gap-3">
-                    {a.image ? (
-                      <div className="relative h-16 w-16 overflow-hidden rounded-lg">
-                        {/* eslint-disable-next-line @next/next/no-img-element */}
-                        <img src={a.image} alt="" className="h-full w-full object-cover" />
-                      </div>
-                    ) : (
-                      <div className="flex h-16 w-16 items-center justify-center rounded-lg bg-brand-medium-grey/10 text-xl">🔱</div>
-                    )}
-                    <div className="flex flex-col gap-1">
-                      <label className="cursor-pointer text-xs text-brand-gold hover:text-brand-pale-gold">
-                        {uploading === i ? "uploading..." : a.image ? "change photo" : "upload photo"}
-                        <input
-                          type="file"
-                          accept="image/png,image/jpeg,image/webp"
-                          disabled={uploading === i}
-                          onChange={(e) => {
-                            const file = e.target.files?.[0];
-                            if (file) handleImageUpload(i, file);
-                            e.target.value = "";
-                          }}
-                          className="hidden"
-                        />
-                      </label>
-                      {a.image && (
-                        <button type="button" onClick={() => updateAt(i, "image", null)} className="text-left text-xs text-brand-grey hover:text-red-400">remove photo</button>
-                      )}
-                    </div>
+                <div className="mb-4 flex items-center gap-4">
+                  <div className="relative h-16 w-16 flex-none overflow-hidden rounded-lg bg-white/5">
+                    {a.image
+                      ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={a.image} alt="" className="h-full w-full object-cover" />
+                      : <div className="flex h-full w-full items-center justify-center text-xl">🔱</div>
+                    }
+                  </div>
+                  <div className="space-y-1">
+                    <label className={`cursor-pointer text-xs text-brand-gold hover:text-brand-pale-gold ${uploading === `photo-${i}` ? "opacity-50" : ""}`}>
+                      {uploading === `photo-${i}` ? "uploading..." : a.image ? "change photo" : "upload photo"}
+                      <input type="file" accept="image/png,image/jpeg,image/webp" disabled={!!uploading} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadPhoto(i, f); e.target.value = ""; }} className="hidden" />
+                    </label>
+                    {a.image && <button type="button" onClick={() => update(i, "image", null)} className="block text-xs text-brand-grey hover:text-red-400">remove photo</button>}
                   </div>
                 </div>
 
                 {/* Name, Role, Age */}
                 <div className="grid gap-3 sm:grid-cols-3">
-                  <div>
-                    <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">name</label>
-                    <input type="text" value={a.name} onChange={(e) => updateAt(i, "name", e.target.value)} className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">role</label>
-                    <input type="text" value={a.role} onChange={(e) => updateAt(i, "role", e.target.value)} className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none" />
-                  </div>
-                  <div>
-                    <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">age</label>
-                    <input type="number" value={a.age} onChange={(e) => updateAt(i, "age", parseInt(e.target.value) || 0)} className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none" />
-                  </div>
+                  {[
+                    { label: "name", field: "name", type: "text", value: a.name },
+                    { label: "role", field: "role", type: "text", value: a.role },
+                    { label: "age", field: "age", type: "number", value: String(a.age) },
+                  ].map(({ label, field, type, value }) => (
+                    <div key={field}>
+                      <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">{label}</label>
+                      <input
+                        type={type}
+                        value={value}
+                        onChange={(e) => update(i, field, type === "number" ? (parseInt(e.target.value) || 0) : e.target.value)}
+                        className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
+                      />
+                    </div>
+                  ))}
                 </div>
 
                 {/* Description */}
                 <div className="mt-3">
-                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">description</label>
-                  <textarea
-                    value={a.description}
-                    onChange={(e) => updateAt(i, "description", e.target.value)}
-                    placeholder="a short bio about this athlete..."
-                    rows={3}
-                    className="w-full resize-none rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
-                  />
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">bio</label>
+                  <textarea value={a.description} onChange={(e) => update(i, "description", e.target.value)} placeholder="short bio..." rows={3} className="w-full resize-none rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
                 </div>
 
-                {/* Hobbies */}
+                {/* Interests */}
                 <div className="mt-3">
                   <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">interests</label>
                   <div className="space-y-2">
                     {a.hobbies.map((h, j) => (
                       <div key={j} className="flex gap-2">
                         <input type="text" value={h} onChange={(e) => updateHobby(i, j, e.target.value)} placeholder="e.g. working out" className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
-                        <button type="button" onClick={() => removeHobby(i, j)} className="flex-none text-xs text-brand-grey hover:text-red-400">×</button>
+                        <button type="button" onClick={() => removeHobby(i, j)} className="flex-none px-1 text-brand-grey hover:text-red-400">×</button>
                       </div>
                     ))}
                   </div>
                   <button type="button" onClick={() => addHobby(i)} className="mt-2 text-xs text-brand-gold hover:text-brand-pale-gold">+ add interest</button>
                 </div>
 
-                {/* Gallery Photos & Videos */}
+                {/* Gallery */}
                 <div className="mt-3">
-                  <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">gallery (photos & videos)</label>
+                  <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">gallery</label>
                   <div className="flex flex-wrap gap-2">
-                    {(a.images || []).map((item, j) => {
-                      const ytThumb = item.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]+)/);
-                      const isVideo = item.includes("youtube.com") || item.includes("youtu.be") || item.includes("tiktok.com") || item.includes("instagram.com") || item.endsWith(".mp4") || item.endsWith(".webm");
-                      return (
-                        <div key={j} className="group relative h-16 w-16 overflow-hidden rounded-lg">
-                          {ytThumb ? (
-                            <div className="relative h-full w-full">
-                              {/* eslint-disable-next-line @next/next/no-img-element */}
-                              <img src={`https://img.youtube.com/vi/${ytThumb[1]}/mqdefault.jpg`} alt="" className="h-full w-full object-cover" />
-                              <div className="absolute inset-0 flex items-center justify-center bg-black/30"><span className="text-sm text-white">▶</span></div>
-                            </div>
-                          ) : isVideo ? (
-                            <div className="flex h-full w-full items-center justify-center bg-brand-medium-grey/20 text-lg">▶</div>
-                          ) : (
-                            // eslint-disable-next-line @next/next/no-img-element
-                            <img src={item} alt="" className="h-full w-full object-cover" />
-                          )}
-                          <button type="button" onClick={() => removeExtraImage(i, j)} className="absolute inset-0 flex items-center justify-center bg-black/50 text-xs text-white opacity-0 group-hover:opacity-100">×</button>
-                        </div>
-                      );
-                    })}
-                    <label className="flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-brand-dark-gold/20 text-xs text-brand-gold hover:border-brand-gold/40" title="upload image">
-                      +
-                      <input type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" onChange={(e) => { const f = e.target.files?.[0]; if (f) addExtraImage(i, f); e.target.value = ""; }} className="hidden" />
+                    {(a.images || []).map((src, j) => (
+                      <div key={j} className="group relative h-16 w-16 overflow-hidden rounded-lg border border-white/10">
+                        <MediaThumb src={src} />
+                        <button type="button" onClick={() => removeGallery(i, j)} className="absolute inset-0 flex items-center justify-center bg-black/50 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100">×</button>
+                      </div>
+                    ))}
+                    <label className={`flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-dashed border-brand-dark-gold/30 text-brand-gold transition-colors hover:border-brand-gold/60 ${uploading === `gallery-${i}` ? "opacity-50" : ""}`}>
+                      {uploading === `gallery-${i}` ? <span className="text-[10px]">...</span> : <span className="text-lg leading-none">+</span>}
+                      <input type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" disabled={!!uploading} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadGalleryFile(i, f); e.target.value = ""; }} className="hidden" />
                     </label>
                   </div>
-                  {/* Add URL (for YouTube etc) */}
-                  <div className="mt-2 flex gap-2">
-                    <input
-                      type="text"
-                      placeholder="paste video/image url..."
-                      className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-1.5 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
-                      onKeyDown={(e) => {
-                        if (e.key === "Enter") {
-                          const val = (e.target as HTMLInputElement).value.trim();
-                          if (val) {
-                            setAthletes((prev) => prev.map((a2, i2) =>
-                              i2 === i ? { ...a2, images: [...(a2.images || []), val] } : a2
-                            ));
-                            (e.target as HTMLInputElement).value = "";
-                          }
-                        }
-                      }}
-                    />
-                  </div>
+                  <input
+                    type="text"
+                    placeholder="paste video/image url and press enter..."
+                    className="mt-2 w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-1.5 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        const val = (e.target as HTMLInputElement).value.trim();
+                        if (val) { addGalleryUrl(i, val); (e.target as HTMLInputElement).value = ""; }
+                      }
+                    }}
+                  />
                 </div>
 
-                {/* Dynamic Socials */}
+                {/* Socials */}
                 <div className="mt-3">
                   <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">socials</label>
                   <div className="space-y-2">
                     {a.socials.map((s, j) => (
                       <div key={j} className="flex gap-2">
-                        <select
-                          value={s.platform}
-                          onChange={(e) => updateSocial(i, j, "platform", e.target.value)}
-                          className="w-1/3 rounded border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-xs text-white focus:border-brand-gold focus:outline-none"
-                        >
+                        <select value={s.platform} onChange={(e) => updateSocial(i, j, "platform", e.target.value)} className="w-1/3 rounded border border-brand-dark-gold/20 bg-brand-dark px-2 py-2 text-xs text-white focus:border-brand-gold focus:outline-none">
                           <option value="">select</option>
-                          {SOCIAL_PLATFORMS.map((p) => (
-                            <option key={p} value={p}>{p}</option>
-                          ))}
+                          {SOCIAL_PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
                         </select>
-                        <input
-                          type="text"
-                          value={s.url}
-                          onChange={(e) => updateSocial(i, j, "url", e.target.value)}
-                          placeholder="url or username"
-                          className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
-                        />
-                        <button type="button" onClick={() => removeSocial(i, j)} className="flex-none text-xs text-brand-grey hover:text-red-400">×</button>
+                        <input type="text" value={s.url} onChange={(e) => updateSocial(i, j, "url", e.target.value)} placeholder="url or username" className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
+                        <button type="button" onClick={() => removeSocial(i, j)} className="flex-none px-1 text-brand-grey hover:text-red-400">×</button>
                       </div>
                     ))}
                   </div>
@@ -406,13 +349,14 @@ export default function AdminAthletesPage() {
             ))}
           </div>
 
-          <button type="button" onClick={addNew} className="mt-4 text-xs text-brand-gold hover:text-brand-pale-gold">+ add athlete</button>
+          <button type="button" onClick={() => setAthletes((prev) => [...prev, { name: "", age: 18, role: "athlete", description: "", image: null, images: [], socials: [], hobbies: [] }])} className="mt-4 text-xs text-brand-gold hover:text-brand-pale-gold">+ add athlete</button>
 
           <div className="mt-6 flex items-center gap-3">
             <button type="button" onClick={save} disabled={saving} className="rounded-full bg-brand-gold px-6 py-2.5 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50">
               {saving ? "saving..." : "save changes"}
             </button>
             {saved && <span className="text-xs text-green-400">saved!</span>}
+            {saveError && <span className="text-xs text-red-400">{saveError}</span>}
           </div>
 
           <div className="mt-4">

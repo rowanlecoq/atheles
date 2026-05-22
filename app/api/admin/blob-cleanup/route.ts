@@ -2,23 +2,14 @@ import { del, list } from "@vercel/blob";
 import { getCustomerByToken } from "lib/auth/shopify-customer";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+import { adminFetch } from "lib/admin/utils";
 
 const blobToken = process.env.BLOB_READ_WRITE_TOKEN || "";
-const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
 const cronSecret = process.env.CRON_SECRET || "";
-const domain = process.env.SHOPIFY_STORE_DOMAIN
-  ? process.env.SHOPIFY_STORE_DOMAIN.startsWith("https://")
-    ? process.env.SHOPIFY_STORE_DOMAIN
-    : `https://${process.env.SHOPIFY_STORE_DOMAIN}`
-  : "";
-const adminEndpoint = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
 
-async function verifyAdmin(request: Request) {
-  // Cron job auth via secret header
+async function verifyAccess(request: Request) {
   const auth = request.headers.get("authorization");
   if (cronSecret && auth === `Bearer ${cronSecret}`) return true;
-
-  // Admin cookie auth
   const cookieStore = await cookies();
   const token = cookieStore.get("atheles-auth-token")?.value;
   if (!token) return false;
@@ -26,72 +17,39 @@ async function verifyAdmin(request: Request) {
   return customer?.isAdmin ?? false;
 }
 
-async function shopifyFetch(query: string) {
-  const res = await fetch(adminEndpoint, {
-    method: "POST",
-    headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": adminToken },
-    body: JSON.stringify({ query }),
-  });
-  if (!res.ok) throw new Error(`Admin API ${res.status}`);
-  return res.json();
+function collectUrlsFromValue(obj: unknown, active: Set<string>) {
+  if (typeof obj === "string" && obj.includes("vercel-storage.com")) {
+    active.add(obj);
+  } else if (Array.isArray(obj)) {
+    obj.forEach((v) => collectUrlsFromValue(v, active));
+  } else if (obj && typeof obj === "object") {
+    Object.values(obj).forEach((v) => collectUrlsFromValue(v, active));
+  }
 }
 
-// Collect every blob URL currently referenced anywhere in the site
 async function collectActiveUrls(): Promise<Set<string>> {
   const active = new Set<string>();
 
-  // Site images (shop metafield)
-  try {
-    const d = await shopifyFetch(`query { shop { metafield(namespace: "atheles", key: "site_images") { value } } }`);
-    const raw = d.data?.shop?.metafield?.value;
-    if (raw) {
-      const obj = JSON.parse(raw);
-      for (const slot of Object.values(obj) as { media?: string[] }[]) {
-        for (const url of slot.media ?? []) {
-          if (url?.includes("vercel-storage.com")) active.add(url);
-        }
-      }
-    }
-  } catch {}
+  for (const key of ["site_images", "site_theme", "athletes"]) {
+    try {
+      const d = await adminFetch(
+        `query { shop { metafield(namespace: "atheles", key: "${key}") { value } } }`,
+      );
+      const raw = d.data?.shop?.metafield?.value;
+      if (raw) collectUrlsFromValue(JSON.parse(raw), active);
+    } catch {}
+  }
 
-  // Site theme (logos)
-  try {
-    const d = await shopifyFetch(`query { shop { metafield(namespace: "atheles", key: "site_theme") { value } } }`);
-    const raw = d.data?.shop?.metafield?.value;
-    if (raw) {
-      const obj = JSON.parse(raw);
-      for (const v of Object.values(obj)) {
-        if (typeof v === "string" && v.includes("vercel-storage.com")) active.add(v);
-      }
-    }
-  } catch {}
-
-  // Athletes
-  try {
-    const d = await shopifyFetch(`query { shop { metafield(namespace: "atheles", key: "athletes") { value } } }`);
-    const raw = d.data?.shop?.metafield?.value;
-    if (raw) {
-      const athletes = JSON.parse(raw);
-      for (const a of athletes) {
-        if (typeof a.image === "string" && a.image.includes("vercel-storage.com")) active.add(a.image);
-      }
-    }
-  } catch {}
-
-  // All customer avatar metafields (paginated)
+  // Customer avatars (paginated)
   try {
     let cursor: string | null = null;
     do {
       const after = cursor ? `, after: "${cursor}"` : "";
-      const d = await shopifyFetch(`
+      const d = await adminFetch(`
         query {
           customers(first: 250${after}) {
             pageInfo { hasNextPage endCursor }
-            edges {
-              node {
-                metafield(namespace: "atheles", key: "avatar") { value }
-              }
-            }
+            edges { node { metafield(namespace: "atheles", key: "avatar") { value } } }
           }
         }
       `);
@@ -107,13 +65,11 @@ async function collectActiveUrls(): Promise<Set<string>> {
   return active;
 }
 
-// GET — dry run: returns what would be deleted
 export async function GET(request: Request) {
-  if (!(await verifyAdmin(request))) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!(await verifyAccess(request))) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!blobToken) return NextResponse.json({ error: "blob not configured" }, { status: 500 });
 
   const active = await collectActiveUrls();
-
   const orphans: string[] = [];
   let cursor: string | undefined;
   do {
@@ -127,13 +83,11 @@ export async function GET(request: Request) {
   return NextResponse.json({ activeCount: active.size, orphanCount: orphans.length, orphans });
 }
 
-// DELETE — actually deletes orphaned blobs
 export async function DELETE(request: Request) {
-  if (!(await verifyAdmin(request))) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  if (!(await verifyAccess(request))) return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   if (!blobToken) return NextResponse.json({ error: "blob not configured" }, { status: 500 });
 
   const active = await collectActiveUrls();
-
   const orphans: string[] = [];
   let cursor: string | undefined;
   do {
@@ -145,11 +99,11 @@ export async function DELETE(request: Request) {
   } while (cursor);
 
   let deleted = 0;
-  // Delete in batches of 10
   for (let i = 0; i < orphans.length; i += 10) {
-    const batch = orphans.slice(i, i + 10);
-    await Promise.all(batch.map((url) => del(url, { token: blobToken }).catch(() => {})));
-    deleted += batch.length;
+    await Promise.all(
+      orphans.slice(i, i + 10).map((url) => del(url, { token: blobToken }).catch(() => {})),
+    );
+    deleted += Math.min(10, orphans.length - i);
   }
 
   return NextResponse.json({ deleted, total: orphans.length });

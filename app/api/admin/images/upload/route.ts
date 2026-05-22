@@ -1,24 +1,16 @@
 import { handleUpload, type HandleUploadBody } from "@vercel/blob/client";
-import { getCustomerByToken } from "lib/auth/shopify-customer";
-import { cookies } from "next/headers";
+import { verifyAdmin } from "lib/admin/utils";
 import { NextResponse } from "next/server";
 
-
-async function verifyAdmin() {
-  const cookieStore = await cookies();
-  const token = cookieStore.get("atheles-auth-token")?.value;
-  if (!token) return false;
-  const customer = await getCustomerByToken(token);
-  return customer?.isAdmin ?? false;
-}
-
 export async function POST(request: Request) {
-  if (!(await verifyAdmin())) {
+  const body = (await request.json()) as HandleUploadBody;
+  // Only check admin auth for token generation.
+  // Vercel Blob calls the completion webhook from its own servers (no session cookie).
+  if (body.type === "blob.generate-client-token" && !(await verifyAdmin())) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   try {
-    const body = (await request.json()) as HandleUploadBody;
     const jsonResponse = await handleUpload({
       body,
       request,
@@ -36,7 +28,7 @@ export async function POST(request: Request) {
         tokenPayload: "admin-upload",
       }),
       onUploadCompleted: async () => {
-        // URL is saved to the slot by the client after upload
+        // URL is registered by the client after upload completes
       },
     });
     return NextResponse.json(jsonResponse);
