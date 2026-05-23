@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MagnifyingGlassIcon, ClipboardDocumentIcon, CheckIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, ClipboardDocumentIcon, CheckIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
 
 type Member = {
   id: string;
@@ -11,6 +11,7 @@ type Member = {
   dob: string | null;
   createdAt: string;
   orders: string;
+  newsletter: boolean;
 };
 
 const TIER_COLORS: Record<string, string> = {
@@ -74,7 +75,9 @@ export default function AdminMembersPage() {
 
   const searchLower = search.toLowerCase();
   const filtered = members.filter((m) => {
-    const matchesFilter = filter === "all" || m.tier === filter;
+    const matchesFilter =
+      filter === "all" ||
+      (filter === "newsletter" ? m.newsletter : m.tier === filter);
     const matchesSearch =
       !search ||
       m.name.toLowerCase().includes(searchLower) ||
@@ -108,9 +111,9 @@ export default function AdminMembersPage() {
         />
       </div>
 
-      {/* Tier filters */}
+      {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-2">
-        {["all", ...VALID_TIERS].map((t) => (
+        {["all", "newsletter", ...VALID_TIERS].map((t) => (
           <button
             key={t}
             type="button"
@@ -122,11 +125,13 @@ export default function AdminMembersPage() {
             }`}
           >
             {t}
-            {t !== "all" && (
-              <span className="ml-1 text-brand-grey/50">
-                {members.filter((m) => m.tier === t).length}
-              </span>
-            )}
+            <span className="ml-1 text-brand-grey/50">
+              {t === "all"
+                ? ""
+                : t === "newsletter"
+                  ? members.filter((m) => m.newsletter).length
+                  : members.filter((m) => m.tier === t).length || ""}
+            </span>
           </button>
         ))}
       </div>
@@ -162,9 +167,15 @@ export default function AdminMembersPage() {
                         : <ClipboardDocumentIcon className="h-3.5 w-3.5" />}
                     </button>
                   </div>
-                  <div className="mt-1.5 flex flex-wrap gap-3 text-[10px] text-brand-grey/50">
+                  <div className="mt-1.5 flex flex-wrap items-center gap-3 text-[10px] text-brand-grey/50">
                     <span>joined {new Date(m.createdAt).toLocaleDateString()}</span>
                     {m.dob && <span>dob: {m.dob}</span>}
+                    {m.newsletter && (
+                      <span className="flex items-center gap-1 text-brand-gold/60">
+                        <EnvelopeIcon className="h-3 w-3" />
+                        subscribed
+                      </span>
+                    )}
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
