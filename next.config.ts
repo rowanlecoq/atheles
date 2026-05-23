@@ -1,7 +1,6 @@
 export default {
   experimental: {
     useCache: true,
-    inlineCss: true,
   },
   redirects: async () => [
     {

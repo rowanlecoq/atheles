@@ -12,6 +12,7 @@ import { ScrollProgress } from "components/scroll-progress";
 import { SelfLinkScroll } from "components/self-link-scroll";
 import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";
+import { getAnnouncementsData } from "lib/announcements-server";
 import { getCart } from "lib/shopify";
 import { getSiteImagesData } from "lib/site-images-server";
 import localFont from "next/font/local";
@@ -23,7 +24,7 @@ import { baseUrl } from "lib/utils";
 const playfair = localFont({
   src: "../public/fonts/PlayfairDisplay-Variable.ttf",
   variable: "--font-playfair",
-  display: "block",
+  display: "optional",
 });
 
 export const metadata = {
@@ -54,7 +55,10 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   const cart = getCart();
-  const siteImages = await getSiteImagesData();
+  const [siteImages, announcements] = await Promise.all([
+    getSiteImagesData(),
+    getAnnouncementsData(),
+  ]);
 
   return (
     <html
@@ -107,7 +111,7 @@ export default async function RootLayout({
               <ThemeBackgroundCanvas />
               <KonamiLightning />
               <div id="thunder-shake-root">
-                <AnnouncementBar />
+                <AnnouncementBar initialAnnouncements={announcements} />
                 <Navbar />
                 <main className="relative z-[1] w-full">
                   <PageTransition>{children}</PageTransition>

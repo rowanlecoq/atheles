@@ -1,3 +1,4 @@
+import { revalidateTag } from "next/cache";
 import { NextResponse } from "next/server";
 import { readMetafield, verifyAdmin, writeMetafield } from "lib/admin/utils";
 
@@ -35,6 +36,6 @@ export async function POST(request: Request) {
   const cleaned = (announcements as string[]).filter((a) => a.trim().length > 0);
   const err = await writeMetafield("announcements", cleaned);
   if (err) return NextResponse.json({ error: err }, { status: 500 });
-
+  revalidateTag("announcements", "seconds");
   return NextResponse.json({ success: true, count: cleaned.length });
 }

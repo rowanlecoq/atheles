@@ -3,38 +3,28 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
-const defaultAnnouncements = [
+const DEFAULT_ANNOUNCEMENTS = [
   "to ascend.",
   "coming soon. this summer.",
   "authentic superiority.",
   "follow us at @atheles.co to share your aesthetic.",
 ];
 
-export function AnnouncementBar() {
-  const [announcements, setAnnouncements] = useState(defaultAnnouncements);
+export function AnnouncementBar({ initialAnnouncements }: { initialAnnouncements?: string[] }) {
+  const [announcements, setAnnouncements] = useState(
+    initialAnnouncements?.length ? initialAnnouncements : DEFAULT_ANNOUNCEMENTS,
+  );
   const [index, setIndex] = useState(0);
   const [entered, setEntered] = useState(false);
   const [paused, setPaused] = useState(false);
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const announcementsLenRef = useRef(defaultAnnouncements.length);
+  const announcementsLenRef = useRef(announcements.length);
 
   // Keep ref in sync so the interval closure always sees the current length
   // without needing to be recreated when announcements change.
   useEffect(() => {
     announcementsLenRef.current = announcements.length;
   }, [announcements.length]);
-
-  // Fetch announcements from Shopify metafield
-  useEffect(() => {
-    fetch("/api/admin/announcements")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => {
-        if (d?.announcements?.length > 0) {
-          setAnnouncements(d.announcements);
-        }
-      })
-      .catch(() => {});
-  }, []);
 
   const startTimer = useCallback(() => {
     intervalRef.current = setInterval(() => {

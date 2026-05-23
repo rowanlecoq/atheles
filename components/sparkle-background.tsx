@@ -1,5 +1,6 @@
 "use client";
 
+import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { useCallback, useEffect, useRef } from "react";
 
@@ -43,6 +44,7 @@ export function SparkleBackground() {
   const starsRef = useRef<Star[]>([]);
   const animIdRef = useRef(0);
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useMobileViewport();
 
   const initStars = useCallback((width: number, height: number) => {
     const cellW = width / COLS;
@@ -66,7 +68,7 @@ export function SparkleBackground() {
   }, []);
 
   useEffect(() => {
-    if (prefersReducedMotion) return;
+    if (prefersReducedMotion || isMobile) return;
 
     const canvas = canvasRef.current;
     if (!canvas) return;
@@ -117,7 +119,7 @@ export function SparkleBackground() {
     };
   }, [prefersReducedMotion, initStars]);
 
-  if (prefersReducedMotion) return null;
+  if (prefersReducedMotion || isMobile) return null;
 
   return (
     <canvas

@@ -39,8 +39,20 @@ function darken(hex: string, amount: number): string {
   return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
 
+const THEME_CACHE_KEY = "atheles-site-theme";
+const THEME_TS_KEY = "atheles-site-theme-ts";
+const THEME_TTL_MS = 5 * 60 * 1000; // 5 minutes
+
 export function SiteThemeProvider() {
   useEffect(() => {
+    // Skip network fetch if cached data is fresh (< 5 min old).
+    // The inline script in layout.tsx already applied the cached theme synchronously,
+    // so there's no visual delay — we just avoid a redundant API call.
+    try {
+      const ts = Number(localStorage.getItem(THEME_TS_KEY) || 0);
+      if (Date.now() - ts < THEME_TTL_MS && localStorage.getItem(THEME_CACHE_KEY)) return;
+    } catch {}
+
     fetch("/api/admin/theme")
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
@@ -85,9 +97,10 @@ export function SiteThemeProvider() {
           gradientStyle.textContent = "";
         }
 
-        // Store for logo component
+        // Store for logo component and next-visit TTL
         try {
-          localStorage.setItem("atheles-site-theme", JSON.stringify(t));
+          localStorage.setItem(THEME_CACHE_KEY, JSON.stringify(t));
+          localStorage.setItem(THEME_TS_KEY, String(Date.now()));
         } catch {}
       })
       .catch(() => {});
