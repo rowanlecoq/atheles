@@ -11,7 +11,7 @@ import React, { useEffect, useState } from "react";
 import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
-function ProductCard({ product }: { product: Product }) {
+function ProductCard({ product, index }: { product: Product; index: number }) {
   const { addCartItem, mergeConfirmAdd } = useCart();
   const [showSizes, setShowSizes] = useState(false);
   const [added, setAdded] = useState(false);
@@ -51,6 +51,7 @@ function ProductCard({ product }: { product: Product }) {
               src={product.featuredImage.url}
               alt={product.title}
               fill
+              priority={index < 4}
               sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
               className={`h-full w-full object-cover transition-opacity duration-500 ${
                 hasMultipleImages ? "group-hover:opacity-0" : ""
@@ -64,6 +65,7 @@ function ProductCard({ product }: { product: Product }) {
               alt={`${product.title} - alternate view`}
               fill
               sizes="(min-width: 768px) 33vw, (min-width: 640px) 50vw, 100vw"
+              loading="lazy"
               className="h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
             />
           )}
@@ -201,7 +203,7 @@ export default function ProductGridItems({
             ease: [0.22, 1, 0.36, 1],
           }}
         >
-          <ProductCard product={product} />
+          <ProductCard product={product} index={index} />
         </motion.li>
       ))}
     </>

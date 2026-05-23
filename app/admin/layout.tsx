@@ -29,6 +29,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       .catch(() => router.replace("/"));
   }, [router]);
 
-  if (!show) return null;
+  if (!show) {
+    return (
+      <div className="min-h-screen bg-brand-dark px-4 py-8">
+        <div className="mx-auto max-w-4xl space-y-4 animate-pulse">
+          <div className="h-8 w-48 rounded-lg bg-white/5" />
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div key={i} className="h-32 rounded-xl bg-white/5" />
+            ))}
+          </div>
+        </div>
+      </div>
+    );
+  }
   return <>{children}</>;
 }
