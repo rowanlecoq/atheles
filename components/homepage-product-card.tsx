@@ -56,6 +56,7 @@ export function HomepageProductCard({
               alt={`${product.title} - alternate`}
               fill
               sizes={size === "full" ? "(min-width: 768px) 66vw, 100vw" : "(min-width: 768px) 33vw, 100vw"}
+              loading="lazy"
               className="h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
             />
           )}

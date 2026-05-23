@@ -361,6 +361,7 @@ function SlotEditor({
             <img
               src={data.media[0] || DEFAULT_IMAGES[slotKey] || ""}
               alt=""
+              loading="lazy"
               className="h-full w-full object-cover"
               style={{
                 objectPosition: `${data.focusX}% ${data.focusY}%`,
