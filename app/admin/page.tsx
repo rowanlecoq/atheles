@@ -1,97 +1,102 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
-import { TrashIcon } from "@heroicons/react/24/outline";
+import { useState } from "react";
+import {
+  CakeIcon,
+  UsersIcon,
+  MegaphoneIcon,
+  PhotoIcon,
+  PaintBrushIcon,
+  TrophyIcon,
+  ChatBubbleBottomCenterTextIcon,
+  ShoppingBagIcon,
+  TrashIcon,
+  ArrowTopRightOnSquareIcon,
+  ArrowRightIcon,
+} from "@heroicons/react/24/outline";
+
+const CARDS = [
+  {
+    title: "birthday tracker",
+    description: "view upcoming birthdays for members with birthday rewards.",
+    href: "/admin/birthdays",
+    Icon: CakeIcon,
+  },
+  {
+    title: "manage members",
+    description: "view customers, assign tiers, and manage athlete/admin roles.",
+    href: "/admin/members",
+    Icon: UsersIcon,
+  },
+  {
+    title: "announcements",
+    description: "edit the announcement bar messages shown at the top of the site.",
+    href: "/admin/announcements",
+    Icon: MegaphoneIcon,
+  },
+  {
+    title: "site images",
+    description: "replace images and videos across the homepage and store.",
+    href: "/admin/images",
+    Icon: PhotoIcon,
+  },
+  {
+    title: "website theme",
+    description: "customize brand colors, text gradients, and logos.",
+    href: "/admin/theme",
+    Icon: PaintBrushIcon,
+  },
+  {
+    title: "athlete profiles",
+    description: "edit athlete bios, photos, and social links.",
+    href: "/admin/athletes",
+    Icon: TrophyIcon,
+  },
+  {
+    title: "manage quotes",
+    description: "edit the rotating greek quotes shown across the site.",
+    href: "/admin/quotes",
+    Icon: ChatBubbleBottomCenterTextIcon,
+  },
+  {
+    title: "shopify admin",
+    description: "go to your shopify dashboard for orders, products, and more.",
+    href: `https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || "admin.shopify.com"}/admin`,
+    Icon: ShoppingBagIcon,
+    external: true,
+  },
+];
 
 export default function AdminDashboard() {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
-  const [userName, setUserName] = useState("");
-
-  useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.user?.isAdmin) {
-          setAuthorized(true);
-          setUserName(d.user.firstName || d.user.name || "admin");
-        } else {
-          router.replace("/");
-        }
-      })
-      .catch(() => router.replace("/"));
-  }, [router]);
-
-  if (!authorized) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-brand-grey">checking access...</p>
-      </div>
-    );
-  }
-
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
-      <div className="mb-8">
-        <h1 className="font-heading text-2xl text-brand-gold">
-          admin dashboard
-        </h1>
-        <p className="mt-1 text-sm text-brand-grey">
-          welcome back, {userName.toLowerCase()}.
-        </p>
+      <div className="mb-10">
+        <h1 className="font-heading text-3xl text-brand-gold">admin</h1>
+        <p className="mt-1 text-sm text-brand-grey">manage your site content and members.</p>
       </div>
 
-      <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <AdminCard
-          title="birthday tracker"
-          description="view upcoming birthdays for members with birthday rewards."
-          href="/admin/birthdays"
-          icon="🎂"
-        />
-        <AdminCard
-          title="manage members"
-          description="view customers, assign tiers, and manage athlete/admin roles."
-          href="/admin/members"
-          icon="👥"
-        />
-        <AdminCard
-          title="announcements"
-          description="edit the announcement bar messages shown at the top of the site."
-          href="/admin/announcements"
-          icon="📢"
-        />
-        <AdminCard
-          title="site images"
-          description="replace placeholder images and videos across the homepage and store."
-          href="/admin/images"
-          icon="🖼️"
-        />
-        <AdminCard
-          title="website theme"
-          description="customize brand colors, text gradients, and logos for seasonal updates."
-          href="/admin/theme"
-          icon="🎨"
-        />
-        <AdminCard
-          title="athlete profiles"
-          description="edit athlete bios, photos, and social links on the athletes page."
-          href="/admin/athletes"
-          icon="🏋️"
-        />
-        <AdminCard
-          title="manage quotes"
-          description="edit the rotating greek quotes shown across the site."
-          href="/admin/quotes"
-          icon="💬"
-        />
-        <AdminCard
-          title="shopify admin"
-          description="go to your shopify dashboard for orders, products, and more."
-          href={`https://${process.env.NEXT_PUBLIC_SHOPIFY_STORE_DOMAIN || "admin.shopify.com"}/admin`}
-          icon="🛍️"
-          external
-        />
+      <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
+        {CARDS.map(({ title, description, href, Icon, external }) => (
+          <a
+            key={href}
+            href={href}
+            {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
+            className="group flex flex-col rounded-xl border border-brand-dark-gold/15 bg-brand-dark p-5 transition-colors hover:border-brand-gold/30"
+          >
+            <div className="mb-4 flex items-center justify-between">
+              <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-brand-gold/10">
+                <Icon className="h-4.5 w-4.5 text-brand-gold" style={{ width: 18, height: 18 }} />
+              </div>
+              {external
+                ? <ArrowTopRightOnSquareIcon className="h-3.5 w-3.5 text-brand-grey/40 transition-colors group-hover:text-brand-gold/60" />
+                : <ArrowRightIcon className="h-3.5 w-3.5 translate-x-0 text-brand-grey/0 transition-all group-hover:translate-x-0.5 group-hover:text-brand-gold/60" />}
+            </div>
+            <h2 className="mb-1 text-sm font-medium text-white group-hover:text-brand-gold transition-colors">
+              {title}
+            </h2>
+            <p className="text-xs leading-relaxed text-brand-grey">{description}</p>
+          </a>
+        ))}
         <BlobCleanupCard />
       </div>
     </div>
@@ -127,11 +132,15 @@ function BlobCleanupCard() {
   };
 
   return (
-    <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
-      <span className="mb-3 block text-2xl">🗑️</span>
+    <div className="flex flex-col rounded-xl border border-brand-dark-gold/15 bg-brand-dark p-5">
+      <div className="mb-4">
+        <div className="flex h-9 w-9 items-center justify-center rounded-lg bg-red-500/10">
+          <TrashIcon className="h-[18px] w-[18px] text-red-400" />
+        </div>
+      </div>
       <h2 className="mb-1 text-sm font-medium text-white">blob storage cleanup</h2>
       <p className="mb-4 text-xs leading-relaxed text-brand-grey">
-        remove old profile photos and unused files from vercel blob to free up space. runs automatically every sunday.
+        remove unused files from vercel blob. runs automatically every sunday.
       </p>
 
       {result && state !== "deleting" && (
@@ -143,7 +152,7 @@ function BlobCleanupCard() {
       )}
       {state === "error" && <p className="mb-3 text-xs text-red-400">something went wrong.</p>}
 
-      <div className="flex gap-2">
+      <div className="mt-auto flex gap-2 pt-2">
         <button
           type="button"
           onClick={scan}
@@ -163,34 +172,5 @@ function BlobCleanupCard() {
         </button>
       </div>
     </div>
-  );
-}
-
-function AdminCard({
-  title,
-  description,
-  href,
-  icon,
-  external,
-}: {
-  title: string;
-  description: string;
-  href: string;
-  icon: string;
-  external?: boolean;
-}) {
-  const Tag = external ? "a" : "a";
-  return (
-    <Tag
-      href={href}
-      {...(external ? { target: "_blank", rel: "noopener noreferrer" } : {})}
-      className="group rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5 transition-colors hover:border-brand-gold/40"
-    >
-      <span className="mb-3 block text-2xl">{icon}</span>
-      <h2 className="mb-1 text-sm font-medium text-white group-hover:text-brand-gold">
-        {title}
-      </h2>
-      <p className="text-xs leading-relaxed text-brand-grey">{description}</p>
-    </Tag>
   );
 }

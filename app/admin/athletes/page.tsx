@@ -2,7 +2,7 @@
 
 import { upload } from "@vercel/blob/client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { UserCircleIcon, PlusIcon, XMarkIcon } from "@heroicons/react/24/outline";
 
 type Social = { platform: string; url: string };
 
@@ -50,50 +50,38 @@ function MediaThumb({ src }: { src: string }) {
 }
 
 export default function AdminAthletesPage() {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
   const [saveError, setSaveError] = useState("");
-  const [uploading, setUploading] = useState<string | null>(null); // "photo-{i}" | "gallery-{i}"
+  const [uploading, setUploading] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState("");
 
   useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => r.json())
+    fetch("/api/admin/athletes")
+      .then((r) => (r.ok ? r.json() : null))
       .then((d) => {
-        if (d?.user?.isAdmin) {
-          setAuthorized(true);
-          fetch("/api/admin/athletes")
-            .then((r) => (r.ok ? r.json() : null))
-            .then((d) => {
-              if (d?.athletes) {
-                setAthletes(d.athletes.map((a: Record<string, unknown>) => ({
-                  name: a.name || "",
-                  age: a.age || 18,
-                  role: a.role || "",
-                  description: a.description || "",
-                  image: a.image || null,
-                  images: Array.isArray(a.images) ? a.images : [],
-                  socials: Array.isArray(a.socials)
-                    ? a.socials
-                    : Object.entries((a.socials as Record<string, string>) || {})
-                        .filter(([, v]) => v)
-                        .map(([k, v]) => ({ platform: k, url: v })),
-                  hobbies: Array.isArray(a.hobbies) ? a.hobbies : [],
-                })));
-              }
-            })
-            .catch(() => {})
-            .finally(() => setLoading(false));
-        } else {
-          router.replace("/");
+        if (d?.athletes) {
+          setAthletes(d.athletes.map((a: Record<string, unknown>) => ({
+            name: a.name || "",
+            age: a.age || 18,
+            role: a.role || "",
+            description: a.description || "",
+            image: a.image || null,
+            images: Array.isArray(a.images) ? a.images : [],
+            socials: Array.isArray(a.socials)
+              ? a.socials
+              : Object.entries((a.socials as Record<string, string>) || {})
+                  .filter(([, v]) => v)
+                  .map(([k, v]) => ({ platform: k, url: v })),
+            hobbies: Array.isArray(a.hobbies) ? a.hobbies : [],
+          })));
         }
       })
-      .catch(() => router.replace("/"));
-  }, [router]);
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const save = async () => {
     setSaving(true);
@@ -210,15 +198,11 @@ export default function AdminAthletesPage() {
       idx === i ? { ...a, hobbies: a.hobbies.filter((_, k) => k !== j) } : a,
     ));
 
-  if (!authorized) {
-    return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-brand-grey">checking access...</p></div>;
-  }
-
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <div className="mb-6">
+      <div className="mb-8">
         <a href="/admin" className="text-xs text-brand-grey hover:text-brand-gold">← back to dashboard</a>
-        <h1 className="mt-2 font-heading text-2xl text-brand-gold">manage athlete profiles</h1>
+        <h1 className="mt-3 font-heading text-2xl text-brand-gold">athlete profiles</h1>
         <p className="mt-1 text-sm text-brand-grey">edit the athletes shown on the /athletes page.</p>
       </div>
 
@@ -230,8 +214,8 @@ export default function AdminAthletesPage() {
 
       {loading ? (
         <div className="space-y-4">
-          {[0, 1].map((i) => (
-            <div key={i} className="h-48 animate-pulse rounded-lg bg-white/5" />
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-48 animate-pulse rounded-xl bg-white/5" />
           ))}
         </div>
       ) : (
@@ -249,7 +233,7 @@ export default function AdminAthletesPage() {
                   <div className="relative h-16 w-16 flex-none overflow-hidden rounded-lg bg-white/5">
                     {a.image
                       ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={a.image} alt="" className="h-full w-full object-cover" />
-                      : <div className="flex h-full w-full items-center justify-center text-xl">🔱</div>
+                      : <div className="flex h-full w-full items-center justify-center"><UserCircleIcon className="h-8 w-8 text-brand-grey/30" /></div>
                     }
                   </div>
                   <div className="space-y-1">
@@ -293,11 +277,11 @@ export default function AdminAthletesPage() {
                     {a.hobbies.map((h, j) => (
                       <div key={j} className="flex gap-2">
                         <input type="text" value={h} onChange={(e) => updateHobby(i, j, e.target.value)} placeholder="e.g. working out" className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
-                        <button type="button" onClick={() => removeHobby(i, j)} className="flex-none px-1 text-brand-grey hover:text-red-400">×</button>
+                        <button type="button" onClick={() => removeHobby(i, j)} className="flex-none p-1 text-brand-grey/40 transition-colors hover:text-red-400"><XMarkIcon className="h-3.5 w-3.5" /></button>
                       </div>
                     ))}
                   </div>
-                  <button type="button" onClick={() => addHobby(i)} className="mt-2 text-xs text-brand-gold hover:text-brand-pale-gold">+ add interest</button>
+                  <button type="button" onClick={() => addHobby(i)} className="mt-2 flex items-center gap-1.5 text-xs text-brand-gold hover:text-brand-pale-gold"><PlusIcon className="h-3.5 w-3.5" />add interest</button>
                 </div>
 
                 {/* Gallery */}
@@ -307,7 +291,7 @@ export default function AdminAthletesPage() {
                     {(a.images || []).map((src, j) => (
                       <div key={j} className="group relative h-16 w-16 overflow-hidden rounded-lg border border-white/10">
                         <MediaThumb src={src} />
-                        <button type="button" onClick={() => removeGallery(i, j)} className="absolute inset-0 flex items-center justify-center bg-black/50 text-sm text-white opacity-0 transition-opacity group-hover:opacity-100">×</button>
+                        <button type="button" onClick={() => removeGallery(i, j)} className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100"><XMarkIcon className="h-4 w-4" /></button>
                       </div>
                     ))}
                     <label className={`flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-dashed border-brand-dark-gold/30 text-brand-gold transition-colors hover:border-brand-gold/60 ${uploading === `gallery-${i}` ? "opacity-50" : ""}`}>
@@ -339,17 +323,17 @@ export default function AdminAthletesPage() {
                           {SOCIAL_PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
                         </select>
                         <input type="text" value={s.url} onChange={(e) => updateSocial(i, j, "url", e.target.value)} placeholder="url or username" className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
-                        <button type="button" onClick={() => removeSocial(i, j)} className="flex-none px-1 text-brand-grey hover:text-red-400">×</button>
+                        <button type="button" onClick={() => removeSocial(i, j)} className="flex-none p-1 text-brand-grey/40 transition-colors hover:text-red-400"><XMarkIcon className="h-3.5 w-3.5" /></button>
                       </div>
                     ))}
                   </div>
-                  <button type="button" onClick={() => addSocial(i)} className="mt-2 text-xs text-brand-gold hover:text-brand-pale-gold">+ add social</button>
+                  <button type="button" onClick={() => addSocial(i)} className="mt-2 flex items-center gap-1.5 text-xs text-brand-gold hover:text-brand-pale-gold"><PlusIcon className="h-3.5 w-3.5" />add social</button>
                 </div>
               </div>
             ))}
           </div>
 
-          <button type="button" onClick={() => setAthletes((prev) => [...prev, { name: "", age: 18, role: "athlete", description: "", image: null, images: [], socials: [], hobbies: [] }])} className="mt-4 text-xs text-brand-gold hover:text-brand-pale-gold">+ add athlete</button>
+          <button type="button" onClick={() => setAthletes((prev) => [...prev, { name: "", age: 18, role: "athlete", description: "", image: null, images: [], socials: [], hobbies: [] }])} className="mt-4 flex items-center gap-1.5 text-xs text-brand-gold hover:text-brand-pale-gold"><PlusIcon className="h-3.5 w-3.5" />add athlete</button>
 
           <div className="mt-6 flex items-center gap-3">
             <button type="button" onClick={save} disabled={saving} className="rounded-full bg-brand-gold px-6 py-2.5 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50">

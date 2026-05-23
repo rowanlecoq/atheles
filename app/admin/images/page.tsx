@@ -2,7 +2,7 @@
 
 import { upload } from "@vercel/blob/client";
 import { useEffect, useState, useCallback, useRef } from "react";
-import { useRouter } from "next/navigation";
+import { ChevronDownIcon, XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 type SlotData = {
   media: string[];
@@ -382,7 +382,7 @@ function SlotEditor({
         </div>
         <div className="flex items-center gap-2">
           {saved && <span className="text-xs text-green-400">saved!</span>}
-          <span className={`text-brand-grey transition-transform ${expanded ? "rotate-180" : ""}`}>▾</span>
+          <ChevronDownIcon className={`h-4 w-4 text-brand-grey transition-transform ${expanded ? "rotate-180" : ""}`} />
         </div>
       </button>
 
@@ -416,7 +416,7 @@ function SlotEditor({
                   <div className="absolute left-1 top-1 rounded bg-black/60 px-1.5 py-0.5 text-[9px] text-white">{i + 1}</div>
                   <div className="absolute inset-0 flex items-center justify-center gap-1 bg-black/0 opacity-0 transition-all group-hover:bg-black/50 group-hover:opacity-100">
                     {i > 0 && <button type="button" onClick={() => moveMedia(i, i - 1)} className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] text-white hover:bg-white/40">←</button>}
-                    <button type="button" onClick={() => removeMedia(i)} className="rounded bg-red-500/70 px-1.5 py-0.5 text-[10px] text-white hover:bg-red-500">✕</button>
+                    <button type="button" onClick={() => removeMedia(i)} className="rounded bg-red-500/70 p-0.5 text-white hover:bg-red-500"><XMarkIcon className="h-3 w-3" /></button>
                     {i < data.media.length - 1 && <button type="button" onClick={() => moveMedia(i, i + 1)} className="rounded bg-white/20 px-1.5 py-0.5 text-[10px] text-white hover:bg-white/40">→</button>}
                   </div>
                 </div>
@@ -427,7 +427,7 @@ function SlotEditor({
                 disabled={uploading}
                 className="flex aspect-video items-center justify-center rounded border border-dashed border-brand-dark-gold/30 text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
               >
-                {uploading ? <span className="text-xs">...</span> : <span className="text-xl leading-none">+</span>}
+                {uploading ? <span className="text-xs">...</span> : <PlusIcon className="h-5 w-5" />}
               </button>
             </div>
             <input ref={fileRef} type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadFile(f); e.target.value = ""; }} />
@@ -488,46 +488,36 @@ function SlotEditor({
 }
 
 export default function AdminImagesPage() {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
   const [slots, setSlots] = useState<Record<string, SlotData>>({});
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.user?.isAdmin) {
-          setAuthorized(true);
-          fetch("/api/admin/images")
-            .then((r) => (r.ok ? r.json() : null))
-            .then((d) => { if (d?.images) setSlots(d.images); })
-            .catch(() => {})
-            .finally(() => setLoading(false));
-        } else { router.replace("/"); }
-      })
-      .catch(() => router.replace("/"));
-  }, [router]);
+    fetch("/api/admin/images")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.images) setSlots(d.images); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const handleUpdate = useCallback((key: string, data: SlotData) => {
     setSlots((prev) => ({ ...prev, [key]: data }));
   }, []);
 
-  if (!authorized) {
-    return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-brand-grey">checking access...</p></div>;
-  }
-
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <div className="mb-6">
+      <div className="mb-8">
         <a href="/admin" className="text-xs text-brand-grey hover:text-brand-gold">← back to dashboard</a>
-        <h1 className="mt-2 font-heading text-2xl text-brand-gold">site images</h1>
+        <h1 className="mt-3 font-heading text-2xl text-brand-gold">site images</h1>
         <p className="mt-1 text-sm text-brand-grey">
           manage images with slideshows, focal point positioning, and display settings.
         </p>
       </div>
       {loading ? (
-        <p className="text-sm text-brand-grey">loading...</p>
+        <div className="space-y-3">
+          {[0, 1, 2, 3].map((i) => (
+            <div key={i} className="h-16 animate-pulse rounded-xl bg-white/5" />
+          ))}
+        </div>
       ) : (
         <div className="space-y-3">
           {IMAGE_SLOTS.map((slot) => (

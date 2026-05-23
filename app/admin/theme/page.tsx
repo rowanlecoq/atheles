@@ -2,7 +2,6 @@
 
 import { upload } from "@vercel/blob/client";
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
 
 type SiteTheme = {
   brandGold: string;
@@ -55,8 +54,6 @@ function ColorField({ label, value, onChange }: { label: string; value: string; 
 }
 
 export default function AdminThemePage() {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
   const [theme, setTheme] = useState<SiteTheme>(DEFAULT_THEME);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -66,22 +63,12 @@ export default function AdminThemePage() {
   const [logoError, setLogoError] = useState("");
 
   useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.user?.isAdmin) {
-          setAuthorized(true);
-          fetch("/api/admin/theme")
-            .then((r) => (r.ok ? r.json() : null))
-            .then((d) => { if (d?.theme) setTheme({ ...DEFAULT_THEME, ...d.theme }); })
-            .catch(() => {})
-            .finally(() => setLoading(false));
-        } else {
-          router.replace("/");
-        }
-      })
-      .catch(() => router.replace("/"));
-  }, [router]);
+    fetch("/api/admin/theme")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.theme) setTheme({ ...DEFAULT_THEME, ...d.theme }); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const save = async () => {
     setSaving(true);
@@ -162,15 +149,11 @@ export default function AdminThemePage() {
     }).catch(() => {});
   };
 
-  if (!authorized) {
-    return <div className="flex min-h-[60vh] items-center justify-center"><p className="text-sm text-brand-grey">checking access...</p></div>;
-  }
-
   return (
     <div className="mx-auto max-w-3xl px-4 py-12">
-      <div className="mb-6">
+      <div className="mb-8">
         <a href="/admin" className="text-xs text-brand-grey hover:text-brand-gold">← back to dashboard</a>
-        <h1 className="mt-2 font-heading text-2xl text-brand-gold">website theme</h1>
+        <h1 className="mt-3 font-heading text-2xl text-brand-gold">website theme</h1>
         <p className="mt-1 text-sm text-brand-grey">customize colors, gradients, and logos. changes apply site-wide after save.</p>
       </div>
 

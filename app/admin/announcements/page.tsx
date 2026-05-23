@@ -1,40 +1,21 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { XMarkIcon, PlusIcon } from "@heroicons/react/24/outline";
 
 export default function AdminAnnouncementsPage() {
-  const router = useRouter();
-  const [authorized, setAuthorized] = useState(false);
   const [announcements, setAnnouncements] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    fetch("/api/auth/session")
-      .then((r) => r.json())
-      .then((d) => {
-        if (d?.user?.isAdmin) {
-          setAuthorized(true);
-          fetchAnnouncements();
-        } else {
-          router.replace("/");
-        }
-      })
-      .catch(() => router.replace("/"));
-  }, [router]);
-
-  const fetchAnnouncements = async () => {
-    try {
-      const res = await fetch("/api/admin/announcements");
-      if (res.ok) {
-        const d = await res.json();
-        setAnnouncements(d.announcements || []);
-      }
-    } catch {}
-    setLoading(false);
-  };
+    fetch("/api/admin/announcements")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => { if (d?.announcements) setAnnouncements(d.announcements); })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+  }, []);
 
   const save = async () => {
     setSaving(true);
@@ -53,62 +34,51 @@ export default function AdminAnnouncementsPage() {
     setSaving(false);
   };
 
-  const updateAt = (index: number, value: string) => {
+  const updateAt = (index: number, value: string) =>
     setAnnouncements((prev) => prev.map((a, i) => (i === index ? value : a)));
-  };
 
-  const removeAt = (index: number) => {
+  const removeAt = (index: number) =>
     setAnnouncements((prev) => prev.filter((_, i) => i !== index));
-  };
 
-  const addNew = () => {
-    setAnnouncements((prev) => [...prev, ""]);
-  };
-
-  if (!authorized) {
-    return (
-      <div className="flex min-h-[60vh] items-center justify-center">
-        <p className="text-sm text-brand-grey">checking access...</p>
-      </div>
-    );
-  }
+  const addNew = () => setAnnouncements((prev) => [...prev, ""]);
 
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
-      <div className="mb-6">
-        <a href="/admin" className="text-xs text-brand-grey hover:text-brand-gold">
+      <div className="mb-8">
+        <a href="/admin" className="inline-flex items-center gap-1.5 text-xs text-brand-grey hover:text-brand-gold">
           ← back to dashboard
         </a>
-        <h1 className="mt-2 font-heading text-2xl text-brand-gold">
-          announcements
-        </h1>
+        <h1 className="mt-3 font-heading text-2xl text-brand-gold">announcements</h1>
         <p className="mt-1 text-sm text-brand-grey">
-          edit the messages shown in the announcement bar at the top of the site.
-          they rotate every 5 seconds.
+          messages rotate every 5 seconds in the announcement bar.
         </p>
       </div>
 
       {loading ? (
-        <p className="text-sm text-brand-grey">loading...</p>
+        <div className="space-y-3">
+          {[0, 1, 2].map((i) => (
+            <div key={i} className="h-11 animate-pulse rounded-lg bg-white/5" />
+          ))}
+        </div>
       ) : (
         <>
-          <div className="space-y-3">
+          <div className="space-y-2.5">
             {announcements.map((text, i) => (
               <div key={i} className="flex gap-2">
                 <input
                   type="text"
                   value={text}
                   onChange={(e) => updateAt(i, e.target.value)}
-                  placeholder="announcement text..."
-                  className="flex-1 rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                  placeholder={`announcement ${i + 1}...`}
+                  className="flex-1 rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white placeholder:text-brand-grey/30 focus:border-brand-gold focus:outline-none"
                 />
                 <button
                   type="button"
                   onClick={() => removeAt(i)}
-                  className="flex h-10 w-10 flex-none items-center justify-center rounded-lg border border-brand-dark-gold/20 text-brand-grey transition-colors hover:border-red-400/40 hover:text-red-400"
-                  aria-label="Remove"
+                  className="flex h-10 w-10 flex-none items-center justify-center rounded-lg border border-brand-dark-gold/20 text-brand-grey/60 transition-colors hover:border-red-400/30 hover:text-red-400"
+                  aria-label="remove"
                 >
-                  ×
+                  <XMarkIcon className="h-4 w-4" />
                 </button>
               </div>
             ))}
@@ -117,12 +87,13 @@ export default function AdminAnnouncementsPage() {
           <button
             type="button"
             onClick={addNew}
-            className="mt-3 text-xs text-brand-gold transition-colors hover:text-brand-pale-gold"
+            className="mt-3 flex items-center gap-1.5 text-xs text-brand-gold transition-colors hover:text-brand-pale-gold"
           >
-            + add announcement
+            <PlusIcon className="h-3.5 w-3.5" />
+            add announcement
           </button>
 
-          <div className="mt-6 flex items-center gap-3">
+          <div className="mt-8 flex items-center gap-4">
             <button
               type="button"
               onClick={save}
@@ -132,17 +103,13 @@ export default function AdminAnnouncementsPage() {
               {saving ? "saving..." : "save changes"}
             </button>
             {saved && (
-              <span className="text-xs text-green-400">saved! changes will appear on next page load.</span>
+              <span className="text-xs text-green-400">saved!</span>
             )}
           </div>
 
-          <div className="mt-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark-gold/5 p-4">
-            <p className="text-xs text-brand-grey">
-              <strong className="text-brand-pale-gold">note:</strong> announcements are stored in shopify and will persist across deploys.
-              changes take effect when users refresh or visit a new page. keep messages short
-              and uppercase-friendly since they display in small caps.
-            </p>
-          </div>
+          <p className="mt-8 text-xs text-brand-grey/50">
+            keep messages short and uppercase-friendly — they display in small caps. changes take effect when users refresh.
+          </p>
         </>
       )}
     </div>
