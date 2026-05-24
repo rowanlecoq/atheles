@@ -376,19 +376,17 @@ export default function CartModal() {
     setIsOpen(false);
   }, []);
 
-  // Lock body scroll when cart is open — position:fixed required for iOS Safari
-  // which ignores overflow:hidden on body when the soft keyboard is visible.
+  // Lock body scroll when cart is open.
+  // overflow:hidden on html+body works on desktop/Android.
+  // overscroll-behavior:contain on the panel handles iOS Safari.
+  // We deliberately avoid position:fixed on body — it breaks sticky navbar.
   useEffect(() => {
     if (isOpen) {
       const scrollY = window.scrollY;
-      document.body.style.position = "fixed";
-      document.body.style.top = `-${scrollY}px`;
-      document.body.style.width = "100%";
+      document.documentElement.style.overflow = "hidden";
       document.body.style.overflow = "hidden";
       return () => {
-        document.body.style.position = "";
-        document.body.style.top = "";
-        document.body.style.width = "";
+        document.documentElement.style.overflow = "";
         document.body.style.overflow = "";
         window.scrollTo(0, scrollY);
       };
@@ -689,7 +687,7 @@ export default function CartModal() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20">
+            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20" style={{ overscrollBehavior: "contain" }}>
 
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
@@ -732,7 +730,7 @@ export default function CartModal() {
               )}
 
               {/* Body */}
-              <div className="flex flex-1 flex-col overflow-y-auto px-5">
+              <div className="flex flex-1 flex-col overflow-y-auto px-5" style={{ overscrollBehavior: "contain" }}>
                 {!hasItems ? (
                   /* ── Empty state ── */
                   <div className="flex flex-1 flex-col">
