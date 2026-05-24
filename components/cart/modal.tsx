@@ -1,6 +1,5 @@
 "use client";
 
-import { Dialog, Transition } from "@headlessui/react";
 import {
   MinusIcon,
   PlusIcon,
@@ -17,7 +16,7 @@ import type { CartItem, Product, ProductVariant } from "lib/shopify/types";
 import { createUrl } from "lib/utils";
 import Image from "next/image";
 import Link from "next/link";
-import { Fragment, useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
 import {
   addItem,
@@ -365,6 +364,9 @@ export default function CartModal() {
   const [deliveryAddress, setDeliveryAddress] = useState<string | null>(null);
   const favCacheRef = useRef<FavProduct[] | null>(null);
   const closedAtRef = useRef(0);
+  const closeButtonRef = useRef<HTMLButtonElement>(null);
+  const [modalMounted, setModalMounted] = useState(false);
+  const [modalVisible, setModalVisible] = useState(false);
 
   const openCart = useCallback(() => {
     if (Date.now() - closedAtRef.current < 500) return;
@@ -375,6 +377,34 @@ export default function CartModal() {
     closedAtRef.current = Date.now();
     setIsOpen(false);
   }, []);
+
+  // Mount/unmount the modal DOM with enter/leave animation timing.
+  // We manage this ourselves so we never use Headless UI's Dialog (which applies
+  // overflow:hidden on the body and breaks sticky navbar positioning).
+  useEffect(() => {
+    if (isOpen) {
+      setModalMounted(true);
+      const raf = requestAnimationFrame(() => setModalVisible(true));
+      return () => cancelAnimationFrame(raf);
+    } else {
+      setModalVisible(false);
+      const t = setTimeout(() => setModalMounted(false), 300);
+      return () => clearTimeout(t);
+    }
+  }, [isOpen]);
+
+  // Focus the close button when the panel becomes visible
+  useEffect(() => {
+    if (modalVisible) closeButtonRef.current?.focus();
+  }, [modalVisible]);
+
+  // Close on Escape
+  useEffect(() => {
+    if (!isOpen) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") closeCart(); };
+    document.addEventListener("keydown", handler);
+    return () => document.removeEventListener("keydown", handler);
+  }, [isOpen, closeCart]);
 
   // Block page scroll while cart is open without touching overflow or position —
   // both of those approaches break sticky navbar positioning.
@@ -668,32 +698,23 @@ export default function CartModal() {
         <OpenCart quantity={cart?.totalQuantity} />
       </button>
 
-      <Transition show={isOpen}>
-        <Dialog onClose={closeCart} className="relative">
+      {modalMounted && (
+        <>
           {/* Backdrop — z-[50] so the sticky navbar (z-[60]) stays visible above it */}
-          <Transition.Child
-            as={Fragment}
-            enter="transition-opacity ease-out duration-300"
-            enterFrom="opacity-0"
-            enterTo="opacity-100"
-            leave="transition-opacity ease-in duration-200"
-            leaveFrom="opacity-100"
-            leaveTo="opacity-0"
-          >
-            <div className="fixed inset-0 z-[50] bg-black/60" aria-hidden="true" onClick={closeCart} />
-          </Transition.Child>
+          <div
+            className={`fixed inset-0 z-[50] bg-black/60 transition-opacity duration-300 ${modalVisible ? "opacity-100" : "opacity-0"}`}
+            aria-hidden="true"
+            onClick={closeCart}
+          />
 
           {/* Panel */}
-          <Transition.Child
-            as={Fragment}
-            enter="transition-transform ease-out duration-300"
-            enterFrom="translate-x-full"
-            enterTo="translate-x-0"
-            leave="transition-transform ease-in duration-200"
-            leaveFrom="translate-x-0"
-            leaveTo="translate-x-full"
+          <div
+            role="dialog"
+            aria-modal="true"
+            aria-label="Shopping cart"
+            className={`fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20 z-[70] transition-transform duration-300 ease-out ${modalVisible ? "translate-x-0" : "translate-x-full"}`}
+            style={{ overscrollBehavior: "contain" }}
           >
-            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20 z-[70]" style={{ overscrollBehavior: "contain" }}>
 
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
@@ -709,6 +730,7 @@ export default function CartModal() {
                   ) : null}
                 </div>
                 <button
+                  ref={closeButtonRef}
                   type="button"
                   onClick={closeCart}
                   aria-label="Close cart"
@@ -907,10 +929,9 @@ export default function CartModal() {
                   </form>
                 </div>
               )}
-            </Dialog.Panel>
-          </Transition.Child>
-        </Dialog>
-      </Transition>
+          </div>
+        </>
+      )}
     </>
   );
 }
