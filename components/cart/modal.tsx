@@ -663,8 +663,8 @@ export default function CartModal() {
       </button>
 
       <Transition show={isOpen}>
-        <Dialog onClose={closeCart} className="relative z-50">
-          {/* Backdrop */}
+        <Dialog onClose={closeCart} className="relative">
+          {/* Backdrop — z-[50] so the sticky navbar (z-[60]) stays visible above it */}
           <Transition.Child
             as={Fragment}
             enter="transition-opacity ease-out duration-300"
@@ -674,7 +674,7 @@ export default function CartModal() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 bg-black/60" aria-hidden="true" onClick={closeCart} />
+            <div className="fixed inset-0 z-[50] bg-black/60" aria-hidden="true" onClick={closeCart} />
           </Transition.Child>
 
           {/* Panel */}
