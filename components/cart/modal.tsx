@@ -376,6 +376,25 @@ export default function CartModal() {
     setIsOpen(false);
   }, []);
 
+  // Lock body scroll when cart is open — position:fixed required for iOS Safari
+  // which ignores overflow:hidden on body when the soft keyboard is visible.
+  useEffect(() => {
+    if (isOpen) {
+      const scrollY = window.scrollY;
+      document.body.style.position = "fixed";
+      document.body.style.top = `-${scrollY}px`;
+      document.body.style.width = "100%";
+      document.body.style.overflow = "hidden";
+      return () => {
+        document.body.style.position = "";
+        document.body.style.top = "";
+        document.body.style.width = "";
+        document.body.style.overflow = "";
+        window.scrollTo(0, scrollY);
+      };
+    }
+  }, [isOpen]);
+
   // Ensure a cart cookie exists
   useEffect(() => {
     if (!cart) createCartAndSetCookie();
@@ -657,9 +676,8 @@ export default function CartModal() {
             leaveFrom="opacity-100"
             leaveTo="opacity-0"
           >
-            <div className="fixed inset-0 hidden bg-black/50 lg:block" aria-hidden="true" onClick={closeCart} />
+            <div className="fixed inset-0 bg-black/60" aria-hidden="true" onClick={closeCart} />
           </Transition.Child>
-          <div className="fixed inset-0 lg:hidden" onClick={closeCart} />
 
           {/* Panel */}
           <Transition.Child
