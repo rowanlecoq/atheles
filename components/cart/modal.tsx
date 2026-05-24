@@ -376,21 +376,25 @@ export default function CartModal() {
     setIsOpen(false);
   }, []);
 
-  // Lock body scroll when cart is open.
-  // overflow:hidden on html+body works on desktop/Android.
-  // overscroll-behavior:contain on the panel handles iOS Safari.
-  // We deliberately avoid position:fixed on body — it breaks sticky navbar.
+  // Block page scroll while cart is open without touching overflow or position —
+  // both of those approaches break sticky navbar positioning.
+  // Instead we intercept wheel + touchmove events at the document level and only
+  // allow them when the touch/scroll originates inside the cart panel itself.
   useEffect(() => {
-    if (isOpen) {
-      const scrollY = window.scrollY;
-      document.documentElement.style.overflow = "hidden";
-      document.body.style.overflow = "hidden";
-      return () => {
-        document.documentElement.style.overflow = "";
-        document.body.style.overflow = "";
-        window.scrollTo(0, scrollY);
-      };
-    }
+    if (!isOpen) return;
+
+    const prevent = (e: WheelEvent | TouchEvent) => {
+      const panel = document.querySelector("[data-cart-panel]");
+      if (panel && panel.contains(e.target as Node)) return;
+      e.preventDefault();
+    };
+
+    document.addEventListener("wheel", prevent, { passive: false });
+    document.addEventListener("touchmove", prevent, { passive: false });
+    return () => {
+      document.removeEventListener("wheel", prevent);
+      document.removeEventListener("touchmove", prevent);
+    };
   }, [isOpen]);
 
   // Ensure a cart cookie exists
@@ -730,7 +734,7 @@ export default function CartModal() {
               )}
 
               {/* Body */}
-              <div className="flex flex-1 flex-col overflow-y-auto px-5" style={{ overscrollBehavior: "contain" }}>
+              <div data-cart-panel className="flex flex-1 flex-col overflow-y-auto px-5" style={{ overscrollBehavior: "contain" }}>
                 {!hasItems ? (
                   /* ── Empty state ── */
                   <div className="flex flex-1 flex-col">
