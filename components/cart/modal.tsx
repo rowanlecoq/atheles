@@ -391,9 +391,11 @@ export default function CartModal() {
 
     document.addEventListener("wheel", prevent, { passive: false });
     document.addEventListener("touchmove", prevent, { passive: false });
+    document.body.classList.add("cart-open");
     return () => {
       document.removeEventListener("wheel", prevent);
       document.removeEventListener("touchmove", prevent);
+      document.body.classList.remove("cart-open");
     };
   }, [isOpen]);
 
