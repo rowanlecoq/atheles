@@ -13,7 +13,7 @@ export function NavbarShell({ children }: { children: ReactNode }) {
 
   return (
     <div
-      className={`site-header-root sticky top-0 z-50 ${
+      className={`site-header-root sticky top-0 z-50 md:z-[60] ${
         animDone ? "" : entered ? "animate-navbar-enter" : "navbar-pre-enter"
       }`}
       // Once the entrance animation finishes, explicitly clear the transform so

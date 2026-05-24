@@ -687,7 +687,7 @@ export default function CartModal() {
             leaveFrom="translate-x-0"
             leaveTo="translate-x-full"
           >
-            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20" style={{ overscrollBehavior: "contain" }}>
+            <Dialog.Panel className="fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20 z-[70]" style={{ overscrollBehavior: "contain" }}>
 
               {/* Header */}
               <div className="flex items-center justify-between px-5 py-4 border-b border-white/5">
