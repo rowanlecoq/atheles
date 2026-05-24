@@ -2,22 +2,32 @@
 
 import { motion } from "motion/react";
 import { usePathname } from "next/navigation";
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
+import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import type { ReactNode } from "react";
 
 export function PageTransition({ children }: { children: ReactNode }) {
   const pathname = usePathname();
+  const hasNavigated = useRef(false);
+  const prefersReducedMotion = useReducedMotion();
 
   useEffect(() => {
     if ("scrollRestoration" in history) {
       history.scrollRestoration = "manual";
     }
-    window.scrollTo(0, 0);
   }, []);
 
   useEffect(() => {
-    window.scrollTo(0, 0);
+    const alreadyNavigated = hasNavigated.current;
+    hasNavigated.current = true;
+    if (alreadyNavigated) window.scrollTo(0, 0);
   }, [pathname]);
+
+  // On initial page load: render children directly (no opacity:0 in HTML → LCP unblocked)
+  // On subsequent navigations: fade in so route changes still feel smooth
+  if (prefersReducedMotion || !hasNavigated.current) {
+    return <>{children}</>;
+  }
 
   return (
     <motion.div
