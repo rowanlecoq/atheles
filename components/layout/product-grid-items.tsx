@@ -194,8 +194,10 @@ export default function ProductGridItems({
       {products.map((product, index) => (
         <motion.li
           key={product.handle}
-          initial={prefersReducedMotion ? {} : { opacity: 0, y: 20 }}
-          whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+          // First 4 cards are above the fold — skip opacity:0 initial state so
+          // SSR'd HTML is immediately visible and LCP fires without waiting for hydration
+          initial={prefersReducedMotion || index < 4 ? {} : { opacity: 0, y: 20 }}
+          whileInView={prefersReducedMotion || index < 4 ? {} : { opacity: 1, y: 0 }}
           viewport={{ once: true, margin: "0px" }}
           transition={{
             duration: 0.28,
