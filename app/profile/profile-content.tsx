@@ -716,7 +716,7 @@ export default function ProfileContent() {
       : Math.min(100, ((points - tier.min) / (tier.max - tier.min)) * 100);
 
   return (
-    <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16 animate-profile-reveal">
+    <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16">
       {/* Background handled by global ThemeBackground component */}
 
       <div className="relative">

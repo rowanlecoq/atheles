@@ -39,18 +39,30 @@ const VALID_TIERS = ["bronze", "silver", "gold", "platinum", "champion", "athlet
 export default function AdminMembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [updating, setUpdating] = useState<string | null>(null);
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
 
-  useEffect(() => {
+  const loadMembers = () => {
+    setLoading(true);
+    setError(null);
     fetch("/api/admin/members")
-      .then((r) => (r.ok ? r.json() : null))
-      .then((d) => { if (d?.customers) setMembers(d.customers); })
-      .catch(() => {})
+      .then(async (r) => {
+        const json = await r.json().catch(() => null);
+        if (!r.ok) {
+          setError(json?.error ?? `HTTP ${r.status}`);
+          return;
+        }
+        if (json?.customers) setMembers(json.customers);
+        else setError("API returned no customers field");
+      })
+      .catch((e) => setError(String(e)))
       .finally(() => setLoading(false));
-  }, []);
+  };
+
+  useEffect(() => { loadMembers(); }, []);
 
   const updateTier = async (customerId: string, tier: string) => {
     setUpdating(customerId);
@@ -141,6 +153,17 @@ export default function AdminMembersPage() {
           {[0, 1, 2, 3, 4].map((i) => (
             <div key={i} className="h-16 animate-pulse rounded-xl bg-white/5" />
           ))}
+        </div>
+      ) : error ? (
+        <div className="rounded-xl border border-red-500/20 bg-red-500/5 p-4">
+          <p className="text-sm text-red-400">error loading members: {error}</p>
+          <button
+            type="button"
+            onClick={loadMembers}
+            className="mt-2 text-xs text-brand-gold hover:underline"
+          >
+            retry
+          </button>
         </div>
       ) : filtered.length === 0 ? (
         <p className="text-sm text-brand-grey">no members found.</p>

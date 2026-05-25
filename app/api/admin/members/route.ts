@@ -3,6 +3,8 @@ import { adminFetch, verifyAdmin } from "lib/admin/utils";
 
 const VALID_TIERS = ["bronze", "silver", "gold", "platinum", "champion", "athlete", "admin"];
 
+export const dynamic = "force-dynamic";
+
 export async function GET() {
   if (!(await verifyAdmin())) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
