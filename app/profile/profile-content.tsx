@@ -704,6 +704,8 @@ export default function ProfileContent() {
     );
   }
 
+  if (!user) return null;
+
   const initials = (user.name || user.email || "A")
     .split(" ")
     .map((w) => w[0])
