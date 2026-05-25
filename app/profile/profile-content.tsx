@@ -769,13 +769,8 @@ export default function ProfileContent() {
         document.body,
       )}
 
-      {/* Avatar & Name — translate-only entrance, no opacity animation */}
-      <motion.div
-        className="mb-10 flex flex-col items-center text-center"
-        initial={{ opacity: 0, y: 16 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4, ease: [0.22, 1, 0.36, 1] }}
-      >
+      {/* Avatar & Name */}
+      <div className="mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
           <div
             className={`relative flex h-40 w-40 items-center justify-center overflow-hidden rounded-full sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}
@@ -856,7 +851,7 @@ export default function ProfileContent() {
             member since {memberSince}
           </p>
         </div>
-      </motion.div>
+      </div>
 
       {/* Points & Tier Progress */}
       <div className="relative mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
