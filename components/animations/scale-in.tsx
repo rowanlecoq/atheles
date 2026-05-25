@@ -43,8 +43,8 @@ export function ScaleIn({
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal;
     const observer = new IntersectionObserver(
-      ([entry]) => {
-        if (entry.isIntersecting) {
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
           setIsInView(true);
           observer.disconnect();
         }

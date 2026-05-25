@@ -62,7 +62,9 @@ export function FadeIn({
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal;
     const observer = new IntersectionObserver(
-      ([entry]) => {
+      (entries) => {
+        const entry = entries[0];
+        if (!entry) return;
         if (entry.isIntersecting) {
           setIsInView(true);
           if (once) observer.disconnect();
