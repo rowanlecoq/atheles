@@ -215,6 +215,8 @@ export default function ProfileContent() {
   const [discordSuccess, setDiscordSuccess] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [addAddressTick, setAddAddressTick] = useState(0);
+  const [revealed, setRevealed] = useState(false);
+  const [skeletonExiting, setSkeletonExiting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
@@ -629,16 +631,25 @@ export default function ProfileContent() {
     setThemeSaving(false);
   };
 
-  if (loading || !user) {
-    if (redirecting) {
-      return (
-        <div className="flex min-h-[60vh] items-center justify-center">
-          <p className="text-sm text-brand-grey">redirecting to sign in...</p>
-        </div>
-      );
-    }
+  // Trigger skeleton fade-out → content fade-in once data is ready
+  if (!loading && user && !redirecting && !revealed && !skeletonExiting) {
+    setSkeletonExiting(true);
+    setTimeout(() => setRevealed(true), 280);
+  }
+
+  if (redirecting) {
     return (
-      <div className="mx-auto max-w-2xl px-4 py-12 sm:py-16 animate-pulse">
+      <div className="flex min-h-[60vh] items-center justify-center">
+        <p className="text-sm text-brand-grey">redirecting to sign in...</p>
+      </div>
+    );
+  }
+
+  if (!revealed) {
+    return (
+      <div
+        className={`mx-auto max-w-2xl px-4 py-12 sm:py-16 animate-pulse transition-opacity duration-[280ms] ${skeletonExiting ? "opacity-0" : "opacity-100"}`}
+      >
         {/* Avatar skeleton */}
         <div className="mb-10 flex flex-col items-center">
           <div className="mb-4 h-24 w-24 rounded-full bg-brand-dark-gold/20" />
@@ -716,7 +727,7 @@ export default function ProfileContent() {
       : Math.min(100, ((points - tier.min) / (tier.max - tier.min)) * 100);
 
   return (
-    <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16">
+    <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16 animate-profile-reveal">
       {/* Background handled by global ThemeBackground component */}
 
       <div className="relative">
