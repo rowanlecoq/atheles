@@ -31,8 +31,9 @@ export async function GET() {
     `);
 
     if (data.errors) {
-      console.error("[admin/members] GraphQL errors:", JSON.stringify(data.errors));
-      return NextResponse.json({ error: "failed to fetch customers" }, { status: 500 });
+      const msg = data.errors.map((e: { message: string }) => e.message).join("; ");
+      console.error("[admin/members] GraphQL errors:", msg);
+      return NextResponse.json({ error: msg }, { status: 500 });
     }
 
     const customers = (data.data?.customers?.edges || []).map(
