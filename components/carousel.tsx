@@ -28,7 +28,7 @@ export async function Carousel() {
     <section className="px-6 py-10 sm:py-14 lg:px-10">
       <CarouselControls
         title="Coming Soon: This Summer"
-        subtitle="Mens"
+        subtitle="mens"
         viewAllHref="/search"
       >
         {products.map((product, index) => (

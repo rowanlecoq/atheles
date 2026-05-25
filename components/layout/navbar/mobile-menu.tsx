@@ -53,21 +53,21 @@ type CategoryLink = {
 
 const categoryLinks: CategoryLink[] = [
   {
-    title: "Mens",
+    title: "mens",
     path: "/search/mens",
     subcategories: [
-      { title: "Compressions", path: "/search/compressions" },
-      { title: "Tees", path: "/search/tees" },
-      { title: "Sweatpants", path: "/search/sweatpants" },
+      { title: "compressions", path: "/search/compressions" },
+      { title: "tees", path: "/search/tees" },
+      { title: "sweatpants", path: "/search/sweatpants" },
     ],
   },
   {
-    title: "Womens",
+    title: "womens",
     path: "/search/womens",
     comingSoon: true,
   },
   {
-    title: "Accessories",
+    title: "accessories",
     path: "/search/accessories",
     comingSoon: true,
   },

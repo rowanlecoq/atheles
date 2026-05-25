@@ -15,22 +15,22 @@ type Category = {
 
 const categories: Category[] = [
   {
-    title: "Mens",
+    title: "mens",
     href: "/search/mens",
     subcategories: [
-      { title: "Compressions", href: "/search/compressions" },
-      { title: "Tees", href: "/search/tees" },
-      { title: "Sweatpants", href: "/search/sweatpants" },
+      { title: "compressions", href: "/search/compressions" },
+      { title: "tees", href: "/search/tees" },
+      { title: "sweatpants", href: "/search/sweatpants" },
     ],
   },
   {
-    title: "Accessories",
+    title: "accessories",
     href: "/search/accessories",
     comingSoon: true,
     subcategories: [],
   },
   {
-    title: "Womens",
+    title: "womens",
     href: "/search/womens",
     comingSoon: true,
     subcategories: [],
