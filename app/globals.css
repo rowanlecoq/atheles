@@ -484,13 +484,13 @@ body[data-bg="sunset"] {
   animation: canvas-reveal 0.8s ease 0.05s both;
 }
 
-/* Profile page: skeleton → content crossfade */
+/* Profile page: content fades in once skeleton is replaced */
 @keyframes profile-reveal {
-  from { opacity: 0; transform: translateY(10px); }
-  to   { opacity: 1; transform: translateY(0); }
+  from { opacity: 0; }
+  to   { opacity: 1; }
 }
 .animate-profile-reveal {
-  animation: profile-reveal 0.35s ease-out both;
+  animation: profile-reveal 0.25s ease-out both;
 }
 
 
