@@ -18,6 +18,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { useFormStatus } from "react-dom";
+import { createPortal } from "react-dom";
 import {
   addItem,
   applyDiscountCode,
@@ -698,7 +699,7 @@ export default function CartModal() {
         <OpenCart quantity={cart?.totalQuantity} />
       </button>
 
-      {modalMounted && (
+      {modalMounted && createPortal(
         <>
           {/* Backdrop — z-[50] so the sticky navbar (z-[60]) stays visible above it */}
           <div
@@ -930,7 +931,8 @@ export default function CartModal() {
                 </div>
               )}
           </div>
-        </>
+        </>,
+        document.body
       )}
     </>
   );
