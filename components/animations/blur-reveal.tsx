@@ -10,7 +10,7 @@ import {
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion, useInView } from "motion/react";
-import { useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 export function BlurReveal({
   children,
@@ -26,6 +26,13 @@ export function BlurReveal({
   const ref = useRef<HTMLDivElement>(null);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
+  const [skipAnimation, setSkipAnimation] = useState(false);
+  useLayoutEffect(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) setSkipAnimation(true);
+    }
+  }, []);
   const isInView = useInView(ref, {
     once: true,
     margin: isMobileViewport
@@ -42,6 +49,10 @@ export function BlurReveal({
     : isMobileViewport
       ? Math.min(duration, animationDurationsMobile.slow)
       : duration;
+
+  if (skipAnimation || prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
     <motion.div

@@ -9,7 +9,7 @@ import {
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion, useInView } from "motion/react";
-import { useRef, type ReactNode } from "react";
+import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
 
@@ -39,6 +39,21 @@ export function FadeIn({
   const ref = useRef<HTMLDivElement>(null);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
+
+  // If the element is already in the viewport when the page loads, skip the
+  // animation entirely — starting at opacity:0 on above-the-fold content
+  // delays LCP. useLayoutEffect fires synchronously before the browser paints,
+  // so setState here causes a re-render that the user never sees as a flash.
+  const [skipAnimation, setSkipAnimation] = useState(false);
+  useLayoutEffect(() => {
+    if (ref.current) {
+      const rect = ref.current.getBoundingClientRect();
+      if (rect.top < window.innerHeight && rect.bottom > 0) {
+        setSkipAnimation(true);
+      }
+    }
+  }, []);
+
   const isInView = useInView(ref, {
     once,
     margin: isMobileViewport
@@ -57,6 +72,10 @@ export function FadeIn({
         x: { type: "spring" as const, stiffness: 300, damping: 30, delay },
         y: { type: "spring" as const, stiffness: 300, damping: 30, delay },
       };
+
+  if (skipAnimation || prefersReducedMotion) {
+    return <div className={className}>{children}</div>;
+  }
 
   return (
     <motion.div
