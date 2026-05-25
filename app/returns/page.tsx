@@ -5,7 +5,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "returns policy",
   description:
-    "ATHELES returns and exchange policy. 30-day return window for unworn items in original condition.",
+    "ATHELES returns and exchange policy. unworn, unwashed items in original condition accepted for return.",
 };
 
 export default function ReturnsPage() {
