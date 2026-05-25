@@ -385,8 +385,14 @@ export default function CartModal() {
   useEffect(() => {
     if (isOpen) {
       setModalMounted(true);
-      const raf = requestAnimationFrame(() => setModalVisible(true));
-      return () => cancelAnimationFrame(raf);
+      // Double-RAF: first RAF queues before paint; second fires after the
+      // browser has actually rendered the initial state so the CSS transition
+      // has a "from" frame to animate from.
+      let raf1: number, raf2: number;
+      raf1 = requestAnimationFrame(() => {
+        raf2 = requestAnimationFrame(() => setModalVisible(true));
+      });
+      return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
     } else {
       setModalVisible(false);
       const t = setTimeout(() => setModalMounted(false), 300);
@@ -701,9 +707,9 @@ export default function CartModal() {
 
       {modalMounted && createPortal(
         <>
-          {/* Backdrop — z-[50] so the sticky navbar (z-[60]) stays visible above it */}
+          {/* Backdrop — z-[65] covers the navbar (z-[60]) so it dims with the rest of the page */}
           <div
-            className={`fixed inset-0 z-[50] bg-black/60 transition-opacity duration-300 ${modalVisible ? "opacity-100" : "opacity-0"}`}
+            className={`fixed inset-0 z-[65] bg-black/60 transition-opacity duration-300 ${modalVisible ? "opacity-100" : "opacity-0"}`}
             aria-hidden="true"
             onClick={closeCart}
           />
