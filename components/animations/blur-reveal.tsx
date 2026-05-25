@@ -9,8 +9,8 @@ import {
 } from "lib/animation-config";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
-import { motion, useInView } from "motion/react";
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { motion } from "motion/react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 export function BlurReveal({
   children,
@@ -26,48 +26,54 @@ export function BlurReveal({
   const ref = useRef<HTMLDivElement>(null);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
-  const [skipAnimation, setSkipAnimation] = useState(false);
-  useLayoutEffect(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      if (rect.top < window.innerHeight && rect.bottom > 0) setSkipAnimation(true);
-    }
-  }, []);
-  const isInView = useInView(ref, {
-    once: true,
-    margin: isMobileViewport
-      ? animationViewportMarginsMobile.normal
-      : animationViewportMargins.normal,
-  });
-  const hiddenBlur = prefersReducedMotion
-    ? "blur(0px)"
-    : isMobileViewport
-      ? "blur(6px)"
-      : "blur(12px)";
-  const transitionDuration = prefersReducedMotion
-    ? Math.min(duration, animationDurations.fast)
-    : isMobileViewport
-      ? Math.min(duration, animationDurationsMobile.slow)
-      : duration;
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [isInView, setIsInView] = useState(false);
 
-  if (skipAnimation || prefersReducedMotion) {
-    return <div className={className}>{children}</div>;
+  useEffect(() => {
+    if (!ref.current || prefersReducedMotion) return;
+    const rect = ref.current.getBoundingClientRect();
+    if (rect.top >= window.innerHeight || rect.bottom <= 0) {
+      setShouldAnimate(true);
+    }
+  }, [prefersReducedMotion]);
+
+  useEffect(() => {
+    if (!shouldAnimate || !ref.current) return;
+    const margin = isMobileViewport
+      ? animationViewportMarginsMobile.normal
+      : animationViewportMargins.normal;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          observer.disconnect();
+        }
+      },
+      { rootMargin: margin },
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [shouldAnimate, isMobileViewport]);
+
+  if (!shouldAnimate || prefersReducedMotion) {
+    return (
+      <div ref={ref} className={className}>
+        {children}
+      </div>
+    );
   }
+
+  const hiddenBlur = isMobileViewport ? "blur(6px)" : "blur(12px)";
+  const transitionDuration = isMobileViewport
+    ? Math.min(duration, animationDurationsMobile.slow)
+    : duration;
 
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, filter: hiddenBlur }}
-      animate={
-        isInView
-          ? { opacity: 1, filter: "blur(0px)" }
-          : { opacity: 0, filter: hiddenBlur }
-      }
-      transition={{
-        duration: transitionDuration,
-        delay,
-        ease: animationEasing,
-      }}
+      animate={isInView ? { opacity: 1, filter: "blur(0px)" } : { opacity: 0, filter: hiddenBlur }}
+      transition={{ duration: transitionDuration, delay, ease: animationEasing }}
       className={className}
     >
       {children}

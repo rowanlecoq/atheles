@@ -8,8 +8,8 @@ import {
 } from "lib/animation-config";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
-import { motion, useInView } from "motion/react";
-import { useLayoutEffect, useRef, useState, type ReactNode } from "react";
+import { motion } from "motion/react";
+import { useEffect, useRef, useState, type ReactNode } from "react";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
 
@@ -40,53 +40,65 @@ export function FadeIn({
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
 
-  // If the element is already in the viewport when the page loads, skip the
-  // animation entirely — starting at opacity:0 on above-the-fold content
-  // delays LCP. useLayoutEffect fires synchronously before the browser paints,
-  // so setState here causes a re-render that the user never sees as a flash.
-  const [skipAnimation, setSkipAnimation] = useState(false);
-  useLayoutEffect(() => {
-    if (ref.current) {
-      const rect = ref.current.getBoundingClientRect();
-      if (rect.top < window.innerHeight && rect.bottom > 0) {
-        setSkipAnimation(true);
-      }
+  // Start visible — SSR HTML never has opacity:0. Only enable scroll animation
+  // for elements that are below the fold at mount time.
+  const [shouldAnimate, setShouldAnimate] = useState(false);
+  const [isInView, setIsInView] = useState(false);
+
+  // Effect 1: after mount, check if element is below the fold.
+  useEffect(() => {
+    if (!ref.current || prefersReducedMotion) return;
+    const rect = ref.current.getBoundingClientRect();
+    if (rect.top >= window.innerHeight || rect.bottom <= 0) {
+      setShouldAnimate(true);
     }
-  }, []);
+  }, [prefersReducedMotion]);
 
-  const isInView = useInView(ref, {
-    once,
-    margin: isMobileViewport
+  // Effect 2: runs after shouldAnimate flips to true, at which point ref.current
+  // is the motion.div. Set up IntersectionObserver on the correct element.
+  useEffect(() => {
+    if (!shouldAnimate || !ref.current) return;
+    const margin = isMobileViewport
       ? animationViewportMarginsMobile.normal
-      : animationViewportMargins.normal,
-  });
-  const offset = offsets[direction];
-  const mobileOffsetMultiplier = isMobileViewport ? 0.65 : 1;
-  const hiddenX = prefersReducedMotion ? 0 : offset.x * mobileOffsetMultiplier;
-  const hiddenY = prefersReducedMotion ? 0 : offset.y * mobileOffsetMultiplier;
+      : animationViewportMargins.normal;
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (entry.isIntersecting) {
+          setIsInView(true);
+          if (once) observer.disconnect();
+        } else if (!once) {
+          setIsInView(false);
+        }
+      },
+      { rootMargin: margin },
+    );
+    observer.observe(ref.current);
+    return () => observer.disconnect();
+  }, [shouldAnimate, isMobileViewport, once]);
 
-  const transition = prefersReducedMotion
-    ? { duration: animationDurations.fast, delay }
-    : {
-        opacity: { duration: duration * 0.8, ease: animationEasing, delay },
-        x: { type: "spring" as const, stiffness: 300, damping: 30, delay },
-        y: { type: "spring" as const, stiffness: 300, damping: 30, delay },
-      };
-
-  if (skipAnimation || prefersReducedMotion) {
-    return <div className={className}>{children}</div>;
+  if (!shouldAnimate || prefersReducedMotion) {
+    return (
+      <div ref={ref} className={className}>
+        {children}
+      </div>
+    );
   }
+
+  const offset = offsets[direction];
+  const m = isMobileViewport ? 0.65 : 1;
+  const hiddenX = offset.x * m;
+  const hiddenY = offset.y * m;
 
   return (
     <motion.div
       ref={ref}
       initial={{ opacity: 0, x: hiddenX, y: hiddenY }}
-      animate={
-        isInView
-          ? { opacity: 1, x: 0, y: 0 }
-          : { opacity: 0, x: hiddenX, y: hiddenY }
-      }
-      transition={transition}
+      animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: hiddenX, y: hiddenY }}
+      transition={{
+        opacity: { duration: duration * 0.8, ease: animationEasing, delay },
+        x: { type: "spring", stiffness: 300, damping: 30, delay },
+        y: { type: "spring", stiffness: 300, damping: 30, delay },
+      }}
       className={className}
     >
       {children}
