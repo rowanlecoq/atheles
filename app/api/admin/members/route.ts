@@ -23,7 +23,9 @@ export async function GET() {
               tags
               createdAt
               numberOfOrders
-              acceptsMarketing
+              emailMarketingConsent {
+                marketingState
+              }
             }
           }
         }
@@ -46,7 +48,7 @@ export async function GET() {
           tags: string[];
           createdAt: string;
           numberOfOrders: string;
-          acceptsMarketing: boolean;
+          emailMarketingConsent: { marketingState: string } | null;
         };
         const tierTag = c.tags?.find((t) => t.startsWith("tier:"));
         const dobTag = c.tags?.find((t) => t.startsWith("dob:"));
@@ -59,7 +61,7 @@ export async function GET() {
           createdAt: c.createdAt,
           orders: c.numberOfOrders || "0",
           tags: c.tags,
-          newsletter: c.acceptsMarketing,
+          newsletter: c.emailMarketingConsent?.marketingState === "SUBSCRIBED",
         };
       },
     );
