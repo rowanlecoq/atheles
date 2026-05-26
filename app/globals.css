@@ -555,44 +555,40 @@ body[data-bg="sunset"] {
 }
 
 /* ─── Light mode — mobile (pointer: coarse) only ─────────────────────────── */
-@media (pointer: coarse) {
-  [data-color-mode="light"] {
-    color-scheme: light;
-    --color-brand-dark: #f5f0e6;
-    --color-brand-dark-gold: #7a6028;
-    --color-brand-gold: #9a7228;
-    --color-brand-pale-gold: #7d5e20;
-    --color-brand-light-gold: #c09030;
-    --color-brand-grey: #6a5a3c;
-    --color-brand-medium-grey: #8a7858;
-    --color-brand-gold-wash: #9e7a3e;
-  }
-  [data-color-mode="light"] body {
-    background-color: var(--color-brand-dark);
-    color: #1a1208;
-  }
-  /* All white text becomes dark */
-  [data-color-mode="light"] [class*="text-white"] {
-    color: #1a1208;
-  }
-  /* Gold buttons use text-brand-dark (now cream) — restore dark text */
-  [data-color-mode="light"] .bg-brand-gold .text-brand-dark {
-    color: #1a1208;
-  }
-  /* Status colours: improve contrast on cream */
-  [data-color-mode="light"] .text-green-400 { color: #15803d; }
-  [data-color-mode="light"] .text-red-400   { color: #b91c1c; }
-  /* Placeholders */
-  [data-color-mode="light"] input::placeholder,
-  [data-color-mode="light"] textarea::placeholder {
-    color: rgba(106, 90, 60, 0.45);
-  }
-  [data-color-mode="light"] ::selection {
-    background-color: rgba(154, 114, 40, 0.28);
-    color: #1a1208;
-  }
-  /* Hide canvas particles (dark dots on cream look bad) */
-  [data-color-mode="light"] canvas { display: none; }
-  /* Suppress dark gradient background themes */
-  [data-color-mode="light"] body[data-bg] { background: none; }
+/* ─── Light mode ─────────────────────────────────────────────────────────── */
+/* Applies wherever data-color-mode="light" is set on <html>.                 */
+/* The picker UI is md:hidden so only mobile users can set it via normal UI.  */
+[data-color-mode="light"] {
+  color-scheme: light;
+  --color-brand-dark: #f8f8f8;
+  --color-brand-dark-gold: #8a6820;
+  --color-brand-gold: #9a7828;
+  --color-brand-pale-gold: #806020;
+  --color-brand-light-gold: #b88a30;
+  --color-brand-grey: #555555;
+  --color-brand-medium-grey: #888888;
+  --color-brand-gold-wash: #a08040;
 }
+[data-color-mode="light"] body {
+  background-color: #f8f8f8;
+  color: #111111;
+}
+[data-color-mode="light"] [class*="text-white"] {
+  color: #111111 !important;
+}
+/* Gold buttons use text-brand-dark which becomes near-white — restore dark */
+[data-color-mode="light"] .bg-brand-gold .text-brand-dark {
+  color: #111111 !important;
+}
+[data-color-mode="light"] .text-green-400 { color: #16a34a !important; }
+[data-color-mode="light"] .text-red-400   { color: #dc2626 !important; }
+[data-color-mode="light"] input::placeholder,
+[data-color-mode="light"] textarea::placeholder {
+  color: rgba(85, 85, 85, 0.45) !important;
+}
+[data-color-mode="light"] ::selection {
+  background-color: rgba(154, 120, 40, 0.25);
+  color: #111111;
+}
+[data-color-mode="light"] canvas { display: none; }
+[data-color-mode="light"] body[data-bg] { background: none; }

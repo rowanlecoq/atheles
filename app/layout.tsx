@@ -71,12 +71,16 @@ export default async function RootLayout({
       <body className="bg-brand-dark text-white isolate">
         {/* Inline scripts run synchronously before React hydrates — prevents
             flashing between SSR paint and client hydration.                  */}
-        {/* Color mode: apply light/dark before first paint (mobile only via CSS) */}
+        {/* Color mode: apply before first paint to prevent flash */}
         <script
           dangerouslySetInnerHTML={{
             __html: `try{
               var _cm=localStorage.getItem("atheles-color-mode");
-              if(_cm==="light"){document.documentElement.setAttribute("data-color-mode","light");document.documentElement.style.colorScheme="light";}
+              var _eff="dark";
+              if(_cm==="light"){_eff="light";}
+              else if(_cm==="system"){_eff=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";}
+              document.documentElement.setAttribute("data-color-mode",_eff);
+              if(_eff==="light"){document.documentElement.style.colorScheme="light";}
             }catch(e){}`,
           }}
         />
