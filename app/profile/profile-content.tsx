@@ -1521,10 +1521,10 @@ export default function ProfileContent() {
                   ? "shadow-[0_0_0_2px_#ccb173,0_0_0_4px_rgba(204,177,115,0.22)]"
                   : "shadow-[0_0_0_1px_rgba(127,111,76,0.18)] hover:shadow-[0_0_0_1px_rgba(127,111,76,0.45)]"
               }`}
-              style={{ background: "linear-gradient(135deg, #242424 0%, #141414 100%)" }}
+              style={{ background: "linear-gradient(135deg, #3d3d3d 0%, #222222 100%)" }}
               aria-label="No background"
             >
-              <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="rgba(127,111,76,0.55)" strokeWidth={1.5} strokeLinecap="round">
+              <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="rgba(180,160,120,0.75)" strokeWidth={1.5} strokeLinecap="round">
                 <line x1="3" y1="3" x2="11" y2="11" />
                 <line x1="11" y1="3" x2="3" y2="11" />
               </svg>
