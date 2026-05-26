@@ -560,7 +560,7 @@ body[data-bg="sunset"] {
 /* The picker UI is md:hidden so only mobile users can set it via normal UI.  */
 [data-color-mode="light"] {
   color-scheme: light;
-  --color-brand-dark: #f8f8f8;
+  --color-brand-dark: #ffffff;
   --color-brand-dark-gold: #8a6820;
   --color-brand-gold: #9a7828;
   --color-brand-pale-gold: #806020;
@@ -572,9 +572,9 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] body {
   color: #111111;
 }
-/* Only apply white bg when no background theme is active */
+/* Light grey page background when no bg theme is active; cards (bg-brand-dark) stay white */
 [data-color-mode="light"] body:not([data-bg]) {
-  background-color: #f8f8f8;
+  background-color: #f0f0f0;
 }
 [data-color-mode="light"] [class*="text-white"] {
   color: #111111 !important;
@@ -594,4 +594,3 @@ body[data-bg="sunset"] {
   color: #111111;
 }
 [data-color-mode="light"] canvas { display: none; }
-[data-color-mode="light"] body[data-bg] { background: none; }

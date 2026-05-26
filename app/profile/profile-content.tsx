@@ -255,7 +255,7 @@ export default function ProfileContent() {
       }
       try {
         const cm = localStorage.getItem("atheles-color-mode");
-        setColorMode(cm === "light" ? "light" : "dark");
+        setColorMode(cm === "light" ? "light" : cm === "system" ? "system" : "dark");
       } catch {}
       setLoading(false);
     } catch {}
