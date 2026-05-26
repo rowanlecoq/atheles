@@ -593,11 +593,7 @@ body[data-bg="sunset"] {
   background-color: rgba(154, 120, 40, 0.25);
   color: #111111;
 }
-/* Boost canvas saturation in light mode — the pale base naturally drains
-   overlay colours; this filter compensates without touching individual values. */
-[data-color-mode="light"] canvas {
-  filter: saturate(1.8) contrast(1.06);
-}
+
 /* Explicit overrides — Tailwind compiles bg-* to static values so CSS variable
    cascade alone isn't enough; these ensure light mode backgrounds apply.
    Warm beige palette keeps the premium gold feel without blinding whites.
