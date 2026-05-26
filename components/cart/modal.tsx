@@ -395,15 +395,15 @@ export default function CartModal() {
       return () => { cancelAnimationFrame(raf1); cancelAnimationFrame(raf2); };
     } else {
       setModalVisible(false);
-      const t = setTimeout(() => setModalMounted(false), 300);
+      // On mobile there's no slide transition, so unmount immediately
+      const delay = window.innerWidth >= 768 ? 300 : 0;
+      const t = setTimeout(() => setModalMounted(false), delay);
       return () => clearTimeout(t);
     }
   }, [isOpen]);
 
-  // Focus the close button when the panel becomes visible
-  useEffect(() => {
-    if (modalVisible) closeButtonRef.current?.focus();
-  }, [modalVisible]);
+  // Keyboard: close on Escape — focus is intentionally NOT moved to the close
+  // button on open because programmatic focus triggers the browser focus ring.
 
   // Close on Escape
   useEffect(() => {
@@ -720,7 +720,7 @@ export default function CartModal() {
             role="dialog"
             aria-modal="true"
             aria-label="Shopping cart"
-            className={`fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20 z-[70] transition-transform duration-300 ease-out ${modalVisible ? "translate-x-0" : "translate-x-full"}`}
+            className={`fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20 z-[70] md:transition-transform md:duration-300 md:ease-out ${modalVisible ? "translate-x-0" : "md:translate-x-full"}`}
             style={{ overscrollBehavior: "contain" }}
           >
 
