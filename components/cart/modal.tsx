@@ -269,7 +269,7 @@ function FavoritesCarousel({
   const scrollRef = useRef<HTMLDivElement>(null);
 
   return (
-    <div className="pt-4">
+    <div className="py-3">
       <div className="flex items-center justify-between mb-3">
         <Link
           href="/favorites"
@@ -283,7 +283,7 @@ function FavoritesCarousel({
           </span>
         </Link>
       </div>
-      <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide">
+      <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ touchAction: "pan-x" }}>
         {loading && products.length === 0 && (
           <>
             {[0, 1, 2].map((i) => (
@@ -742,7 +742,8 @@ export default function CartModal() {
                   type="button"
                   onClick={closeCart}
                   aria-label="Close cart"
-                  className="flex h-9 w-9 items-center justify-center rounded-full text-white/40 hover:text-white transition-colors"
+                  className="flex h-9 w-9 items-center justify-center text-white/40 hover:text-white transition-colors outline-none"
+                  style={{ WebkitTapHighlightColor: "transparent" }}
                 >
                   <XMarkIcon className="h-5 w-5" />
                 </button>
@@ -799,10 +800,6 @@ export default function CartModal() {
                         </Link>
                       </div>
                     </div>
-                    {(favLoading || filteredFavs.length > 0) && (
-                      <FavoritesCarousel products={filteredFavs} loading={favLoading} onAdd={handleAddFav} onClose={closeCart} addingHandle={addingHandle} />
-                    )}
-                    <div className="pb-4" />
                   </div>
                 ) : (
                   /* ── Has items ── */
@@ -822,11 +819,6 @@ export default function CartModal() {
                           <CartLineItem key={item.merchandise.id} item={item} />
                         ))}
                     </ul>
-
-                    {/* Favorites */}
-                    {(favLoading || filteredFavs.length > 0) && (
-                      <FavoritesCarousel products={filteredFavs} loading={favLoading} onAdd={handleAddFav} onClose={closeCart} addingHandle={addingHandle} />
-                    )}
 
                     {/* Spacer so content doesn't hide behind sticky footer */}
                     <div className="flex-1" />
@@ -928,6 +920,13 @@ export default function CartModal() {
                   </div>
                 )}
               </div>
+
+              {/* Favorites — outside the scroll body so it never causes vertical scroll */}
+              {(favLoading || filteredFavs.length > 0) && (
+                <div className="border-t border-white/5 px-5">
+                  <FavoritesCarousel products={filteredFavs} loading={favLoading} onAdd={handleAddFav} onClose={closeCart} addingHandle={addingHandle} />
+                </div>
+              )}
 
               {/* Checkout footer — only when items exist */}
               {hasItems && (
