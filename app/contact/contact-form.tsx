@@ -97,11 +97,12 @@ export function ContactForm() {
           >
             Subject
           </label>
+          <div className="relative">
           <select
             id="subject"
             name="subject"
             required
-            className={fieldClass}
+            className={`${fieldClass} appearance-none pr-10`}
           >
             <option value="">select a subject</option>
             <option value="order inquiry">order inquiry</option>
@@ -114,6 +115,12 @@ export function ContactForm() {
             <option value="feedback">feedback</option>
             <option value="other">other</option>
           </select>
+          <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
+            <svg className="h-4 w-4 text-brand-grey/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+              <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+            </svg>
+          </div>
+          </div>
         </div>
         <div>
           <label
