@@ -7,11 +7,11 @@ import {
 } from "lib/animation-config";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
-import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useEffect, useLayoutEffect, useRef, type ReactNode } from "react";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
 
-const keyframeNames: Record<Direction, string> = {
+const keyframes: Record<Direction, string> = {
   up: "fi-up",
   down: "fi-down",
   left: "fi-left",
@@ -20,6 +20,9 @@ const keyframeNames: Record<Direction, string> = {
 };
 
 const EASING = "cubic-bezier(0.22,1,0.36,1)";
+
+const anim = (dir: Direction, dur: number, del: number) =>
+  `${keyframes[dir]} ${dur}s ${EASING} ${del}s both`;
 
 export function FadeIn({
   children,
@@ -39,39 +42,42 @@ export function FadeIn({
   const ref = useRef<HTMLDivElement>(null);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
-  // Ref-based guard — can never fire twice regardless of re-renders or parent updates.
-  const triggeredRef = useRef(false);
-  const [animStyle, setAnimStyle] = useState<CSSProperties | undefined>(undefined);
+  const triggered = useRef(false);
 
+  // Runs synchronously before browser paint — above-fold elements get their
+  // animation applied before the user ever sees them in their resting position.
+  // Below-fold elements are hidden so they don't flash into view while waiting.
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useLayoutEffect(() => {
+    if (prefersReducedMotion) return;
+    const el = ref.current;
+    if (!el) return;
+    const { top, bottom } = el.getBoundingClientRect();
+    const inView = top < window.innerHeight && bottom > 0;
+    if (inView) {
+      el.style.animation = anim(direction, duration, delay);
+      triggered.current = true;
+    } else {
+      el.style.opacity = "0";
+    }
+  }, []); // intentionally mount-only
+
+  // IntersectionObserver for below-fold elements.
   useEffect(() => {
-    if (prefersReducedMotion || triggeredRef.current) return;
+    if (prefersReducedMotion || triggered.current) return;
     const el = ref.current;
     if (!el) return;
 
-    const rect = el.getBoundingClientRect();
-    const inView = rect.top < window.innerHeight && rect.bottom > 0;
-    const name = keyframeNames[direction];
-    const style: CSSProperties = {
-      animation: `${name} ${duration}s ${EASING} ${delay}s both`,
-    };
-
-    if (inView) {
-      // In viewport (page load or navigation): animate immediately.
-      triggeredRef.current = true;
-      setAnimStyle(style);
-      return;
-    }
-
-    // Below fold: fire when the element scrolls into view.
     const margin = isMobileViewport
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal;
 
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting && !triggeredRef.current) {
-          triggeredRef.current = true;
-          setAnimStyle(style);
+        if (entries[0]?.isIntersecting && !triggered.current) {
+          triggered.current = true;
+          el.style.opacity = "";
+          el.style.animation = anim(direction, duration, delay);
           if (once) observer.disconnect();
         }
       },
@@ -82,7 +88,7 @@ export function FadeIn({
   }, [prefersReducedMotion, isMobileViewport, direction, duration, delay, once]);
 
   return (
-    <div ref={ref} className={className} style={animStyle}>
+    <div ref={ref} className={className}>
       {children}
     </div>
   );
