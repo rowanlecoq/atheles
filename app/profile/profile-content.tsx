@@ -716,12 +716,7 @@ export default function ProfileContent() {
       : Math.min(100, ((points - tier.min) / (tier.max - tier.min)) * 100);
 
   return (
-    <motion.div
-      className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16"
-      initial={{ y: 18 }}
-      animate={{ y: 0 }}
-      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <div className="animate-profile-slide-up relative mx-auto max-w-2xl px-4 py-12 sm:py-16">
       {/* Background handled by global ThemeBackground component */}
 
       <div className="relative">
@@ -736,7 +731,10 @@ export default function ProfileContent() {
 
       {/* Avatar Preview Modal — portaled to cover everything including navbar */}
       {showAvatarPreview && avatar && typeof document !== "undefined" && createPortal(
-        <div
+        <motion.div
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.2 }}
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/90 p-4"
           onClick={() => setShowAvatarPreview(false)}
         >
@@ -751,7 +749,10 @@ export default function ProfileContent() {
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          <div
+          <motion.div
+            initial={{ scale: 0.88, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
             className="flex flex-col items-center gap-4"
             onClick={(e) => e.stopPropagation()}
           >
@@ -763,8 +764,8 @@ export default function ProfileContent() {
                 className="h-64 w-64 object-cover sm:h-80 sm:w-80"
               />
             </div>
-          </div>
-        </div>,
+          </motion.div>
+        </motion.div>,
         document.body,
       )}
 
@@ -1520,10 +1521,10 @@ export default function ProfileContent() {
                   ? "shadow-[0_0_0_2px_#ccb173,0_0_0_4px_rgba(204,177,115,0.22)]"
                   : "shadow-[0_0_0_1px_rgba(127,111,76,0.18)] hover:shadow-[0_0_0_1px_rgba(127,111,76,0.45)]"
               }`}
-              style={{ background: "linear-gradient(135deg, #3d3d3d 0%, #222222 100%)" }}
+              style={{ background: "#1e1e1e" }}
               aria-label="No background"
             >
-              <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="rgba(180,160,120,0.75)" strokeWidth={1.5} strokeLinecap="round">
+              <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="rgba(160,140,100,0.70)" strokeWidth={1.5} strokeLinecap="round">
                 <line x1="3" y1="3" x2="11" y2="11" />
                 <line x1="11" y1="3" x2="3" y2="11" />
               </svg>
@@ -1688,6 +1689,6 @@ export default function ProfileContent() {
         </div>
       )}
       </div>
-    </motion.div>
+    </div>
   );
 }
