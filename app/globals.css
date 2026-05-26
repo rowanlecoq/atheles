@@ -493,15 +493,13 @@ body[data-bg="sunset"] {
 @keyframes fi-right{ from { opacity:0; transform:translateX(-14px);} to { opacity:1; transform:translateX(0); } }
 @keyframes fi-none { from { opacity:0; }                             to { opacity:1; }                          }
 
-/* fi-anim: elements start hidden via paused animation (fill-mode backwards applies from-frame).
-   CSS is render-blocking, so this is opacity:0 from the very first paint — no JS needed.
-   JS just sets animation-play-state:running at the right time. */
+/* fi-anim: elements start hidden at opacity:0. JS sets el.style.animation directly —
+   no CSS custom properties involved, so React re-renders can never restart the animation. */
 .fi-anim {
-  animation: var(--fi-kf, fi-up) var(--fi-dur, 0.5s) cubic-bezier(0.22,1,0.36,1) var(--fi-del, 0s) both;
-  animation-play-state: paused;
+  opacity: 0;
 }
 @media (prefers-reduced-motion: reduce) {
-  .fi-anim { animation: none; }
+  .fi-anim { opacity: 1; }
 }
 
 /* Profile page: content slides up on load — transform only, no opacity change */

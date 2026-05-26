@@ -7,7 +7,9 @@ import {
 } from "lib/animation-config";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useAnimateInView } from "lib/hooks/use-animate-in-view";
-import { type CSSProperties, type ReactNode } from "react";
+import { type ReactNode } from "react";
+
+const EASING = "cubic-bezier(0.22,1,0.36,1)";
 
 export function ScaleIn({
   children,
@@ -24,18 +26,11 @@ export function ScaleIn({
   const margin = isMobileViewport
     ? animationViewportMarginsMobile.normal
     : animationViewportMargins.normal;
-  const ref = useAnimateInView<HTMLDivElement>(margin);
+  const animString = `fi-none ${duration}s ${EASING} ${delay}s both`;
+  const ref = useAnimateInView<HTMLDivElement>(animString, margin);
 
   return (
-    <div
-      ref={ref}
-      className={`fi-anim${className ? ` ${className}` : ""}`}
-      style={{
-        "--fi-kf": "fi-none",
-        "--fi-dur": `${duration}s`,
-        "--fi-del": `${delay}s`,
-      } as CSSProperties}
-    >
+    <div ref={ref} className={`fi-anim${className ? ` ${className}` : ""}`}>
       {children}
     </div>
   );

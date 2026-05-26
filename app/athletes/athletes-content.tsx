@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
 import { useAnimateInView } from "lib/hooks/use-animate-in-view";
@@ -112,11 +112,7 @@ function renderMediaItem(item: string, altText: string, imgClassName: string) {
   return <img src={item} alt={altText} className={imgClassName} />;
 }
 
-const CARD_ANIM: CSSProperties = {
-  "--fi-kf": "fi-up",
-  "--fi-dur": "0.28s",
-  "--fi-del": "0s",
-} as CSSProperties;
+const CARD_ANIM_STR = "fi-up 0.28s cubic-bezier(0.22,1,0.36,1) 0s both";
 
 function AthleteCard({
   athlete,
@@ -127,7 +123,7 @@ function AthleteCard({
   index: number;
   onOpenLightbox: (items: string[], index: number) => void;
 }) {
-  const cardRef = useAnimateInView<HTMLDivElement>();
+  const cardRef = useAnimateInView<HTMLDivElement>(CARD_ANIM_STR);
   const allImages = [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[];
   const [imageIndex, setImageIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -185,7 +181,6 @@ function AthleteCard({
     <div
       ref={cardRef}
       className="fi-anim overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
-      style={CARD_ANIM}
     >
       {/* Mobile: horizontal scroll snap gallery — swipe to navigate, tap to open lightbox */}
       <div

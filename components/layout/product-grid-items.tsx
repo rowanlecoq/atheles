@@ -6,7 +6,7 @@ import type { Product } from "lib/shopify/types";
 import Image from "next/image";
 import Link from "next/link";
 import { useAnimateInView } from "lib/hooks/use-animate-in-view";
-import React, { useEffect, useState, type CSSProperties } from "react";
+import React, { useEffect, useState } from "react";
 import { addItem } from "components/cart/actions";
 import Price from "components/price";
 
@@ -181,16 +181,12 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
   );
 }
 
-const CARD_ANIM: CSSProperties = {
-  "--fi-kf": "fi-up",
-  "--fi-dur": "0.28s",
-  "--fi-del": "0s",
-} as CSSProperties;
+const CARD_ANIM_STR = "fi-up 0.28s cubic-bezier(0.22,1,0.36,1) 0s both";
 
 function AnimatedGridItem({ product, index }: { product: Product; index: number }) {
-  const ref = useAnimateInView<HTMLLIElement>();
+  const ref = useAnimateInView<HTMLLIElement>(CARD_ANIM_STR);
   return (
-    <li ref={ref} className="fi-anim" style={CARD_ANIM}>
+    <li ref={ref} className="fi-anim">
       <ProductCard product={product} index={index} />
     </li>
   );

@@ -7,7 +7,7 @@ import {
 } from "lib/animation-config";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useAnimateInView } from "lib/hooks/use-animate-in-view";
-import { type CSSProperties, type ReactNode } from "react";
+import { type ReactNode } from "react";
 
 type Direction = "up" | "down" | "left" | "right" | "none";
 
@@ -18,6 +18,8 @@ const keyframes: Record<Direction, string> = {
   right: "fi-right",
   none: "fi-none",
 };
+
+const EASING = "cubic-bezier(0.22,1,0.36,1)";
 
 export function FadeIn({
   children,
@@ -36,18 +38,13 @@ export function FadeIn({
   const margin = isMobileViewport
     ? animationViewportMarginsMobile.normal
     : animationViewportMargins.normal;
-  const ref = useAnimateInView<HTMLDivElement>(margin);
+  // Animation string is set directly on el.style — never via React style prop,
+  // so React re-renders cannot touch it and restart the animation.
+  const animString = `${keyframes[direction]} ${duration}s ${EASING} ${delay}s both`;
+  const ref = useAnimateInView<HTMLDivElement>(animString, margin);
 
   return (
-    <div
-      ref={ref}
-      className={`fi-anim${className ? ` ${className}` : ""}`}
-      style={{
-        "--fi-kf": keyframes[direction],
-        "--fi-dur": `${duration}s`,
-        "--fi-del": `${delay}s`,
-      } as CSSProperties}
-    >
+    <div ref={ref} className={`fi-anim${className ? ` ${className}` : ""}`}>
       {children}
     </div>
   );

@@ -6,13 +6,7 @@ import Image from "next/image";
 import Link from "next/link";
 import Price from "components/price";
 import type { Product } from "lib/shopify/types";
-import type { CSSProperties } from "react";
-
-const CARD_ANIM: CSSProperties = {
-  "--fi-kf": "fi-up",
-  "--fi-dur": "0.28s",
-  "--fi-del": "0s",
-} as CSSProperties;
+const CARD_ANIM_STR = "fi-up 0.28s cubic-bezier(0.22,1,0.36,1) 0s both";
 
 export function HomepageProductCard({
   product,
@@ -24,11 +18,11 @@ export function HomepageProductCard({
   priority?: boolean;
   index?: number;
 }) {
-  const ref = useAnimateInView<HTMLDivElement>();
+  const ref = useAnimateInView<HTMLDivElement>(CARD_ANIM_STR);
   const secondImage = product.images?.[1]?.url;
 
   return (
-    <div ref={ref} className="fi-anim group h-full" style={CARD_ANIM}>
+    <div ref={ref} className="fi-anim group h-full">
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark md:aspect-auto md:h-full">
         <Link
           href={`/product/${product.handle}`}
