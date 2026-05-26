@@ -570,8 +570,11 @@ body[data-bg="sunset"] {
   --color-brand-gold-wash: #a08040;
 }
 [data-color-mode="light"] body {
-  background-color: #f8f8f8;
   color: #111111;
+}
+/* Only apply white bg when no background theme is active */
+[data-color-mode="light"] body:not([data-bg]) {
+  background-color: #f8f8f8;
 }
 [data-color-mode="light"] [class*="text-white"] {
   color: #111111 !important;
