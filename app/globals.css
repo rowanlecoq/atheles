@@ -593,4 +593,3 @@ body[data-bg="sunset"] {
   background-color: rgba(154, 120, 40, 0.25);
   color: #111111;
 }
-[data-color-mode="light"] canvas { display: none; }
