@@ -213,7 +213,6 @@ export default function ProfileContent() {
   const [themeGlobal, setThemeGlobal] = useState(false);
   const [themeSaving, setThemeSaving] = useState(false);
   const [colorMode, setColorMode] = useState<"dark" | "light" | "system">("dark");
-  const [themeDdOpen, setThemeDdOpen] = useState(false);
   const [discordSuccess, setDiscordSuccess] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [addAddressTick, setAddAddressTick] = useState(0);
@@ -1518,109 +1517,102 @@ export default function ProfileContent() {
         </div>
       </div>
 
-      {/* Appearance (mobile) / Background Theme (desktop) */}
+      {/* Appearance */}
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
-        <div className="mb-5 flex items-center justify-between">
-          <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">appearance</h2>
+        <div className="mb-6 flex items-center justify-between">
+          <h2 className="font-heading text-xl text-brand-pale-gold">theme appearance</h2>
           {themeSaving && <span className="text-xs text-brand-grey/60">saving...</span>}
         </div>
 
-        {/* Appearance: theme selector (all devices) */}
-        <div className="mb-5 flex items-center justify-between">
-          <p className="text-xs uppercase tracking-wider text-brand-pale-gold">theme</p>
-          <div className="relative">
-            <select
-              value={colorMode}
-              onChange={(e) => handleColorModeChange(e.target.value as "dark" | "light" | "system")}
-              onFocus={() => setThemeDdOpen(true)}
-              onBlur={() => setThemeDdOpen(false)}
-              className="appearance-none rounded-lg border border-brand-dark-gold/20 bg-brand-dark pl-4 pr-9 py-2 text-sm text-white focus:border-brand-gold/50 focus:outline-none transition-colors duration-150"
-            >
-              <option value="dark">dark</option>
-              <option value="light">light</option>
-              <option value="system">system</option>
-            </select>
-            <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-              <svg
-                className={`h-4 w-4 text-brand-grey/60 transition-transform duration-200 ${themeDdOpen ? "rotate-180" : ""}`}
-                fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}
+        {/* Color mode — segmented pill control */}
+        <div className="mb-6">
+          <p className="mb-3 text-xs uppercase tracking-wider text-brand-grey/50">color mode</p>
+          <div className="flex gap-1 rounded-lg border border-brand-dark-gold/20 bg-brand-dark-gold/5 p-1">
+            {(["dark", "light", "system"] as const).map((mode) => (
+              <button
+                key={mode}
+                type="button"
+                onClick={() => handleColorModeChange(mode)}
+                className={`flex-1 rounded-md py-2 text-xs uppercase tracking-wider transition-all duration-200 ${
+                  colorMode === mode
+                    ? "bg-brand-gold font-medium text-brand-dark shadow-sm"
+                    : "text-brand-grey/60 hover:text-brand-pale-gold"
+                }`}
               >
-                <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-              </svg>
-            </div>
+                {mode}
+              </button>
+            ))}
           </div>
         </div>
 
-        {/* Background theme swatches — desktop only */}
+        {/* Background swatches — desktop only */}
         <div className="hidden md:block">
-        <div className="border-t border-brand-dark-gold/10 pt-5">
-          <p className="mb-4 text-xs uppercase tracking-wider text-brand-pale-gold">background</p>
+          <p className="mb-4 text-xs uppercase tracking-wider text-brand-grey/50">background</p>
           <div className="mb-5 grid grid-cols-6 justify-items-center gap-5">
-          {/* None / default */}
-          <div className="flex flex-col items-center gap-2">
-            <button
-              type="button"
-              onClick={() => handleThemeChange(null, themeGlobal)}
-              className={`flex h-14 w-14 items-center justify-center rounded-full transition-all duration-200 ${
-                !selectedTheme
-                  ? "shadow-[0_0_0_2px_#ccb173,0_0_0_4px_rgba(204,177,115,0.22)]"
-                  : "shadow-[0_0_0_1px_rgba(127,111,76,0.18)] hover:shadow-[0_0_0_1px_rgba(127,111,76,0.45)]"
-              }`}
-              style={{ background: "#1e1e1e" }}
-              aria-label="No background"
-            >
-              <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="rgba(160,140,100,0.70)" strokeWidth={1.5} strokeLinecap="round">
-                <line x1="3" y1="3" x2="11" y2="11" />
-                <line x1="11" y1="3" x2="3" y2="11" />
-              </svg>
-            </button>
-            <span className={`text-[11px] tracking-wide ${!selectedTheme ? "text-brand-gold" : "text-brand-grey/40"}`}>none</span>
-          </div>
-
-          {/* Theme swatches */}
-          {PROFILE_BACKGROUNDS.map((bg) => (
-            <div key={bg.id} className="flex flex-col items-center gap-2">
+            {/* None */}
+            <div className="flex flex-col items-center gap-2">
               <button
                 type="button"
-                onClick={() => handleThemeChange(bg.id, themeGlobal)}
-                className={`h-14 w-14 rounded-full transition-all duration-200 ${
-                  selectedTheme === bg.id
-                    ? "scale-110 shadow-[0_0_0_2px_#ccb173,0_0_0_4px_rgba(204,177,115,0.22)]"
-                    : "shadow-[0_0_0_1px_rgba(255,255,255,0.08)] hover:scale-105 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.22)]"
+                onClick={() => handleThemeChange(null, themeGlobal)}
+                className={`flex h-14 w-14 items-center justify-center rounded-full transition-all duration-200 ${
+                  !selectedTheme
+                    ? "shadow-[0_0_0_2px_#ccb173,0_0_0_4px_rgba(204,177,115,0.22)]"
+                    : "shadow-[0_0_0_1px_rgba(127,111,76,0.18)] hover:shadow-[0_0_0_1px_rgba(127,111,76,0.45)]"
                 }`}
-                style={{ background: bg.swatch }}
-                aria-label={`${bg.label} background`}
-              />
-              <span className={`text-[11px] tracking-wide ${selectedTheme === bg.id ? "text-brand-gold" : "text-brand-grey/40"}`}>{bg.label}</span>
+                style={{ background: "#1e1e1e" }}
+                aria-label="No background"
+              >
+                <svg viewBox="0 0 14 14" className="h-3.5 w-3.5" fill="none" stroke="rgba(160,140,100,0.70)" strokeWidth={1.5} strokeLinecap="round">
+                  <line x1="3" y1="3" x2="11" y2="11" />
+                  <line x1="11" y1="3" x2="3" y2="11" />
+                </svg>
+              </button>
+              <span className={`text-[11px] tracking-wide ${!selectedTheme ? "text-brand-gold" : "text-brand-grey/40"}`}>none</span>
             </div>
-          ))}
-          </div>{/* end swatch grid */}
-        </div>{/* end border-t wrapper */}
 
-        {/* Scope toggle — only visible when a theme is active */}
-        {selectedTheme && (
-          <div className="flex items-center justify-between pt-2">
-            <div>
-              <p className="text-sm text-white/80">show across entire store</p>
-              <p className="text-xs text-brand-grey/50">not just your profile</p>
-            </div>
-            <button
-              type="button"
-              onClick={() => handleThemeChange(selectedTheme, !themeGlobal)}
-              className={`relative h-6 w-11 overflow-hidden rounded-full transition-colors ${
-                themeGlobal ? "bg-brand-gold" : "bg-brand-dark-gold/30"
-              } cursor-pointer`}
-              aria-label="Toggle site-wide background"
-            >
-              <span
-                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
-                  themeGlobal ? "translate-x-5" : "translate-x-0"
-                }`}
-              />
-            </button>
+            {/* Theme swatches */}
+            {PROFILE_BACKGROUNDS.map((bg) => (
+              <div key={bg.id} className="flex flex-col items-center gap-2">
+                <button
+                  type="button"
+                  onClick={() => handleThemeChange(bg.id, themeGlobal)}
+                  className={`h-14 w-14 rounded-full transition-all duration-200 ${
+                    selectedTheme === bg.id
+                      ? "scale-110 shadow-[0_0_0_2px_#ccb173,0_0_0_4px_rgba(204,177,115,0.22)]"
+                      : "shadow-[0_0_0_1px_rgba(255,255,255,0.08)] hover:scale-105 hover:shadow-[0_0_0_1px_rgba(255,255,255,0.22)]"
+                  }`}
+                  style={{ background: bg.swatch }}
+                  aria-label={`${bg.label} background`}
+                />
+                <span className={`text-[11px] tracking-wide ${selectedTheme === bg.id ? "text-brand-gold" : "text-brand-grey/40"}`}>{bg.label}</span>
+              </div>
+            ))}
           </div>
-        )}
-        </div>{/* end desktop block */}
+
+          {/* Scope toggle */}
+          {selectedTheme && (
+            <div className="flex items-center justify-between rounded-lg border border-brand-dark-gold/10 bg-brand-dark-gold/5 px-4 py-3">
+              <div>
+                <p className="text-sm text-white/80">apply sitewide</p>
+                <p className="text-xs text-brand-grey/50">show on every page, not just your profile</p>
+              </div>
+              <button
+                type="button"
+                onClick={() => handleThemeChange(selectedTheme, !themeGlobal)}
+                className={`relative h-6 w-11 flex-none overflow-hidden rounded-full transition-colors ${
+                  themeGlobal ? "bg-brand-gold" : "bg-brand-dark-gold/30"
+                } cursor-pointer`}
+                aria-label="Toggle site-wide background"
+              >
+                <span
+                  className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                    themeGlobal ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
+              </button>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Address Book */}
