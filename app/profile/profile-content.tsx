@@ -1279,7 +1279,7 @@ export default function ProfileContent() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
                 placeholder="first name"
               />
             ) : (
@@ -1304,7 +1304,7 @@ export default function ProfileContent() {
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
                 placeholder="last name"
               />
             ) : (
@@ -1334,21 +1334,21 @@ export default function ProfileContent() {
               )}
             </div>
             {showChangeEmail && (
-              <div className="mt-2 space-y-2 rounded border border-brand-dark-gold/20 bg-brand-dark-gold/5 p-3">
+              <div className="mt-2 space-y-2 rounded-lg border border-brand-dark-gold/20 bg-brand-dark-gold/5 p-3">
                 <p className="text-xs text-brand-grey/60">enter a new email address. you'll be signed out so you can log in with it.</p>
                 <input
                   type="email"
                   value={newEmail}
                   onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
                   placeholder="new email address"
-                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold/50 focus:outline-none"
                 />
                 {emailError && <p className="text-xs text-red-400">{emailError}</p>}
                 <button
                   type="button"
                   onClick={handleChangeEmail}
                   disabled={emailSaving || !newEmail.trim()}
-                  className="rounded border border-brand-dark-gold/30 px-4 py-1.5 text-xs uppercase tracking-wider text-brand-pale-gold transition-colors hover:border-brand-gold hover:text-brand-gold disabled:opacity-40"
+                  className="rounded-lg border border-brand-dark-gold/20 px-4 py-1.5 text-xs uppercase tracking-wider text-brand-pale-gold transition-colors hover:border-brand-gold hover:text-brand-gold disabled:opacity-40"
                 >
                   {emailSaving ? "saving..." : "confirm change"}
                 </button>
@@ -1366,7 +1366,7 @@ export default function ProfileContent() {
                 <select
                   value={dobDay}
                   onChange={(e) => setDobDay(e.target.value)}
-                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold/50 focus:outline-none"
                   aria-label="Day"
                 >
                   <option value="">day</option>
@@ -1379,7 +1379,7 @@ export default function ProfileContent() {
                 <select
                   value={dobMonth}
                   onChange={(e) => setDobMonth(e.target.value)}
-                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold/50 focus:outline-none"
                   aria-label="Month"
                 >
                   <option value="">month</option>
@@ -1405,7 +1405,7 @@ export default function ProfileContent() {
                 <select
                   value={dobYear}
                   onChange={(e) => setDobYear(e.target.value)}
-                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold/50 focus:outline-none"
                   aria-label="Year"
                 >
                   <option value="">year</option>
@@ -1455,7 +1455,7 @@ export default function ProfileContent() {
                   }
                   setPhone(formatPhoneDisplay(raw));
                 }}
-                className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
                 placeholder="+44 7911 123456"
               />
             ) : (
@@ -1470,7 +1470,7 @@ export default function ProfileContent() {
           </div>
 
           {/* Newsletter */}
-          <div className="flex items-center justify-between rounded border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-3">
+          <div className="flex items-center justify-between rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-3">
             <div>
               <p className="text-sm text-white">atheles club</p>
               <p className="text-xs text-brand-grey">
@@ -1665,14 +1665,14 @@ export default function ProfileContent() {
               value={deleteEmail}
               onChange={(e) => { setDeleteEmail(e.target.value); setDeleteError(""); }}
               placeholder={user.email}
-              className="mb-3 w-full rounded border border-red-900/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/30 focus:border-red-700/50 focus:outline-none"
+              className="mb-3 w-full rounded-lg border border-red-900/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/30 focus:border-red-700/50 focus:outline-none"
             />
             {deleteError && <p className="mb-3 text-xs text-red-400">{deleteError}</p>}
             <div className="flex gap-3">
               <button
                 type="button"
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 rounded border border-brand-dark-gold/20 px-4 py-2 text-xs uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold/30 hover:text-white"
+                className="flex-1 rounded-lg border border-brand-dark-gold/20 px-4 py-2 text-xs uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold/30 hover:text-white"
               >
                 cancel
               </button>
@@ -1680,7 +1680,7 @@ export default function ProfileContent() {
                 type="button"
                 onClick={handleDeleteAccount}
                 disabled={deleting || deleteEmail.trim().toLowerCase() !== user.email?.toLowerCase()}
-                className="flex-1 rounded border border-red-900/40 bg-red-900/10 px-4 py-2 text-xs uppercase tracking-wider text-red-400 transition-colors hover:bg-red-900/20 disabled:opacity-40"
+                className="flex-1 rounded-lg border border-red-900/40 bg-red-900/10 px-4 py-2 text-xs uppercase tracking-wider text-red-400 transition-colors hover:bg-red-900/20 disabled:opacity-40"
               >
                 {deleting ? "deleting..." : "delete"}
               </button>

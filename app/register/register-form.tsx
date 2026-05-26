@@ -124,7 +124,7 @@ export default function RegisterForm() {
                   required
                   value={firstName}
                   onChange={(e) => setFirstName(e.target.value)}
-                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
                   placeholder="first name"
                 />
               </div>
@@ -141,7 +141,7 @@ export default function RegisterForm() {
                   type="text"
                   value={lastName}
                   onChange={(e) => setLastName(e.target.value)}
-                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
                   placeholder="last name"
                 />
               </div>
@@ -158,7 +158,7 @@ export default function RegisterForm() {
                   required
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
-                  className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
                   placeholder="your@email.com"
                 />
               </div>
@@ -177,7 +177,7 @@ export default function RegisterForm() {
                     minLength={5}
                     value={password}
                     onChange={(e) => setPassword(e.target.value)}
-                    className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 pr-10 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                    className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 pr-10 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
                     placeholder="min. 5 characters"
                   />
                   <button
@@ -229,7 +229,7 @@ export default function RegisterForm() {
                   <select
                     value={dobDay}
                     onChange={(e) => setDobDay(e.target.value)}
-                    className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold focus:outline-none [&:invalid]:text-brand-grey/50"
+                    className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold/50 focus:outline-none [&:invalid]:text-brand-grey/50"
                     aria-label="Day"
                   >
                     <option value="" disabled>
@@ -244,7 +244,7 @@ export default function RegisterForm() {
                   <select
                     value={dobMonth}
                     onChange={(e) => setDobMonth(e.target.value)}
-                    className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold focus:outline-none [&:invalid]:text-brand-grey/50"
+                    className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold/50 focus:outline-none [&:invalid]:text-brand-grey/50"
                     aria-label="Month"
                   >
                     <option value="" disabled>
@@ -272,7 +272,7 @@ export default function RegisterForm() {
                   <select
                     value={dobYear}
                     onChange={(e) => setDobYear(e.target.value)}
-                    className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold focus:outline-none [&:invalid]:text-brand-grey/50"
+                    className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold/50 focus:outline-none [&:invalid]:text-brand-grey/50"
                     aria-label="Year"
                   >
                     <option value="" disabled>
@@ -302,7 +302,7 @@ export default function RegisterForm() {
                 </span>
               </label>
               {error && (
-                <div className="rounded border border-red-400/20 bg-red-400/5 p-3">
+                <div className="rounded-lg border border-red-400/20 bg-red-400/5 p-3">
                   <p className="text-xs text-red-400">{error}</p>
                   {alreadyExists && (
                     <Link
