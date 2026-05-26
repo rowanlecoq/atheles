@@ -14,10 +14,10 @@ import { useEffect, useRef, useState, type ReactNode } from "react";
 type Direction = "up" | "down" | "left" | "right" | "none";
 
 const offsets: Record<Direction, { x: number; y: number }> = {
-  up: { x: 0, y: 40 },
-  down: { x: 0, y: -40 },
-  left: { x: 40, y: 0 },
-  right: { x: -40, y: 0 },
+  up: { x: 0, y: 18 },
+  down: { x: 0, y: -18 },
+  left: { x: 18, y: 0 },
+  right: { x: -18, y: 0 },
   none: { x: 0, y: 0 },
 };
 
@@ -88,7 +88,7 @@ export function FadeIn({
   }
 
   const offset = offsets[direction];
-  const m = isMobileViewport ? 0.65 : 1;
+  const m = isMobileViewport ? 0.7 : 1;
   const hiddenX = offset.x * m;
   const hiddenY = offset.y * m;
   const initialOpacity = isAboveFoldRef.current ? 1 : 0;
@@ -99,9 +99,9 @@ export function FadeIn({
       initial={{ opacity: initialOpacity, x: hiddenX, y: hiddenY }}
       animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: initialOpacity, x: hiddenX, y: hiddenY }}
       transition={{
-        opacity: { duration: duration * 0.8, ease: animationEasing, delay },
-        x: { type: "spring", stiffness: 300, damping: 30, delay },
-        y: { type: "spring", stiffness: 300, damping: 30, delay },
+        duration: duration,
+        ease: animationEasing,
+        delay,
       }}
       className={className}
     >
