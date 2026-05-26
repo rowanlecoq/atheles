@@ -616,3 +616,19 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .bg-brand-dark-gold\/10 {
   background-color: rgba(138, 104, 32, 0.08) !important;
 }
+/* Cart / modal backdrop — 50% black is too dark over the warm-beige page */
+[data-color-mode="light"] .bg-black\/50 {
+  background-color: rgba(26, 22, 18, 0.15) !important;
+}
+/* White-opacity borders → subtle warm-dark borders (cart, modals, etc.) */
+[data-color-mode="light"] [class*="border-white\/"] {
+  border-color: rgba(26, 22, 18, 0.10) !important;
+}
+/* White-opacity backgrounds → very subtle warm-dark tints */
+[data-color-mode="light"] [class*="bg-white\/"] {
+  background-color: rgba(26, 22, 18, 0.04) !important;
+}
+/* Footer divider line and similar bg-brand-dark-gold/20 elements */
+[data-color-mode="light"] .bg-brand-dark-gold\/20 {
+  background-color: rgba(138, 104, 32, 0.25) !important;
+}
