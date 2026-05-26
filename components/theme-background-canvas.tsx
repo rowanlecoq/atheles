@@ -237,22 +237,26 @@ function drawBeam(
   }
 }
 
-function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
+function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number, lightMode: boolean) {
+  // In light mode: darken ray colours so they contrast against the bright base,
+  // and boost opacity ~5× so the beams are actually visible.
+  const m = lightMode ? 5.0 : 1.0;
   const hasFilter = "filter" in ctx;
   if (hasFilter) ctx.filter = "blur(20px)";
 
   if (theme === "water") {
+    const eCol = lightMode ? "0,70,155"   : "34,211,238";
+    const mCol = lightMode ? "0,90,175"   : "6,182,212";
     for (let i = 0; i < 8; i++) {
       const angle   = (-10 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.060 + (i % 3) * 0.022;
+      const opacity = (0.060 + (i % 3) * 0.022) * m;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.4 + i) * 20;
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
-        (o) => `rgba(34,211,238,${o.toFixed(4)})`,
-        (o) => `rgba(6,182,212,${o.toFixed(4)})`,
+        (o) => `rgba(${eCol},${o.toFixed(4)})`,
+        (o) => `rgba(${mCol},${o.toFixed(4)})`,
         hasFilter);
     }
-    // small bottom-left fill rays — positive angles match main bottom rays (~+8°–+11°)
     const blFill = [
       [0.10, 0.80,  8, 16, 0.040],
       [0.06, 0.90, 10, 20, 0.044],
@@ -260,9 +264,9 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     ] as const;
     for (const [cx, cyF, deg, sH, op] of blFill) {
       const cy = h * cyF + Math.sin(time * 0.3 + cx * 10) * 8;
-      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
-        (o) => `rgba(34,211,238,${o.toFixed(4)})`,
-        (o) => `rgba(6,182,212,${o.toFixed(4)})`,
+      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op * m,
+        (o) => `rgba(${eCol},${o.toFixed(4)})`,
+        (o) => `rgba(${mCol},${o.toFixed(4)})`,
         hasFilter);
     }
   }
@@ -271,9 +275,11 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     for (let i = 0; i < 8; i++) {
       const angle  = (-6 + i * 3.5) * (Math.PI / 180);
       const stripH = 28 + (i % 4) * 12;
-      const opacity = 0.052 + (i % 3) * 0.018;
+      const opacity = (0.052 + (i % 3) * 0.018) * m;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.35 + i * 1.5) * 16;
-      const rgb = i % 3 === 0 ? "16,185,129" : i % 3 === 1 ? "245,158,11" : "0,210,175";
+      const rgb = lightMode
+        ? (i % 3 === 0 ? "0,100,52" : i % 3 === 1 ? "148,85,0" : "0,120,80")
+        : (i % 3 === 0 ? "16,185,129" : i % 3 === 1 ? "245,158,11" : "0,210,175");
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
@@ -285,23 +291,22 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     for (let i = 0; i < 6; i++) {
       const angle   = (-12 + i * 4.5) * (Math.PI / 180);
       const stripH  = 24 + i * 5;
-      const opacity = 0.058 + i * 0.012;
+      const opacity = (0.058 + i * 0.012) * m;
       const cy = h * (0.06 + i * 0.16) + Math.sin(time * 0.28 + i * 1.3) * 14;
-      const rgb = i % 3 === 0 ? "147,51,234" : i % 3 === 1 ? "255,80,150" : "255,130,60";
+      const rgb = lightMode
+        ? (i % 3 === 0 ? "98,12,195"  : i % 3 === 1 ? "180,25,85"  : "180,72,5")
+        : (i % 3 === 0 ? "147,51,234" : i % 3 === 1 ? "255,80,150" : "255,130,60");
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    // small bottom-left fill rays — positive angles match main bottom rays (~+6°–+10°)
-    const blFill = [
-      [0.10, 0.80,  6, 16, 0.040, "255,130,60"],
-      [0.06, 0.90,  8, 20, 0.044, "255,80,150"],
-      [0.15, 0.96, 10, 14, 0.034, "255,130,60"],
-    ] as const;
+    const blFill = lightMode
+      ? [[0.10, 0.80, 6, 16, 0.040, "180,72,5"], [0.06, 0.90, 8, 20, 0.044, "180,25,85"], [0.15, 0.96, 10, 14, 0.034, "180,72,5"]] as const
+      : [[0.10, 0.80, 6, 16, 0.040, "255,130,60"], [0.06, 0.90, 8, 20, 0.044, "255,80,150"], [0.15, 0.96, 10, 14, 0.034, "255,130,60"]] as const;
     for (const [cx, cyF, deg, sH, op, rgb] of blFill) {
       const cy = h * cyF + Math.sin(time * 0.28 + cx * 10) * 8;
-      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
+      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH * m, op * m,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         (o) => `rgba(${rgb},${o.toFixed(4)})`,
         hasFilter);
@@ -309,28 +314,35 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
   }
 
   if (theme === "gold") {
-    // 8 beams, ocean coverage geometry. Colors stay close to brand gold #ccb173
-    // (204,177,115) — edge slightly deeper, mid slightly brighter, never yellow.
     for (let i = 0; i < 8; i++) {
       const angle   = (-8 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.052 + (i % 3) * 0.018;
+      const opacity = (0.052 + (i % 3) * 0.018) * m;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.28 + i) * 20;
-      const eRgb = i % 3 === 0 ? "192,162,88"  : i % 3 === 1 ? "200,170,96"  : "184,154,80";
-      const mRgb = i % 3 === 0 ? "222,194,128" : i % 3 === 1 ? "230,202,136" : "216,188,120";
+      const eRgb = lightMode
+        ? (i % 3 === 0 ? "138,78,0"  : i % 3 === 1 ? "148,88,5"  : "128,70,0")
+        : (i % 3 === 0 ? "192,162,88"  : i % 3 === 1 ? "200,170,96"  : "184,154,80");
+      const mRgb = lightMode
+        ? (i % 3 === 0 ? "158,98,8"  : i % 3 === 1 ? "165,105,10" : "148,90,5")
+        : (i % 3 === 0 ? "222,194,128" : i % 3 === 1 ? "230,202,136" : "216,188,120");
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
-    const goldFill = [
+    const goldFillDark = [
+      [0.10, 0.80,  8, 16, 0.038, "158,98,8",   "138,78,0"],
+      [0.06, 0.90, 10, 20, 0.042, "148,90,5",   "128,70,0"],
+      [0.15, 0.96, 11, 14, 0.032, "165,105,10", "148,88,5"],
+    ] as const;
+    const goldFillLight = [
       [0.10, 0.80,  8, 16, 0.038, "222,194,128", "192,162,88"],
       [0.06, 0.90, 10, 20, 0.042, "216,188,120", "184,154,80"],
       [0.15, 0.96, 11, 14, 0.032, "230,202,136", "200,170,96"],
     ] as const;
-    for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of goldFill) {
+    for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of (lightMode ? goldFillDark : goldFillLight)) {
       const cy = h * cyF + Math.sin(time * 0.28 + cx * 10) * 8;
-      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
+      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op * m,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
@@ -343,23 +355,27 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     for (let i = 0; i < 8; i++) {
       const angle   = (-5 + i * 3) * (Math.PI / 180);
       const stripH  = 24 + (i % 4) * 8;
-      const opacity = 0.062 + (i % 4) * 0.016;
+      const opacity = (0.062 + (i % 4) * 0.016) * m;
       const cy = h * (0.05 + i * 0.12) + Math.sin(time * 0.22 + i) * 14;
-      const eRgb = i % 4 === 0 ? "75,35,200"   : i % 4 === 1 ? "15,55,205"   : i % 4 === 2 ? "90,22,215"   : "120,68,238";
-      const mRgb = i % 4 === 0 ? "155,118,255" : i % 4 === 1 ? "80,138,255"  : i % 4 === 2 ? "148,92,248"  : "188,155,255";
+      const eRgb = lightMode
+        ? (i % 4 === 0 ? "42,8,155"    : i % 4 === 1 ? "8,30,160"    : i % 4 === 2 ? "55,5,168"    : "78,35,185")
+        : (i % 4 === 0 ? "75,35,200"   : i % 4 === 1 ? "15,55,205"   : i % 4 === 2 ? "90,22,215"   : "120,68,238");
+      const mRgb = lightMode
+        ? (i % 4 === 0 ? "68,28,175"   : i % 4 === 1 ? "30,75,180"   : i % 4 === 2 ? "85,35,192"   : "105,65,210")
+        : (i % 4 === 0 ? "155,118,255" : i % 4 === 1 ? "80,138,255"  : i % 4 === 2 ? "148,92,248"  : "188,155,255");
       drawBeam(ctx, w, 0.5, cy, angle, stripH, opacity,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
     }
     const midFill = [
-      [0.10, 0.80, 12, 16, 0.044, "155,118,255", "75,35,200"],
-      [0.06, 0.90, 14, 20, 0.048, "80,138,255",  "15,55,205"],
-      [0.15, 0.96, 16, 14, 0.038, "148,92,248",  "90,22,215"],
+      [0.10, 0.80, 12, 16, 0.044, lightMode ? "68,28,175"  : "155,118,255", lightMode ? "42,8,155"  : "75,35,200"],
+      [0.06, 0.90, 14, 20, 0.048, lightMode ? "30,75,180"  : "80,138,255",  lightMode ? "8,30,160"  : "15,55,205"],
+      [0.15, 0.96, 16, 14, 0.038, lightMode ? "85,35,192"  : "148,92,248",  lightMode ? "55,5,168"  : "90,22,215"],
     ] as const;
     for (const [cx, cyF, deg, sH, op, mRgb, eRgb] of midFill) {
       const cy = h * cyF + Math.sin(time * 0.22 + cx * 10) * 8;
-      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op,
+      drawBeam(ctx, w, cx, cy, deg * (Math.PI / 180), sH, op * m,
         (o) => `rgba(${eRgb},${o.toFixed(4)})`,
         (o) => `rgba(${mRgb},${o.toFixed(4)})`,
         hasFilter);
@@ -480,7 +496,8 @@ export function ThemeBackgroundCanvas() {
       state.time += 0.007;
       const cfg = THEMES[theme as ThemeKey];
 
-      drawRays(ctx, w, h, theme as ThemeKey, state.time);
+      const lm = getLightMode();
+      drawRays(ctx, w, h, theme as ThemeKey, state.time, lm);
 
       for (const p of state.particles) {
         p.x += p.vx;
@@ -497,8 +514,14 @@ export function ThemeBackgroundCanvas() {
           p.targetAlpha = cfg.minAlpha + Math.random() * (cfg.maxAlpha - cfg.minAlpha);
         }
 
+        // In light mode: darken particle colour (bright colours vanish on bright base)
+        // and boost alpha so sparkles read against the saturated background.
         const [r, g, b] = p.color;
-        ctx.fillStyle = `rgba(${r},${g},${b},${p.alpha.toFixed(3)})`;
+        const pr = lm ? Math.round(r * 0.28) : r;
+        const pg = lm ? Math.round(g * 0.28) : g;
+        const pb = lm ? Math.round(b * 0.28) : b;
+        const pa = lm ? Math.min(p.alpha * 3.0, 0.88) : p.alpha;
+        ctx.fillStyle = `rgba(${pr},${pg},${pb},${pa.toFixed(3)})`;
         if (p.isStar) {
           drawStar(ctx, p.x, p.y, p.r, p.rotation);
         } else {
