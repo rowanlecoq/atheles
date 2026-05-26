@@ -132,9 +132,15 @@ export function ContactForm() {
       <button
         type="submit"
         disabled={loading}
-        className="w-full rounded bg-brand-gold px-6 py-3 font-heading text-sm uppercase tracking-wider text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50"
+        className="group relative flex w-full items-center justify-center overflow-hidden rounded-full bg-brand-gold p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300 disabled:opacity-50"
       >
-        {loading ? "Sending..." : "Send Message"}
+        <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{
+          background: "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
+          animation: "cartShimmer 2s ease-in-out infinite",
+        }} />
+        <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
+          {loading ? "Sending..." : "Send Message"}
+        </span>
       </button>
     </form>
   );
