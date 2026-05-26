@@ -9,6 +9,7 @@ export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
+  const [subjectOpen, setSubjectOpen] = useState(false);
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -103,6 +104,8 @@ export function ContactForm() {
             name="subject"
             required
             className={`${fieldClass} appearance-none pr-10`}
+            onFocus={() => setSubjectOpen(true)}
+            onBlur={() => setSubjectOpen(false)}
           >
             <option value="">select a subject</option>
             <option value="order inquiry">order inquiry</option>
@@ -116,7 +119,7 @@ export function ContactForm() {
             <option value="other">other</option>
           </select>
           <div className="pointer-events-none absolute inset-y-0 right-3 flex items-center">
-            <svg className="h-4 w-4 text-brand-grey/60" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+            <svg className={`h-4 w-4 text-brand-grey/60 transition-transform duration-200 ${subjectOpen ? "rotate-180" : ""}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
               <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
             </svg>
           </div>
