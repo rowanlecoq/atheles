@@ -25,7 +25,7 @@ export async function Carousel() {
   if (!hasProducts) return null;
 
   return (
-    <section className="px-6 py-10 sm:py-14 lg:px-10">
+    <section className="content-surface px-6 py-10 sm:py-14 lg:px-10">
       <CarouselControls
         title="Coming Soon: This Summer"
         subtitle="mens"

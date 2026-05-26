@@ -37,7 +37,7 @@ export async function ThreeItemGrid() {
   const [firstProduct, secondProduct, thirdProduct] = homepageItems;
 
   return (
-    <section className="py-10 sm:py-12">
+    <section className="content-surface py-10 sm:py-12">
       <div className="mb-8 px-4 text-center">
         <SplitText
           as="h2"

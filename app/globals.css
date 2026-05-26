@@ -677,3 +677,8 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] [class*="from-black\/"] [class*="text-white"] {
   color: rgba(255, 255, 255, 0.9) !important;
 }
+/* Homepage product/carousel sections — white surface in light mode so dark
+   product images read cleanly instead of floating on the dark canvas.      */
+[data-color-mode="light"] .content-surface {
+  background-color: #ffffff;
+}
