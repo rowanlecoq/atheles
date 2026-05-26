@@ -636,13 +636,44 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] button[aria-label="No background"] {
   background: #e8e2d8 !important;
 }
-/* Theme-section image overlays (newsletter, quote) — keep semi-transparent so
-   the background image shows through. Higher specificity than the general
-   [class*="bg-brand-dark"] rule so it wins for the overlay divs only.      */
-[data-color-mode="light"] .theme-section [class*="bg-brand-dark/"] {
-  background-color: rgba(232, 226, 216, 0.45) !important;
+/* Theme sections (hero, newsletter, quote) keep their dark atmospheric look in light mode.
+   They are always media-background sections — dark overlays are essential for legibility.
+   Restore the CSS variable so from-brand-dark/X gradient stops resolve to dark.         */
+[data-color-mode="light"] .theme-section {
+  --color-brand-dark: #1a1614;
+  --color-brand-gold: #ccb173;
+  --color-brand-pale-gold: #b09e73;
+  --color-brand-dark-gold: #7f6f4c;
+  --color-brand-grey: #737373;
 }
-/* Remove the dark gradient fade added on top of newsletter image */
-[data-color-mode="light"] .theme-section .bg-gradient-to-b {
-  background-image: none !important;
+/* Section background — beat the generic [class*="bg-brand-dark"] rule */
+[data-color-mode="light"] .theme-section.bg-brand-dark {
+  background-color: #1a1614 !important;
+}
+/* Restore dark semi-transparent overlays for every opacity variant used in theme-sections.
+   Also restore backdrop-filter (stripped by the broad rule above). */
+[data-color-mode="light"] .theme-section .bg-brand-dark\/40 {
+  background-color: rgba(26, 22, 18, 0.40) !important;
+  backdrop-filter: unset !important;
+  -webkit-backdrop-filter: unset !important;
+}
+[data-color-mode="light"] .theme-section .bg-brand-dark\/60 {
+  background-color: rgba(26, 22, 18, 0.60) !important;
+}
+[data-color-mode="light"] .theme-section .bg-brand-dark\/95 {
+  background-color: rgba(26, 22, 18, 0.95) !important;
+  backdrop-filter: unset !important;
+  -webkit-backdrop-filter: unset !important;
+}
+/* Text in theme-sections: white stays white (dark background) */
+[data-color-mode="light"] .theme-section [class*="text-white"] {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+/* Stock badge pills on product cards — keep dark semi-transparent glass look */
+[data-color-mode="light"] .bg-brand-dark\/70 {
+  background-color: rgba(26, 22, 18, 0.70) !important;
+}
+/* Product card title lives inside a from-black/80 dark gradient — keep text white */
+[data-color-mode="light"] [class*="from-black\/"] [class*="text-white"] {
+  color: rgba(255, 255, 255, 0.9) !important;
 }
