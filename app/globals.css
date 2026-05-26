@@ -493,6 +493,17 @@ body[data-bg="sunset"] {
 @keyframes fi-right{ from { opacity:0; transform:translateX(-14px);} to { opacity:1; transform:translateX(0); } }
 @keyframes fi-none { from { opacity:0; }                             to { opacity:1; }                          }
 
+/* fi-anim: elements start hidden via paused animation (fill-mode backwards applies from-frame).
+   CSS is render-blocking, so this is opacity:0 from the very first paint — no JS needed.
+   JS just sets animation-play-state:running at the right time. */
+.fi-anim {
+  animation: var(--fi-kf, fi-up) var(--fi-dur, 0.5s) cubic-bezier(0.22,1,0.36,1) var(--fi-del, 0s) both;
+  animation-play-state: paused;
+}
+@media (prefers-reduced-motion: reduce) {
+  .fi-anim { animation: none; }
+}
+
 /* Profile page: content slides up on load — transform only, no opacity change */
 @keyframes profile-slide-up {
   from { transform: translateY(18px); }

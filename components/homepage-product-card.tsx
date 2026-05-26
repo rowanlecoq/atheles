@@ -1,35 +1,34 @@
 "use client";
 
 import { FavoriteCardButton } from "components/favorite-card-button";
-import { useReducedMotion } from "lib/hooks/use-reduced-motion";
-import { motion } from "motion/react";
+import { useAnimateInView } from "lib/hooks/use-animate-in-view";
 import Image from "next/image";
 import Link from "next/link";
 import Price from "components/price";
 import type { Product } from "lib/shopify/types";
+import type { CSSProperties } from "react";
+
+const CARD_ANIM: CSSProperties = {
+  "--fi-kf": "fi-up",
+  "--fi-dur": "0.28s",
+  "--fi-del": "0s",
+} as CSSProperties;
 
 export function HomepageProductCard({
   product,
   size = "half",
   priority = false,
-  index = 0,
 }: {
   product: Product;
   size?: "full" | "half";
   priority?: boolean;
   index?: number;
 }) {
+  const ref = useAnimateInView<HTMLDivElement>();
   const secondImage = product.images?.[1]?.url;
-  const prefersReducedMotion = useReducedMotion();
 
   return (
-    <motion.div
-      className="group h-full"
-      initial={prefersReducedMotion ? {} : { opacity: 0, y: 14 }}
-      whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "0px" }}
-      transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <div ref={ref} className="fi-anim group h-full" style={CARD_ANIM}>
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark md:aspect-auto md:h-full">
         <Link
           href={`/product/${product.handle}`}
@@ -92,6 +91,6 @@ export function HomepageProductCard({
           />
         </div>
       </div>
-    </motion.div>
+    </div>
   );
 }
