@@ -183,7 +183,7 @@ function drawBeam(
 }
 
 function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
-  const hasFilter = false; // blur(20px) on canvas is too expensive on mobile — skip
+  const hasFilter = true; // use single-draw path (no ctx.filter blur — too expensive on mobile)
 
   if (theme === "water") {
     for (let i = 0; i < 8; i++) {
