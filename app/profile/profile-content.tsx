@@ -212,6 +212,7 @@ export default function ProfileContent() {
   const [selectedTheme, setSelectedTheme] = useState<string | null>(null);
   const [themeGlobal, setThemeGlobal] = useState(false);
   const [themeSaving, setThemeSaving] = useState(false);
+  const [colorMode, setColorMode] = useState<"dark" | "light">("dark");
   const [discordSuccess, setDiscordSuccess] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [addAddressTick, setAddAddressTick] = useState(0);
@@ -251,6 +252,10 @@ export default function ProfileContent() {
         setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
         setThemeGlobal(u.globalTheme || false);
       }
+      try {
+        const cm = localStorage.getItem("atheles-color-mode");
+        setColorMode(cm === "light" ? "light" : "dark");
+      } catch {}
       setLoading(false);
     } catch {}
   }, []);
@@ -627,6 +632,14 @@ export default function ProfileContent() {
       });
     } catch {}
     setThemeSaving(false);
+  };
+
+  const handleColorModeChange = (mode: "dark" | "light") => {
+    setColorMode(mode);
+    try { localStorage.setItem("atheles-color-mode", mode); } catch {}
+    document.documentElement.setAttribute("data-color-mode", mode);
+    document.documentElement.style.colorScheme = mode === "light" ? "light" : "dark";
+    window.dispatchEvent(new Event("atheles-color-mode-change"));
   };
 
   if (loading || !user) {
@@ -1467,6 +1480,28 @@ export default function ProfileContent() {
                 )}
               </p>
             )}
+          </div>
+
+          {/* Appearance — mobile only */}
+          <div className="flex items-center justify-between rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 px-3 py-3 md:hidden">
+            <div>
+              <p className="text-sm text-white">light mode</p>
+              <p className="text-xs text-brand-grey">switch to light theme</p>
+            </div>
+            <button
+              type="button"
+              onClick={() => handleColorModeChange(colorMode === "dark" ? "light" : "dark")}
+              className={`relative h-6 w-11 rounded-full transition-colors cursor-pointer ${
+                colorMode === "light" ? "bg-brand-gold" : "bg-brand-dark-gold/30"
+              }`}
+              aria-label="Toggle light mode"
+            >
+              <span
+                className={`absolute top-0.5 left-0.5 h-5 w-5 rounded-full bg-white transition-transform ${
+                  colorMode === "light" ? "translate-x-5" : "translate-x-0"
+                }`}
+              />
+            </button>
           </div>
 
           {/* Newsletter */}

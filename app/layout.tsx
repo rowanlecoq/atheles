@@ -7,6 +7,7 @@ import { CurrencyProvider } from "components/currency-context";
 import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
+import { ColorModeApplier } from "components/color-mode-applier";
 import { ProfileBackgroundApplier } from "components/profile-background-applier";
 import { ScrollProgress } from "components/scroll-progress";
 import { SelfLinkScroll } from "components/self-link-scroll";
@@ -63,12 +64,22 @@ export default async function RootLayout({
   return (
     <html
       lang="en"
+      data-color-mode="dark"
       className={`dark ${playfair.variable}`}
       style={{ colorScheme: "dark" }}
     >
       <body className="bg-brand-dark text-white isolate">
         {/* Inline scripts run synchronously before React hydrates — prevents
             flashing between SSR paint and client hydration.                  */}
+        {/* Color mode: apply light/dark before first paint (mobile only via CSS) */}
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `try{
+              var _cm=localStorage.getItem("atheles-color-mode");
+              if(_cm==="light"){document.documentElement.setAttribute("data-color-mode","light");document.documentElement.style.colorScheme="light";}
+            }catch(e){}`,
+          }}
+        />
         <script
           dangerouslySetInnerHTML={{
             __html: `try{
@@ -107,6 +118,7 @@ export default async function RootLayout({
             <CartProvider cartPromise={cart}>
               <SelfLinkScroll />
               <SiteThemeProvider />
+              <ColorModeApplier />
               <ProfileBackgroundApplier />
               <ThemeBackgroundCanvas />
               <KonamiLightning />
