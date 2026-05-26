@@ -108,10 +108,58 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
   ]},
 };
 
+// Light-mode variants: same geometry, warm/bright base instead of near-black.
+const MOBILE_BG_LIGHT: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
+  gold: { base: '#f5e8c0', radial: [
+    [0.50, 0.62, 1.45, 0.80, 160, 120,  40, 0.22, 0.88],
+    [0.50, 0.48, 0.88, 0.72, 180, 145,  60, 0.28, 0.72],
+    [0.50, 0.28, 0.55, 0.48, 200, 165,  80, 0.16, 0.65],
+  ]},
+  water: { base: '#c8e8f5', radial: [
+    [0.50, 1.22, 1.00, 0.40,   0, 100, 180, 0.16, 0.48],
+    [0.50, 0.70, 0.65, 0.50,   0, 140, 190, 0.18, 0.55],
+    [0.50, 0.50, 0.55, 0.55,  20, 180, 220, 0.20, 0.55],
+    [0.70, 0.65, 0.60, 0.70,   0,  90, 170, 0.24, 0.60],
+    [0.50, 0.35, 0.70, 0.60,  10, 160, 200, 0.28, 0.60],
+  ]},
+  tropical: { base: '#d0f0d8', radial: [
+    [0.50, 0.85, 1.20, 0.50,   0, 110,  55, 0.22, 0.60],
+    [0.78, 0.72, 0.72, 0.55, 220, 155,  20, 0.24, 0.55],
+    [0.50, 0.48, 0.68, 0.68,   0, 130,  80, 0.22, 0.55],
+    [0.48, 0.22, 0.68, 0.72, 220, 140,   0, 0.24, 0.58],
+    [0.18, 0.65, 0.82, 0.68,   0, 118,  60, 0.28, 0.58],
+    [0.72, 0.88, 0.65, 0.52, 215, 130,  10, 0.22, 0.56],
+    [0.28, 0.90, 0.62, 0.48,   0, 122,  65, 0.20, 0.58],
+  ]},
+  midnight: { base: '#e0d8f5', radial: [
+    [0.12, 0.10, 0.62, 0.55,  80,  40, 200, 0.22, 0.72],
+    [0.42, 0.28, 0.70, 0.64, 120,  50, 230, 0.20, 0.75],
+    [0.72, 0.50, 0.74, 0.68,  40,  80, 210, 0.24, 0.75],
+    [0.82, 0.78, 0.60, 0.58, 100,  40, 215, 0.22, 0.72],
+    [0.22, 0.70, 0.62, 0.58,  60,  25, 180, 0.18, 0.70],
+    [0.50, 0.42, 0.68, 0.60, 140,  65, 240, 0.16, 0.68],
+    [0.06, 0.88, 0.55, 0.50,  80,  30, 195, 0.20, 0.68],
+  ]},
+  sunset: { base: '#fce0e8', radial: [
+    [0.50, 1.18, 1.10, 0.40, 240, 110,  20, 0.20, 0.48],
+    [0.20, 0.12, 0.55, 0.52, 160,  60, 220, 0.44, 0.60],
+    [0.78, 0.28, 0.65, 0.55, 240,  60, 130, 0.46, 0.60],
+    [0.15, 0.52, 0.60, 0.55, 200,  30, 100, 0.38, 0.55],
+    [0.80, 0.68, 0.55, 0.55, 240,  80, 140, 0.30, 0.55],
+    [0.50, 0.55, 1.00, 0.28, 240,  95,  18, 0.22, 0.55],
+  ], linear: [
+    [160,  60, 220, 0.22, 0.00],
+    [160,  60, 220, 0.00, 0.35],
+    [240,  95,  18, 0.00, 0.68],
+    [240, 120,  20, 0.16, 1.00],
+  ]},
+};
+
 // Draw the theme gradient directly onto the canvas (used on mobile so the
 // gradient + particles are a single composited layer with no CSS overlay fighting it).
 function drawGradientBg(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey) {
-  const T = MOBILE_BG[theme];
+  const isLight = document.documentElement.getAttribute("data-color-mode") === "light";
+  const T = isLight ? MOBILE_BG_LIGHT[theme] : MOBILE_BG[theme];
   ctx.fillStyle = T.base;
   ctx.fillRect(0, 0, w, h);
   for (const [cx, cy, rx, ry, r, g, b, a, fade] of T.radial) {
@@ -482,11 +530,16 @@ export function ThemeBackgroundCanvas() {
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
+    // Re-draw when color mode toggles so light/dark palette swaps immediately
+    const onColorModeChange = () => { if (state.theme) renderFrame(); };
+    window.addEventListener("atheles-color-mode-change", onColorModeChange);
+
     return () => {
       cancelAnimationFrame(state.animId);
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
+      window.removeEventListener("atheles-color-mode-change", onColorModeChange);
       canvas.style.willChange = "auto";
     };
   }, [prefersReducedMotion, isTouch, buildParticles]);

@@ -595,17 +595,15 @@ body[data-bg="sunset"] {
 }
 /* Explicit overrides — Tailwind compiles bg-* to static values so CSS variable
    cascade alone isn't enough; these ensure light mode backgrounds apply.
-   Warm beige palette keeps the premium gold feel without blinding whites. */
-[data-color-mode="light"] .bg-brand-dark {
+   Warm beige palette keeps the premium gold feel without blinding whites.
+   [class*="bg-brand-dark"] catches bg-brand-dark, bg-brand-dark/95, etc. */
+[data-color-mode="light"] [class*="bg-brand-dark"] {
   background-color: #f2ede4 !important;
+  backdrop-filter: none !important;
+  -webkit-backdrop-filter: none !important;
 }
-[data-color-mode="light"] body.bg-brand-dark:not([data-bg]) {
+[data-color-mode="light"] body[class*="bg-brand-dark"]:not([data-bg]) {
   background-color: #e8e2d8 !important;
-}
-/* When a background theme is active, cards stay solid so text stays readable.
-   The animated background is visible around the cards, not through them. */
-[data-color-mode="light"] body[data-bg] .bg-brand-dark {
-  background-color: #f2ede4 !important;
 }
 /* Border colours — slightly more visible on warm background */
 [data-color-mode="light"] [class*="border-brand-dark-gold"] {
