@@ -70,10 +70,10 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
   ]},
   water: { base: '#020a10', radial: [
     [0.50, 1.22, 1.00, 0.40,  20, 100, 200, 0.14, 0.48],
-    [0.50, 0.70, 0.65, 0.50,   0, 160, 200, 0.16, 0.55], // cx centred (was 0.15)
+    [0.50, 0.70, 0.65, 0.50,   0, 160, 200, 0.16, 0.55],
     [0.50, 0.50, 0.55, 0.55,  40, 210, 240, 0.18, 0.55],
     [0.70, 0.65, 0.60, 0.70,  20, 100, 200, 0.26, 0.60],
-    [0.50, 0.35, 0.70, 0.60,  30, 180, 220, 0.30, 0.60], // cx centred (was 0.30)
+    [0.50, 0.35, 0.70, 0.60,  30, 180, 220, 0.30, 0.60],
   ]},
   tropical: { base: '#020d06', radial: [
     [0.50, 0.85, 1.20, 0.50,  10, 130,  72, 0.24, 0.60],  // bottom dark forest green
@@ -108,10 +108,58 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
   ]},
 };
 
+// Light-mode palette — same colour families, light base instead of near-black.
+// Dark areas become lighter tints of the theme colour; glows stay vibrant.
+const LIGHT_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
+  gold: { base: '#faf5e8', radial: [
+    [0.50, 0.62, 1.45, 0.80, 175, 135, 45,  0.32, 0.88],  // wide warm amber wash
+    [0.50, 0.48, 0.88, 0.72, 200, 162, 72,  0.48, 0.72],  // deep gold core
+    [0.50, 0.28, 0.55, 0.48, 215, 182, 92,  0.26, 0.65],  // bright upper bloom
+  ]},
+  water: { base: '#e4f7ff', radial: [
+    [0.50, 1.22, 1.00, 0.40,   0, 110, 200, 0.30, 0.48],
+    [0.50, 0.70, 0.65, 0.50,   0, 150, 205, 0.36, 0.55],
+    [0.50, 0.50, 0.55, 0.55,  20, 190, 235, 0.40, 0.55],
+    [0.70, 0.65, 0.60, 0.70,   0,  90, 195, 0.44, 0.60],
+    [0.50, 0.35, 0.70, 0.60,  10, 165, 218, 0.48, 0.60],
+  ]},
+  tropical: { base: '#e8fdf3', radial: [
+    [0.50, 0.85, 1.20, 0.50,   0, 145,  75, 0.38, 0.60],  // bottom green
+    [0.78, 0.72, 0.72, 0.55, 240, 175,  20, 0.42, 0.55],  // lower-right amber
+    [0.50, 0.48, 0.68, 0.68,   0, 158, 100, 0.38, 0.55],  // centre teal
+    [0.48, 0.22, 0.68, 0.72, 235, 158,   0, 0.42, 0.58],  // upper amber
+    [0.18, 0.65, 0.82, 0.68,   0, 145,  80, 0.48, 0.58],  // left green
+    [0.72, 0.88, 0.65, 0.52, 240, 148,  10, 0.38, 0.56],  // lower-right amber accent
+    [0.28, 0.90, 0.62, 0.48,   0, 148,  85, 0.36, 0.58],  // lower-left teal
+  ]},
+  midnight: { base: '#eee9ff', radial: [
+    [0.12, 0.10, 0.62, 0.55,  80,  38, 220, 0.40, 0.72],  // indigo top-left
+    [0.42, 0.28, 0.70, 0.64, 118,  48, 248, 0.36, 0.75],  // purple upper-center
+    [0.72, 0.50, 0.74, 0.68,  38,  78, 225, 0.42, 0.75],  // cobalt center-right
+    [0.82, 0.78, 0.60, 0.58, 105,  40, 240, 0.38, 0.72],  // violet lower-right
+    [0.22, 0.70, 0.62, 0.58,  55,  20, 200, 0.30, 0.70],  // navy lower-left
+    [0.50, 0.42, 0.68, 0.60, 138,  62, 255, 0.28, 0.68],  // bright violet center
+    [0.06, 0.88, 0.55, 0.50,  75,  28, 215, 0.34, 0.68],  // bottom-left fill
+  ]},
+  sunset: { base: '#fff1f5', radial: [
+    [0.50, 1.18, 1.10, 0.40, 255, 140,  20, 0.36, 0.48],  // orange bottom
+    [0.20, 0.12, 0.55, 0.52, 155,  55, 248, 0.70, 0.60],  // violet upper-left
+    [0.78, 0.28, 0.65, 0.55, 255,  78, 148, 0.70, 0.60],  // hot pink upper-right
+    [0.15, 0.52, 0.60, 0.55, 225,  45, 125, 0.58, 0.55],  // deep pink mid-left
+    [0.80, 0.68, 0.55, 0.55, 255, 108, 165, 0.54, 0.55],  // pink lower-right
+    [0.50, 0.55, 1.00, 0.28, 252, 118,  28, 0.44, 0.55],  // orange center wash
+  ], linear: [
+    [155,  55, 248, 0.20, 0.00],  // violet tint at top
+    [155,  55, 248, 0.00, 0.35],
+    [252, 118,  28, 0.00, 0.68],
+    [255, 148,  28, 0.16, 1.00],  // orange tint at bottom
+  ]},
+};
+
 // Draw the theme gradient directly onto the canvas (used on mobile so the
 // gradient + particles are a single composited layer with no CSS overlay fighting it).
-function drawGradientBg(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey) {
-  const T = MOBILE_BG[theme];
+function drawGradientBg(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, lightMode: boolean) {
+  const T = lightMode ? LIGHT_BG[theme] : MOBILE_BG[theme];
   ctx.fillStyle = T.base;
   ctx.fillRect(0, 0, w, h);
   for (const [cx, cy, rx, ry, r, g, b, a, fade] of T.radial) {
@@ -376,6 +424,7 @@ export function ThemeBackgroundCanvas() {
     const state = stateRef.current;
 
     const getTheme = () => document.body.getAttribute("data-bg") as ThemeKey | null;
+    const getLightMode = () => document.documentElement.getAttribute("data-color-mode") === "light";
 
     canvas.style.willChange = "transform";
 
@@ -414,7 +463,7 @@ export function ThemeBackgroundCanvas() {
       const h = canvas.height;
 
       if (theme && theme in THEMES) {
-        drawGradientBg(ctx, w, h, theme as ThemeKey);
+        drawGradientBg(ctx, w, h, theme as ThemeKey, getLightMode());
       } else {
         ctx.clearRect(0, 0, w, h);
       }
@@ -482,11 +531,17 @@ export function ThemeBackgroundCanvas() {
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
+    // Re-paint immediately when the user switches colour mode so the
+    // light/dark palette swap is instant (no waiting for next frame).
+    const onColorModeChange = () => { renderFrame(); };
+    window.addEventListener("atheles-color-mode-change", onColorModeChange);
+
     return () => {
       cancelAnimationFrame(state.animId);
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
+      window.removeEventListener("atheles-color-mode-change", onColorModeChange);
       canvas.style.willChange = "auto";
     };
   }, [prefersReducedMotion, isTouch, buildParticles]);
