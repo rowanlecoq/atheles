@@ -2,6 +2,9 @@
 
 import { useState } from "react";
 
+const fieldClass =
+  "w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold/50 focus:outline-none transition-colors duration-150";
+
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -54,94 +57,100 @@ export function ContactForm() {
   }
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-4">
-      <div>
-        <label
-          htmlFor="name"
-          className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold"
+    <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
+      <form onSubmit={handleSubmit} className="space-y-4">
+        <div>
+          <label
+            htmlFor="name"
+            className="mb-1.5 block text-xs uppercase tracking-wider text-brand-pale-gold"
+          >
+            Name
+          </label>
+          <input
+            id="name"
+            name="name"
+            type="text"
+            required
+            className={fieldClass}
+            placeholder="your name"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="email"
+            className="mb-1.5 block text-xs uppercase tracking-wider text-brand-pale-gold"
+          >
+            Email
+          </label>
+          <input
+            id="email"
+            name="email"
+            type="email"
+            required
+            className={fieldClass}
+            placeholder="your@email.com"
+          />
+        </div>
+        <div>
+          <label
+            htmlFor="subject"
+            className="mb-1.5 block text-xs uppercase tracking-wider text-brand-pale-gold"
+          >
+            Subject
+          </label>
+          <select
+            id="subject"
+            name="subject"
+            required
+            className={fieldClass}
+          >
+            <option value="">select a subject</option>
+            <option value="order inquiry">order inquiry</option>
+            <option value="sizing help">sizing help</option>
+            <option value="returns & exchanges">returns &amp; exchanges</option>
+            <option value="collaboration">collaboration</option>
+            <option value="ambassadorship">ambassadorship</option>
+            <option value="sponsorship">sponsorship</option>
+            <option value="wholesale inquiry">wholesale inquiry</option>
+            <option value="feedback">feedback</option>
+            <option value="other">other</option>
+          </select>
+        </div>
+        <div>
+          <label
+            htmlFor="message"
+            className="mb-1.5 block text-xs uppercase tracking-wider text-brand-pale-gold"
+          >
+            Message
+          </label>
+          <textarea
+            id="message"
+            name="message"
+            required
+            rows={5}
+            className={`${fieldClass} resize-none`}
+            placeholder="how can we help?"
+          />
+        </div>
+        {error && <p className="text-xs text-red-400">{error}</p>}
+        <button
+          type="submit"
+          disabled={loading}
+          className="group relative flex w-full items-center justify-center overflow-hidden rounded-full bg-brand-gold p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300 disabled:opacity-50"
         >
-          Name
-        </label>
-        <input
-          id="name"
-          name="name"
-          type="text"
-          required
-          className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-          placeholder="your name"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="email"
-          className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold"
-        >
-          Email
-        </label>
-        <input
-          id="email"
-          name="email"
-          type="email"
-          required
-          className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-          placeholder="your@email.com"
-        />
-      </div>
-      <div>
-        <label
-          htmlFor="subject"
-          className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold"
-        >
-          Subject
-        </label>
-        <select
-          id="subject"
-          name="subject"
-          required
-          className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white focus:border-brand-gold focus:outline-none"
-        >
-          <option value="">select a subject</option>
-          <option value="order inquiry">order inquiry</option>
-          <option value="sizing help">sizing help</option>
-          <option value="returns & exchanges">returns & exchanges</option>
-          <option value="collaboration">collaboration</option>
-          <option value="ambassadorship">ambassadorship</option>
-          <option value="sponsorship">sponsorship</option>
-          <option value="wholesale inquiry">wholesale inquiry</option>
-          <option value="feedback">feedback</option>
-          <option value="other">other</option>
-        </select>
-      </div>
-      <div>
-        <label
-          htmlFor="message"
-          className="mb-1 block text-xs uppercase tracking-wider text-brand-pale-gold"
-        >
-          Message
-        </label>
-        <textarea
-          id="message"
-          name="message"
-          required
-          rows={5}
-          className="w-full resize-none rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
-          placeholder="how can we help?"
-        />
-      </div>
-      {error && <p className="text-xs text-red-400">{error}</p>}
-      <button
-        type="submit"
-        disabled={loading}
-        className="group relative flex w-full items-center justify-center overflow-hidden rounded-full bg-brand-gold p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300 disabled:opacity-50"
-      >
-        <div className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100" style={{
-          background: "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
-          animation: "cartShimmer 2s ease-in-out infinite",
-        }} />
-        <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
-          {loading ? "Sending..." : "Send Message"}
-        </span>
-      </button>
-    </form>
+          <div
+            className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            style={{
+              background:
+                "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
+              animation: "cartShimmer 2s ease-in-out infinite",
+            }}
+          />
+          <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
+            {loading ? "Sending..." : "Send Message"}
+          </span>
+        </button>
+      </form>
+    </div>
   );
 }
