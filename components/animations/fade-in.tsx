@@ -39,25 +39,26 @@ export function FadeIn({
   const ref = useRef<HTMLDivElement>(null);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
-
-  // Start visible — SSR HTML never has opacity:0. Only enable scroll animation
-  // for elements that are below the fold at mount time.
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  // If the element is already in the viewport on mount, skip opacity so there's
+  // no flash of invisible content — only the translate animates.
+  const isAboveFoldRef = useRef(false);
 
-  // Effect 1: after mount, check if element is below the fold.
+  // Effect 1: always enable animation after mount. If already in viewport,
+  // trigger immediately so entrance animations work on page navigation.
   useEffect(() => {
     if (!ref.current || prefersReducedMotion) return;
     const rect = ref.current.getBoundingClientRect();
-    if (rect.top >= window.innerHeight || rect.bottom <= 0) {
-      setShouldAnimate(true);
-    }
+    const inView = rect.top < window.innerHeight && rect.bottom > 0;
+    isAboveFoldRef.current = inView;
+    setShouldAnimate(true);
+    if (inView) setIsInView(true);
   }, [prefersReducedMotion]);
 
-  // Effect 2: runs after shouldAnimate flips to true, at which point ref.current
-  // is the motion.div. Set up IntersectionObserver on the correct element.
+  // Effect 2: for below-fold elements, observe when they scroll into view.
   useEffect(() => {
-    if (!shouldAnimate || !ref.current) return;
+    if (!shouldAnimate || !ref.current || isAboveFoldRef.current) return;
     const margin = isMobileViewport
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal;
@@ -90,12 +91,13 @@ export function FadeIn({
   const m = isMobileViewport ? 0.65 : 1;
   const hiddenX = offset.x * m;
   const hiddenY = offset.y * m;
+  const initialOpacity = isAboveFoldRef.current ? 1 : 0;
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, x: hiddenX, y: hiddenY }}
-      animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: hiddenX, y: hiddenY }}
+      initial={{ opacity: initialOpacity, x: hiddenX, y: hiddenY }}
+      animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: initialOpacity, x: hiddenX, y: hiddenY }}
       transition={{
         opacity: { duration: duration * 0.8, ease: animationEasing, delay },
         x: { type: "spring", stiffness: 300, damping: 30, delay },

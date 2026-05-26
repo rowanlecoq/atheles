@@ -28,17 +28,19 @@ export function BlurReveal({
   const prefersReducedMotion = useReducedMotion();
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [isInView, setIsInView] = useState(false);
+  const isAboveFoldRef = useRef(false);
 
   useEffect(() => {
     if (!ref.current || prefersReducedMotion) return;
     const rect = ref.current.getBoundingClientRect();
-    if (rect.top >= window.innerHeight || rect.bottom <= 0) {
-      setShouldAnimate(true);
-    }
+    const inView = rect.top < window.innerHeight && rect.bottom > 0;
+    isAboveFoldRef.current = inView;
+    setShouldAnimate(true);
+    if (inView) setIsInView(true);
   }, [prefersReducedMotion]);
 
   useEffect(() => {
-    if (!shouldAnimate || !ref.current) return;
+    if (!shouldAnimate || !ref.current || isAboveFoldRef.current) return;
     const margin = isMobileViewport
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal;
@@ -67,12 +69,14 @@ export function BlurReveal({
   const transitionDuration = isMobileViewport
     ? Math.min(duration, animationDurationsMobile.slow)
     : duration;
+  const initialOpacity = isAboveFoldRef.current ? 1 : 0;
+  const initialFilter = isAboveFoldRef.current ? "blur(0px)" : hiddenBlur;
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: 0, filter: hiddenBlur }}
-      animate={isInView ? { opacity: 1, filter: "blur(0px)" } : { opacity: 0, filter: hiddenBlur }}
+      initial={{ opacity: initialOpacity, filter: initialFilter }}
+      animate={isInView ? { opacity: 1, filter: "blur(0px)" } : { opacity: initialOpacity, filter: initialFilter }}
       transition={{ duration: transitionDuration, delay, ease: animationEasing }}
       className={className}
     >
