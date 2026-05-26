@@ -560,7 +560,7 @@ body[data-bg="sunset"] {
 /* The picker UI is md:hidden so only mobile users can set it via normal UI.  */
 [data-color-mode="light"] {
   color-scheme: light;
-  --color-brand-dark: #ffffff;
+  --color-brand-dark: #f2ede4;
   --color-brand-dark-gold: #8a6820;
   --color-brand-gold: #9a7828;
   --color-brand-pale-gold: #806020;
@@ -570,18 +570,18 @@ body[data-bg="sunset"] {
   --color-brand-gold-wash: #a08040;
 }
 [data-color-mode="light"] body {
-  color: #111111;
+  color: #1a1612;
 }
 /* Light grey page background when no bg theme is active; cards (bg-brand-dark) stay white */
 [data-color-mode="light"] body:not([data-bg]) {
   background-color: #f0f0f0;
 }
 [data-color-mode="light"] [class*="text-white"] {
-  color: #111111 !important;
+  color: #1a1612 !important;
 }
 /* Gold buttons use text-brand-dark which becomes near-white — restore dark */
 [data-color-mode="light"] .bg-brand-gold .text-brand-dark {
-  color: #111111 !important;
+  color: #1a1612 !important;
 }
 [data-color-mode="light"] .text-green-400 { color: #16a34a !important; }
 [data-color-mode="light"] .text-red-400   { color: #dc2626 !important; }
@@ -594,27 +594,28 @@ body[data-bg="sunset"] {
   color: #111111;
 }
 /* Explicit overrides — Tailwind compiles bg-* to static values so CSS variable
-   cascade alone isn't enough; these ensure light mode backgrounds apply. */
+   cascade alone isn't enough; these ensure light mode backgrounds apply.
+   Warm beige palette keeps the premium gold feel without blinding whites. */
 [data-color-mode="light"] .bg-brand-dark {
-  background-color: #ffffff !important;
+  background-color: #f2ede4 !important;
 }
 [data-color-mode="light"] body.bg-brand-dark:not([data-bg]) {
-  background-color: #f0f0f0 !important;
+  background-color: #e8e2d8 !important;
 }
-/* When a background theme is active in light mode, frosted glass so white
-   cards don't blind against the dark animated canvas. */
+/* When a background theme is active in light mode, frosted glass so cards
+   feel integrated with the canvas rather than floating white slabs. */
 [data-color-mode="light"] body[data-bg] .bg-brand-dark {
-  background-color: rgba(255, 255, 255, 0.78) !important;
-  backdrop-filter: blur(20px) saturate(1.3);
-  -webkit-backdrop-filter: blur(20px) saturate(1.3);
+  background-color: rgba(242, 237, 228, 0.72) !important;
+  backdrop-filter: blur(20px) saturate(1.2);
+  -webkit-backdrop-filter: blur(20px) saturate(1.2);
 }
-/* Border colours — darken for visibility on white backgrounds */
+/* Border colours — slightly more visible on warm background */
 [data-color-mode="light"] [class*="border-brand-dark-gold"] {
-  border-color: rgba(138, 104, 32, 0.35) !important;
+  border-color: rgba(138, 104, 32, 0.30) !important;
 }
-/* Medium-grey backgrounds (used in some inner sections) */
+/* Medium-grey / subtle inner section backgrounds */
 [data-color-mode="light"] .bg-brand-medium-grey\/10,
 [data-color-mode="light"] .bg-brand-dark-gold\/5,
 [data-color-mode="light"] .bg-brand-dark-gold\/10 {
-  background-color: rgba(138, 104, 32, 0.07) !important;
+  background-color: rgba(138, 104, 32, 0.08) !important;
 }
