@@ -716,7 +716,12 @@ export default function ProfileContent() {
       : Math.min(100, ((points - tier.min) / (tier.max - tier.min)) * 100);
 
   return (
-    <div className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16">
+    <motion.div
+      className="relative mx-auto max-w-2xl px-4 py-12 sm:py-16"
+      initial={{ y: 18 }}
+      animate={{ y: 0 }}
+      transition={{ duration: 0.32, ease: [0.22, 1, 0.36, 1] }}
+    >
       {/* Background handled by global ThemeBackground component */}
 
       <div className="relative">
@@ -731,10 +736,7 @@ export default function ProfileContent() {
 
       {/* Avatar Preview Modal — portaled to cover everything including navbar */}
       {showAvatarPreview && avatar && typeof document !== "undefined" && createPortal(
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
+        <div
           className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/90 p-4"
           onClick={() => setShowAvatarPreview(false)}
         >
@@ -749,10 +751,7 @@ export default function ProfileContent() {
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          <motion.div
-            initial={{ scale: 0.88, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          <div
             className="flex flex-col items-center gap-4"
             onClick={(e) => e.stopPropagation()}
           >
@@ -764,8 +763,8 @@ export default function ProfileContent() {
                 className="h-64 w-64 object-cover sm:h-80 sm:w-80"
               />
             </div>
-          </motion.div>
-        </motion.div>,
+          </div>
+        </div>,
         document.body,
       )}
 
@@ -1689,6 +1688,6 @@ export default function ProfileContent() {
         </div>
       )}
       </div>
-    </div>
+    </motion.div>
   );
 }
