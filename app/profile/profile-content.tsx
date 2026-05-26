@@ -1593,8 +1593,8 @@ export default function ProfileContent() {
           {selectedTheme && (
             <div className="flex items-center justify-between rounded-lg border border-brand-dark-gold/10 bg-brand-dark-gold/5 px-4 py-3">
               <div>
-                <p className="text-sm text-white/80">apply sitewide</p>
-                <p className="text-xs text-brand-grey/50">show on every page, not just your profile</p>
+                <p className="text-sm text-white/80">show across entire store</p>
+                <p className="text-xs text-brand-grey/50">not just your profile</p>
               </div>
               <button
                 type="button"
