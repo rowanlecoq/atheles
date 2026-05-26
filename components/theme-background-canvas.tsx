@@ -15,38 +15,45 @@ type Particle = {
 };
 
 // Per-theme particle config — gold, midnight, sunset use star shapes for sparkle
+// lightColors: medium-dark saturated tints used in light mode so sparkles
+//   read as coloured glints rather than near-black bugs.
 const THEMES = {
   gold: {
     count: 40,
-    colors: [[255, 210, 60], [220, 185, 90], [255, 240, 160], [190, 160, 80]] as [number,number,number][],
+    colors:      [[255, 210, 60],  [220, 185, 90],  [255, 240, 160], [190, 160, 80]]  as [number,number,number][],
+    lightColors: [[148, 88,  8],   [135, 72,  5],   [160, 105, 18],  [125, 68,  0]]   as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.72,
     speed: 0.06, isStar: true,
   },
   water: {
     count: 38,
-    colors: [[0, 225, 240], [0, 170, 230], [120, 245, 255], [0, 195, 215]] as [number,number,number][],
+    colors:      [[0, 225, 240],   [0, 170, 230],   [120, 245, 255], [0, 195, 215]]   as [number,number,number][],
+    lightColors: [[0,  75, 155],   [0,  95, 170],   [12, 118, 188],  [0,  65, 145]]   as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.24,
     speed: 0.12, isStar: false,
   },
   tropical: {
     count: 40,
-    colors: [[20, 230, 110], [0, 195, 255], [255, 175, 30], [80, 255, 160]] as [number,number,number][],
+    colors:      [[20, 230, 110],  [0, 195, 255],   [255, 175, 30],  [80, 255, 160]]  as [number,number,number][],
+    lightColors: [[0,  108,  52],  [0,  85, 152],   [145, 80,  0],   [0, 118,  65]]   as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.06, maxAlpha: 0.55,
     speed: 0.14, isStar: false,
   },
   midnight: {
     count: 60,
-    colors: [[255, 255, 255], [225, 185, 255], [255, 185, 225], [210, 165, 255]] as [number,number,number][],
+    colors:      [[255, 255, 255], [225, 185, 255], [255, 185, 225], [210, 165, 255]] as [number,number,number][],
+    lightColors: [[52,  10, 172],  [18,  40, 172],  [68,   5, 192],  [88,  45, 202]] as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.78,
     speed: 0.04, isStar: true,
   },
   sunset: {
     count: 40,
-    colors: [[255, 90, 145], [255, 145, 50], [200, 75, 225], [255, 125, 90]] as [number,number,number][],
+    colors:      [[255, 90, 145],  [255, 145, 50],  [200, 75, 225],  [255, 125, 90]]  as [number,number,number][],
+    lightColors: [[138, 15,  92],  [145, 32,   5],  [112,  8, 178],  [152, 32, 108]]  as [number,number,number][],
     minR: 1.0, maxR: 3.5,
     minAlpha: 0.04, maxAlpha: 0.72,
     speed: 0.07, isStar: true,
@@ -113,53 +120,53 @@ const MOBILE_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LSt
 // Radial blobs use deeper/darker versions at 0.55–0.80 opacity to create
 // rich colour pools against the already-tinted base.
 const LIGHT_BG: Record<ThemeKey, { base: string; radial: RLayer[]; linear?: LStop[] }> = {
-  // Warm golden-honey base; deep amber pools
-  gold: { base: '#f0d060', radial: [
+  // Warm amber-honey base matching brand gold (#ccb173) lightened — not yellow
+  gold: { base: '#e8c878', radial: [
     [0.50, 0.62, 1.45, 0.80, 165, 105,   0, 0.55, 0.88],
     [0.50, 0.48, 0.88, 0.72, 190, 138,  18, 0.68, 0.72],
     [0.50, 0.28, 0.55, 0.48, 210, 162,  40, 0.46, 0.65],
   ]},
-  // Sky-blue base; deep ocean-teal pools
-  water: { base: '#80d8f8', radial: [
-    [0.50, 1.22, 1.00, 0.40,   0,  72, 175, 0.58, 0.48],
-    [0.50, 0.70, 0.65, 0.50,   0, 110, 185, 0.64, 0.55],
-    [0.50, 0.50, 0.55, 0.55,   8, 158, 218, 0.68, 0.55],
-    [0.70, 0.65, 0.60, 0.70,   0,  62, 172, 0.72, 0.60],
-    [0.50, 0.35, 0.70, 0.60,   5, 132, 205, 0.74, 0.60],
+  // Warm turquoise base (hue shifted towards teal to avoid cold pure-blue)
+  water: { base: '#62d8e8', radial: [
+    [0.50, 1.22, 1.00, 0.40,   0,  88, 162, 0.58, 0.48],
+    [0.50, 0.70, 0.65, 0.50,   0, 128, 172, 0.64, 0.55],
+    [0.50, 0.50, 0.55, 0.55,  15, 165, 200, 0.68, 0.55],
+    [0.70, 0.65, 0.60, 0.70,   0,  72, 155, 0.72, 0.60],
+    [0.50, 0.35, 0.70, 0.60,   8, 145, 188, 0.74, 0.60],
   ]},
-  // Vivid mint-teal base; deep jungle-green & amber pools
-  tropical: { base: '#62e8b8', radial: [
-    [0.50, 0.85, 1.20, 0.50,   0, 115,  52, 0.62, 0.60],
-    [0.78, 0.72, 0.72, 0.55, 215, 142,   0, 0.68, 0.55],
-    [0.50, 0.48, 0.68, 0.68,   0, 128,  78, 0.62, 0.55],
-    [0.48, 0.22, 0.68, 0.72, 210, 135,   0, 0.68, 0.58],
-    [0.18, 0.65, 0.82, 0.68,   0, 115,  60, 0.72, 0.58],
-    [0.72, 0.88, 0.65, 0.52, 215, 125,   8, 0.60, 0.56],
-    [0.28, 0.90, 0.62, 0.48,   0, 120,  65, 0.58, 0.58],
+  // Warm lime-teal base; deep jungle-green & golden-amber pools
+  tropical: { base: '#72e8a0', radial: [
+    [0.50, 0.85, 1.20, 0.50,   0, 112,  48, 0.62, 0.60],
+    [0.78, 0.72, 0.72, 0.55, 210, 148,   0, 0.70, 0.55],
+    [0.50, 0.48, 0.68, 0.68,   0, 122,  72, 0.62, 0.55],
+    [0.48, 0.22, 0.68, 0.72, 205, 140,   0, 0.70, 0.58],
+    [0.18, 0.65, 0.82, 0.68,   0, 108,  55, 0.72, 0.58],
+    [0.72, 0.88, 0.65, 0.52, 212, 130,  10, 0.62, 0.56],
+    [0.28, 0.90, 0.62, 0.48,   0, 115,  60, 0.58, 0.58],
   ]},
-  // Saturated lavender base; deep indigo & violet pools
-  midnight: { base: '#a890f0', radial: [
-    [0.12, 0.10, 0.62, 0.55,  50,  15, 195, 0.62, 0.72],
-    [0.42, 0.28, 0.70, 0.64,  88,  22, 228, 0.58, 0.75],
-    [0.72, 0.50, 0.74, 0.68,  20,  52, 208, 0.64, 0.75],
-    [0.82, 0.78, 0.60, 0.58,  78,  18, 225, 0.60, 0.72],
-    [0.22, 0.70, 0.62, 0.58,  38,   8, 182, 0.52, 0.70],
-    [0.50, 0.42, 0.68, 0.60, 118,  42, 248, 0.50, 0.68],
-    [0.06, 0.88, 0.55, 0.50,  58,  14, 200, 0.56, 0.68],
+  // Warm rose-violet base (more pink than blue to feel less cold)
+  midnight: { base: '#b888f0', radial: [
+    [0.12, 0.10, 0.62, 0.55,  68,  12, 188, 0.62, 0.72],
+    [0.42, 0.28, 0.70, 0.64, 105,  18, 220, 0.58, 0.75],
+    [0.72, 0.50, 0.74, 0.68,  38,  48, 202, 0.64, 0.75],
+    [0.82, 0.78, 0.60, 0.58,  95,  15, 218, 0.60, 0.72],
+    [0.22, 0.70, 0.62, 0.58,  52,   8, 175, 0.52, 0.70],
+    [0.50, 0.42, 0.68, 0.60, 138,  38, 242, 0.50, 0.68],
+    [0.06, 0.88, 0.55, 0.50,  75,  10, 195, 0.56, 0.68],
   ]},
-  // Hot-pink base; vivid violet & orange pools
-  sunset: { base: '#f878b0', radial: [
-    [0.50, 1.18, 1.10, 0.40, 255, 118,   8, 0.65, 0.48],
-    [0.20, 0.12, 0.55, 0.52, 128,  28, 230, 0.80, 0.60],
-    [0.78, 0.28, 0.65, 0.55, 255,  52, 130, 0.78, 0.60],
-    [0.15, 0.52, 0.60, 0.55, 208,  22, 108, 0.72, 0.55],
-    [0.80, 0.68, 0.55, 0.55, 255,  82, 148, 0.68, 0.55],
-    [0.50, 0.55, 1.00, 0.28, 248, 100,  10, 0.62, 0.55],
+  // Warm coral-orange base; deep orange & magenta pools (no cold purple base)
+  sunset: { base: '#f87858', radial: [
+    [0.50, 1.18, 1.10, 0.40, 220,  88,   5, 0.65, 0.48],
+    [0.20, 0.12, 0.55, 0.52, 165,  18, 185, 0.78, 0.60],
+    [0.78, 0.28, 0.65, 0.55, 240,  42, 115, 0.76, 0.60],
+    [0.15, 0.52, 0.60, 0.55, 195,  18,  95, 0.70, 0.55],
+    [0.80, 0.68, 0.55, 0.55, 245,  72, 130, 0.66, 0.55],
+    [0.50, 0.55, 1.00, 0.28, 238,  95,   8, 0.60, 0.55],
   ], linear: [
-    [128,  28, 230, 0.35, 0.00],
-    [128,  28, 230, 0.00, 0.35],
-    [248, 100,  10, 0.00, 0.68],
-    [255, 125,  15, 0.28, 1.00],
+    [165,  18, 185, 0.28, 0.00],
+    [165,  18, 185, 0.00, 0.35],
+    [238,  95,   8, 0.00, 0.68],
+    [245, 115,  12, 0.26, 1.00],
   ]},
 };
 
@@ -514,14 +521,12 @@ export function ThemeBackgroundCanvas() {
           p.targetAlpha = cfg.minAlpha + Math.random() * (cfg.maxAlpha - cfg.minAlpha);
         }
 
-        // In light mode: darken particle colour (bright colours vanish on bright base)
-        // and boost alpha so sparkles read against the saturated background.
-        const [r, g, b] = p.color;
-        const pr = lm ? Math.round(r * 0.28) : r;
-        const pg = lm ? Math.round(g * 0.28) : g;
-        const pb = lm ? Math.round(b * 0.28) : b;
-        const pa = lm ? Math.min(p.alpha * 3.0, 0.88) : p.alpha;
-        ctx.fillStyle = `rgba(${pr},${pg},${pb},${pa.toFixed(3)})`;
+        // In light mode: swap to per-theme light palette (medium-dark saturated tints)
+        // so sparkles read as coloured glints, not dark bugs.
+        const col = lm ? cfg.lightColors[p.color === cfg.colors[0] ? 0 : p.color === cfg.colors[1] ? 1 : p.color === cfg.colors[2] ? 2 : 3]! : p.color;
+        const [r, g, b] = col;
+        const pa = lm ? Math.min(p.alpha * 2.2, 0.80) : p.alpha;
+        ctx.fillStyle = `rgba(${r},${g},${b},${pa.toFixed(3)})`;
         if (p.isStar) {
           drawStar(ctx, p.x, p.y, p.r, p.rotation);
         } else {
