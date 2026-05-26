@@ -405,7 +405,7 @@ export function AthletesContent({ initialAthletes = [] }: { initialAthletes?: At
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.18 }}
-          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/95"
+          className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50"
           onClick={() => { setLightbox(null); setEmbedLoading(false); setZoom(false); }}
         >
           {/* Close button — matches pfp preview style */}

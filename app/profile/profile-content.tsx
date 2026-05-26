@@ -735,7 +735,7 @@ export default function ProfileContent() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/90 p-4"
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/50 p-4"
           onClick={() => setShowAvatarPreview(false)}
         >
           <button
@@ -1651,7 +1651,7 @@ export default function ProfileContent() {
 
       {/* Delete account modal */}
       {showDeleteModal && (
-        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 px-4 backdrop-blur-sm">
+        <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 px-4">
           <div className="w-full max-w-sm rounded-lg border border-red-900/30 bg-brand-dark p-6">
             <h3 className="mb-2 font-heading text-lg text-red-400">delete account</h3>
             <p className="mb-4 text-xs leading-relaxed text-brand-grey">
