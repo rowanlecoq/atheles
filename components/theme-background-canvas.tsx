@@ -134,17 +134,6 @@ function drawGradientBg(ctx: CanvasRenderingContext2D, w: number, h: number, the
     ctx.fillStyle = lg;
     ctx.fillRect(0, 0, w, h);
   }
-  // In light mode, fade edges to warm beige instead of letting the near-black
-  // base show — centre stays identical to dark mode.
-  if (document.documentElement.getAttribute("data-color-mode") === "light") {
-    const fade = ctx.createRadialGradient(w * 0.5, h * 0.5, 0, w * 0.5, h * 0.5, Math.max(w, h) * 0.72);
-    fade.addColorStop(0,    "rgba(232,226,216,0)");
-    fade.addColorStop(0.45, "rgba(232,226,216,0)");
-    fade.addColorStop(0.75, "rgba(232,226,216,0.55)");
-    fade.addColorStop(1,    "rgba(232,226,216,0.92)");
-    ctx.fillStyle = fade;
-    ctx.fillRect(0, 0, w, h);
-  }
 }
 
 // Diagonal light rays — water caustics for ocean, sun rays for tropical.
@@ -493,15 +482,11 @@ export function ThemeBackgroundCanvas() {
     };
     window.addEventListener("atheles-bg-change", onBgChange);
 
-    const onColorModeChange = () => { if (state.theme) renderFrame(); };
-    window.addEventListener("atheles-color-mode-change", onColorModeChange);
-
     return () => {
       cancelAnimationFrame(state.animId);
       if (resizeTimer) clearTimeout(resizeTimer);
       window.removeEventListener("resize", resize);
       window.removeEventListener("atheles-bg-change", onBgChange);
-      window.removeEventListener("atheles-color-mode-change", onColorModeChange);
       canvas.style.willChange = "auto";
     };
   }, [prefersReducedMotion, isTouch, buildParticles]);
