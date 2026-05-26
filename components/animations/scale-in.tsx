@@ -12,6 +12,13 @@ import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { motion } from "motion/react";
 import { useEffect, useRef, useState, type ReactNode } from "react";
 
+let pageLoadSettled = false;
+if (typeof window !== "undefined") {
+  const mark = () => setTimeout(() => { pageLoadSettled = true; }, 100);
+  if (document.readyState === "complete") mark();
+  else window.addEventListener("load", mark, { once: true });
+}
+
 export function ScaleIn({
   children,
   delay = 0,
@@ -28,19 +35,18 @@ export function ScaleIn({
   const prefersReducedMotion = useReducedMotion();
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [isInView, setIsInView] = useState(false);
-  const isAboveFoldRef = useRef(false);
 
   useEffect(() => {
     if (!ref.current || prefersReducedMotion) return;
     const rect = ref.current.getBoundingClientRect();
     const inView = rect.top < window.innerHeight && rect.bottom > 0;
-    isAboveFoldRef.current = inView;
+    if (inView && !pageLoadSettled) return;
     setShouldAnimate(true);
     if (inView) setIsInView(true);
   }, [prefersReducedMotion]);
 
   useEffect(() => {
-    if (!shouldAnimate || !ref.current || isAboveFoldRef.current) return;
+    if (!shouldAnimate || !ref.current || isInView) return;
     const margin = isMobileViewport
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal;
@@ -55,7 +61,7 @@ export function ScaleIn({
     );
     observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [shouldAnimate, isMobileViewport]);
+  }, [shouldAnimate, isMobileViewport, isInView]);
 
   if (!shouldAnimate || prefersReducedMotion) {
     return (
@@ -69,14 +75,12 @@ export function ScaleIn({
   const transitionDuration = isMobileViewport
     ? Math.min(duration, animationDurationsMobile.normal)
     : duration;
-  const initialOpacity = isAboveFoldRef.current ? 1 : 0;
-  const initialScale = isAboveFoldRef.current ? 1 : hiddenScale;
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: initialOpacity, scale: initialScale }}
-      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: initialOpacity, scale: initialScale }}
+      initial={{ opacity: 0, scale: hiddenScale }}
+      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: hiddenScale }}
       transition={{ duration: transitionDuration, delay, ease: animationEasing }}
       className={className}
     >

@@ -21,6 +21,15 @@ const offsets: Record<Direction, { x: number; y: number }> = {
   none: { x: 0, y: 0 },
 };
 
+// True once the initial hard page load has settled. Any FadeIn that mounts
+// after this point is from client-side navigation and should always animate.
+let pageLoadSettled = false;
+if (typeof window !== "undefined") {
+  const mark = () => setTimeout(() => { pageLoadSettled = true; }, 100);
+  if (document.readyState === "complete") mark();
+  else window.addEventListener("load", mark, { once: true });
+}
+
 export function FadeIn({
   children,
   direction = "up",
@@ -41,24 +50,23 @@ export function FadeIn({
   const prefersReducedMotion = useReducedMotion();
   const [shouldAnimate, setShouldAnimate] = useState(false);
   const [isInView, setIsInView] = useState(false);
-  // If the element is already in the viewport on mount, skip opacity so there's
-  // no flash of invisible content — only the translate animates.
-  const isAboveFoldRef = useRef(false);
 
-  // Effect 1: always enable animation after mount. If already in viewport,
-  // trigger immediately so entrance animations work on page navigation.
+  // Effect 1: decide whether to animate.
+  // - Hard load, above fold: skip — SSR already painted it visible, animating causes bounce.
+  // - Navigation, above fold: animate immediately (fade+slide entrance).
+  // - Below fold (any case): set up IntersectionObserver.
   useEffect(() => {
     if (!ref.current || prefersReducedMotion) return;
     const rect = ref.current.getBoundingClientRect();
     const inView = rect.top < window.innerHeight && rect.bottom > 0;
-    isAboveFoldRef.current = inView;
+    if (inView && !pageLoadSettled) return;
     setShouldAnimate(true);
     if (inView) setIsInView(true);
   }, [prefersReducedMotion]);
 
-  // Effect 2: for below-fold elements, observe when they scroll into view.
+  // Effect 2: IntersectionObserver for below-fold elements.
   useEffect(() => {
-    if (!shouldAnimate || !ref.current || isAboveFoldRef.current) return;
+    if (!shouldAnimate || !ref.current || isInView) return;
     const margin = isMobileViewport
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal;
@@ -77,7 +85,7 @@ export function FadeIn({
     );
     observer.observe(ref.current);
     return () => observer.disconnect();
-  }, [shouldAnimate, isMobileViewport, once]);
+  }, [shouldAnimate, isMobileViewport, once, isInView]);
 
   if (!shouldAnimate || prefersReducedMotion) {
     return (
@@ -91,18 +99,13 @@ export function FadeIn({
   const m = isMobileViewport ? 0.7 : 1;
   const hiddenX = offset.x * m;
   const hiddenY = offset.y * m;
-  const initialOpacity = isAboveFoldRef.current ? 1 : 0;
 
   return (
     <motion.div
       ref={ref}
-      initial={{ opacity: initialOpacity, x: hiddenX, y: hiddenY }}
-      animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: initialOpacity, x: hiddenX, y: hiddenY }}
-      transition={{
-        duration: duration,
-        ease: animationEasing,
-        delay,
-      }}
+      initial={{ opacity: 0, x: hiddenX, y: hiddenY }}
+      animate={isInView ? { opacity: 1, x: 0, y: 0 } : { opacity: 0, x: hiddenX, y: hiddenY }}
+      transition={{ duration, ease: animationEasing, delay }}
       className={className}
     >
       {children}
