@@ -176,6 +176,8 @@ textarea {
   .tap-target {
     min-height: var(--touch-target-size);
     min-width: var(--touch-target-size);
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
   }
 
   .mobile-page-shell {

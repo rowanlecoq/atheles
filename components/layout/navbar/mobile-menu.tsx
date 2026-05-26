@@ -276,7 +276,8 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
         type="button"
         onClick={openMobileMenu}
         aria-label="Open mobile menu"
-        className="flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold md:hidden"
+        className="flex h-11 w-11 items-center justify-center text-brand-grey transition-colors hover:text-brand-gold md:hidden outline-none"
+        style={{ WebkitTapHighlightColor: "transparent" }}
       >
         <Bars3Icon className="h-5 w-5" />
       </button>

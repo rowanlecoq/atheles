@@ -700,7 +700,8 @@ export default function CartModal() {
         type="button"
         aria-label="Open cart"
         onClick={openCart}
-        className="tap-target rounded-md"
+        className="tap-target rounded-md outline-none"
+        style={{ WebkitTapHighlightColor: "transparent" }}
       >
         <OpenCart quantity={cart?.totalQuantity} />
       </button>
