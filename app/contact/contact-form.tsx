@@ -57,8 +57,7 @@ export function ContactForm() {
   }
 
   return (
-    <div className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
-      <form onSubmit={handleSubmit} className="space-y-4">
+    <form onSubmit={handleSubmit} className="space-y-4">
         <div>
           <label
             htmlFor="name"
@@ -151,6 +150,5 @@ export function ContactForm() {
           </span>
         </button>
       </form>
-    </div>
   );
 }
