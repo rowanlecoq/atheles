@@ -26,7 +26,8 @@ export function HomepageProductCard({
     <motion.div
       className="group h-full"
       initial={prefersReducedMotion ? {} : { opacity: 0, y: 14 }}
-      animate={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+      whileInView={prefersReducedMotion ? {} : { opacity: 1, y: 0 }}
+      viewport={{ once: true, margin: "0px" }}
       transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
     >
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark md:aspect-auto md:h-full">
