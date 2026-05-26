@@ -3,21 +3,14 @@
 import {
   animationDurations,
   animationDurationsMobile,
-  animationEasing,
   animationViewportMargins,
   animationViewportMarginsMobile,
 } from "lib/animation-config";
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
-import { motion } from "motion/react";
-import { useEffect, useRef, useState, type ReactNode } from "react";
+import { useEffect, useRef, useState, type CSSProperties, type ReactNode } from "react";
 
-let pageLoadSettled = false;
-if (typeof window !== "undefined") {
-  const mark = () => setTimeout(() => { pageLoadSettled = true; }, 100);
-  if (document.readyState === "complete") mark();
-  else window.addEventListener("load", mark, { once: true });
-}
+const EASING = "cubic-bezier(0.22,1,0.36,1)";
 
 export function ScaleIn({
   children,
@@ -33,58 +26,48 @@ export function ScaleIn({
   const ref = useRef<HTMLDivElement>(null);
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
-  const [shouldAnimate, setShouldAnimate] = useState(false);
-  const [isInView, setIsInView] = useState(false);
+  const triggeredRef = useRef(false);
+  const [animStyle, setAnimStyle] = useState<CSSProperties | undefined>(undefined);
 
   useEffect(() => {
-    if (!ref.current || prefersReducedMotion) return;
-    const rect = ref.current.getBoundingClientRect();
+    if (prefersReducedMotion || triggeredRef.current) return;
+    const el = ref.current;
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
     const inView = rect.top < window.innerHeight && rect.bottom > 0;
-    if (inView && !pageLoadSettled) return;
-    setShouldAnimate(true);
-    if (inView) setIsInView(true);
-  }, [prefersReducedMotion]);
+    const d = isMobileViewport ? Math.min(duration, animationDurationsMobile.normal) : duration;
+    const style: CSSProperties = {
+      animation: `fi-none ${d}s ${EASING} ${delay}s both`,
+    };
 
-  useEffect(() => {
-    if (!shouldAnimate || !ref.current || isInView) return;
+    if (inView) {
+      triggeredRef.current = true;
+      setAnimStyle(style);
+      return;
+    }
+
     const margin = isMobileViewport
       ? animationViewportMarginsMobile.normal
       : animationViewportMargins.normal;
+
     const observer = new IntersectionObserver(
       (entries) => {
-        if (entries[0]?.isIntersecting) {
-          setIsInView(true);
+        if (entries[0]?.isIntersecting && !triggeredRef.current) {
+          triggeredRef.current = true;
+          setAnimStyle(style);
           observer.disconnect();
         }
       },
       { rootMargin: margin },
     );
-    observer.observe(ref.current);
+    observer.observe(el);
     return () => observer.disconnect();
-  }, [shouldAnimate, isMobileViewport, isInView]);
-
-  if (!shouldAnimate || prefersReducedMotion) {
-    return (
-      <div ref={ref} className={className}>
-        {children}
-      </div>
-    );
-  }
-
-  const hiddenScale = isMobileViewport ? 0.95 : 0.9;
-  const transitionDuration = isMobileViewport
-    ? Math.min(duration, animationDurationsMobile.normal)
-    : duration;
+  }, [prefersReducedMotion, isMobileViewport, duration, delay]);
 
   return (
-    <motion.div
-      ref={ref}
-      initial={{ opacity: 0, scale: hiddenScale }}
-      animate={isInView ? { opacity: 1, scale: 1 } : { opacity: 0, scale: hiddenScale }}
-      transition={{ duration: transitionDuration, delay, ease: animationEasing }}
-      className={className}
-    >
+    <div ref={ref} className={className} style={animStyle}>
       {children}
-    </motion.div>
+    </div>
   );
 }
