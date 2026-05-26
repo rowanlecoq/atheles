@@ -42,7 +42,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
   return (
     <div className="group">
       {/* Image container */}
-      <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark">
+      <div className="card-dark-bg relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark">
         <Link href={`/product/${product.handle}`} prefetch={true}>
           {/* Primary image */}
           {product.featuredImage?.url && (
@@ -93,7 +93,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
         {/* Size picker overlay */}
         {hasMultipleVariants && product.availableForSale && showSizes && (
           <div
-            className="absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-brand-dark via-brand-dark/95 to-transparent p-4 pt-10"
+            className="size-picker absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-brand-dark via-brand-dark/95 to-transparent p-4 pt-10"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
           >
             <div className="grid auto-cols-fr grid-flow-col gap-1.5">

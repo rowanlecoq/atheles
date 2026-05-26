@@ -673,6 +673,24 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .bg-brand-dark\/70 {
   background-color: rgba(26, 22, 18, 0.70) !important;
 }
+/* Product card image container — dark fallback behind images (hover transition, load state) */
+[data-color-mode="light"] .card-dark-bg {
+  background-color: #1a1614 !important;
+}
+/* Size picker overlay — always dark since it sits over the product image.
+   Restore CSS var so from-brand-dark/via-brand-dark gradient stops resolve dark.
+   Re-allow white-opacity buttons and white text inside the dark overlay. */
+[data-color-mode="light"] .size-picker {
+  --color-brand-dark: #1a1614;
+}
+[data-color-mode="light"] .size-picker [class*="bg-white\/"] {
+  background-color: rgba(255, 255, 255, 0.10) !important;
+  backdrop-filter: unset !important;
+  -webkit-backdrop-filter: unset !important;
+}
+[data-color-mode="light"] .size-picker [class*="text-white"] {
+  color: rgba(255, 255, 255, 0.90) !important;
+}
 /* Product card title lives inside a from-black/80 dark gradient — keep text white */
 [data-color-mode="light"] [class*="from-black\/"] [class*="text-white"] {
   color: rgba(255, 255, 255, 0.9) !important;
