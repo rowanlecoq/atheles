@@ -602,12 +602,10 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] body.bg-brand-dark:not([data-bg]) {
   background-color: #e8e2d8 !important;
 }
-/* When a background theme is active in light mode, frosted glass so cards
-   feel integrated with the canvas rather than floating white slabs. */
+/* When a background theme is active, cards stay solid so text stays readable.
+   The animated background is visible around the cards, not through them. */
 [data-color-mode="light"] body[data-bg] .bg-brand-dark {
-  background-color: rgba(242, 237, 228, 0.72) !important;
-  backdrop-filter: blur(20px) saturate(1.2);
-  -webkit-backdrop-filter: blur(20px) saturate(1.2);
+  background-color: #f2ede4 !important;
 }
 /* Border colours — slightly more visible on warm background */
 [data-color-mode="light"] [class*="border-brand-dark-gold"] {
