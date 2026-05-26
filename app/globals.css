@@ -593,3 +593,21 @@ body[data-bg="sunset"] {
   background-color: rgba(154, 120, 40, 0.25);
   color: #111111;
 }
+/* Explicit overrides — Tailwind compiles bg-* to static values so CSS variable
+   cascade alone isn't enough; these ensure light mode backgrounds apply. */
+[data-color-mode="light"] .bg-brand-dark {
+  background-color: #ffffff !important;
+}
+[data-color-mode="light"] body.bg-brand-dark:not([data-bg]) {
+  background-color: #f0f0f0 !important;
+}
+/* Border colours — darken for visibility on white backgrounds */
+[data-color-mode="light"] [class*="border-brand-dark-gold"] {
+  border-color: rgba(138, 104, 32, 0.35) !important;
+}
+/* Medium-grey backgrounds (used in some inner sections) */
+[data-color-mode="light"] .bg-brand-medium-grey\/10,
+[data-color-mode="light"] .bg-brand-dark-gold\/5,
+[data-color-mode="light"] .bg-brand-dark-gold\/10 {
+  background-color: rgba(138, 104, 32, 0.07) !important;
+}

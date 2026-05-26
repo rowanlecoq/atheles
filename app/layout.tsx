@@ -67,6 +67,7 @@ export default async function RootLayout({
       data-color-mode="dark"
       className={`dark ${playfair.variable}`}
       style={{ colorScheme: "dark" }}
+      suppressHydrationWarning
     >
       <body className="bg-brand-dark text-white isolate">
         {/* Inline scripts run synchronously before React hydrates — prevents
