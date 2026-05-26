@@ -183,8 +183,7 @@ function drawBeam(
 }
 
 function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: ThemeKey, time: number) {
-  const hasFilter = "filter" in ctx;
-  if (hasFilter) ctx.filter = "blur(20px)";
+  const hasFilter = false; // blur(20px) on canvas is too expensive on mobile — skip
 
   if (theme === "water") {
     for (let i = 0; i < 8; i++) {
@@ -311,7 +310,6 @@ function drawRays(ctx: CanvasRenderingContext2D, w: number, h: number, theme: Th
     }
   }
 
-  if (hasFilter) ctx.filter = "none";
 }
 
 function drawStar(ctx: CanvasRenderingContext2D, cx: number, cy: number, outerR: number, rotation: number) {

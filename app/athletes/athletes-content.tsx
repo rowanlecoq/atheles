@@ -1,9 +1,9 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState, type CSSProperties } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
-import { useReducedMotion } from "lib/hooks/use-reduced-motion";
+import { useAnimateInView } from "lib/hooks/use-animate-in-view";
 import { FadeIn } from "components/animations";
 import { normalizeSocials as _normalizeSocials, type AthleteData } from "lib/athletes";
 
@@ -112,19 +112,22 @@ function renderMediaItem(item: string, altText: string, imgClassName: string) {
   return <img src={item} alt={altText} className={imgClassName} />;
 }
 
+const CARD_ANIM: CSSProperties = {
+  "--fi-kf": "fi-up",
+  "--fi-dur": "0.28s",
+  "--fi-del": "0s",
+} as CSSProperties;
+
 function AthleteCard({
   athlete,
   index,
   onOpenLightbox,
-  blurInitial,
-  blurFinal,
 }: {
   athlete: Athlete;
   index: number;
   onOpenLightbox: (items: string[], index: number) => void;
-  blurInitial?: string;
-  blurFinal?: string;
 }) {
+  const cardRef = useAnimateInView<HTMLDivElement>();
   const allImages = [athlete.image, ...(athlete.images || [])].filter(Boolean) as string[];
   const [imageIndex, setImageIndex] = useState(0);
   const scrollRef = useRef<HTMLDivElement>(null);
@@ -179,12 +182,10 @@ function AthleteCard({
   );
 
   return (
-    <motion.div
-      className="overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
-      initial={{ opacity: 0, y: 20, ...(blurInitial ? { filter: blurInitial } : {}) }}
-      whileInView={{ opacity: 1, y: 0, ...(blurFinal ? { filter: blurFinal } : {}) }}
-      viewport={{ once: true, margin: "0px" }}
-      transition={{ duration: 0.28, delay: Math.min(index, 5) * 0.03, ease: [0.22, 1, 0.36, 1] }}
+    <div
+      ref={cardRef}
+      className="fi-anim overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark"
+      style={CARD_ANIM}
     >
       {/* Mobile: horizontal scroll snap gallery — swipe to navigate, tap to open lightbox */}
       <div
@@ -315,7 +316,7 @@ function AthleteCard({
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }
 
@@ -326,9 +327,6 @@ export function AthletesContent({ initialAthletes = [] }: { initialAthletes?: At
   const [embedLoading, setEmbedLoading] = useState(false);
   const [zoom, setZoom] = useState(false);
   const [zoomOrigin, setZoomOrigin] = useState({ x: 50, y: 50 });
-  const prefersReducedMotion = useReducedMotion();
-  const blurInitial = prefersReducedMotion ? undefined : "blur(8px)";
-  const blurFinal = prefersReducedMotion ? undefined : "blur(0.001px)";
 
   // Keyboard navigation
   useEffect(() => {
@@ -384,8 +382,6 @@ export function AthletesContent({ initialAthletes = [] }: { initialAthletes?: At
               setEmbedLoading(isMediaUrl(items[idx] || ""));
               setLightbox({ items, index: idx });
             }}
-            blurInitial={blurInitial}
-            blurFinal={blurFinal}
           />
         ))}
       </div>

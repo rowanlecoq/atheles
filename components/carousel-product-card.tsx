@@ -1,25 +1,25 @@
 "use client";
 
 import { FavoriteCardButton } from "components/favorite-card-button";
-import { useReducedMotion } from "lib/hooks/use-reduced-motion";
-import { motion } from "motion/react";
+import { useAnimateInView } from "lib/hooks/use-animate-in-view";
 import Image from "next/image";
 import Link from "next/link";
 import Price from "components/price";
 import type { Product } from "lib/shopify/types";
+import type { CSSProperties } from "react";
 
-export function CarouselProductCard({ product, index = 0 }: { product: Product; index?: number }) {
+const CARD_ANIM: CSSProperties = {
+  "--fi-kf": "fi-up",
+  "--fi-dur": "0.28s",
+  "--fi-del": "0s",
+} as CSSProperties;
+
+export function CarouselProductCard({ product }: { product: Product; index?: number }) {
+  const ref = useAnimateInView<HTMLDivElement>();
   const secondImage = product.images?.[1]?.url;
-  const prefersReducedMotion = useReducedMotion();
 
   return (
-    <motion.div
-      className="group"
-      initial={prefersReducedMotion || index < 2 ? {} : { opacity: 0, y: 16 }}
-      whileInView={prefersReducedMotion || index < 2 ? {} : { opacity: 1, y: 0 }}
-      viewport={{ once: true, margin: "0px" }}
-      transition={{ duration: 0.28, delay: Math.min(index, 4) * 0.05, ease: [0.22, 1, 0.36, 1] }}
-    >
+    <div ref={ref} className="fi-anim group" style={CARD_ANIM}>
       {/* Image */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark">
         <Link href={`/product/${product.handle}`} prefetch={true}>
@@ -80,6 +80,6 @@ export function CarouselProductCard({ product, index = 0 }: { product: Product; 
           currencyCode={product.priceRange.maxVariantPrice.currencyCode}
         />
       </div>
-    </motion.div>
+    </div>
   );
 }
