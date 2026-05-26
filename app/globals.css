@@ -632,3 +632,17 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .bg-brand-dark-gold\/20 {
   background-color: rgba(138, 104, 32, 0.25) !important;
 }
+/* "None" background swatch — match light page colour instead of dark circle */
+[data-color-mode="light"] button[aria-label="No background"] {
+  background: #e8e2d8 !important;
+}
+/* Theme-section image overlays (newsletter, quote) — keep semi-transparent so
+   the background image shows through. Higher specificity than the general
+   [class*="bg-brand-dark"] rule so it wins for the overlay divs only.      */
+[data-color-mode="light"] .theme-section [class*="bg-brand-dark/"] {
+  background-color: rgba(232, 226, 216, 0.45) !important;
+}
+/* Remove the dark gradient fade added on top of newsletter image */
+[data-color-mode="light"] .theme-section .bg-gradient-to-b {
+  background-image: none !important;
+}
