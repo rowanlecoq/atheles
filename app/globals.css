@@ -561,13 +561,13 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] {
   color-scheme: light;
   --color-brand-dark: #e0d5c0;
-  --color-brand-dark-gold: #8a6820;
-  --color-brand-gold: #9a7828;
-  --color-brand-pale-gold: #806020;
-  --color-brand-light-gold: #b88a30;
-  --color-brand-grey: #555555;
-  --color-brand-medium-grey: #888888;
-  --color-brand-gold-wash: #a08040;
+  --color-brand-dark-gold: #7a5e18;
+  --color-brand-gold: #6e5214;
+  --color-brand-pale-gold: #614a12;
+  --color-brand-light-gold: #8a6a20;
+  --color-brand-grey: #4a4030;
+  --color-brand-medium-grey: #6a6058;
+  --color-brand-gold-wash: #7a6228;
 }
 [data-color-mode="light"] body {
   color: #1a1612;
