@@ -239,17 +239,18 @@ export default function ProfileContent() {
       // Prefer atheles-bg-theme for UI state — it's only written by the user's
       // explicit swatch clicks and never overwritten by a stale session fetch.
       try {
-        const bg = localStorage.getItem("atheles-bg-theme");
-        if (bg) {
-          const { theme: t, globalTheme: g } = JSON.parse(bg) as { theme?: string; globalTheme?: boolean };
+        const bgRaw = localStorage.getItem("atheles-bg-theme");
+        const bgKeyMissing = bgRaw === null;
+        if (!bgKeyMissing) {
+          const { theme: t, globalTheme: g } = JSON.parse(bgRaw!) as { theme?: string; globalTheme?: boolean };
           const bgTheme = t && t !== "none" ? t : null;
           if (bgTheme) {
             setSelectedTheme(bgTheme);
             setThemeGlobal(g || false);
             document.body.setAttribute("data-bg", bgTheme);
-          } else if (u.theme && u.theme !== "none") {
-            // atheles-bg-theme was corrupted to "none" by the stale-server race;
-            // atheles-session still holds the real preference — recover from it.
+          } else if (bgKeyMissing && u.theme && u.theme !== "none") {
+            // Only recover from session on a fresh device where the key is absent —
+            // never overwrite an explicit "none" the user set.
             setSelectedTheme(u.theme);
             setThemeGlobal(u.globalTheme || false);
             document.body.setAttribute("data-bg", u.theme);
@@ -260,8 +261,16 @@ export default function ProfileContent() {
             setSelectedTheme(null);
             setThemeGlobal(g || false);
           }
+        } else if (u.theme && u.theme !== "none") {
+          // Key absent: fresh device — recover from session
+          setSelectedTheme(u.theme);
+          setThemeGlobal(u.globalTheme || false);
+          document.body.setAttribute("data-bg", u.theme);
+          try {
+            localStorage.setItem("atheles-bg-theme", JSON.stringify({ theme: u.theme, globalTheme: u.globalTheme || false }));
+          } catch {}
         } else {
-          setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
+          setSelectedTheme(null);
           setThemeGlobal(u.globalTheme || false);
         }
       } catch {
@@ -305,30 +314,32 @@ export default function ProfileContent() {
 
       // Restore background theme state — prefer local storage over stale session
       try {
-        const bg = localStorage.getItem("atheles-bg-theme");
-        if (bg) {
-          const { theme: t, globalTheme: g } = JSON.parse(bg) as { theme?: string; globalTheme?: boolean };
+        const bgRaw = localStorage.getItem("atheles-bg-theme");
+        const bgKeyMissing = bgRaw === null;
+        if (!bgKeyMissing) {
+          const { theme: t, globalTheme: g } = JSON.parse(bgRaw!) as { theme?: string; globalTheme?: boolean };
           const bgTheme = t && t !== "none" ? t : null;
           if (bgTheme) {
             setSelectedTheme(bgTheme);
             setThemeGlobal(g || false);
-          } else if (u.theme && u.theme !== "none") {
-            // Recovery: atheles-bg-theme was corrupted to "none" but session holds real theme
-            setSelectedTheme(u.theme);
-            setThemeGlobal(u.globalTheme || false);
-            try {
-              localStorage.setItem("atheles-bg-theme", JSON.stringify({ theme: u.theme, globalTheme: u.globalTheme || false }));
-            } catch {}
-            if (u.globalTheme || window.location.pathname.startsWith("/profile")) {
-              document.body.setAttribute("data-bg", u.theme);
-              window.dispatchEvent(new Event("atheles-bg-change"));
-            }
           } else {
+            // Key present but explicitly "none" — respect user's choice, don't recover from session
             setSelectedTheme(null);
             setThemeGlobal(g || false);
           }
+        } else if (u.theme && u.theme !== "none") {
+          // Key absent: fresh device — recover from session
+          setSelectedTheme(u.theme);
+          setThemeGlobal(u.globalTheme || false);
+          try {
+            localStorage.setItem("atheles-bg-theme", JSON.stringify({ theme: u.theme, globalTheme: u.globalTheme || false }));
+          } catch {}
+          if (u.globalTheme || window.location.pathname.startsWith("/profile")) {
+            document.body.setAttribute("data-bg", u.theme);
+            window.dispatchEvent(new Event("atheles-bg-change"));
+          }
         } else {
-          setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
+          setSelectedTheme(null);
           setThemeGlobal(u.globalTheme || false);
         }
       } catch {

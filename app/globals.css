@@ -772,3 +772,27 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .profile-settings-section [class*="text-white"] {
   color: #2d2010 !important;
 }
+
+/* -----------------------------------------------------------------------
+   White-text preservation for elements that stay dark in light mode
+   ----------------------------------------------------------------------- */
+/* bg-black/X overlays (gallery counters, play buttons, lightbox controls):
+   these are NOT caught by the bg-brand-dark rule, so they keep their dark
+   background — preserve white text so it stays readable on them.          */
+[data-color-mode="light"] .bg-black\/30 [class*="text-white"],
+[data-color-mode="light"] .bg-black\/60 [class*="text-white"],
+[data-color-mode="light"] .bg-black\/70 [class*="text-white"],
+[data-color-mode="light"] .bg-black\/80 [class*="text-white"] {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+/* Newsletter / quote-section email input: sits over the dark bg-brand-dark/60
+   overlay so typed text must be light, not dark.                          */
+[data-color-mode="light"] .theme-section:not(.bg-brand-dark) [class*="bg-brand-dark\/40"] [class*="text-white"] {
+  color: rgba(255, 255, 255, 0.9) !important;
+}
+/* Prose content pages (FAQ, shipping, returns): Tailwind Typography's
+   prose-strong:text-white targets <strong> via a descendant selector that
+   the global [class*="text-white"] rule cannot reach — override directly.  */
+[data-color-mode="light"] .prose-strong\:text-white strong {
+  color: #2d1a06 !important;
+}
