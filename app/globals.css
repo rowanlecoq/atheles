@@ -572,9 +572,9 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] body {
   color: #1a1612;
 }
-/* Light grey page background when no bg theme is active; cards (bg-brand-dark) stay white */
+/* Single cream background — matches the card/section colour everywhere */
 [data-color-mode="light"] body:not([data-bg]) {
-  background-color: #f0f0f0;
+  background-color: #f2ede4;
 }
 [data-color-mode="light"] [class*="text-white"] {
   color: #1a1612 !important;
@@ -604,7 +604,7 @@ body[data-bg="sunset"] {
   -webkit-backdrop-filter: none !important;
 }
 [data-color-mode="light"] body[class*="bg-brand-dark"]:not([data-bg]) {
-  background-color: #e8e2d8 !important;
+  background-color: #f2ede4 !important;
 }
 /* Border colours — slightly more visible on warm background */
 [data-color-mode="light"] [class*="border-brand-dark-gold"] {
