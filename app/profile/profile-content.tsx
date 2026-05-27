@@ -243,12 +243,22 @@ export default function ProfileContent() {
         if (bg) {
           const { theme: t, globalTheme: g } = JSON.parse(bg) as { theme?: string; globalTheme?: boolean };
           const bgTheme = t && t !== "none" ? t : null;
-          setSelectedTheme(bgTheme);
-          setThemeGlobal(g || false);
-          // Profile page directly owns its background — ensures canvas is always
-          // restored on return navigation regardless of ProfileBackgroundApplier timing.
           if (bgTheme) {
+            setSelectedTheme(bgTheme);
+            setThemeGlobal(g || false);
             document.body.setAttribute("data-bg", bgTheme);
+          } else if (u.theme && u.theme !== "none") {
+            // atheles-bg-theme was corrupted to "none" by the stale-server race;
+            // atheles-session still holds the real preference — recover from it.
+            setSelectedTheme(u.theme);
+            setThemeGlobal(u.globalTheme || false);
+            document.body.setAttribute("data-bg", u.theme);
+            try {
+              localStorage.setItem("atheles-bg-theme", JSON.stringify({ theme: u.theme, globalTheme: u.globalTheme || false }));
+            } catch {}
+          } else {
+            setSelectedTheme(null);
+            setThemeGlobal(g || false);
           }
         } else {
           setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
@@ -298,8 +308,25 @@ export default function ProfileContent() {
         const bg = localStorage.getItem("atheles-bg-theme");
         if (bg) {
           const { theme: t, globalTheme: g } = JSON.parse(bg) as { theme?: string; globalTheme?: boolean };
-          setSelectedTheme(t && t !== "none" ? t : null);
-          setThemeGlobal(g || false);
+          const bgTheme = t && t !== "none" ? t : null;
+          if (bgTheme) {
+            setSelectedTheme(bgTheme);
+            setThemeGlobal(g || false);
+          } else if (u.theme && u.theme !== "none") {
+            // Recovery: atheles-bg-theme was corrupted to "none" but session holds real theme
+            setSelectedTheme(u.theme);
+            setThemeGlobal(u.globalTheme || false);
+            try {
+              localStorage.setItem("atheles-bg-theme", JSON.stringify({ theme: u.theme, globalTheme: u.globalTheme || false }));
+            } catch {}
+            if (u.globalTheme || window.location.pathname.startsWith("/profile")) {
+              document.body.setAttribute("data-bg", u.theme);
+              window.dispatchEvent(new Event("atheles-bg-change"));
+            }
+          } else {
+            setSelectedTheme(null);
+            setThemeGlobal(g || false);
+          }
         } else {
           setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
           setThemeGlobal(u.globalTheme || false);
