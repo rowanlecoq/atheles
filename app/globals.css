@@ -634,7 +634,7 @@ body[data-bg="sunset"] {
 }
 /* Hero: remove the dark gradient overlay in light mode — images show at full brightness */
 [data-color-mode="light"] .hero-gradient-overlay {
-  background: rgba(26, 22, 18, 0.42) !important;
+  background: rgba(26, 22, 18, 0.60) !important;
 }
 [data-color-mode="light"] .hero-bottom-fade {
   display: none;
@@ -692,7 +692,7 @@ body[data-bg="sunset"] {
   --color-brand-dark: #1a1614;
 }
 [data-color-mode="light"] .theme-section:not(.bg-brand-dark) .bg-brand-dark\/60 {
-  background-color: rgba(26, 22, 18, 0.52) !important;
+  background-color: rgba(26, 22, 18, 0.68) !important;
 }
 [data-color-mode="light"] .theme-section:not(.bg-brand-dark) .bg-brand-dark\/40 {
   background-color: rgba(26, 22, 18, 0.18) !important;
