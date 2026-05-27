@@ -1181,7 +1181,7 @@ export default function ProfileContent() {
 
       {/* Monthly Discount Code */}
       {user.discountCode && tier.discountPercent && (
-        <div className="mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
+        <div className="profile-discount-section mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
           <div className="p-5">
             <div className="mb-3 flex items-center gap-2">
               <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-5 w-5 text-brand-gold">
