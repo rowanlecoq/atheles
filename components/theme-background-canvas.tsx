@@ -505,7 +505,6 @@ export function ThemeBackgroundCanvas() {
     const loop = (ts: number) => {
       state.animId = requestAnimationFrame(loop);
       if (document.hidden) return;
-      if (!state.theme) return; // no theme active — skip draw, keep loop parked
       if (ts - lastFrameTime < TARGET_MS) return;
       lastFrameTime = ts;
       renderFrame();
