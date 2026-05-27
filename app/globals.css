@@ -636,6 +636,9 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .hero-gradient-overlay {
   display: none;
 }
+[data-color-mode="light"] .hero-bottom-fade {
+  display: none;
+}
 /* Profile theme appearance card: brand-grey opacity variants read well on dark cards
    but are too faint on the cream card in light mode — restore full legibility.
    Target both plain and opacity-suffixed variants. */
