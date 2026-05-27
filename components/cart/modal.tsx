@@ -752,7 +752,7 @@ export default function CartModal() {
                 <Link
                   href="/profile"
                   onClick={closeCart}
-                  className="group flex items-center gap-2 border-b border-white/5 px-5 py-2.5 transition-colors hover:bg-white/[0.02]"
+                  className="group flex items-center gap-2 border-b border-brand-dark-gold/15 px-5 py-2.5 transition-colors hover:bg-brand-dark-gold/5"
                 >
                   <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinecap="round" strokeLinejoin="round" className="h-3.5 w-3.5 flex-none text-brand-gold/60">
                     <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/>
