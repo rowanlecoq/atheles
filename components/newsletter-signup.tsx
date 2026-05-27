@@ -105,7 +105,7 @@ export function NewsletterSignup() {
             <h2 className="mb-4 animate-fade-in font-heading text-2xl font-bold tracking-[0.06em] text-brand-gold sm:text-3xl sm:tracking-wider md:text-4xl">
               you&apos;re in the club 🔱
             </h2>
-            <div className="mx-auto mb-6 h-px w-24 bg-brand-dark-gold/40" />
+            <div className="mx-auto mb-6 h-px w-24 bg-brand-gold/60" />
             <p className="animate-fade-in text-sm text-brand-grey [animation-delay:200ms]">
               thank you so much for joining. you will be the first to know about
               new drops, exclusive offers, and upcoming releases.
@@ -116,7 +116,7 @@ export function NewsletterSignup() {
             <h2 className="mb-4 animate-fade-in font-heading text-2xl font-bold tracking-[0.06em] text-brand-gold sm:text-3xl sm:tracking-wider md:text-4xl">
               join the club 🔱 for free.
             </h2>
-            <div className="mx-auto mb-6 h-px w-24 bg-brand-dark-gold/40" />
+            <div className="mx-auto mb-6 h-px w-24 bg-brand-gold/60" />
             <p className="mb-8 animate-fade-in text-sm text-brand-grey [animation-delay:200ms]">
               be the first to know about new drops, exclusive offers, and upcoming
               releases.
