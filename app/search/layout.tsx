@@ -33,7 +33,7 @@ export default function SearchLayout({
       </FadeIn>
 
       {/* Main content area */}
-      <div className="mx-auto max-w-(--breakpoint-2xl) px-4 pb-8 pt-4 text-white md:pt-8">
+      <div className="search-page-bg mx-auto max-w-(--breakpoint-2xl) px-4 pb-8 pt-4 text-white md:pt-8">
         <div className="grid grid-cols-1 gap-10 md:grid-cols-[200px_1fr]">
           {/* Desktop sidebar */}
           <FadeIn direction="up" duration={0.3}>

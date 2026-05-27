@@ -1244,7 +1244,7 @@ export default function ProfileContent() {
       )}
 
       {/* Profile Settings */}
-      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
+      <div className="profile-settings-section mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">
             settings

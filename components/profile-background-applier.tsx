@@ -5,10 +5,10 @@ import { useEffect, useLayoutEffect } from "react";
 
 const LS_KEY = "atheles-bg-theme";
 
-function applyFromStorage() {
+// Accept an explicit path so the hook's pathname (always current) takes priority
+// over window.location.pathname, which can lag during Next.js concurrent transitions.
+function applyFromStorage(pathname: string) {
   try {
-    const pathname = window.location.pathname;
-    // localStorage persists across browser close — primary source
     const stored = localStorage.getItem(LS_KEY);
     if (stored) {
       const { theme, globalTheme } = JSON.parse(stored) as { theme?: string; globalTheme?: boolean };
@@ -38,9 +38,12 @@ export function ProfileBackgroundApplier() {
   // paints so data-bg is set before the first frame, eliminating the dark flash
   // on client-side navigation (useEffect would fire after paint).
   useLayoutEffect(() => {
-    applyFromStorage();
-    window.addEventListener("atheles-bg-change", applyFromStorage);
-    return () => window.removeEventListener("atheles-bg-change", applyFromStorage);
+    applyFromStorage(pathname);
+    // Close over the current pathname so event-driven re-applies always use
+    // the correct path value, not a stale window.location.pathname.
+    const handler = () => applyFromStorage(pathname);
+    window.addEventListener("atheles-bg-change", handler);
+    return () => window.removeEventListener("atheles-bg-change", handler);
   }, [pathname]);
 
   // Cross-device sync: fetch fresh session once per mount
@@ -63,10 +66,11 @@ export function ProfileBackgroundApplier() {
             prevTheme = (JSON.parse(prev) as { theme?: string }).theme ?? "none";
           }
         } catch {}
-        // If the user explicitly cleared the theme locally (set to "none") but the
-        // server still has the old theme (e.g. update request in flight or failed),
-        // don't overwrite — trust the local choice to avoid a re-flash.
-        if (hasLocal && prevTheme === "none" && newTheme !== "none") return;
+        // Trust the local choice when:
+        // (a) user cleared theme locally but server still has old (request in flight)
+        // (b) same theme — user may have toggled globalTheme locally; don't overwrite
+        if (hasLocal && (prevTheme === "none" && newTheme !== "none")) return;
+        if (hasLocal && prevTheme === newTheme) return;
         try {
           localStorage.setItem(LS_KEY, JSON.stringify({
             theme: newTheme,
@@ -77,7 +81,7 @@ export function ProfileBackgroundApplier() {
         // device sync). Silently write for removals or same-theme so the session
         // fetch never causes a background flash or canvas rebuild.
         if (newTheme !== "none" && newTheme !== prevTheme) {
-          applyFromStorage();
+          applyFromStorage(window.location.pathname);
           window.dispatchEvent(new Event("atheles-bg-change"));
         }
       })

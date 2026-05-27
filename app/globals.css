@@ -701,3 +701,19 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] body:not([data-bg]) .content-surface {
   background-color: #f2ede4;
 }
+/* Search/store page: always cream in light mode so transparent children (titles,
+   filter labels) remain readable whether or not a canvas theme is globally active.  */
+[data-color-mode="light"] .search-page-bg {
+  background-color: #f2ede4;
+}
+/* Active segmented pill: bg-brand-gold + text-brand-dark on the SAME element.
+   The descendant rule (.bg-brand-gold .text-brand-dark) doesn't match this case —
+   add the compound-selector form so the active pill text stays dark on gold.       */
+[data-color-mode="light"] .bg-brand-gold.text-brand-dark {
+  color: #1a1612 !important;
+}
+/* Profile settings card: soften field values (text-white → near-black #1a1612) to
+   warm dark-brown so they read consistently with the golden/pale-gold theme text.  */
+[data-color-mode="light"] .profile-settings-section [class*="text-white"] {
+  color: #2d2010 !important;
+}
