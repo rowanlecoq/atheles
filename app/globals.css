@@ -638,13 +638,22 @@ body[data-bg="sunset"] {
 }
 /* Theme sections (hero, newsletter, quote) keep their dark atmospheric look in light mode.
    They are always media-background sections — dark overlays are essential for legibility.
-   Restore the CSS variable so from-brand-dark/X gradient stops resolve to dark.         */
+   Restore the CSS variable so from-brand-dark/X gradient stops resolve to dark.
+   Also set a solid dark base so semi-transparent overlays (bg-brand-dark/60) aren't
+   blended over the cream body, which would produce washed-out brownish grey.          */
 [data-color-mode="light"] .theme-section {
   --color-brand-dark: #1a1614;
   --color-brand-gold: #ccb173;
   --color-brand-pale-gold: #b09e73;
   --color-brand-dark-gold: #7f6f4c;
   --color-brand-grey: #737373;
+  background-color: #1a1614;
+}
+/* Body/subtitle text in theme-sections: brand-grey (#737373) is readable on the
+   true dark background in dark mode but too low-contrast on the semi-transparent
+   overlay in light mode — lift it to a warm lighter grey.                          */
+[data-color-mode="light"] .theme-section [class*="text-brand-grey"] {
+  color: #b8b0a0 !important;
 }
 /* Section background — beat the generic [class*="bg-brand-dark"] rule */
 [data-color-mode="light"] .theme-section.bg-brand-dark {

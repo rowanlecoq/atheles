@@ -242,8 +242,14 @@ export default function ProfileContent() {
         const bg = localStorage.getItem("atheles-bg-theme");
         if (bg) {
           const { theme: t, globalTheme: g } = JSON.parse(bg) as { theme?: string; globalTheme?: boolean };
-          setSelectedTheme(t && t !== "none" ? t : null);
+          const bgTheme = t && t !== "none" ? t : null;
+          setSelectedTheme(bgTheme);
           setThemeGlobal(g || false);
+          // Profile page directly owns its background — ensures canvas is always
+          // restored on return navigation regardless of ProfileBackgroundApplier timing.
+          if (bgTheme) {
+            document.body.setAttribute("data-bg", bgTheme);
+          }
         } else {
           setSelectedTheme(u.theme && u.theme !== "none" ? u.theme : null);
           setThemeGlobal(u.globalTheme || false);
