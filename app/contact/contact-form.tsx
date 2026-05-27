@@ -106,6 +106,7 @@ export function ContactForm() {
             className={`${fieldClass} appearance-none pr-10`}
             onFocus={() => setSubjectOpen(true)}
             onBlur={() => setSubjectOpen(false)}
+            onChange={() => setSubjectOpen(false)}
           >
             <option value="">select a subject</option>
             <option value="order inquiry">order inquiry</option>

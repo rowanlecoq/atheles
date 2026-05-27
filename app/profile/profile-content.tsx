@@ -1559,7 +1559,7 @@ export default function ProfileContent() {
 
         {/* Color mode — segmented pill control */}
         <div className="mb-6">
-          <p className="mb-3 text-xs uppercase tracking-wider text-brand-grey/50">color mode</p>
+          <p className="mb-3 text-xs uppercase tracking-wider text-brand-grey">color mode</p>
           <div className="flex gap-1 rounded-lg border border-brand-dark-gold/20 bg-brand-dark-gold/5 p-1">
             {(["dark", "light", "system"] as const).map((mode) => (
               <button
@@ -1580,7 +1580,7 @@ export default function ProfileContent() {
 
         {/* Background swatches — desktop only */}
         <div className="hidden md:block">
-          <p className="mb-4 text-xs uppercase tracking-wider text-brand-grey/50">background</p>
+          <p className="mb-4 text-xs uppercase tracking-wider text-brand-grey">background</p>
           <div className="mb-5 grid grid-cols-6 justify-items-center gap-5">
             {/* None */}
             <div className="flex flex-col items-center gap-2">
