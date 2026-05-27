@@ -648,6 +648,18 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .profile-settings-section [class*="text-brand-grey"] {
   color: #3d2e1a !important;
 }
+/* Tier/rankings card: gradient text (bg-clip-text text-transparent) uses light Tailwind
+   colours (to-yellow-300, to-white, etc.) that vanish on the cream background.
+   Replace with solid dark gold so all tier names, sparkles and labels stay legible. */
+[data-color-mode="light"] .profile-tier-section [class*="text-transparent"] {
+  -webkit-text-fill-color: #5a3e0c !important;
+  color: #5a3e0c !important;
+}
+/* Rank button: keep gradient bg but ensure white text stays white */
+[data-color-mode="light"] .profile-tier-section [class*="text-white"] {
+  color: #fff !important;
+  -webkit-text-fill-color: #fff !important;
+}
 /* "None" background swatch — match light page colour instead of dark circle */
 [data-color-mode="light"] button[aria-label="No background"] {
   background: #d4c9b4 !important;

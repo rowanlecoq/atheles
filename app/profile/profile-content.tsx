@@ -906,7 +906,7 @@ export default function ProfileContent() {
       </div>
 
       {/* Points & Tier Progress */}
-      <div className="relative mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
+      <div className="profile-tier-section relative mb-8 overflow-hidden rounded-lg border border-brand-dark-gold/20 bg-brand-dark">
         {/* Background glow */}
         <div className="pointer-events-none absolute inset-0 bg-gradient-to-br from-brand-gold/5 via-transparent to-brand-gold/3" />
 
