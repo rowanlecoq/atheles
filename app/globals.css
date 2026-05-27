@@ -632,6 +632,15 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .bg-brand-dark-gold\/20 {
   background-color: rgba(138, 104, 32, 0.25) !important;
 }
+/* Hero: reduce the dark gradient overlay to ~30% so images show through in light mode */
+[data-color-mode="light"] .hero-gradient-overlay {
+  opacity: 0.3;
+}
+/* Profile theme appearance card: brand-grey opacity variants read well on dark cards
+   but are too faint on the cream card in light mode — restore full legibility */
+[data-color-mode="light"] .profile-theme-section [class*="text-brand-grey"] {
+  color: #3d2e1a !important;
+}
 /* "None" background swatch — match light page colour instead of dark circle */
 [data-color-mode="light"] button[aria-label="No background"] {
   background: #e8e2d8 !important;

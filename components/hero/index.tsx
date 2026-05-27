@@ -16,7 +16,7 @@ export function Hero() {
         sizes="100vw"
         priority
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/76 via-brand-dark/70 to-brand-dark/90" />
+      <div className="hero-gradient-overlay absolute inset-0 bg-gradient-to-b from-brand-dark/76 via-brand-dark/70 to-brand-dark/90" />
       <GoldParticles count={16} />
 
       {/* 3-column grid: image | center | image */}

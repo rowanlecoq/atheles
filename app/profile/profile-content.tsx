@@ -1551,7 +1551,7 @@ export default function ProfileContent() {
       </div>
 
       {/* Appearance */}
-      <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
+      <div className="profile-theme-section mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
         <div className="mb-6 flex items-center justify-between">
           <h2 className="font-heading text-xl text-brand-pale-gold">theme appearance</h2>
           {themeSaving && <span className="text-xs text-brand-grey/60">saving...</span>}
