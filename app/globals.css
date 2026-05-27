@@ -560,7 +560,7 @@ body[data-bg="sunset"] {
 /* The picker UI is md:hidden so only mobile users can set it via normal UI.  */
 [data-color-mode="light"] {
   color-scheme: light;
-  --color-brand-dark: #ece4d4;
+  --color-brand-dark: #e0d5c0;
   --color-brand-dark-gold: #8a6820;
   --color-brand-gold: #9a7828;
   --color-brand-pale-gold: #806020;
@@ -574,7 +574,7 @@ body[data-bg="sunset"] {
 }
 /* Single cream background — matches the card/section colour everywhere */
 [data-color-mode="light"] body:not([data-bg]) {
-  background-color: #ece4d4;
+  background-color: #e0d5c0;
 }
 [data-color-mode="light"] [class*="text-white"] {
   color: #1a1612 !important;
@@ -599,12 +599,12 @@ body[data-bg="sunset"] {
    Warm beige palette keeps the premium gold feel without blinding whites.
    [class*="bg-brand-dark"] catches bg-brand-dark, bg-brand-dark/95, etc. */
 [data-color-mode="light"] [class*="bg-brand-dark"] {
-  background-color: #ece4d4 !important;
+  background-color: #e0d5c0 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 [data-color-mode="light"] body[class*="bg-brand-dark"]:not([data-bg]) {
-  background-color: #ece4d4 !important;
+  background-color: #e0d5c0 !important;
 }
 /* Border colours — slightly more visible on warm background */
 [data-color-mode="light"] [class*="border-brand-dark-gold"] {
@@ -650,7 +650,7 @@ body[data-bg="sunset"] {
 }
 /* "None" background swatch — match light page colour instead of dark circle */
 [data-color-mode="light"] button[aria-label="No background"] {
-  background: #e0d8c8 !important;
+  background: #d4c9b4 !important;
 }
 /* Hero keeps its dark atmospheric look in light mode — the full-bleed gradient overlays
    (from-brand-dark/76 via-brand-dark/70 to-brand-dark/90) are essential for legibility.
@@ -688,6 +688,13 @@ body[data-bg="sunset"] {
   background-color: rgba(26, 22, 18, 0.95) !important;
   backdrop-filter: unset !important;
   -webkit-backdrop-filter: unset !important;
+}
+/* Dropdown nav items sit on a near-black panel — give them clear light text */
+[data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/95 a {
+  color: rgba(232, 220, 195, 0.9) !important;
+}
+[data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/95 a:hover {
+  color: #ccb173 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-white"] {
   color: rgba(255, 255, 255, 0.9) !important;
@@ -740,12 +747,12 @@ body[data-bg="sunset"] {
    When a background theme is selected (body[data-bg]), sections stay transparent so
    the canvas shows through, same as dark mode.                                        */
 [data-color-mode="light"] body:not([data-bg]) .content-surface {
-  background-color: #ece4d4;
+  background-color: #e0d5c0;
 }
 /* Search/store page: always cream in light mode so transparent children (titles,
    filter labels) remain readable whether or not a canvas theme is globally active.  */
 [data-color-mode="light"] .search-page-bg {
-  background-color: #ece4d4;
+  background-color: #e0d5c0;
 }
 /* Active segmented pill: bg-brand-gold + text-brand-dark on the SAME element.
    The descendant rule (.bg-brand-gold .text-brand-dark) doesn't match this case —
