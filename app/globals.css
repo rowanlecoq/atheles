@@ -560,7 +560,7 @@ body[data-bg="sunset"] {
 /* The picker UI is md:hidden so only mobile users can set it via normal UI.  */
 [data-color-mode="light"] {
   color-scheme: light;
-  --color-brand-dark: #f2ede4;
+  --color-brand-dark: #ece4d4;
   --color-brand-dark-gold: #8a6820;
   --color-brand-gold: #9a7828;
   --color-brand-pale-gold: #806020;
@@ -574,7 +574,7 @@ body[data-bg="sunset"] {
 }
 /* Single cream background — matches the card/section colour everywhere */
 [data-color-mode="light"] body:not([data-bg]) {
-  background-color: #f2ede4;
+  background-color: #ece4d4;
 }
 [data-color-mode="light"] [class*="text-white"] {
   color: #1a1612 !important;
@@ -599,12 +599,12 @@ body[data-bg="sunset"] {
    Warm beige palette keeps the premium gold feel without blinding whites.
    [class*="bg-brand-dark"] catches bg-brand-dark, bg-brand-dark/95, etc. */
 [data-color-mode="light"] [class*="bg-brand-dark"] {
-  background-color: #f2ede4 !important;
+  background-color: #ece4d4 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 [data-color-mode="light"] body[class*="bg-brand-dark"]:not([data-bg]) {
-  background-color: #f2ede4 !important;
+  background-color: #ece4d4 !important;
 }
 /* Border colours — slightly more visible on warm background */
 [data-color-mode="light"] [class*="border-brand-dark-gold"] {
@@ -634,7 +634,7 @@ body[data-bg="sunset"] {
 }
 /* Hero: remove the dark gradient overlay in light mode — images show at full brightness */
 [data-color-mode="light"] .hero-gradient-overlay {
-  background: rgba(26, 22, 18, 0.60) !important;
+  background: rgba(26, 22, 18, 0.72) !important;
 }
 [data-color-mode="light"] .hero-bottom-fade {
   display: none;
@@ -650,7 +650,7 @@ body[data-bg="sunset"] {
 }
 /* "None" background swatch — match light page colour instead of dark circle */
 [data-color-mode="light"] button[aria-label="No background"] {
-  background: #e8e2d8 !important;
+  background: #e0d8c8 !important;
 }
 /* Hero keeps its dark atmospheric look in light mode — the full-bleed gradient overlays
    (from-brand-dark/76 via-brand-dark/70 to-brand-dark/90) are essential for legibility.
@@ -664,13 +664,17 @@ body[data-bg="sunset"] {
   background-color: #1a1614;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-brand-grey"] {
-  color: #c8c0b0 !important;
+  color: #ddd6c8 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-brand-dark-gold"] {
-  color: #c4a860 !important;
+  color: #dfc06a !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-brand-pale-gold"] {
-  color: #d4bc7c !important;
+  color: #e8cc7c !important;
+}
+[data-color-mode="light"] .theme-section.bg-brand-dark [class*="beta-pulse"] {
+  animation: none !important;
+  opacity: 1 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/40 {
   background-color: rgba(26, 22, 18, 0.40) !important;
@@ -736,12 +740,12 @@ body[data-bg="sunset"] {
    When a background theme is selected (body[data-bg]), sections stay transparent so
    the canvas shows through, same as dark mode.                                        */
 [data-color-mode="light"] body:not([data-bg]) .content-surface {
-  background-color: #f2ede4;
+  background-color: #ece4d4;
 }
 /* Search/store page: always cream in light mode so transparent children (titles,
    filter labels) remain readable whether or not a canvas theme is globally active.  */
 [data-color-mode="light"] .search-page-bg {
-  background-color: #f2ede4;
+  background-color: #ece4d4;
 }
 /* Active segmented pill: bg-brand-gold + text-brand-dark on the SAME element.
    The descendant rule (.bg-brand-gold .text-brand-dark) doesn't match this case —
