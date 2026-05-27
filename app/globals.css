@@ -684,17 +684,12 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/60 {
   background-color: rgba(26, 22, 18, 0.60) !important;
 }
-[data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/95 {
-  background-color: rgba(26, 22, 18, 0.95) !important;
-  backdrop-filter: unset !important;
-  -webkit-backdrop-filter: unset !important;
-}
-/* Dropdown nav items sit on a near-black panel — give them clear light text */
+/* Dropdown panel: let the general cream rule apply; use dark text on cream */
 [data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/95 a {
-  color: rgba(232, 220, 195, 0.9) !important;
+  color: #3a2c14 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/95 a:hover {
-  color: #ccb173 !important;
+  color: #8a6820 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-white"] {
   color: rgba(255, 255, 255, 0.9) !important;
