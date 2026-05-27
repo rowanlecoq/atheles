@@ -69,8 +69,11 @@ export function ProfileBackgroundApplier() {
         // Trust the local choice when:
         // (a) user cleared theme locally but server still has old (request in flight)
         // (b) same theme — user may have toggled globalTheme locally; don't overwrite
+        // (c) server says "none" but local has a real theme — server is stale from the
+        //     save API call not having landed yet (race on navigate-away + return)
         if (hasLocal && (prevTheme === "none" && newTheme !== "none")) return;
         if (hasLocal && prevTheme === newTheme) return;
+        if (hasLocal && newTheme === "none") return;
         try {
           localStorage.setItem(LS_KEY, JSON.stringify({
             theme: newTheme,
