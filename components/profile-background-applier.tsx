@@ -50,6 +50,14 @@ export function ProfileBackgroundApplier() {
   useEffect(() => {
     if (!document.cookie.includes("atheles-logged-in")) return;
 
+    // Snapshot localStorage at fetch-start time. If the user picks a new theme
+    // while the fetch is in-flight, their live choice wins over stale server data.
+    let localAtMount = "none";
+    try {
+      const stored = localStorage.getItem(LS_KEY);
+      if (stored) localAtMount = (JSON.parse(stored) as { theme?: string }).theme ?? "none";
+    } catch {}
+
     fetch("/api/auth/session")
       .then((r) => (r.ok ? r.json() : null))
       .then((data) => {
@@ -66,6 +74,9 @@ export function ProfileBackgroundApplier() {
             prevTheme = (JSON.parse(prev) as { theme?: string }).theme ?? "none";
           }
         } catch {}
+        // If the user changed their theme after this fetch started, trust their
+        // live choice — server data is stale relative to their current session.
+        if (prevTheme !== localAtMount) return;
         // Trust the local choice when:
         // (a) user cleared theme locally but server still has old (request in flight)
         // (b) same theme — user may have toggled globalTheme locally; don't overwrite
