@@ -654,9 +654,10 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .profile-discount-section [class*="text-transparent"] {
   filter: brightness(0.48) saturate(1.4) !important;
 }
-/* Rank reveal button and any gradient button inside these cards: keep text white */
-[data-color-mode="light"] .profile-tier-section [class*="text-white"],
-[data-color-mode="light"] .profile-discount-section [class*="text-white"] {
+/* Gradient bg elements (progress bar fill, REVEAL YOUR CODE button) stay dark — keep
+   white text on them. All other text-white in the cream card is made dark by the global rule. */
+[data-color-mode="light"] .profile-tier-section [class*="bg-gradient-to-r"] [class*="text-white"],
+[data-color-mode="light"] .profile-discount-section [class*="bg-gradient-to-r"] [class*="text-white"] {
   color: #fff !important;
   -webkit-text-fill-color: #fff !important;
 }
@@ -669,9 +670,9 @@ body[data-bg="sunset"] {
    Restore the CSS variable so from-brand-dark/X gradient stops resolve to dark.           */
 [data-color-mode="light"] .theme-section.bg-brand-dark {
   --color-brand-dark: #1a1614;
-  --color-brand-gold: #ccb173;
-  --color-brand-pale-gold: #b09e73;
-  --color-brand-dark-gold: #7f6f4c;
+  --color-brand-gold: #d4aa38;
+  --color-brand-pale-gold: #c8a84c;
+  --color-brand-dark-gold: #ba9030;
   --color-brand-grey: #737373;
   background-color: #1a1614;
 }
@@ -710,10 +711,10 @@ body[data-bg="sunset"] {
    Background image shows through a soft overlay; text uses the light-mode gold palette. */
 [data-color-mode="light"] .theme-section:not(.bg-brand-dark) {
   background-color: transparent;
-  --color-brand-gold: #ccb173;
-  --color-brand-pale-gold: #d4bc7c;
+  --color-brand-gold: #d4aa38;
+  --color-brand-pale-gold: #c8a84c;
   --color-brand-grey: #c8c0b0;
-  --color-brand-dark-gold: #c4a860;
+  --color-brand-dark-gold: #ba9030;
   --color-brand-dark: #1a1614;
 }
 [data-color-mode="light"] .theme-section:not(.bg-brand-dark) .bg-brand-dark\/60 {

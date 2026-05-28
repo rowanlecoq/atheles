@@ -66,7 +66,7 @@ export function HeroCategoryNav() {
                 onMouseLeave={hasDropdown ? handleLeave : undefined}
               >
                 {cat.comingSoon ? (
-                  <span className="relative block cursor-default py-1 text-sm uppercase tracking-[0.2em] text-brand-pale-gold/40">
+                  <span className="relative block cursor-default py-1 text-sm uppercase tracking-[0.2em] text-brand-pale-gold opacity-40">
                     {cat.title}
                   </span>
                 ) : (
