@@ -30,7 +30,7 @@ export default function SearchPageHeader() {
         sizes="100vw"
         priority
       />
-      <div className="absolute inset-0 bg-gradient-to-b from-brand-dark/30 via-brand-dark/50 to-brand-dark/70" />
+      <div className="search-header-overlay absolute inset-0 bg-gradient-to-b from-brand-dark/30 via-brand-dark/50 to-brand-dark/70" />
       {/* Content */}
       <div className="relative px-4 pb-8 pt-10 sm:pb-10 sm:pt-14" style={{ position: "relative", paddingTop: 40, paddingBottom: 32 }}>
         <div className="mx-auto max-w-(--breakpoint-2xl) text-center" style={{ textAlign: "center" }}>

@@ -88,14 +88,23 @@ export default async function RootLayout({
         <script
           dangerouslySetInnerHTML={{
             __html: `try{
-              var st=localStorage.getItem("atheles-site-theme");
-              if(st){
-                var th=JSON.parse(st),r=document.documentElement;
-                if(th.brandGold){r.style.setProperty("--color-brand-gold",th.brandGold);r.style.setProperty("--color-brand-dark-gold",th.brandDarkGold);r.style.setProperty("--color-brand-dark",th.brandDark)}
-                if(th.headingStyle==="gradient"&&th.headingGradientFrom){
-                  var gs=document.createElement("style");gs.id="atheles-heading-gradient";
-                  gs.textContent=".text-brand-gold,.text-brand-dark-gold,.text-brand-pale-gold,.text-brand-light-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+","+th.headingGradientTo+") !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;background-clip:text !important}.text-brand-dark-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+"99,"+th.headingGradientTo+"99) !important}";
-                  document.head.appendChild(gs)
+              var r=document.documentElement;
+              var _isLt=r.getAttribute("data-color-mode")==="light";
+              if(_isLt){
+                r.style.setProperty("--color-brand-gold","#6e5214");r.style.setProperty("--color-brand-dark-gold","#7a5e18");
+                r.style.setProperty("--color-brand-pale-gold","#614a12");r.style.setProperty("--color-brand-light-gold","#8a6a20");
+                r.style.setProperty("--color-brand-dark","#e0d5c0");r.style.setProperty("--color-brand-grey","#4a4030");
+                r.style.setProperty("--color-brand-medium-grey","#6a6058");r.style.setProperty("--color-brand-gold-wash","#7a6228");
+              } else {
+                var st=localStorage.getItem("atheles-site-theme");
+                if(st){
+                  var th=JSON.parse(st);
+                  if(th.brandGold){r.style.setProperty("--color-brand-gold",th.brandGold);r.style.setProperty("--color-brand-dark-gold",th.brandDarkGold);r.style.setProperty("--color-brand-dark",th.brandDark)}
+                  if(th.headingStyle==="gradient"&&th.headingGradientFrom){
+                    var gs=document.createElement("style");gs.id="atheles-heading-gradient";
+                    gs.textContent=".text-brand-gold,.text-brand-dark-gold,.text-brand-pale-gold,.text-brand-light-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+","+th.headingGradientTo+") !important;-webkit-background-clip:text !important;-webkit-text-fill-color:transparent !important;background-clip:text !important}.text-brand-dark-gold{background:linear-gradient(90deg,"+th.headingGradientFrom+"99,"+th.headingGradientTo+"99) !important}";
+                    document.head.appendChild(gs)
+                  }
                 }
               }
             }catch(e){}`,

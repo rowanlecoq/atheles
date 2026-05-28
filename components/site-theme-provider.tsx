@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 type SiteTheme = {
   brandGold: string;
@@ -13,6 +13,17 @@ type SiteTheme = {
   logoDefault: string | null;
   logoHover: string | null;
   logoSmall: string | null;
+};
+
+const LIGHT_MODE_VARS: Record<string, string> = {
+  "--color-brand-gold": "#6e5214",
+  "--color-brand-dark-gold": "#7a5e18",
+  "--color-brand-pale-gold": "#614a12",
+  "--color-brand-light-gold": "#8a6a20",
+  "--color-brand-dark": "#e0d5c0",
+  "--color-brand-grey": "#4a4030",
+  "--color-brand-medium-grey": "#6a6058",
+  "--color-brand-gold-wash": "#7a6228",
 };
 
 function hexToRgb(hex: string): { r: number; g: number; b: number } | null {
@@ -43,14 +54,72 @@ const THEME_CACHE_KEY = "atheles-site-theme";
 const THEME_TS_KEY = "atheles-site-theme-ts";
 const THEME_TTL_MS = 5 * 60 * 1000; // 5 minutes
 
+function applyVars(root: HTMLElement, t: SiteTheme) {
+  const isLight = root.getAttribute("data-color-mode") === "light";
+  if (isLight) {
+    for (const [k, v] of Object.entries(LIGHT_MODE_VARS)) root.style.setProperty(k, v);
+    // Clear any heading gradient in light mode — solid dark gold is used instead
+    const gs = document.getElementById("atheles-heading-gradient");
+    if (gs) gs.textContent = "";
+    return;
+  }
+  root.style.setProperty("--color-brand-gold", t.brandGold);
+  root.style.setProperty("--color-brand-dark-gold", t.brandDarkGold);
+  root.style.setProperty("--color-brand-dark", t.brandDark);
+  root.style.setProperty("--color-brand-pale-gold", darken(t.brandGold, 0.1));
+  root.style.setProperty("--color-brand-light-gold", lighten(t.brandGold, 0.2));
+  root.style.setProperty("--color-brand-gold-wash", darken(t.brandGold, 0.05));
+
+  let gradientStyle = document.getElementById("atheles-heading-gradient");
+  if (!gradientStyle) {
+    gradientStyle = document.createElement("style");
+    gradientStyle.id = "atheles-heading-gradient";
+    document.head.appendChild(gradientStyle);
+  }
+  if (t.headingStyle === "gradient") {
+    gradientStyle.textContent = `
+      .font-heading.text-brand-gold,
+      .font-heading.text-brand-dark-gold,
+      .font-heading.text-brand-pale-gold,
+      .font-heading.text-brand-light-gold,
+      h1.text-brand-gold, h2.text-brand-gold, h3.text-brand-gold,
+      h1.text-brand-dark-gold, h2.text-brand-dark-gold, h3.text-brand-dark-gold,
+      h1.text-brand-pale-gold, h2.text-brand-pale-gold, h3.text-brand-pale-gold,
+      h1.text-brand-light-gold, h2.text-brand-light-gold, h3.text-brand-light-gold {
+        background: linear-gradient(90deg, ${t.headingGradientFrom}, ${t.headingGradientTo}) !important;
+        -webkit-background-clip: text !important;
+        -webkit-text-fill-color: transparent !important;
+        background-clip: text !important;
+      }
+    `;
+  } else {
+    gradientStyle.textContent = "";
+  }
+}
+
 export function SiteThemeProvider() {
+  const themeRef = useRef<SiteTheme | null>(null);
+
   useEffect(() => {
+    const root = document.documentElement;
+
+    const onModeChange = () => {
+      if (themeRef.current) applyVars(root, themeRef.current);
+    };
+    window.addEventListener("atheles-color-mode-change", onModeChange);
+
     // Skip network fetch if cached data is fresh (< 5 min old).
     // The inline script in layout.tsx already applied the cached theme synchronously,
     // so there's no visual delay — we just avoid a redundant API call.
     try {
       const ts = Number(localStorage.getItem(THEME_TS_KEY) || 0);
-      if (Date.now() - ts < THEME_TTL_MS && localStorage.getItem(THEME_CACHE_KEY)) return;
+      if (Date.now() - ts < THEME_TTL_MS && localStorage.getItem(THEME_CACHE_KEY)) {
+        const cached = JSON.parse(localStorage.getItem(THEME_CACHE_KEY)!);
+        themeRef.current = cached;
+        // Still re-apply to ensure light mode inline overrides are set correctly
+        applyVars(root, cached);
+        return () => window.removeEventListener("atheles-color-mode-change", onModeChange);
+      }
     } catch {}
 
     fetch("/api/admin/theme")
@@ -58,52 +127,16 @@ export function SiteThemeProvider() {
       .then((d) => {
         if (!d?.theme) return;
         const t: SiteTheme = d.theme;
-        const root = document.documentElement;
-
-        // Core brand colors
-        root.style.setProperty("--color-brand-gold", t.brandGold);
-        root.style.setProperty("--color-brand-dark-gold", t.brandDarkGold);
-        root.style.setProperty("--color-brand-dark", t.brandDark);
-
-        // Derived colors — auto-generate from primary
-        root.style.setProperty("--color-brand-pale-gold", darken(t.brandGold, 0.1));
-        root.style.setProperty("--color-brand-light-gold", lighten(t.brandGold, 0.2));
-        root.style.setProperty("--color-brand-gold-wash", darken(t.brandGold, 0.05));
-
-        // Gradient heading support — inject a style tag for gradient text
-        let gradientStyle = document.getElementById("atheles-heading-gradient");
-        if (!gradientStyle) {
-          gradientStyle = document.createElement("style");
-          gradientStyle.id = "atheles-heading-gradient";
-          document.head.appendChild(gradientStyle);
-        }
-        if (t.headingStyle === "gradient") {
-          gradientStyle.textContent = `
-            .font-heading.text-brand-gold,
-            .font-heading.text-brand-dark-gold,
-            .font-heading.text-brand-pale-gold,
-            .font-heading.text-brand-light-gold,
-            h1.text-brand-gold, h2.text-brand-gold, h3.text-brand-gold,
-            h1.text-brand-dark-gold, h2.text-brand-dark-gold, h3.text-brand-dark-gold,
-            h1.text-brand-pale-gold, h2.text-brand-pale-gold, h3.text-brand-pale-gold,
-            h1.text-brand-light-gold, h2.text-brand-light-gold, h3.text-brand-light-gold {
-              background: linear-gradient(90deg, ${t.headingGradientFrom}, ${t.headingGradientTo}) !important;
-              -webkit-background-clip: text !important;
-              -webkit-text-fill-color: transparent !important;
-              background-clip: text !important;
-            }
-          `;
-        } else {
-          gradientStyle.textContent = "";
-        }
-
-        // Store for logo component and next-visit TTL
+        themeRef.current = t;
+        applyVars(root, t);
         try {
           localStorage.setItem(THEME_CACHE_KEY, JSON.stringify(t));
           localStorage.setItem(THEME_TS_KEY, String(Date.now()));
         } catch {}
       })
       .catch(() => {});
+
+    return () => window.removeEventListener("atheles-color-mode-change", onModeChange);
   }, []);
 
   return null;
