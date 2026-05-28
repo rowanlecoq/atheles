@@ -1570,8 +1570,8 @@ export default function ProfileContent() {
           {themeSaving && <span className="text-xs text-brand-grey/60">saving...</span>}
         </div>
 
-        {/* Color mode — segmented pill control */}
-        <div className="mb-6">
+        {/* Color mode — segmented pill control (mobile only; desktop is always dark) */}
+        <div className="mb-6 lg:hidden">
           <p className="mb-3 text-xs uppercase tracking-wider text-brand-grey">color mode</p>
           <div className="flex gap-1 rounded-lg border border-brand-dark-gold/20 bg-brand-dark-gold/5 p-1">
             {(["dark", "light", "system"] as const).map((mode) => (
