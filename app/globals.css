@@ -632,9 +632,9 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .bg-brand-dark-gold\/20 {
   background-color: rgba(138, 104, 32, 0.25) !important;
 }
-/* Hero: remove the dark gradient overlay in light mode — images show at full brightness */
+/* Hero: warm cream overlay so dark-gold text stays readable — matches the rest of light mode */
 [data-color-mode="light"] .hero-gradient-overlay {
-  background: rgba(26, 22, 18, 0.72) !important;
+  background: rgba(224, 213, 192, 0.65) !important;
 }
 [data-color-mode="light"] .hero-bottom-fade {
   display: none;
@@ -665,63 +665,50 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] button[aria-label="No background"] {
   background: #d4c9b4 !important;
 }
-/* Hero keeps its dark atmospheric look in light mode — the full-bleed gradient overlays
-   (from-brand-dark/76 via-brand-dark/70 to-brand-dark/90) are essential for legibility.
-   Restore the CSS variable so from-brand-dark/X gradient stops resolve to dark.           */
+/* Hero in light mode: cream overlay means we can use the same dark-gold palette as
+   the rest of the page. Keep --color-brand-dark dark for any gradient stops that need it. */
 [data-color-mode="light"] .theme-section.bg-brand-dark {
   --color-brand-dark: #1a1614;
-  --color-brand-gold: #d4aa38;
-  --color-brand-pale-gold: #c8a84c;
-  --color-brand-dark-gold: #ba9030;
-  --color-brand-grey: #737373;
-  background-color: #1a1614;
+  --color-brand-gold: #6e5214;
+  --color-brand-pale-gold: #614a12;
+  --color-brand-dark-gold: #7a5e18;
+  --color-brand-grey: #4a4030;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-brand-grey"] {
-  color: #ddd6c8 !important;
+  color: #4a4030 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-brand-dark-gold"] {
-  color: #d4a030 !important;
+  color: #7a5e18 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-brand-pale-gold"] {
-  color: #d8a832 !important;
+  color: #6e5214 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="beta-pulse"] {
   animation: none !important;
   opacity: 1 !important;
 }
-[data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/40 {
-  background-color: rgba(26, 22, 18, 0.40) !important;
-  backdrop-filter: unset !important;
-  -webkit-backdrop-filter: unset !important;
-}
-[data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/60 {
-  background-color: rgba(26, 22, 18, 0.60) !important;
-}
-/* Dropdown panel: let the general cream rule apply; use dark text on cream */
+/* Dropdown panel: cream background (from general rule), dark text */
 [data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/95 a {
   color: #3a2c14 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/95 a:hover {
-  color: #8a6820 !important;
+  color: #7a5e18 !important;
 }
-[data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-white"] {
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-/* Newsletter + quote sections: no forced dark base in light mode.
-   Background image shows through a soft overlay; text uses the light-mode gold palette. */
+/* Newsletter + quote sections: warm cream overlay over background image.
+   Gold palette matches the rest of the light-mode page. */
 [data-color-mode="light"] .theme-section:not(.bg-brand-dark) {
   background-color: transparent;
-  --color-brand-gold: #d4aa38;
-  --color-brand-pale-gold: #c8a84c;
-  --color-brand-grey: #c8c0b0;
-  --color-brand-dark-gold: #ba9030;
+  --color-brand-gold: #6e5214;
+  --color-brand-pale-gold: #614a12;
+  --color-brand-grey: #4a4030;
+  --color-brand-dark-gold: #7a5e18;
   --color-brand-dark: #1a1614;
 }
 [data-color-mode="light"] .theme-section:not(.bg-brand-dark) .bg-brand-dark\/60 {
-  background-color: rgba(26, 22, 18, 0.68) !important;
+  background-color: rgba(224, 213, 192, 0.62) !important;
 }
 [data-color-mode="light"] .theme-section:not(.bg-brand-dark) .bg-brand-dark\/40 {
-  background-color: rgba(26, 22, 18, 0.18) !important;
+  background-color: rgba(224, 213, 192, 0.40) !important;
   backdrop-filter: unset !important;
   -webkit-backdrop-filter: unset !important;
 }
@@ -784,11 +771,6 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .bg-black\/60 [class*="text-white"],
 [data-color-mode="light"] .bg-black\/70 [class*="text-white"],
 [data-color-mode="light"] .bg-black\/80 [class*="text-white"] {
-  color: rgba(255, 255, 255, 0.9) !important;
-}
-/* Newsletter / quote-section email input: sits over the dark bg-brand-dark/60
-   overlay so typed text must be light, not dark.                          */
-[data-color-mode="light"] .theme-section:not(.bg-brand-dark) [class*="bg-brand-dark\/40"] [class*="text-white"] {
   color: rgba(255, 255, 255, 0.9) !important;
 }
 /* Prose content pages (FAQ, shipping, returns): Tailwind Typography's
