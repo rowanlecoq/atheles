@@ -650,6 +650,12 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .newsletter-top-fade {
   display: none;
 }
+/* Avatar circle: border-radius + overflow-hidden leaves 1-2px anti-aliasing pixels at the
+   boundary that reveal the page background as a ring. An outset ring in the page background
+   colour covers those pixels without visually changing the avatar size. */
+[data-color-mode="light"] .profile-avatar-container {
+  box-shadow: 0 0 0 4px #e0d5c0;
+}
 /* Profile theme appearance card: brand-grey opacity variants read well on dark cards
    but are too faint on the cream card in light mode — restore full legibility.
    Target both plain and opacity-suffixed variants. */
