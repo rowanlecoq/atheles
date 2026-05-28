@@ -95,7 +95,7 @@ export default async function RootLayout({
               if(_isLt){
                 r.style.setProperty("--color-brand-gold","#6e5214");r.style.setProperty("--color-brand-dark-gold","#7a5e18");
                 r.style.setProperty("--color-brand-pale-gold","#614a12");r.style.setProperty("--color-brand-light-gold","#8a6a20");
-                r.style.setProperty("--color-brand-dark","#f5f0e8");r.style.setProperty("--color-brand-grey","#4a4030");
+                r.style.setProperty("--color-brand-dark","#e8dfc9");r.style.setProperty("--color-brand-grey","#4a4030");
                 r.style.setProperty("--color-brand-medium-grey","#6a6058");r.style.setProperty("--color-brand-gold-wash","#7a6228");
               } else {
                 var st=localStorage.getItem("atheles-site-theme");

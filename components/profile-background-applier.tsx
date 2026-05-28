@@ -46,17 +46,13 @@ export function ProfileBackgroundApplier() {
     return () => window.removeEventListener("atheles-bg-change", handler);
   }, [pathname]);
 
-  // Cross-device sync: fetch fresh session once per mount
+  // Cross-device sync: fetch fresh session once per mount.
+  // Only writes to local storage when this device has NO local preference at all —
+  // if any value exists locally (even explicit "none"), trust it. The server may
+  // be stale (failed save, different session) and overwriting would cause glitches.
   useEffect(() => {
     if (!document.cookie.includes("atheles-logged-in")) return;
-
-    // Snapshot localStorage at fetch-start time. If the user picks a new theme
-    // while the fetch is in-flight, their live choice wins over stale server data.
-    let localAtMount = "none";
-    try {
-      const stored = localStorage.getItem(LS_KEY);
-      if (stored) localAtMount = (JSON.parse(stored) as { theme?: string }).theme ?? "none";
-    } catch {}
+    if (localStorage.getItem(LS_KEY) !== null) return; // local preference exists — trust it
 
     fetch("/api/auth/session")
       .then((r) => (r.ok ? r.json() : null))
@@ -64,40 +60,14 @@ export function ProfileBackgroundApplier() {
         if (!data?.user) return;
         const { theme, globalTheme } = data.user as { theme?: string | null; globalTheme?: boolean };
         const newTheme = theme || "none";
-        // Read what's currently in localStorage before overwriting
-        let prevTheme = "none";
-        let hasLocal = false;
+        if (newTheme === "none") return;
+        // Double-check local is still absent (user may have clicked a theme while fetch was in-flight)
+        if (localStorage.getItem(LS_KEY) !== null) return;
         try {
-          const prev = localStorage.getItem(LS_KEY);
-          if (prev) {
-            hasLocal = true;
-            prevTheme = (JSON.parse(prev) as { theme?: string }).theme ?? "none";
-          }
+          localStorage.setItem(LS_KEY, JSON.stringify({ theme: newTheme, globalTheme: globalTheme ?? false }));
         } catch {}
-        // If the user changed their theme after this fetch started, trust their
-        // live choice — server data is stale relative to their current session.
-        if (prevTheme !== localAtMount) return;
-        // Trust the local choice when:
-        // (a) user cleared theme locally but server still has old (request in flight)
-        // (b) same theme — user may have toggled globalTheme locally; don't overwrite
-        // (c) server says "none" but local has a real theme — server is stale from the
-        //     save API call not having landed yet (race on navigate-away + return)
-        if (hasLocal && (prevTheme === "none" && newTheme !== "none")) return;
-        if (hasLocal && prevTheme === newTheme) return;
-        if (hasLocal && newTheme === "none") return;
-        try {
-          localStorage.setItem(LS_KEY, JSON.stringify({
-            theme: newTheme,
-            globalTheme: globalTheme ?? false,
-          }));
-        } catch {}
-        // Only trigger a visible re-apply when a new theme is being added (cross-
-        // device sync). Silently write for removals or same-theme so the session
-        // fetch never causes a background flash or canvas rebuild.
-        if (newTheme !== "none" && newTheme !== prevTheme) {
-          applyFromStorage(window.location.pathname);
-          window.dispatchEvent(new Event("atheles-bg-change"));
-        }
+        applyFromStorage(window.location.pathname);
+        window.dispatchEvent(new Event("atheles-bg-change"));
       })
       .catch(() => {});
   // eslint-disable-next-line react-hooks/exhaustive-deps

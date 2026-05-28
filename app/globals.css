@@ -560,7 +560,7 @@ body[data-bg="sunset"] {
 /* The picker UI is md:hidden so only mobile users can set it via normal UI.  */
 [data-color-mode="light"] {
   color-scheme: light;
-  --color-brand-dark: #f5f0e8;
+  --color-brand-dark: #e8dfc9;
   --color-brand-dark-gold: #7a5e18;
   --color-brand-gold: #6e5214;
   --color-brand-pale-gold: #614a12;
@@ -574,7 +574,7 @@ body[data-bg="sunset"] {
 }
 /* Single cream background — matches the card/section colour everywhere */
 [data-color-mode="light"] body:not([data-bg]) {
-  background-color: #f5f0e8;
+  background-color: #e8dfc9;
 }
 [data-color-mode="light"] [class*="text-white"] {
   color: #1a1612 !important;
@@ -599,12 +599,12 @@ body[data-bg="sunset"] {
    Warm beige palette keeps the premium gold feel without blinding whites.
    [class*="bg-brand-dark"] catches bg-brand-dark, bg-brand-dark/95, etc. */
 [data-color-mode="light"] [class*="bg-brand-dark"] {
-  background-color: #f5f0e8 !important;
+  background-color: #e8dfc9 !important;
   backdrop-filter: none !important;
   -webkit-backdrop-filter: none !important;
 }
 [data-color-mode="light"] body[class*="bg-brand-dark"]:not([data-bg]) {
-  background-color: #f5f0e8 !important;
+  background-color: #e8dfc9 !important;
 }
 /* Border colours — slightly more visible on warm background */
 [data-color-mode="light"] [class*="border-brand-dark-gold"] {
@@ -634,17 +634,17 @@ body[data-bg="sunset"] {
 }
 /* Hero: warm cream overlay so dark-gold text stays readable — matches the rest of light mode */
 [data-color-mode="light"] .hero-gradient-overlay {
-  background: rgba(245, 240, 232, 0.65) !important;
+  background: rgba(232, 223, 201, 0.65) !important;
 }
 [data-color-mode="light"] .hero-bottom-fade {
   display: none;
 }
 [data-color-mode="light"] .hero-panel-fade {
-  background: linear-gradient(to top, rgba(245, 240, 232, 0.60), transparent, rgba(245, 240, 232, 0.30)) !important;
+  background: linear-gradient(to top, rgba(232, 223, 201, 0.60), transparent, rgba(232, 223, 201, 0.30)) !important;
 }
 /* Search page header: flip dark gradient to warm cream so it blends with light mode */
 [data-color-mode="light"] .search-header-overlay {
-  background: linear-gradient(to bottom, rgba(245, 240, 232, 0.40), rgba(245, 240, 232, 0.65), rgba(245, 240, 232, 0.80)) !important;
+  background: linear-gradient(to bottom, rgba(232, 223, 201, 0.40), rgba(232, 223, 201, 0.65), rgba(232, 223, 201, 0.80)) !important;
 }
 /* Newsletter top-fade: dark gradient is redundant over the cream overlay — hide it */
 [data-color-mode="light"] .newsletter-top-fade {
@@ -666,28 +666,33 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .profile-discount-section [class*="text-transparent"] {
   filter: brightness(0.48) saturate(1.4) !important;
 }
-/* Gradient bg elements (progress bar fill, REVEAL YOUR CODE button): restore white so button
-   text stays readable. Sparkle spans are handled separately via .bar-sparkle / .reveal-sparkle. */
+/* Gradient bg elements (progress bar fill): restore white so text stays readable.
+   Descendant rule — matches children with text-white class inside a gradient element.
+   Sparkle spans handled separately via .bar-sparkle / .reveal-sparkle.            */
 [data-color-mode="light"] .profile-tier-section [class*="bg-gradient-to-r"] [class*="text-white"],
 [data-color-mode="light"] .profile-discount-section [class*="bg-gradient-to-r"] [class*="text-white"] {
   color: rgba(255, 255, 255, 0.9) !important;
   -webkit-text-fill-color: rgba(255, 255, 255, 0.9) !important;
 }
-/* Progress bar sparkles: warm golden shimmer (same specificity as rule above, placed after → wins) */
-[data-color-mode="light"] .profile-tier-section [class*="bg-gradient-to-r"] .bar-sparkle {
-  color: rgba(255, 235, 140, 0.8) !important;
-  -webkit-text-fill-color: rgba(255, 235, 140, 0.8) !important;
+/* REVEAL button: bg-gradient-to-r AND text-white are on the SAME element — compound
+   selector (no space) catches this; the descendant rule above misses it.          */
+[data-color-mode="light"] .profile-discount-section [class*="bg-gradient-to-r"][class*="text-white"] {
+  color: rgba(255, 255, 255, 0.95) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.95) !important;
 }
-/* REVEAL button sparkles: invisible by default, warm gold on hover.
-   Transparent rule: same specificity as exception above → wins (placed after).
-   Hover rule: higher specificity (extra pseudo-class) → wins over transparent. */
+/* Progress bar sparkles: match dark mode white shimmer */
+[data-color-mode="light"] .profile-tier-section [class*="bg-gradient-to-r"] .bar-sparkle {
+  color: rgba(255, 255, 255, 0.7) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.7) !important;
+}
+/* REVEAL sparkles: invisible by default, white on hover — same as dark mode */
 [data-color-mode="light"] .profile-discount-section [class*="bg-gradient-to-r"] .reveal-sparkle {
   color: transparent !important;
   -webkit-text-fill-color: transparent !important;
 }
 [data-color-mode="light"] .profile-discount-section .group\/reveal:hover .reveal-sparkle {
-  color: rgba(255, 235, 140, 0.75) !important;
-  -webkit-text-fill-color: rgba(255, 235, 140, 0.75) !important;
+  color: rgba(255, 255, 255, 0.55) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.55) !important;
 }
 /* Stats card (orders link) — make hover clearly visible in light mode */
 [data-color-mode="light"] .stat-card-orders:hover {
@@ -716,10 +721,6 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-brand-pale-gold"] {
   color: #6e5214 !important;
 }
-[data-color-mode="light"] .theme-section.bg-brand-dark [class*="beta-pulse"] {
-  animation: none !important;
-  opacity: 1 !important;
-}
 /* Dropdown panel: cream background (from general rule), dark text */
 [data-color-mode="light"] .theme-section.bg-brand-dark .bg-brand-dark\/95 a {
   color: #3a2c14 !important;
@@ -738,10 +739,10 @@ body[data-bg="sunset"] {
   --color-brand-dark: #1a1614;
 }
 [data-color-mode="light"] .theme-section:not(.bg-brand-dark) .bg-brand-dark\/60 {
-  background-color: rgba(245, 240, 232, 0.62) !important;
+  background-color: rgba(232, 223, 201, 0.62) !important;
 }
 [data-color-mode="light"] .theme-section:not(.bg-brand-dark) .bg-brand-dark\/40 {
-  background-color: rgba(245, 240, 232, 0.40) !important;
+  background-color: rgba(232, 223, 201, 0.40) !important;
   backdrop-filter: unset !important;
   -webkit-backdrop-filter: unset !important;
 }
@@ -775,12 +776,12 @@ body[data-bg="sunset"] {
    When a background theme is selected (body[data-bg]), sections stay transparent so
    the canvas shows through, same as dark mode.                                        */
 [data-color-mode="light"] body:not([data-bg]) .content-surface {
-  background-color: #f5f0e8;
+  background-color: #e8dfc9;
 }
 /* Search/store page: always cream in light mode so transparent children (titles,
    filter labels) remain readable whether or not a canvas theme is globally active.  */
 [data-color-mode="light"] .search-page-bg {
-  background-color: #f5f0e8;
+  background-color: #e8dfc9;
 }
 /* Active segmented pill: bg-brand-gold + text-brand-dark on the SAME element.
    The descendant rule (.bg-brand-gold .text-brand-dark) doesn't match this case —
