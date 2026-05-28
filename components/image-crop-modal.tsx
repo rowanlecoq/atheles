@@ -90,17 +90,20 @@ export default function ImageCropModal({
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
     ctx.restore();
 
-    // Darken outside circle
+    const isLight = typeof document !== "undefined" &&
+      document.documentElement.getAttribute("data-color-mode") === "light";
+
+    // Shade outside circle
     ctx.save();
-    ctx.fillStyle = "rgba(0, 0, 0, 0.5)";
+    ctx.fillStyle = isLight ? "rgba(200, 190, 170, 0.55)" : "rgba(0, 0, 0, 0.5)";
     ctx.beginPath();
     ctx.rect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
     ctx.arc(RADIUS, RADIUS, RADIUS, 0, Math.PI * 2, true);
     ctx.fill();
     ctx.restore();
 
-    // Subtle circle outline
-    ctx.strokeStyle = "rgba(255, 255, 255, 0.15)";
+    // Circle boundary guide
+    ctx.strokeStyle = isLight ? "rgba(110, 82, 20, 0.35)" : "rgba(255, 255, 255, 0.15)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(RADIUS, RADIUS, RADIUS - 0.5, 0, Math.PI * 2);
