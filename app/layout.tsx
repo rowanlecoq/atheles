@@ -78,8 +78,10 @@ export default async function RootLayout({
             __html: `try{
               var _cm=localStorage.getItem("atheles-color-mode");
               var _eff="dark";
-              if(_cm==="light"){_eff="light";}
-              else if(_cm==="system"){_eff=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";}
+              if(window.innerWidth<1024){
+                if(_cm==="light"){_eff="light";}
+                else if(_cm==="system"){_eff=window.matchMedia("(prefers-color-scheme:dark)").matches?"dark":"light";}
+              }
               document.documentElement.setAttribute("data-color-mode",_eff);
               if(_eff==="light"){document.documentElement.style.colorScheme="light";}
             }catch(e){}`,
