@@ -1548,7 +1548,7 @@ export default function ProfileContent() {
               disabled={!editing}
               className={`relative h-6 w-11 overflow-hidden rounded-full transition-colors ${
                 newsletter ? "bg-brand-gold" : "bg-brand-dark-gold/30"
-              } ${!editing ? "opacity-60" : "cursor-pointer"}`}
+              } ${!editing ? "cursor-default opacity-60" : "cursor-pointer"}`}
               aria-label="Toggle newsletter subscription"
             >
               <span
