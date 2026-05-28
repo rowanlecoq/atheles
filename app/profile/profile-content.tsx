@@ -783,13 +783,15 @@ export default function ProfileContent() {
       {/* Background handled by global ThemeBackground component */}
 
       <div className="relative">
-      {/* Crop Modal */}
-      {cropSrc && (
+      {/* Crop Modal — portaled to body so it escapes the transform:translateY ancestor
+          (animate-profile-slide-up), which would otherwise confine fixed positioning */}
+      {cropSrc && typeof document !== "undefined" && createPortal(
         <ImageCropModal
           imageSrc={cropSrc}
           onSave={handleCropSave}
           onCancel={handleCropCancel}
-        />
+        />,
+        document.body,
       )}
 
       {/* Avatar Preview Modal — portaled to cover everything including navbar */}
