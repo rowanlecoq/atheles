@@ -95,7 +95,7 @@ export default function ImageCropModal({
 
     // Shade outside circle
     ctx.save();
-    ctx.fillStyle = isLight ? "rgba(200, 190, 170, 0.55)" : "rgba(0, 0, 0, 0.5)";
+    ctx.fillStyle = isLight ? "rgba(245, 240, 232, 0.65)" : "rgba(0, 0, 0, 0.5)";
     ctx.beginPath();
     ctx.rect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
     ctx.arc(RADIUS, RADIUS, RADIUS, 0, Math.PI * 2, true);

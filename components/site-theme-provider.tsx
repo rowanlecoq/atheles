@@ -20,7 +20,7 @@ const LIGHT_MODE_VARS: Record<string, string> = {
   "--color-brand-dark-gold": "#7a5e18",
   "--color-brand-pale-gold": "#614a12",
   "--color-brand-light-gold": "#8a6a20",
-  "--color-brand-dark": "#e0d5c0",
+  "--color-brand-dark": "#f5f0e8",
   "--color-brand-grey": "#4a4030",
   "--color-brand-medium-grey": "#6a6058",
   "--color-brand-gold-wash": "#7a6228",
