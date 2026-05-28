@@ -31,7 +31,7 @@ export function Hero() {
               sizes="(min-width: 768px) 25vw, 0px"
               priority
             />
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-brand-dark/60 via-transparent to-brand-dark/30" />
+            <div className="hero-panel-fade absolute inset-0 z-10 bg-gradient-to-t from-brand-dark/60 via-transparent to-brand-dark/30" />
           </div>
         </div>
 
@@ -51,7 +51,7 @@ export function Hero() {
               sizes="(min-width: 768px) 25vw, 0px"
               priority
             />
-            <div className="absolute inset-0 z-10 bg-gradient-to-t from-brand-dark/60 via-transparent to-brand-dark/30" />
+            <div className="hero-panel-fade absolute inset-0 z-10 bg-gradient-to-t from-brand-dark/60 via-transparent to-brand-dark/30" />
           </div>
         </div>
       </div>
