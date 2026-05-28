@@ -819,7 +819,7 @@ export default function ProfileContent() {
             className="flex flex-col items-center gap-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="overflow-hidden rounded-full">
+            <div style={{ clipPath: "circle(50%)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={avatar}
