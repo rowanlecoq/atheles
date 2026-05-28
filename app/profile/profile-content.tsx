@@ -835,7 +835,7 @@ export default function ProfileContent() {
       )}
 
       {/* Avatar & Name */}
-      <div className="mb-10 flex flex-col items-center text-center">
+      <div className="profile-identity-header mb-10 flex flex-col items-center text-center">
         <div className="group relative mb-4">
           <div
             className={`profile-avatar-container relative flex h-40 w-40 items-center justify-center overflow-hidden sm:h-44 sm:w-44 ${avatar ? "cursor-pointer" : "bg-brand-dark-gold/10"}`}

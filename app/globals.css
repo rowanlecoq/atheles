@@ -817,3 +817,14 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .crop-zoom-slider {
   background-color: rgba(122, 94, 24, 0.45) !important;
 }
+
+/* Profile header (avatar + name + email + member-since) sits directly on the canvas
+   when a background theme is active. In light mode the dark-brown text is unreadable
+   on colorful gradients — add a frosted cream backdrop so it stays legible.          */
+[data-color-mode="light"] body[data-bg] .profile-identity-header {
+  background: rgba(245, 240, 232, 0.82);
+  border-radius: 16px;
+  padding: 24px 40px;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
