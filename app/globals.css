@@ -656,13 +656,6 @@ body[data-bg="sunset"] {
   display: none;
 }
 /* Avatar circle: border-radius + overflow-hidden leaves 1-2px anti-aliasing pixels at the
-/* Avatar circle: mask-image provides a clean circular clip without the sub-pixel
-   anti-aliasing ring that border-radius + overflow:hidden produces against light backgrounds.
-   The 1% feather at the edge smooths the boundary without any background bleed. */
-.profile-avatar-container {
-  -webkit-mask-image: radial-gradient(circle, white 99%, transparent 100%);
-  mask-image: radial-gradient(circle, white 99%, transparent 100%);
-}
 /* Profile theme appearance card: brand-grey opacity variants read well on dark cards
    but are too faint on the cream card in light mode — restore full legibility.
    Target both plain and opacity-suffixed variants. */
