@@ -646,6 +646,10 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .search-header-overlay {
   background: linear-gradient(to bottom, rgba(224, 213, 192, 0.40), rgba(224, 213, 192, 0.65), rgba(224, 213, 192, 0.80)) !important;
 }
+/* Newsletter top-fade: dark gradient is redundant over the cream overlay — hide it */
+[data-color-mode="light"] .newsletter-top-fade {
+  display: none;
+}
 /* Profile theme appearance card: brand-grey opacity variants read well on dark cards
    but are too faint on the cream card in light mode — restore full legibility.
    Target both plain and opacity-suffixed variants. */
