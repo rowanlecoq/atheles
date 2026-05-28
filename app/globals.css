@@ -666,12 +666,28 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .profile-discount-section [class*="text-transparent"] {
   filter: brightness(0.48) saturate(1.4) !important;
 }
-/* Gradient bg elements (progress bar fill, REVEAL YOUR CODE button): keep sparkle/text
-   visible on the colorful gradient. In light mode use a warm amber glow instead of white. */
+/* Gradient bg elements (progress bar fill, REVEAL YOUR CODE button): restore white so button
+   text stays readable. Sparkle spans are handled separately via .bar-sparkle / .reveal-sparkle. */
 [data-color-mode="light"] .profile-tier-section [class*="bg-gradient-to-r"] [class*="text-white"],
 [data-color-mode="light"] .profile-discount-section [class*="bg-gradient-to-r"] [class*="text-white"] {
-  color: rgba(180, 130, 40, 0.75) !important;
-  -webkit-text-fill-color: rgba(180, 130, 40, 0.75) !important;
+  color: rgba(255, 255, 255, 0.9) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.9) !important;
+}
+/* Progress bar sparkles: warm golden shimmer (same specificity as rule above, placed after → wins) */
+[data-color-mode="light"] .profile-tier-section [class*="bg-gradient-to-r"] .bar-sparkle {
+  color: rgba(255, 235, 140, 0.8) !important;
+  -webkit-text-fill-color: rgba(255, 235, 140, 0.8) !important;
+}
+/* REVEAL button sparkles: invisible by default, warm gold on hover.
+   Transparent rule: same specificity as exception above → wins (placed after).
+   Hover rule: higher specificity (extra pseudo-class) → wins over transparent. */
+[data-color-mode="light"] .profile-discount-section [class*="bg-gradient-to-r"] .reveal-sparkle {
+  color: transparent !important;
+  -webkit-text-fill-color: transparent !important;
+}
+[data-color-mode="light"] .profile-discount-section .group\/reveal:hover .reveal-sparkle {
+  color: rgba(255, 235, 140, 0.75) !important;
+  -webkit-text-fill-color: rgba(255, 235, 140, 0.75) !important;
 }
 /* Stats card (orders link) — make hover clearly visible in light mode */
 [data-color-mode="light"] .stat-card-orders:hover {

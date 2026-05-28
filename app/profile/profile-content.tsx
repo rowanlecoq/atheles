@@ -1006,31 +1006,31 @@ export default function ProfileContent() {
                 </div>
                 {/* Sparkles across the bar */}
                 <span
-                  className="absolute left-[12%] top-1 animate-pulse text-[5px] text-white/50"
+                  className="bar-sparkle absolute left-[12%] top-1 animate-pulse text-[5px] text-white/50"
                   style={{ animationDuration: "2s" }}
                 >
                   &#10022;
                 </span>
                 <span
-                  className="absolute left-[30%] top-3 animate-pulse text-[4px] text-white/40"
+                  className="bar-sparkle absolute left-[30%] top-3 animate-pulse text-[4px] text-white/40"
                   style={{ animationDuration: "2.5s", animationDelay: "0.5s" }}
                 >
                   &#10022;
                 </span>
                 <span
-                  className="absolute left-[50%] top-0.5 animate-pulse text-[5px] text-white/50"
+                  className="bar-sparkle absolute left-[50%] top-0.5 animate-pulse text-[5px] text-white/50"
                   style={{ animationDuration: "2.2s", animationDelay: "1s" }}
                 >
                   &#10022;
                 </span>
                 <span
-                  className="absolute left-[70%] top-2.5 animate-pulse text-[4px] text-white/35"
+                  className="bar-sparkle absolute left-[70%] top-2.5 animate-pulse text-[4px] text-white/35"
                   style={{ animationDuration: "2.8s", animationDelay: "1.5s" }}
                 >
                   &#10022;
                 </span>
                 <span
-                  className="absolute left-[88%] top-1 animate-pulse text-[5px] text-white/45"
+                  className="bar-sparkle absolute left-[88%] top-1 animate-pulse text-[5px] text-white/45"
                   style={{ animationDuration: "2.3s", animationDelay: "0.3s" }}
                 >
                   &#10022;
@@ -1260,11 +1260,11 @@ export default function ProfileContent() {
                   }}
                 />
                 {/* Sparkles on hover */}
-                <span className="absolute left-[10%] top-[20%] text-[7px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/50" style={{ animation: "revealSpark 1.5s ease-in-out infinite" }}>&#10022;</span>
-                <span className="absolute left-[30%] top-[15%] text-[5px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/40" style={{ animation: "revealSpark 1.8s ease-in-out infinite 0.3s" }}>&#10022;</span>
-                <span className="absolute left-[55%] top-[70%] text-[6px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/50" style={{ animation: "revealSpark 1.6s ease-in-out infinite 0.6s" }}>&#10022;</span>
-                <span className="absolute left-[75%] top-[25%] text-[7px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/40" style={{ animation: "revealSpark 2s ease-in-out infinite 0.2s" }}>&#10022;</span>
-                <span className="absolute left-[90%] top-[60%] text-[5px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/50" style={{ animation: "revealSpark 1.7s ease-in-out infinite 0.8s" }}>&#10022;</span>
+                <span className="reveal-sparkle absolute left-[10%] top-[20%] text-[7px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/50" style={{ animation: "revealSpark 1.5s ease-in-out infinite" }}>&#10022;</span>
+                <span className="reveal-sparkle absolute left-[30%] top-[15%] text-[5px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/40" style={{ animation: "revealSpark 1.8s ease-in-out infinite 0.3s" }}>&#10022;</span>
+                <span className="reveal-sparkle absolute left-[55%] top-[70%] text-[6px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/50" style={{ animation: "revealSpark 1.6s ease-in-out infinite 0.6s" }}>&#10022;</span>
+                <span className="reveal-sparkle absolute left-[75%] top-[25%] text-[7px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/40" style={{ animation: "revealSpark 2s ease-in-out infinite 0.2s" }}>&#10022;</span>
+                <span className="reveal-sparkle absolute left-[90%] top-[60%] text-[5px] text-white/0 transition-all duration-300 group-hover/reveal:text-white/50" style={{ animation: "revealSpark 1.7s ease-in-out infinite 0.8s" }}>&#10022;</span>
                 {/* Text with letter spacing on hover */}
                 <span className="relative z-10 transition-all duration-300 group-hover/reveal:tracking-[0.25em]">
                   reveal your code
