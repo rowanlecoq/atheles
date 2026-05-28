@@ -268,7 +268,7 @@ export default function ImageCropModal({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded border border-brand-dark-gold/30 px-4 py-2.5 text-sm text-brand-grey transition-colors hover:border-brand-gold/50 hover:text-white"
+            className="flex-1 rounded border border-brand-dark-gold/30 px-4 py-2.5 text-sm text-brand-grey transition-colors hover:border-brand-gold/50 hover:text-brand-pale-gold"
           >
             cancel
           </button>
