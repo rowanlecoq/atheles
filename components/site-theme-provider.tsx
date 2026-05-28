@@ -69,6 +69,10 @@ function applyVars(root: HTMLElement, t: SiteTheme) {
   root.style.setProperty("--color-brand-pale-gold", darken(t.brandGold, 0.1));
   root.style.setProperty("--color-brand-light-gold", lighten(t.brandGold, 0.2));
   root.style.setProperty("--color-brand-gold-wash", darken(t.brandGold, 0.05));
+  // Light mode sets grey/medium-grey as inline styles; remove them in dark mode
+  // so the @theme defaults (#737373, #484848) take over instead of the dark brownish values.
+  root.style.removeProperty("--color-brand-grey");
+  root.style.removeProperty("--color-brand-medium-grey");
 
   let gradientStyle = document.getElementById("atheles-heading-gradient");
   if (!gradientStyle) {

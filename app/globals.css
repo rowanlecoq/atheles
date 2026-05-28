@@ -666,13 +666,12 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .profile-discount-section [class*="text-transparent"] {
   filter: brightness(0.48) saturate(1.4) !important;
 }
-/* Gradient bg elements (progress bar fill, REVEAL YOUR CODE button) stay dark — keep
-   white text on them. All other text-white in the cream card is made dark by the global rule.
-   Use rgba instead of #fff so sparkles remain semi-transparent rather than stark solid white. */
+/* Gradient bg elements (progress bar fill, REVEAL YOUR CODE button): keep sparkle/text
+   visible on the colorful gradient. In light mode use a warm amber glow instead of white. */
 [data-color-mode="light"] .profile-tier-section [class*="bg-gradient-to-r"] [class*="text-white"],
 [data-color-mode="light"] .profile-discount-section [class*="bg-gradient-to-r"] [class*="text-white"] {
-  color: rgba(255, 255, 255, 0.45) !important;
-  -webkit-text-fill-color: rgba(255, 255, 255, 0.45) !important;
+  color: rgba(180, 130, 40, 0.75) !important;
+  -webkit-text-fill-color: rgba(180, 130, 40, 0.75) !important;
 }
 /* Stats card (orders link) — make hover clearly visible in light mode */
 [data-color-mode="light"] .stat-card-orders:hover {
@@ -786,6 +785,7 @@ body[data-bg="sunset"] {
    these are NOT caught by the bg-brand-dark rule, so they keep their dark
    background — preserve white text so it stays readable on them.          */
 [data-color-mode="light"] .bg-black\/30 [class*="text-white"],
+[data-color-mode="light"] .bg-black\/50 [class*="text-white"],
 [data-color-mode="light"] .bg-black\/60 [class*="text-white"],
 [data-color-mode="light"] .bg-black\/70 [class*="text-white"],
 [data-color-mode="light"] .bg-black\/80 [class*="text-white"] {

@@ -109,7 +109,7 @@ export function AddressSearch({
               <button
                 type="button"
                 onClick={() => pick(r)}
-                className="w-full px-3 py-2.5 text-left text-xs text-brand-grey transition-colors hover:bg-brand-gold/10 hover:text-white"
+                className="w-full px-3 py-2.5 text-left text-xs text-brand-grey transition-colors hover:bg-brand-gold/10 hover:text-brand-pale-gold"
               >
                 <span className="font-medium text-white">{r.address1}</span>
                 {" "}

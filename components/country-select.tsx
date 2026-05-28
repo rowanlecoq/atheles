@@ -87,7 +87,7 @@ export function CountrySelect({
               <button
                 type="button"
                 onMouseDown={(e) => { e.preventDefault(); pick(c); }}
-                className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-brand-gold/10 hover:text-white ${
+                className={`w-full px-3 py-2 text-left text-sm transition-colors hover:bg-brand-gold/10 hover:text-brand-pale-gold ${
                   c === value ? "text-brand-gold" : "text-brand-grey"
                 }`}
               >

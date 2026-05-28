@@ -110,7 +110,7 @@ function AddressForm({ initial, onSave, onCancel, saving }: {
         <button
           type="button"
           onClick={onCancel}
-          className="text-xs text-brand-grey transition-colors hover:text-white"
+          className="text-xs text-brand-grey transition-colors hover:text-brand-gold"
         >
           cancel
         </button>
@@ -269,7 +269,7 @@ export function ProfileAddressBook({ triggerAdd }: { triggerAdd?: number }) {
                   <button
                     type="button"
                     onClick={() => { setEditId(addr.id); setShowAdd(false); setError(""); }}
-                    className="text-xs text-brand-grey transition-colors hover:text-white"
+                    className="text-xs text-brand-grey transition-colors hover:text-brand-gold"
                   >
                     <PencilIcon className="h-4 w-4" />
                   </button>

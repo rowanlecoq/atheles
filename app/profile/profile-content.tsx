@@ -806,7 +806,7 @@ export default function ProfileContent() {
           <button
             type="button"
             onClick={() => setShowAvatarPreview(false)}
-            className="absolute right-4 top-4 text-white/70 transition-colors hover:text-white"
+            className="absolute right-4 top-4 opacity-70 transition-opacity hover:opacity-100 text-white"
             aria-label="Close"
           >
             <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-8 w-8">
@@ -821,12 +821,12 @@ export default function ProfileContent() {
             className="flex flex-col items-center gap-4"
             onClick={(e) => e.stopPropagation()}
           >
-            <div style={{ clipPath: "circle(50%)" }}>
+            <div className="h-64 w-64 overflow-hidden sm:h-80 sm:w-80" style={{ clipPath: "circle(50%)" }}>
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={avatar}
                 alt="Profile photo"
-                className="h-64 w-64 object-cover sm:h-80 sm:w-80"
+                className="h-full w-full object-cover"
               />
             </div>
           </motion.div>
@@ -1308,7 +1308,7 @@ export default function ProfileContent() {
               <button
                 type="button"
                 onClick={handleCancel}
-                className="text-xs text-brand-grey transition-colors hover:text-white"
+                className="text-xs text-brand-grey transition-colors hover:text-brand-gold"
               >
                 cancel
               </button>
@@ -1757,7 +1757,7 @@ export default function ProfileContent() {
               <button
                 type="button"
                 onClick={() => setShowDeleteModal(false)}
-                className="flex-1 rounded-lg border border-brand-dark-gold/20 px-4 py-2 text-xs uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold/30 hover:text-white"
+                className="flex-1 rounded-lg border border-brand-dark-gold/20 px-4 py-2 text-xs uppercase tracking-wider text-brand-grey transition-colors hover:border-brand-gold/30 hover:text-brand-gold"
               >
                 cancel
               </button>
