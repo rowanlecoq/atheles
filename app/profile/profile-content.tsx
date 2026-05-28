@@ -1141,7 +1141,7 @@ export default function ProfileContent() {
           <div className="grid grid-cols-2 gap-3">
             <Link
               href="/account"
-              className="group/orders rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center transition-colors hover:border-brand-gold/40 hover:bg-brand-dark-gold/10"
+              className="stat-card-orders group/orders rounded-lg border border-brand-dark-gold/15 bg-brand-dark-gold/5 p-3 text-center transition-colors hover:border-brand-gold/40 hover:bg-brand-dark-gold/10"
             >
               <p className="font-heading text-xl text-brand-gold">{orders}</p>
               <p className="text-sm uppercase tracking-wider text-brand-grey transition-colors group-hover/orders:text-brand-gold sm:text-xs">

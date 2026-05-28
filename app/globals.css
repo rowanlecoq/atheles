@@ -667,11 +667,17 @@ body[data-bg="sunset"] {
   filter: brightness(0.48) saturate(1.4) !important;
 }
 /* Gradient bg elements (progress bar fill, REVEAL YOUR CODE button) stay dark — keep
-   white text on them. All other text-white in the cream card is made dark by the global rule. */
+   white text on them. All other text-white in the cream card is made dark by the global rule.
+   Use rgba instead of #fff so sparkles remain semi-transparent rather than stark solid white. */
 [data-color-mode="light"] .profile-tier-section [class*="bg-gradient-to-r"] [class*="text-white"],
 [data-color-mode="light"] .profile-discount-section [class*="bg-gradient-to-r"] [class*="text-white"] {
-  color: #fff !important;
-  -webkit-text-fill-color: #fff !important;
+  color: rgba(255, 255, 255, 0.45) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.45) !important;
+}
+/* Stats card (orders link) — make hover clearly visible in light mode */
+[data-color-mode="light"] .stat-card-orders:hover {
+  background-color: rgba(122, 94, 24, 0.13) !important;
+  border-color: rgba(110, 82, 20, 0.45) !important;
 }
 /* "None" background swatch — match light page colour instead of dark circle */
 [data-color-mode="light"] button[aria-label="No background"] {
