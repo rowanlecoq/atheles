@@ -124,39 +124,37 @@ export function NewsletterSignup() {
 
             <div className="animate-fade-in [animation-delay:400ms]">
               {submitted ? (
-                <div className="border border-brand-dark-gold/40 bg-brand-dark/40 px-8 py-4 backdrop-blur-sm">
-                  <p className="text-sm uppercase tracking-wider text-brand-pale-gold">
-                    welcome to the club.
-                  </p>
-                </div>
+                <p className="text-sm uppercase tracking-[0.2em] text-brand-pale-gold">
+                  welcome to the club.
+                </p>
               ) : loggedIn ? (
                 <button
                   type="button"
                   disabled={loading}
                   onClick={() => handleSubscribe(userEmail)}
-                  className="border border-brand-gold bg-transparent px-10 py-3 text-sm uppercase tracking-[0.2em] text-brand-gold transition-all duration-300 hover:bg-brand-gold hover:text-brand-dark disabled:opacity-50"
+                  className="border border-brand-gold/70 px-10 py-3 text-xs uppercase tracking-[0.25em] text-brand-gold transition-all duration-300 hover:bg-brand-gold/10 disabled:opacity-50"
                 >
                   {loading ? "..." : "join now"}
                 </button>
               ) : (
                 <form
                   onSubmit={(e) => { e.preventDefault(); handleSubscribe(email); }}
-                  className="flex flex-col gap-3 bg-brand-dark/40 p-3 backdrop-blur-sm sm:flex-row"
+                  className="mx-auto flex max-w-sm flex-col gap-4"
                 >
                   <input
                     type="email"
                     value={email}
                     onChange={(e) => setEmail(e.target.value)}
-                    placeholder="Enter your email"
+                    placeholder="enter your email"
                     required
-                    className="flex-1 border border-brand-dark-gold/40 bg-transparent px-4 py-3 text-base text-white placeholder:text-brand-grey"
+                    className="w-full border-0 border-b border-brand-dark-gold/40 bg-transparent py-2.5 text-center text-sm tracking-wide text-white placeholder:text-brand-grey/60 transition-colors duration-200 focus:border-brand-pale-gold/60 focus:outline-none"
                   />
                   <button
                     type="submit"
                     disabled={loading}
-                    className="border border-brand-gold bg-transparent px-8 py-3 text-sm uppercase tracking-[0.2em] text-brand-gold transition-all duration-300 hover:bg-brand-gold hover:text-brand-dark disabled:opacity-50"
+                    className="w-full border border-brand-gold/70 py-3 text-xs uppercase tracking-[0.25em] text-brand-gold transition-all duration-300 hover:bg-brand-gold/10 disabled:opacity-50"
                   >
-                    {loading ? "..." : "Subscribe"}
+                    {loading ? "..." : "subscribe"}
                   </button>
                 </form>
               )}
