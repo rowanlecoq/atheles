@@ -791,3 +791,7 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .prose-strong\:text-white strong {
   color: #2d1a06 !important;
 }
+
+[data-color-mode="light"] .crop-zoom-slider {
+  background-color: rgba(122, 94, 24, 0.45) !important;
+}
