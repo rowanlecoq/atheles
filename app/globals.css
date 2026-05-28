@@ -620,11 +620,6 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .bg-black\/50 {
   background-color: rgba(26, 22, 18, 0.15) !important;
 }
-[data-color-mode="light"] .bg-black\/80 {
-  background-color: rgba(26, 22, 18, 0.45) !important;
-  backdrop-filter: blur(4px) !important;
-  -webkit-backdrop-filter: blur(4px) !important;
-}
 /* White-opacity borders → subtle warm-dark borders (cart, modals, etc.) */
 [data-color-mode="light"] [class*="border-white\/"] {
   border-color: rgba(26, 22, 18, 0.10) !important;

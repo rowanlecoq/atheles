@@ -202,7 +202,7 @@ export default function ImageCropModal({
   const maxZoom = minZoom * 4;
 
   return (
-    <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black/80 backdrop-blur-sm">
+    <div className="fixed inset-0 z-[9999] overflow-y-auto bg-brand-dark/75">
       <div className="flex min-h-full items-center justify-center p-4">
       <div className="w-full max-w-md rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8">
         <h3 className="mb-2 text-center font-heading text-lg text-brand-gold">
