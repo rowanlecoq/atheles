@@ -202,8 +202,9 @@ export default function ImageCropModal({
   const maxZoom = minZoom * 4;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-start justify-center overflow-y-auto bg-black/80 py-6 backdrop-blur-sm">
-      <div className="mx-4 w-full max-w-sm flex-none rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6 my-auto">
+    <div className="fixed inset-0 z-[9999] overflow-y-auto bg-black/80 backdrop-blur-sm">
+      <div className="flex min-h-full items-center justify-center p-4">
+      <div className="w-full max-w-sm rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-6">
         <h3 className="mb-2 text-center font-heading text-lg text-brand-gold">
           adjust photo
         </h3>
@@ -279,6 +280,7 @@ export default function ImageCropModal({
             save photo
           </button>
         </div>
+      </div>
       </div>
     </div>
   );
