@@ -680,10 +680,10 @@ body[data-bg="sunset"] {
   color: #ddd6c8 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-brand-dark-gold"] {
-  color: #dfc06a !important;
+  color: #d4a030 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="text-brand-pale-gold"] {
-  color: #e8cc7c !important;
+  color: #d8a832 !important;
 }
 [data-color-mode="light"] .theme-section.bg-brand-dark [class*="beta-pulse"] {
   animation: none !important;
