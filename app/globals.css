@@ -819,6 +819,13 @@ body[data-bg="sunset"] {
   background-color: rgba(122, 94, 24, 0.45) !important;
 }
 
+/* In light mode, bg-brand-dark surfaces become cream, making border-white/* variants
+   nearly invisible (white on cream ≈ transparent). Remap to a warm cream border so
+   all dividers look consistent — matching border-brand-dark-gold/* elements nearby.  */
+[data-color-mode="light"] .bg-brand-dark [class*="border-white\/"] {
+  border-color: rgba(110, 82, 20, 0.18) !important;
+}
+
 /* Profile header text (name, email, member-since) sits directly on the canvas when
    a background theme is active. In light mode the dark-brown palette is unreadable on
    colorful canvases, so revert to dark-mode gold/grey values for that subtree only.  */
