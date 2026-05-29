@@ -32,6 +32,7 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
     document.addEventListener("keydown", handleEsc);
     document.documentElement.style.overflow = "hidden";
     const prevent = (e: TouchEvent) => {
+      if (e.touches.length > 1) return; // allow pinch-to-zoom
       const modal = document.querySelector("[data-size-guide-scroll]");
       if (modal && modal.contains(e.target as Node)) return;
       e.preventDefault();

@@ -200,7 +200,7 @@ export default function ImageCropModal({
 
   useEffect(() => {
     document.documentElement.style.overflow = "hidden";
-    const prevent = (e: TouchEvent) => e.preventDefault();
+    const prevent = (e: TouchEvent) => { if (e.touches.length < 2) e.preventDefault(); };
     document.addEventListener("touchmove", prevent, { passive: false });
     return () => {
       document.documentElement.style.overflow = "";
