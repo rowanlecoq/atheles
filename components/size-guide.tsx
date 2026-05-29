@@ -31,9 +31,16 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
     };
     document.addEventListener("keydown", handleEsc);
     document.documentElement.style.overflow = "hidden";
+    const prevent = (e: TouchEvent) => {
+      const modal = document.querySelector("[data-size-guide-scroll]");
+      if (modal && modal.contains(e.target as Node)) return;
+      e.preventDefault();
+    };
+    document.addEventListener("touchmove", prevent, { passive: false });
     return () => {
       document.removeEventListener("keydown", handleEsc);
       document.documentElement.style.overflow = "";
+      document.removeEventListener("touchmove", prevent);
     };
   }, [onClose]);
 
@@ -79,6 +86,7 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
 
         {/* Content */}
         <div
+          data-size-guide-scroll
           className="overflow-y-auto p-6"
           style={{ maxHeight: "calc(85vh - 130px)" }}
         >

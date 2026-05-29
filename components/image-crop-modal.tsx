@@ -200,7 +200,12 @@ export default function ImageCropModal({
 
   useEffect(() => {
     document.documentElement.style.overflow = "hidden";
-    return () => { document.documentElement.style.overflow = ""; };
+    const prevent = (e: TouchEvent) => e.preventDefault();
+    document.addEventListener("touchmove", prevent, { passive: false });
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.removeEventListener("touchmove", prevent);
+    };
   }, []);
 
   const minZoom = getMinZoom();

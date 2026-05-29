@@ -221,10 +221,14 @@ export default function ProfileContent() {
 
   useEffect(() => {
     const locked = showAvatarPreview || showDeleteModal;
-    if (locked) {
-      document.documentElement.style.overflow = "hidden";
-      return () => { document.documentElement.style.overflow = ""; };
-    }
+    if (!locked) return;
+    document.documentElement.style.overflow = "hidden";
+    const prevent = (e: TouchEvent) => e.preventDefault();
+    document.addEventListener("touchmove", prevent, { passive: false });
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.removeEventListener("touchmove", prevent);
+    };
   }, [showAvatarPreview, showDeleteModal]);
 
   // Read cache synchronously before first paint — no skeleton flash on navigation

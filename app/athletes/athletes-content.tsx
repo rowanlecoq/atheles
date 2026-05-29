@@ -339,7 +339,12 @@ export function AthletesContent({ initialAthletes = [] }: { initialAthletes?: At
   useEffect(() => {
     if (!lightbox) return;
     document.documentElement.style.overflow = "hidden";
-    return () => { document.documentElement.style.overflow = ""; };
+    const prevent = (e: TouchEvent) => e.preventDefault();
+    document.addEventListener("touchmove", prevent, { passive: false });
+    return () => {
+      document.documentElement.style.overflow = "";
+      document.removeEventListener("touchmove", prevent);
+    };
   }, [lightbox]);
 
   // Reset zoom on slide change
