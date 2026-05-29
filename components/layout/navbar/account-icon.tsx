@@ -128,7 +128,7 @@ export function AccountIcon() {
       aria-label="Account"
     >
       {loggedIn && avatar ? (
-        <div className="relative h-9 w-9 overflow-hidden rounded-full transition-transform duration-200 hover:scale-110" style={{ clipPath: "circle(50%)" }}>
+        <div className="relative h-9 w-9 overflow-hidden rounded-full transition-transform duration-200 hover:scale-110">
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img src={avatar} alt="Profile" width={36} height={36} className="absolute inset-0 h-full w-full scale-[1.02] object-cover" />
         </div>

@@ -314,7 +314,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                     className="tap-target flex items-center gap-3 rounded-lg px-2 py-2 transition-colors hover:bg-brand-dark-gold/10"
                   >
                     {avatar ? (
-                      <div className="relative h-11 w-11 flex-none overflow-hidden rounded-full" style={{ clipPath: "circle(50%)" }}>
+                      <div className="relative h-11 w-11 flex-none overflow-hidden rounded-full">
                         {/* eslint-disable-next-line @next/next/no-img-element */}
                         <img src={avatar} alt="Profile" width={44} height={44} className="absolute inset-0 h-full w-full scale-[1.02] object-cover" />
                       </div>
