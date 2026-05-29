@@ -220,7 +220,7 @@ export function SearchToggle() {
       {mounted && createPortal(
         <>
           <div
-            className={`fixed inset-0 z-[200] bg-black/70 md:hidden ${overlayClass}`}
+            className={`fixed inset-0 z-[200] bg-black/50 md:hidden ${overlayClass}`}
             style={{ touchAction: open ? "none" : "auto" }}
             onPointerDown={(e) => {
               backdropPointerStart.current = { x: e.clientX, y: e.clientY };

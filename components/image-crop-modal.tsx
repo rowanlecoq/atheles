@@ -198,12 +198,16 @@ export default function ImageCropModal({
     onSave(out.toDataURL("image/jpeg", 0.85));
   };
 
+  useEffect(() => {
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, []);
+
   const minZoom = getMinZoom();
   const maxZoom = minZoom * 4;
 
   return (
-    <div className="fixed inset-0 z-[9999] overflow-y-auto bg-[rgba(20,16,12,0.78)]">
-      <div className="flex min-h-full items-center justify-center p-4">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
       <div className="w-full max-w-md rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8">
         <h3 className="mb-2 text-center font-heading text-lg text-brand-gold">
           adjust photo
@@ -280,7 +284,6 @@ export default function ImageCropModal({
             save photo
           </button>
         </div>
-      </div>
       </div>
     </div>
   );

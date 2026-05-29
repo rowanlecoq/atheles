@@ -219,6 +219,14 @@ export default function ProfileContent() {
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
 
+  useEffect(() => {
+    const locked = showAvatarPreview || showDeleteModal;
+    if (locked) {
+      document.body.style.overflow = "hidden";
+      return () => { document.body.style.overflow = ""; };
+    }
+  }, [showAvatarPreview, showDeleteModal]);
+
   // Read cache synchronously before first paint — no skeleton flash on navigation
   useLayoutEffect(() => {
     try {

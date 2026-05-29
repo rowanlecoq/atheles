@@ -335,6 +335,13 @@ export function AthletesContent({ initialAthletes = [] }: { initialAthletes?: At
     return () => window.removeEventListener("keydown", handler);
   }, [lightbox]);
 
+  // Scroll lock while lightbox is open
+  useEffect(() => {
+    if (!lightbox) return;
+    document.body.style.overflow = "hidden";
+    return () => { document.body.style.overflow = ""; };
+  }, [lightbox]);
+
   // Reset zoom on slide change
   useEffect(() => { setZoom(false); }, [lightbox?.index]);
 
