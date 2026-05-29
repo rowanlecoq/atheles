@@ -338,8 +338,8 @@ export function AthletesContent({ initialAthletes = [] }: { initialAthletes?: At
   // Scroll lock while lightbox is open
   useEffect(() => {
     if (!lightbox) return;
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    document.documentElement.style.overflow = "hidden";
+    return () => { document.documentElement.style.overflow = ""; };
   }, [lightbox]);
 
   // Reset zoom on slide change

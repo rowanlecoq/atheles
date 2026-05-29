@@ -199,8 +199,8 @@ export default function ImageCropModal({
   };
 
   useEffect(() => {
-    document.body.style.overflow = "hidden";
-    return () => { document.body.style.overflow = ""; };
+    document.documentElement.style.overflow = "hidden";
+    return () => { document.documentElement.style.overflow = ""; };
   }, []);
 
   const minZoom = getMinZoom();

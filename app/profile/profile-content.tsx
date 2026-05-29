@@ -222,8 +222,8 @@ export default function ProfileContent() {
   useEffect(() => {
     const locked = showAvatarPreview || showDeleteModal;
     if (locked) {
-      document.body.style.overflow = "hidden";
-      return () => { document.body.style.overflow = ""; };
+      document.documentElement.style.overflow = "hidden";
+      return () => { document.documentElement.style.overflow = ""; };
     }
   }, [showAvatarPreview, showDeleteModal]);
 
