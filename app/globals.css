@@ -616,10 +616,6 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .bg-brand-dark-gold\/10 {
   background-color: rgba(138, 104, 32, 0.08) !important;
 }
-/* Modal backdrops — heavy black is too dark over the warm-beige page */
-[data-color-mode="light"] .bg-black\/50 {
-  background-color: rgba(26, 22, 18, 0.15) !important;
-}
 /* White-opacity borders → subtle warm-dark borders (cart, modals, etc.) */
 [data-color-mode="light"] [class*="border-white\/"] {
   border-color: rgba(26, 22, 18, 0.10) !important;
