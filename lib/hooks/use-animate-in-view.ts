@@ -14,8 +14,11 @@ export function useAnimateInView<T extends HTMLElement>(animString: string, marg
     if (!el) return;
     const { top, bottom } = el.getBoundingClientRect();
     if (top < window.innerHeight && bottom > 0) {
+      el.style.willChange = "transform, opacity";
       el.style.animation = animRef.current;
       triggered.current = true;
+      const cleanup = () => { el.style.willChange = ""; el.removeEventListener("animationend", cleanup); };
+      el.addEventListener("animationend", cleanup);
     }
   }, []); // mount-only — fires before paint on client-side navigation
 
@@ -27,8 +30,11 @@ export function useAnimateInView<T extends HTMLElement>(animString: string, marg
       (entries) => {
         if (entries[0]?.isIntersecting && !triggered.current) {
           triggered.current = true;
+          el.style.willChange = "transform, opacity";
           el.style.animation = animRef.current;
           observer.disconnect();
+          const cleanup = () => { el.style.willChange = ""; el.removeEventListener("animationend", cleanup); };
+          el.addEventListener("animationend", cleanup);
         }
       },
       { rootMargin: margin },

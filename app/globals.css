@@ -508,7 +508,20 @@ body[data-bg="sunset"] {
   to   { transform: translateY(0); }
 }
 .animate-profile-slide-up {
+  will-change: transform;
   animation: profile-slide-up 0.32s cubic-bezier(0.22, 1, 0.36, 1) both;
+}
+
+/* Promote CSS-driven entrance animations to GPU layers so layout reflows
+   (font swap, canvas init) can't disrupt their transforms */
+.animate-header-enter,
+.animate-navbar-enter,
+.animate-announcement-bar-enter {
+  will-change: transform;
+}
+.animate-hero-section-enter,
+.animate-hero-nav-enter {
+  will-change: transform;
 }
 
 
