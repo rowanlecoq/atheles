@@ -36,10 +36,13 @@ export async function GET() {
       ? "1100.00"
       : customer.totalSpent;
 
-    // Auto-tag customer with their tier (non-blocking) — skip if athlete
+    // Auto-tag customer with their tier (non-blocking) — skip if athlete, admin, or manually overridden
     const points = Math.floor(parseFloat(totalSpent) * 50);
     const tierName = getTierName(points);
-    if (!customer.isAthlete && !customer.isAdmin) {
+    const effectiveTier = customer.isAdmin ? "admin"
+      : customer.isAthlete ? "athlete"
+      : customer.tierOverride ?? tierName;
+    if (!customer.isAthlete && !customer.isAdmin && !customer.tierOverride) {
       updateCustomerTier(customer.email, tierName).catch(() => {});
     }
 
@@ -68,11 +71,12 @@ export async function GET() {
         globalTheme: customer.globalTheme,
         isAthlete: customer.isAthlete,
         isAdmin: customer.isAdmin,
+        tierOverride: customer.tierOverride ?? null,
         discordLinked: !!customer.discordId,
         discordUsername: customer.discordUsername,
         discountCode: customer.isAthlete
           ? (process.env.DISCOUNT_ATHLETE || "athelesathlete")
-          : (discountCodes[tierName] || null),
+          : (discountCodes[effectiveTier] || null),
       },
     });
   } catch {

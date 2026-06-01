@@ -739,6 +739,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   let globalTheme = false;
   let isAthlete = false;
   let isAdmin = false;
+  let tierOverride: string | null = null;
   let discordId: string | null = null;
   let discordUsername: string | null = null;
   if (adminEndpoint && adminToken) {
@@ -761,6 +762,8 @@ export async function getCustomerByToken(accessToken: string): Promise<{
       globalTheme = tags.includes("globaltheme:on");
       isAthlete = tags.includes("tier:athlete");
       isAdmin = tags.includes("tier:admin");
+      const overrideTag = tags.find((t) => t.startsWith("tier-override:"));
+      tierOverride = overrideTag ? overrideTag.replace("tier-override:", "") : null;
       const discordTag = tags.find((t) => t.startsWith("discord:") && !t.startsWith("discord_username:"));
       discordId = discordTag ? discordTag.replace("discord:", "") : null;
       const discordUsernameTag = tags.find((t) => t.startsWith("discord_username:"));
@@ -786,6 +789,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
     globalTheme,
     isAthlete,
     isAdmin,
+    tierOverride,
     discordId,
     discordUsername,
   };

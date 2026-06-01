@@ -181,10 +181,12 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
           setLoggedIn(true);
           setUserName(user.name || user.firstName || "");
           const pts = Math.floor(parseFloat(user.totalSpent || "0") * 50);
-          const label = user.isAdmin === "true" || user.isAdmin === true as unknown as string
-            ? "ADMIN"
-            : user.isAthlete === "true" || user.isAthlete === true as unknown as string
-            ? "ATHLETE"
+          const isAdmin = user.isAdmin === "true" || user.isAdmin === true as unknown as string;
+          const isAthlete = user.isAthlete === "true" || user.isAthlete === true as unknown as string;
+          const override = user.tierOverride as string | null | undefined;
+          const label = isAdmin ? "ADMIN"
+            : isAthlete ? "ATHLETE"
+            : override ? override.toUpperCase()
             : pts >= 50000 ? "CHAMPION"
             : pts >= 30000 ? "PLATINUM"
             : pts >= 15000 ? "GOLD"

@@ -8,6 +8,7 @@ type Member = {
   email: string;
   name: string;
   tier: string;
+  tierOverride: string | null;
   dob: string | null;
   createdAt: string;
   orders: string;
@@ -35,6 +36,7 @@ const TIER_BG: Record<string, string> = {
 };
 
 const VALID_TIERS = ["bronze", "silver", "gold", "platinum", "champion", "athlete", "admin"];
+const ALL_TIER_OPTIONS = [...VALID_TIERS, "auto"];
 
 export default function AdminMembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -73,7 +75,14 @@ export default function AdminMembersPage() {
         body: JSON.stringify({ customerId, tier }),
       });
       if (res.ok) {
-        setMembers((prev) => prev.map((m) => (m.id === customerId ? { ...m, tier } : m)));
+        if (tier === "auto") {
+          // Tier reverts to points-based — reload to reflect actual state
+          loadMembers();
+        } else {
+          setMembers((prev) =>
+            prev.map((m) => m.id === customerId ? { ...m, tier, tierOverride: tier } : m),
+          );
+        }
       }
     } catch {}
     setUpdating(null);
@@ -89,7 +98,9 @@ export default function AdminMembersPage() {
   const filtered = members.filter((m) => {
     const matchesFilter =
       filter === "all" ||
-      (filter === "newsletter" ? m.newsletter : m.tier === filter);
+      (filter === "newsletter" ? m.newsletter
+        : filter === "override" ? !!m.tierOverride
+        : m.tier === filter);
     const matchesSearch =
       !search ||
       m.name.toLowerCase().includes(searchLower) ||
@@ -125,7 +136,7 @@ export default function AdminMembersPage() {
 
       {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-2">
-        {["all", "newsletter", ...VALID_TIERS].map((t) => (
+        {["all", "newsletter", ...VALID_TIERS, "override"].map((t) => (
           <button
             key={t}
             type="button"
@@ -142,7 +153,9 @@ export default function AdminMembersPage() {
                 ? ""
                 : t === "newsletter"
                   ? members.filter((m) => m.newsletter).length
-                  : members.filter((m) => m.tier === t).length || ""}
+                  : t === "override"
+                    ? members.filter((m) => !!m.tierOverride).length || ""
+                    : members.filter((m) => m.tier === t).length || ""}
             </span>
           </button>
         ))}
@@ -202,17 +215,26 @@ export default function AdminMembersPage() {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${TIER_COLORS[m.tier] || "text-brand-grey"} ${TIER_BG[m.tier] || ""}`}>
-                    {m.tier}
-                  </span>
+                  <div className="flex items-center gap-1.5">
+                    <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${TIER_COLORS[m.tier] || "text-brand-grey"} ${TIER_BG[m.tier] || ""}`}>
+                      {m.tier}
+                    </span>
+                    {m.tierOverride && (
+                      <span className="rounded-full bg-brand-gold/10 px-1.5 py-0.5 text-[9px] text-brand-gold" title="manually overridden">
+                        override
+                      </span>
+                    )}
+                  </div>
                   <select
-                    value={m.tier}
+                    value={m.tierOverride ? m.tierOverride : m.tier}
                     disabled={updating === m.id}
                     onChange={(e) => updateTier(m.id, e.target.value)}
                     className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-2 py-1 text-xs text-white focus:border-brand-gold focus:outline-none disabled:opacity-50"
                   >
-                    {VALID_TIERS.map((t) => (
-                      <option key={t} value={t}>{t}</option>
+                    {ALL_TIER_OPTIONS.map((t) => (
+                      <option key={t} value={t}>
+                        {t === "auto" ? "auto (points-based)" : t}
+                      </option>
                     ))}
                   </select>
                 </div>

@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
 import { adminFetch, verifyAdmin } from "lib/admin/utils";
 
-const VALID_TIERS = ["bronze", "silver", "gold", "platinum", "champion", "athlete", "admin"];
+const VALID_TIERS = ["bronze", "silver", "gold", "platinum", "champion", "athlete", "admin", "auto"];
+// "auto" clears the override so the user returns to points-based calculation
 
 export const dynamic = "force-dynamic";
 
@@ -52,11 +53,13 @@ export async function GET() {
         };
         const tierTag = c.tags?.find((t) => t.startsWith("tier:"));
         const dobTag = c.tags?.find((t) => t.startsWith("dob:"));
+        const overrideTag = c.tags?.find((t) => t.startsWith("tier-override:"));
         return {
           id: c.id,
           email: c.email,
           name: `${c.firstName || ""} ${c.lastName || ""}`.trim() || c.email,
           tier: tierTag ? tierTag.replace("tier:", "") : "bronze",
+          tierOverride: overrideTag ? overrideTag.replace("tier-override:", "") : null,
           dob: dobTag ? dobTag.replace("dob:", "") : null,
           createdAt: c.createdAt,
           orders: c.numberOfOrders || "0",
@@ -94,7 +97,19 @@ export async function POST(request: Request) {
   );
 
   const currentTags: string[] = customerData.data?.node?.tags || [];
-  const newTags = [...currentTags.filter((t: string) => !t.startsWith("tier:")), `tier:${tier}`];
+  // Strip existing tier and override tags
+  const baseTags = currentTags.filter(
+    (t: string) => !t.startsWith("tier:") && !t.startsWith("tier-override:"),
+  );
+
+  let newTags: string[];
+  if (tier === "auto") {
+    // Remove override — user returns to points-based tier on next login
+    newTags = baseTags;
+  } else {
+    // Set tier tag + override tag so session route won't auto-overwrite
+    newTags = [...baseTags, `tier:${tier}`, `tier-override:${tier}`];
+  }
 
   const updateData = await adminFetch(
     `mutation customerUpdate($input: CustomerInput!) {

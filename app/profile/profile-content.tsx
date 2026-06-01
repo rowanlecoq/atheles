@@ -27,6 +27,7 @@ type User = {
   globalTheme: boolean;
   isAthlete: boolean;
   isAdmin: boolean;
+  tierOverride: string | null;
   discordLinked: boolean;
   discordUsername: string | null;
   discountCode: string | null;
@@ -123,14 +124,27 @@ const ATHLETE_TIER = {
   discountPercent: 20,
 };
 
-function getTier(points: number, isAthlete?: boolean, isAdmin?: boolean) {
+function getTier(points: number, isAthlete?: boolean, isAdmin?: boolean, tierOverride?: string | null) {
   if (isAdmin) return ADMIN_TIER;
   if (isAthlete) return ATHLETE_TIER;
+  if (tierOverride) {
+    const o = tierOverride.toUpperCase();
+    if (o === "ADMIN") return ADMIN_TIER;
+    if (o === "ATHLETE") return ATHLETE_TIER;
+    const found = TIERS.find((t) => t.name === o);
+    if (found) return found;
+  }
   return TIERS.find((t) => points >= t.min && points < t.max) || TIERS[0]!;
 }
 
-function getNextTier(points: number, isAthlete?: boolean, isAdmin?: boolean) {
+function getNextTier(points: number, isAthlete?: boolean, isAdmin?: boolean, tierOverride?: string | null) {
   if (isAthlete || isAdmin) return null;
+  if (tierOverride) {
+    const o = tierOverride.toUpperCase();
+    if (o === "ADMIN" || o === "ATHLETE") return null;
+    const idx = TIERS.findIndex((t) => t.name === o);
+    return idx >= 0 && idx < TIERS.length - 1 ? TIERS[idx + 1] : null;
+  }
   const idx = TIERS.findIndex((t) => points >= t.min && points < t.max);
   return idx < TIERS.length - 1 ? TIERS[idx + 1] : null;
 }
@@ -783,8 +797,8 @@ export default function ProfileContent() {
   const totalSpentNum = parseFloat(user.totalSpent || "0");
   const points = Math.floor(totalSpentNum * 50);
   const orders = parseInt(user.numberOfOrders || "0", 10);
-  const tier = getTier(points, user.isAthlete, user.isAdmin);
-  const nextTier = getNextTier(points, user.isAthlete, user.isAdmin);
+  const tier = getTier(points, user.isAthlete, user.isAdmin, user.tierOverride);
+  const nextTier = getNextTier(points, user.isAthlete, user.isAdmin, user.tierOverride);
   const progressInTier =
     tier.max === Infinity
       ? 100
