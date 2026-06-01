@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import ImageCropModal from "components/image-crop-modal";
 import { useCurrency } from "components/currency-context";
@@ -40,7 +40,6 @@ const TIERS = [
     max: 5000,
     barGradient: "from-amber-900 via-amber-700 to-amber-500",
     titleGradient: "from-amber-500 via-amber-400 to-yellow-300",
-    lightTitleGradient: "from-amber-700 via-amber-600 to-amber-500",
     perks: [] as string[],
     discountCode: null as string | null,
     discountPercent: null as number | null,
@@ -51,7 +50,6 @@ const TIERS = [
     max: 15000,
     barGradient: "from-gray-500 via-gray-400 to-gray-300",
     titleGradient: "from-gray-300 via-gray-200 to-white",
-    lightTitleGradient: "from-gray-600 via-gray-500 to-gray-400",
     perks: ["10% loyalty discount"],
     discountCode: null as string | null,
     discountPercent: 10,
@@ -62,7 +60,6 @@ const TIERS = [
     max: 30000,
     barGradient: "from-yellow-700 via-yellow-500 to-amber-300",
     titleGradient: "from-yellow-400 via-yellow-300 to-amber-200",
-    lightTitleGradient: "from-yellow-600 via-yellow-500 to-amber-400",
     perks: ["early access", "12% loyalty discount"],
     discountCode: null as string | null,
     discountPercent: 12,
@@ -73,7 +70,6 @@ const TIERS = [
     max: 50000,
     barGradient: "from-slate-500 via-indigo-300 to-slate-200",
     titleGradient: "from-slate-300 via-indigo-200 to-white",
-    lightTitleGradient: "from-slate-600 via-indigo-500 to-slate-400",
     perks: [
       "early access",
       "15% loyalty discount",
@@ -88,7 +84,6 @@ const TIERS = [
     max: Infinity,
     barGradient: "from-fuchsia-700 via-purple-500 to-fuchsia-300",
     titleGradient: "from-fuchsia-300 via-purple-300 to-amber-200",
-    lightTitleGradient: "from-fuchsia-700 via-purple-600 to-amber-500",
     perks: [
       "exclusive access",
       "18% loyalty discount",
@@ -106,7 +101,6 @@ const ADMIN_TIER = {
   max: Infinity,
   barGradient: "from-red-500 via-orange-400 to-amber-300",
   titleGradient: "from-red-400 via-orange-300 to-amber-200",
-  lightTitleGradient: "from-red-700 via-orange-600 to-amber-500",
   perks: [] as string[],
   discountCode: null as string | null,
   discountPercent: null as number | null,
@@ -118,7 +112,6 @@ const ATHLETE_TIER = {
   max: Infinity,
   barGradient: "from-sky-400 via-teal-300 to-teal-200",
   titleGradient: "from-sky-300 via-teal-200 to-amber-200",
-  lightTitleGradient: "from-sky-600 via-teal-500 to-amber-500",
   perks: [
     "exclusive access",
     "20% athlete discount",
@@ -234,15 +227,6 @@ export default function ProfileContent() {
   const [themeGlobal, setThemeGlobal] = useState(false);
   const [themeSaving, setThemeSaving] = useState(false);
   const [colorMode, setColorMode] = useState<"dark" | "light" | "system">("dark");
-  const isLightMode = useSyncExternalStore(
-    (cb) => {
-      const obs = new MutationObserver(cb);
-      obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-color-mode"] });
-      return () => obs.disconnect();
-    },
-    () => document.documentElement.getAttribute("data-color-mode") === "light",
-    () => false,
-  );
   const [discordSuccess, setDiscordSuccess] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [addAddressTick, setAddAddressTick] = useState(0);
@@ -968,12 +952,12 @@ export default function ProfileContent() {
           {/* Header - gradient title + tier name */}
           <div className="mb-5 text-center">
             <p
-              className={`mx-auto w-fit mb-1.5 bg-gradient-to-r ${isLightMode ? tier.lightTitleGradient : tier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.25em] text-transparent`}
+              className={`mx-auto w-fit mb-1.5 bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.25em] text-transparent`}
             >
               LOYALTY REWARDS
             </p>
             <p
-              className={`mx-auto w-fit bg-gradient-to-r ${isLightMode ? tier.lightTitleGradient : tier.titleGradient} bg-clip-text text-2xl font-medium tracking-[0.25em] text-transparent`}
+              className={`mx-auto w-fit bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-2xl font-medium tracking-[0.25em] text-transparent`}
             >
               {tier.name}
             </p>
@@ -997,13 +981,13 @@ export default function ProfileContent() {
           {/* Current tier → Next tier labels */}
           <div className="mb-2 flex items-center justify-between">
             <span
-              className={`bg-gradient-to-r ${isLightMode ? tier.lightTitleGradient : tier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.15em] text-transparent`}
+              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.15em] text-transparent`}
             >
               {tier.name}
             </span>
             {nextTier ? (
               <span
-                className={`bg-gradient-to-r ${isLightMode ? nextTier.lightTitleGradient : nextTier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.15em] text-transparent`}
+                className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.15em] text-transparent`}
               >
                 {nextTier.name}
               </span>
@@ -1059,7 +1043,7 @@ export default function ProfileContent() {
                 </span>{" "}
                 points to{" "}
                 <span
-                  className={`bg-gradient-to-r ${isLightMode ? nextTier.lightTitleGradient : nextTier.titleGradient} bg-clip-text font-medium text-transparent`}
+                  className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text font-medium text-transparent`}
                   style={{ textTransform: "uppercase" }}
                 >
                   {nextTier.name}
@@ -1091,7 +1075,7 @@ export default function ProfileContent() {
                     className="flex items-center gap-2.5 text-sm text-white"
                   >
                     <span
-                      className={`bg-gradient-to-r ${isLightMode ? tier.lightTitleGradient : tier.titleGradient} bg-clip-text text-xs text-transparent`}
+                      className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-xs text-transparent`}
                     >
                       &#10022;
                     </span>
@@ -1103,7 +1087,7 @@ export default function ProfileContent() {
               <p className="text-sm text-white/70">
                 reach{" "}
                 <span
-                  className={`bg-gradient-to-r ${isLightMode ? TIERS[1]!.lightTitleGradient : TIERS[1]!.titleGradient} bg-clip-text font-medium text-transparent`}
+                  className={`bg-gradient-to-r ${TIERS[1]!.titleGradient} bg-clip-text font-medium text-transparent`}
                   style={{ textTransform: "uppercase" }}
                 >
                   SILVER
@@ -1119,7 +1103,7 @@ export default function ProfileContent() {
                 >
                   NEXT AT{" "}
                   <span
-                    className={`bg-gradient-to-r ${isLightMode ? nextTier.lightTitleGradient : nextTier.titleGradient} bg-clip-text text-transparent`}
+                    className={`bg-gradient-to-r ${nextTier.titleGradient} bg-clip-text text-transparent`}
                   >
                     {nextTier.name}
                   </span>
@@ -1213,7 +1197,7 @@ export default function ProfileContent() {
             </div>
             <p className="mb-4 text-sm text-brand-grey">
               as a{" "}
-              <span className={`bg-gradient-to-r ${isLightMode ? tier.lightTitleGradient : tier.titleGradient} bg-clip-text font-medium text-transparent`}>
+              <span className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text font-medium text-transparent`}>
                 {tier.name}
               </span>
               {" "}member, you get {tier.discountPercent}% off every order. use this code at checkout:
