@@ -835,11 +835,23 @@ body[data-bg="sunset"] {
   border-color: rgba(110, 82, 20, 0.18) !important;
 }
 
-/* Profile header text (name, email, member-since) sits directly on the canvas when
-   a background theme is active. In light mode the dark-brown palette is unreadable on
-   colorful canvases, so revert to dark-mode gold/grey values for that subtree only.  */
-[data-color-mode="light"] body[data-bg] .profile-hero-text {
-  --color-brand-gold: #ccb173;
-  --color-brand-dark-gold: #7f6f4c;
-  --color-brand-grey: #a09888;
-}
+/* Tier gradient text — used in hamburger menu and profile page.
+   Dark-mode uses light/pastel colors (visible on dark bg).
+   Light-mode overrides use darker saturated colors (visible on cream bg).
+   CSS cascade guarantees correct value the instant data-color-mode is set. */
+.tier-grad-bronze   { background-image: linear-gradient(to right, #f59e0b, #fbbf24, #fde047); }
+.tier-grad-silver   { background-image: linear-gradient(to right, #d1d5db, #e5e7eb, #ffffff); }
+.tier-grad-gold     { background-image: linear-gradient(to right, #facc15, #fde047, #fde68a); }
+.tier-grad-platinum { background-image: linear-gradient(to right, #cbd5e1, #c7d2fe, #ffffff); }
+.tier-grad-champion { background-image: linear-gradient(to right, #f0abfc, #d8b4fe, #fde68a); }
+.tier-grad-admin    { background-image: linear-gradient(to right, #f87171, #fdba74, #fde68a); }
+.tier-grad-athlete  { background-image: linear-gradient(to right, #7dd3fc, #99f6e4, #fde68a); }
+
+[data-color-mode="light"] .tier-grad-bronze   { background-image: linear-gradient(to right, #b45309, #d97706, #f59e0b); }
+[data-color-mode="light"] .tier-grad-silver   { background-image: linear-gradient(to right, #4b5563, #6b7280, #9ca3af); }
+[data-color-mode="light"] .tier-grad-gold     { background-image: linear-gradient(to right, #ca8a04, #eab308, #fbbf24); }
+[data-color-mode="light"] .tier-grad-platinum { background-image: linear-gradient(to right, #475569, #6366f1, #94a3b8); }
+[data-color-mode="light"] .tier-grad-champion { background-image: linear-gradient(to right, #a21caf, #9333ea, #f59e0b); }
+[data-color-mode="light"] .tier-grad-admin    { background-image: linear-gradient(to right, #b91c1c, #ea580c, #f59e0b); }
+[data-color-mode="light"] .tier-grad-athlete  { background-image: linear-gradient(to right, #0284c7, #14b8a6, #f59e0b); }
+
