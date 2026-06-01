@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import ImageCropModal from "components/image-crop-modal";
 import { useCurrency } from "components/currency-context";
@@ -234,21 +234,20 @@ export default function ProfileContent() {
   const [themeGlobal, setThemeGlobal] = useState(false);
   const [themeSaving, setThemeSaving] = useState(false);
   const [colorMode, setColorMode] = useState<"dark" | "light" | "system">("dark");
-  const [isLightMode, setIsLightMode] = useState(false);
+  const isLightMode = useSyncExternalStore(
+    (cb) => {
+      const obs = new MutationObserver(cb);
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-color-mode"] });
+      return () => obs.disconnect();
+    },
+    () => document.documentElement.getAttribute("data-color-mode") === "light",
+    () => false,
+  );
   const [discordSuccess, setDiscordSuccess] = useState(false);
   const [disconnecting, setDisconnecting] = useState(false);
   const [addAddressTick, setAddAddressTick] = useState(0);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const router = useRouter();
-
-  useEffect(() => {
-    const update = () =>
-      setIsLightMode(document.documentElement.getAttribute("data-color-mode") === "light");
-    update();
-    const observer = new MutationObserver(update);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-color-mode"] });
-    return () => observer.disconnect();
-  }, []);
 
   useEffect(() => {
     const locked = showAvatarPreview || showDeleteModal;

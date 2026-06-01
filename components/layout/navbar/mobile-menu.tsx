@@ -3,7 +3,7 @@
 import { Dialog, Transition } from "@headlessui/react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
-import { Fragment, useCallback, useEffect, useState } from "react";
+import { Fragment, useCallback, useEffect, useSyncExternalStore, useState } from "react";
 
 import {
   Bars3Icon,
@@ -164,16 +164,15 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [tierLabel, setTierLabel] = useState("");
   const [loyaltyPoints, setLoyaltyPoints] = useState<number | null>(null);
-  const [isLight, setIsLight] = useState(false);
-
-  useEffect(() => {
-    const update = () =>
-      setIsLight(document.documentElement.getAttribute("data-color-mode") === "light");
-    update();
-    const observer = new MutationObserver(update);
-    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-color-mode"] });
-    return () => observer.disconnect();
-  }, []);
+  const isLight = useSyncExternalStore(
+    (cb) => {
+      const obs = new MutationObserver(cb);
+      obs.observe(document.documentElement, { attributes: true, attributeFilter: ["data-color-mode"] });
+      return () => obs.disconnect();
+    },
+    () => document.documentElement.getAttribute("data-color-mode") === "light",
+    () => false,
+  );
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
