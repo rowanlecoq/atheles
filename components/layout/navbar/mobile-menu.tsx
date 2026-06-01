@@ -38,7 +38,7 @@ const TIER_GRADIENTS: Record<string, string> = {
   BRONZE: "from-amber-500 via-amber-400 to-yellow-300",
   SILVER: "from-gray-300 via-gray-200 to-white",
   GOLD: "from-yellow-400 via-yellow-300 to-amber-200",
-  PLATINUM: "from-zinc-300 via-slate-200 to-white",
+  PLATINUM: "from-slate-300 via-indigo-200 to-white",
   CHAMPION: "from-fuchsia-300 via-purple-300 to-amber-200",
   ADMIN: "from-red-400 via-orange-300 to-amber-200",
   ATHLETE: "from-sky-300 via-teal-200 to-amber-200",

@@ -68,8 +68,8 @@ const TIERS = [
     name: "PLATINUM",
     min: 30000,
     max: 50000,
-    barGradient: "from-slate-600 via-zinc-400 to-slate-200",
-    titleGradient: "from-zinc-300 via-slate-200 to-white",
+    barGradient: "from-slate-500 via-indigo-300 to-slate-200",
+    titleGradient: "from-slate-300 via-indigo-200 to-white",
     perks: [
       "early access",
       "15% loyalty discount",
