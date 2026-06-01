@@ -58,7 +58,7 @@ const TIERS = [
     min: 15000,
     max: 30000,
     barGradient: "from-yellow-700 via-yellow-500 to-amber-300",
-    titleGradient: "from-yellow-400 via-yellow-300 to-amber-300",
+    titleGradient: "from-yellow-400 via-yellow-300 to-amber-200",
     perks: ["early access", "12% loyalty discount"],
     discountCode: null as string | null,
     discountPercent: 12,
@@ -82,7 +82,7 @@ const TIERS = [
     min: 50000,
     max: Infinity,
     barGradient: "from-fuchsia-700 via-purple-500 to-amber-400",
-    titleGradient: "from-fuchsia-300 via-purple-300 to-amber-400",
+    titleGradient: "from-fuchsia-300 via-purple-300 to-amber-200",
     perks: [
       "exclusive access",
       "18% loyalty discount",
@@ -99,7 +99,7 @@ const ADMIN_TIER = {
   min: 0,
   max: Infinity,
   barGradient: "from-red-500 via-orange-400 to-amber-300",
-  titleGradient: "from-red-400 via-orange-300 to-amber-300",
+  titleGradient: "from-red-400 via-orange-300 to-amber-200",
   perks: [] as string[],
   discountCode: null as string | null,
   discountPercent: null as number | null,
@@ -110,7 +110,7 @@ const ATHLETE_TIER = {
   min: 0,
   max: Infinity,
   barGradient: "from-sky-400 via-teal-300 to-amber-300",
-  titleGradient: "from-sky-300 via-teal-200 to-amber-300",
+  titleGradient: "from-sky-300 via-teal-200 to-amber-200",
   perks: [
     "exclusive access",
     "20% athlete discount",
@@ -938,12 +938,12 @@ export default function ProfileContent() {
           {/* Header - gradient title + tier name */}
           <div className="mb-5 text-center">
             <p
-              className={`mb-1.5 bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.25em] text-transparent`}
+              className={`mx-auto w-fit mb-1.5 bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-xs font-medium tracking-[0.25em] text-transparent`}
             >
               LOYALTY REWARDS
             </p>
             <p
-              className={`bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-2xl font-medium tracking-[0.25em] text-transparent`}
+              className={`mx-auto w-fit bg-gradient-to-r ${tier.titleGradient} bg-clip-text text-2xl font-medium tracking-[0.25em] text-transparent`}
             >
               {tier.name}
             </p>
