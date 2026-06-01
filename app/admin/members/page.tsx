@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { MagnifyingGlassIcon, ClipboardDocumentIcon, CheckIcon, EnvelopeIcon } from "@heroicons/react/24/outline";
+import { MagnifyingGlassIcon, ClipboardDocumentIcon, CheckIcon, EnvelopeIcon, ExclamationTriangleIcon } from "@heroicons/react/24/outline";
 
 type Member = {
   id: string;
@@ -36,7 +36,6 @@ const TIER_BG: Record<string, string> = {
 };
 
 const VALID_TIERS = ["bronze", "silver", "gold", "platinum", "champion", "athlete", "admin"];
-const ALL_TIER_OPTIONS = VALID_TIERS;
 
 export default function AdminMembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -46,6 +45,7 @@ export default function AdminMembersPage() {
   const [filter, setFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [copied, setCopied] = useState<string | null>(null);
+  const [adminConfirm, setAdminConfirm] = useState<{ member: Member; pendingTier: string } | null>(null);
 
   const loadMembers = () => {
     setLoading(true);
@@ -83,6 +83,14 @@ export default function AdminMembersPage() {
     setUpdating(null);
   };
 
+  const handleTierChange = (member: Member, tier: string) => {
+    if (tier === "admin") {
+      setAdminConfirm({ member, pendingTier: tier });
+      return;
+    }
+    updateTier(member.id, tier);
+  };
+
   const copyEmail = (email: string) => {
     navigator.clipboard.writeText(email).catch(() => {});
     setCopied(email);
@@ -93,9 +101,7 @@ export default function AdminMembersPage() {
   const filtered = members.filter((m) => {
     const matchesFilter =
       filter === "all" ||
-      (filter === "newsletter" ? m.newsletter
-        : filter === "override" ? !!m.tierOverride
-        : m.tier === filter);
+      (filter === "newsletter" ? m.newsletter : m.tier === filter);
     const matchesSearch =
       !search ||
       m.name.toLowerCase().includes(searchLower) ||
@@ -105,6 +111,46 @@ export default function AdminMembersPage() {
 
   return (
     <div className="mx-auto max-w-4xl px-4 py-12">
+      {/* Admin confirm modal */}
+      {adminConfirm && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div className="absolute inset-0 bg-black/60" onClick={() => setAdminConfirm(null)} />
+          <div className="relative z-10 w-full max-w-sm rounded-xl border border-red-500/30 bg-brand-dark p-6 shadow-2xl">
+            <div className="mb-4 flex items-center gap-3">
+              <ExclamationTriangleIcon className="h-5 w-5 flex-none text-red-400" />
+              <h3 className="font-heading text-base text-red-400">Grant Admin Access</h3>
+            </div>
+            <p className="mb-1 text-sm text-brand-grey">
+              You&apos;re about to grant full admin access to:
+            </p>
+            <p className="mb-1 text-sm font-medium text-white">{adminConfirm.member.name}</p>
+            <p className="mb-5 text-xs text-brand-grey/70">{adminConfirm.member.email}</p>
+            <p className="mb-5 text-xs text-red-400/80">
+              Admins can manage all members, tiers, and site content. Only do this for trusted accounts.
+            </p>
+            <div className="flex gap-3">
+              <button
+                type="button"
+                onClick={() => setAdminConfirm(null)}
+                className="flex-1 rounded-lg border border-brand-dark-gold/30 px-4 py-2 text-sm text-brand-grey transition-colors hover:border-brand-gold/50 hover:text-brand-gold"
+              >
+                cancel
+              </button>
+              <button
+                type="button"
+                onClick={() => {
+                  updateTier(adminConfirm.member.id, adminConfirm.pendingTier);
+                  setAdminConfirm(null);
+                }}
+                className="flex-1 rounded-lg bg-red-500/20 px-4 py-2 text-sm text-red-400 transition-colors hover:bg-red-500/30"
+              >
+                confirm admin
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div className="mb-8">
         <a href="/admin" className="text-xs text-brand-grey hover:text-brand-gold">
           ← back to dashboard
@@ -131,7 +177,7 @@ export default function AdminMembersPage() {
 
       {/* Filters */}
       <div className="mb-6 flex flex-wrap gap-2">
-        {["all", "newsletter", ...VALID_TIERS, "override"].map((t) => (
+        {["all", "newsletter", ...VALID_TIERS].map((t) => (
           <button
             key={t}
             type="button"
@@ -148,9 +194,7 @@ export default function AdminMembersPage() {
                 ? ""
                 : t === "newsletter"
                   ? members.filter((m) => m.newsletter).length
-                  : t === "override"
-                    ? members.filter((m) => !!m.tierOverride).length || ""
-                    : members.filter((m) => m.tier === t).length || ""}
+                  : members.filter((m) => m.tier === t).length || ""}
             </span>
           </button>
         ))}
@@ -210,23 +254,16 @@ export default function AdminMembersPage() {
                   </div>
                 </div>
                 <div className="flex flex-col items-end gap-2">
-                  <div className="flex items-center gap-1.5">
-                    <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${TIER_COLORS[m.tier] || "text-brand-grey"} ${TIER_BG[m.tier] || ""}`}>
-                      {m.tier}
-                    </span>
-                    {m.tierOverride && (
-                      <span className="rounded-full bg-brand-gold/10 px-1.5 py-0.5 text-[9px] text-brand-gold" title="manually overridden">
-                        override
-                      </span>
-                    )}
-                  </div>
+                  <span className={`rounded-full px-2 py-0.5 text-[10px] uppercase tracking-wider ${TIER_COLORS[m.tier] || "text-brand-grey"} ${TIER_BG[m.tier] || ""}`}>
+                    {m.tier}
+                  </span>
                   <select
                     value={m.tierOverride ? m.tierOverride : m.tier}
                     disabled={updating === m.id}
-                    onChange={(e) => updateTier(m.id, e.target.value)}
+                    onChange={(e) => handleTierChange(m, e.target.value)}
                     className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-2 py-1 text-xs text-white focus:border-brand-gold focus:outline-none disabled:opacity-50"
                   >
-                    {ALL_TIER_OPTIONS.map((t) => (
+                    {VALID_TIERS.map((t) => (
                       <option key={t} value={t}>{t}</option>
                     ))}
                   </select>
