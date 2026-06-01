@@ -228,8 +228,8 @@ export default function AdminThemePage() {
             <div className="rounded-lg p-4" style={{ background: theme.brandDark }}>
               {theme.headingStyle === "gradient" ? (
                 <>
-                  <p className="bg-clip-text text-xs text-transparent" style={{ backgroundImage: `linear-gradient(90deg, ${theme.headingGradientFrom}cc, ${theme.headingGradientTo}cc)` }}>preview text</p>
-                  <p className="bg-clip-text font-heading text-lg font-bold text-transparent" style={{ backgroundImage: `linear-gradient(90deg, ${theme.headingGradientFrom}, ${theme.headingGradientTo})` }}>ATHELES</p>
+                  <p className="w-fit bg-clip-text text-xs text-transparent" style={{ backgroundImage: `linear-gradient(90deg, ${theme.headingGradientFrom}cc, ${theme.headingGradientTo}cc)` }}>preview text</p>
+                  <p className="w-fit bg-clip-text font-heading text-lg font-bold text-transparent" style={{ backgroundImage: `linear-gradient(90deg, ${theme.headingGradientFrom}, ${theme.headingGradientTo})` }}>ATHELES</p>
                 </>
               ) : (
                 <>

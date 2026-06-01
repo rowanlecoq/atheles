@@ -331,7 +331,7 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                       {loggedIn ? (
                         <>
                           {tierLabel && (
-                            <p className={`bg-gradient-to-r ${TIER_GRADIENTS[tierLabel] ?? ""} bg-clip-text text-[10px] uppercase tracking-[0.18em] text-transparent`}>
+                            <p className={`w-fit bg-gradient-to-r ${TIER_GRADIENTS[tierLabel] ?? ""} bg-clip-text text-[10px] uppercase tracking-[0.18em] text-transparent`}>
                               {tierLabel}
                             </p>
                           )}
