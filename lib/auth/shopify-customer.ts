@@ -692,6 +692,7 @@ export async function getCustomerByToken(accessToken: string): Promise<{
   globalTheme: boolean;
   isAthlete: boolean;
   isAdmin: boolean;
+  tierOverride: string | null;
   discordId: string | null;
   discordUsername: string | null;
 } | null> {
