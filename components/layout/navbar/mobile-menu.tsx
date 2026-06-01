@@ -34,7 +34,7 @@ const TIER_THRESHOLDS: Record<string, { min: number; max: number; next: string |
   ATHLETE:  { min: 0,     max: Infinity, next: null },
   ADMIN:    { min: 0,     max: Infinity, next: null },
 };
-const TIER_GRADIENTS: Record<string, string> = {
+const TIER_GRADIENTS_DARK: Record<string, string> = {
   BRONZE: "from-amber-500 via-amber-400 to-yellow-300",
   SILVER: "from-gray-300 via-gray-200 to-white",
   GOLD: "from-yellow-400 via-yellow-300 to-amber-200",
@@ -42,6 +42,16 @@ const TIER_GRADIENTS: Record<string, string> = {
   CHAMPION: "from-fuchsia-300 via-purple-300 to-amber-200",
   ADMIN: "from-red-400 via-orange-300 to-amber-200",
   ATHLETE: "from-sky-300 via-teal-200 to-amber-200",
+};
+
+const TIER_GRADIENTS_LIGHT: Record<string, string> = {
+  BRONZE: "from-amber-700 via-amber-600 to-amber-500",
+  SILVER: "from-gray-600 via-gray-500 to-gray-400",
+  GOLD: "from-yellow-600 via-yellow-500 to-amber-400",
+  PLATINUM: "from-slate-600 via-indigo-500 to-slate-400",
+  CHAMPION: "from-fuchsia-700 via-purple-600 to-amber-500",
+  ADMIN: "from-red-700 via-orange-600 to-amber-500",
+  ATHLETE: "from-sky-600 via-teal-500 to-amber-500",
 };
 
 type CategoryLink = {
@@ -154,6 +164,18 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
   const [avatar, setAvatar] = useState<string | null>(null);
   const [tierLabel, setTierLabel] = useState("");
   const [loyaltyPoints, setLoyaltyPoints] = useState<number | null>(null);
+  const [isLight, setIsLight] = useState(false);
+
+  useEffect(() => {
+    const update = () =>
+      setIsLight(document.documentElement.getAttribute("data-color-mode") === "light");
+    update();
+    const observer = new MutationObserver(update);
+    observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-color-mode"] });
+    return () => observer.disconnect();
+  }, []);
+
+  const TIER_GRADIENTS = isLight ? TIER_GRADIENTS_LIGHT : TIER_GRADIENTS_DARK;
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
