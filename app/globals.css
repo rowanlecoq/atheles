@@ -835,10 +835,10 @@ body[data-bg="sunset"] {
   border-color: rgba(110, 82, 20, 0.18) !important;
 }
 
-/* Tier gradient text — used in hamburger menu and profile page.
+/* Tier gradient text — used in hamburger menu.
    Dark-mode uses light/pastel colors (visible on dark bg).
-   Light-mode overrides use darker saturated colors (visible on cream bg).
-   CSS cascade guarantees correct value the instant data-color-mode is set. */
+   Light-mode: same filter as profile-tier-section — brightness(0.48) saturate(1.4)
+   darkens the pastels to readable saturated shades on the cream background. */
 .tier-grad-bronze   { background-image: linear-gradient(to right, #f59e0b, #fbbf24, #fde047); }
 .tier-grad-silver   { background-image: linear-gradient(to right, #d1d5db, #e5e7eb, #ffffff); }
 .tier-grad-gold     { background-image: linear-gradient(to right, #facc15, #fde047, #fde68a); }
@@ -847,11 +847,13 @@ body[data-bg="sunset"] {
 .tier-grad-admin    { background-image: linear-gradient(to right, #f87171, #fdba74, #fde68a); }
 .tier-grad-athlete  { background-image: linear-gradient(to right, #7dd3fc, #99f6e4, #fde68a); }
 
-[data-color-mode="light"] .tier-grad-bronze   { background-image: linear-gradient(to right, #b45309, #d97706, #f59e0b); }
-[data-color-mode="light"] .tier-grad-silver   { background-image: linear-gradient(to right, #4b5563, #6b7280, #9ca3af); }
-[data-color-mode="light"] .tier-grad-gold     { background-image: linear-gradient(to right, #ca8a04, #eab308, #fbbf24); }
-[data-color-mode="light"] .tier-grad-platinum { background-image: linear-gradient(to right, #475569, #6366f1, #94a3b8); }
-[data-color-mode="light"] .tier-grad-champion { background-image: linear-gradient(to right, #a21caf, #9333ea, #f59e0b); }
-[data-color-mode="light"] .tier-grad-admin    { background-image: linear-gradient(to right, #b91c1c, #ea580c, #f59e0b); }
-[data-color-mode="light"] .tier-grad-athlete  { background-image: linear-gradient(to right, #0284c7, #14b8a6, #f59e0b); }
+[data-color-mode="light"] .tier-grad-bronze,
+[data-color-mode="light"] .tier-grad-silver,
+[data-color-mode="light"] .tier-grad-gold,
+[data-color-mode="light"] .tier-grad-platinum,
+[data-color-mode="light"] .tier-grad-champion,
+[data-color-mode="light"] .tier-grad-admin,
+[data-color-mode="light"] .tier-grad-athlete {
+  filter: brightness(0.48) saturate(1.4) !important;
+}
 
