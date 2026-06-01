@@ -35,23 +35,23 @@ const TIER_THRESHOLDS: Record<string, { min: number; max: number; next: string |
   ADMIN:    { min: 0,     max: Infinity, next: null },
 };
 const TIER_GRADIENTS_DARK: Record<string, string> = {
-  BRONZE: "from-amber-500 via-amber-400 to-yellow-300",
-  SILVER: "from-gray-300 via-gray-200 to-white",
-  GOLD: "from-yellow-400 via-yellow-300 to-amber-200",
-  PLATINUM: "from-slate-300 via-indigo-200 to-white",
-  CHAMPION: "from-fuchsia-300 via-purple-300 to-amber-200",
-  ADMIN: "from-red-400 via-orange-300 to-amber-200",
-  ATHLETE: "from-sky-300 via-teal-200 to-amber-200",
+  BRONZE:   "linear-gradient(to right, #f59e0b, #fbbf24, #fde047)",
+  SILVER:   "linear-gradient(to right, #d1d5db, #e5e7eb, #ffffff)",
+  GOLD:     "linear-gradient(to right, #facc15, #fde047, #fde68a)",
+  PLATINUM: "linear-gradient(to right, #cbd5e1, #c7d2fe, #ffffff)",
+  CHAMPION: "linear-gradient(to right, #f0abfc, #d8b4fe, #fde68a)",
+  ADMIN:    "linear-gradient(to right, #f87171, #fdba74, #fde68a)",
+  ATHLETE:  "linear-gradient(to right, #7dd3fc, #99f6e4, #fde68a)",
 };
 
 const TIER_GRADIENTS_LIGHT: Record<string, string> = {
-  BRONZE: "from-amber-700 via-amber-600 to-amber-500",
-  SILVER: "from-gray-600 via-gray-500 to-gray-400",
-  GOLD: "from-yellow-600 via-yellow-500 to-amber-400",
-  PLATINUM: "from-slate-600 via-indigo-500 to-slate-400",
-  CHAMPION: "from-fuchsia-700 via-purple-600 to-amber-500",
-  ADMIN: "from-red-700 via-orange-600 to-amber-500",
-  ATHLETE: "from-sky-600 via-teal-500 to-amber-500",
+  BRONZE:   "linear-gradient(to right, #b45309, #d97706, #f59e0b)",
+  SILVER:   "linear-gradient(to right, #4b5563, #6b7280, #9ca3af)",
+  GOLD:     "linear-gradient(to right, #ca8a04, #eab308, #fbbf24)",
+  PLATINUM: "linear-gradient(to right, #475569, #6366f1, #94a3b8)",
+  CHAMPION: "linear-gradient(to right, #a21caf, #9333ea, #f59e0b)",
+  ADMIN:    "linear-gradient(to right, #b91c1c, #ea580c, #f59e0b)",
+  ATHLETE:  "linear-gradient(to right, #0284c7, #14b8a6, #f59e0b)",
 };
 
 type CategoryLink = {
@@ -174,8 +174,6 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
     observer.observe(document.documentElement, { attributes: true, attributeFilter: ["data-color-mode"] });
     return () => observer.disconnect();
   }, []);
-
-  const TIER_GRADIENTS = isLight ? TIER_GRADIENTS_LIGHT : TIER_GRADIENTS_DARK;
 
   const openMobileMenu = () => setIsOpen(true);
   const closeMobileMenu = () => setIsOpen(false);
@@ -355,7 +353,10 @@ export default function MobileMenu({ menu }: { menu: Menu[] }) {
                       {loggedIn ? (
                         <>
                           {tierLabel && (
-                            <p className={`w-fit bg-gradient-to-r ${TIER_GRADIENTS[tierLabel] ?? ""} bg-clip-text text-[10px] uppercase tracking-[0.18em] text-transparent`}>
+                            <p
+                              className="w-fit bg-clip-text text-[10px] uppercase tracking-[0.18em] text-transparent"
+                              style={{ backgroundImage: (isLight ? TIER_GRADIENTS_LIGHT : TIER_GRADIENTS_DARK)[tierLabel] }}
+                            >
                               {tierLabel}
                             </p>
                           )}
