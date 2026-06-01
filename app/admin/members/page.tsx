@@ -36,7 +36,7 @@ const TIER_BG: Record<string, string> = {
 };
 
 const VALID_TIERS = ["bronze", "silver", "gold", "platinum", "champion", "athlete", "admin"];
-const ALL_TIER_OPTIONS = [...VALID_TIERS, "auto"];
+const ALL_TIER_OPTIONS = VALID_TIERS;
 
 export default function AdminMembersPage() {
   const [members, setMembers] = useState<Member[]>([]);
@@ -75,14 +75,9 @@ export default function AdminMembersPage() {
         body: JSON.stringify({ customerId, tier }),
       });
       if (res.ok) {
-        if (tier === "auto") {
-          // Tier reverts to points-based — reload to reflect actual state
-          loadMembers();
-        } else {
-          setMembers((prev) =>
-            prev.map((m) => m.id === customerId ? { ...m, tier, tierOverride: tier } : m),
-          );
-        }
+        setMembers((prev) =>
+          prev.map((m) => m.id === customerId ? { ...m, tier, tierOverride: tier } : m),
+        );
       }
     } catch {}
     setUpdating(null);
@@ -232,9 +227,7 @@ export default function AdminMembersPage() {
                     className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-2 py-1 text-xs text-white focus:border-brand-gold focus:outline-none disabled:opacity-50"
                   >
                     {ALL_TIER_OPTIONS.map((t) => (
-                      <option key={t} value={t}>
-                        {t === "auto" ? "auto (points-based)" : t}
-                      </option>
+                      <option key={t} value={t}>{t}</option>
                     ))}
                   </select>
                 </div>
