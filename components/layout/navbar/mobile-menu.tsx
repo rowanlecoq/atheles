@@ -15,15 +15,6 @@ import LogoSquare from "components/logo-square";
 import { fetchSession } from "lib/session-cache";
 import type { Menu } from "lib/shopify/types";
 
-const TIER_BAR_GRADIENTS: Record<string, string> = {
-  BRONZE: "from-amber-900 via-amber-700 to-amber-500",
-  SILVER: "from-gray-500 via-gray-400 to-gray-300",
-  GOLD: "from-yellow-700 via-yellow-500 to-amber-300",
-  PLATINUM: "from-cyan-700 via-cyan-400 to-cyan-200",
-  CHAMPION: "from-fuchsia-700 via-purple-500 to-amber-400",
-  ADMIN: "from-red-500 via-orange-400 to-amber-300",
-  ATHLETE: "from-sky-400 via-teal-300 to-amber-300",
-};
 
 const TIER_THRESHOLDS: Record<string, { min: number; max: number; next: string | null }> = {
   BRONZE:   { min: 0,     max: 5000,    next: "SILVER" },
