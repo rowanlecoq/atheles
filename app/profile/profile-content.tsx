@@ -81,7 +81,7 @@ const TIERS = [
     name: "CHAMPION",
     min: 50000,
     max: Infinity,
-    barGradient: "from-fuchsia-700 via-purple-500 to-amber-400",
+    barGradient: "from-fuchsia-700 via-purple-500 to-fuchsia-300",
     titleGradient: "from-fuchsia-300 via-purple-300 to-amber-200",
     perks: [
       "exclusive access",
@@ -109,7 +109,7 @@ const ATHLETE_TIER = {
   name: "ATHLETE",
   min: 0,
   max: Infinity,
-  barGradient: "from-sky-400 via-teal-300 to-amber-300",
+  barGradient: "from-sky-400 via-teal-300 to-teal-200",
   titleGradient: "from-sky-300 via-teal-200 to-amber-200",
   perks: [
     "exclusive access",
