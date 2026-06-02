@@ -851,6 +851,7 @@ body[data-bg="sunset"] {
 .reveal-sparkle {
   color: transparent;
   -webkit-text-fill-color: transparent;
+  transition: color 400ms ease, -webkit-text-fill-color 400ms ease;
 }
 .group\/reveal:hover .reveal-shimmer,
 .group\/reveal:active .reveal-shimmer {
