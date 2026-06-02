@@ -123,7 +123,10 @@ export function SearchToggle() {
     let active = false;
     let savedY = window.scrollY;
 
-    const onStart = () => { active = true; savedY = window.scrollY; };
+    const onStart = () => {
+      if (!active) savedY = window.scrollY; // capture once per press, not on key-repeat
+      active = true;
+    };
     const onEnd = () => { active = false; };
     const onScroll = () => {
       if (active && window.scrollY < savedY) window.scrollTo(0, savedY);
