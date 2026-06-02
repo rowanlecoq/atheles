@@ -118,16 +118,24 @@ export function SearchToggle() {
     }
 
     // Desktop: sticky navbar drifts scroll toward y=0 on every keystroke.
-    // Intercept and snap back, but only when the page drifts upward (browser-caused).
-    // User-initiated downward scrolling is left untouched.
+    // Browsers sometimes defer this scroll adjustment to the next frame, after keyup
+    // has already fired, so we hold the guard open for 2 extra frames after release.
     let active = false;
     let savedY = window.scrollY;
+    let endRaf = 0;
 
     const onStart = () => {
-      if (!active) savedY = window.scrollY; // capture once per press, not on key-repeat
+      cancelAnimationFrame(endRaf);
+      if (!active) savedY = window.scrollY;
       active = true;
     };
-    const onEnd = () => { active = false; };
+    const onEnd = () => {
+      // Stay active for 2 frames to catch deferred browser scroll adjustments
+      cancelAnimationFrame(endRaf);
+      endRaf = requestAnimationFrame(() => {
+        endRaf = requestAnimationFrame(() => { active = false; });
+      });
+    };
     const onScroll = () => {
       if (active && window.scrollY < savedY) window.scrollTo(0, savedY);
     };
@@ -139,6 +147,7 @@ export function SearchToggle() {
     window.addEventListener("scroll", onScroll);
 
     return () => {
+      cancelAnimationFrame(endRaf);
       document.removeEventListener("keydown", onStart, true);
       document.removeEventListener("keyup", onEnd, true);
       document.removeEventListener("mousedown", onStart, true);
