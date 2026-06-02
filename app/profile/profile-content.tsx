@@ -1243,32 +1243,22 @@ export default function ProfileContent() {
               >
                 {/* Shimmer sweep */}
                 <div
-                  className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover/reveal:opacity-100"
+                  className="reveal-shimmer absolute inset-0 opacity-0 transition-opacity duration-300"
                   style={{
                     background: "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.25) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)",
                     animation: "revealShimmer 2s ease-in-out infinite",
                   }}
                 />
-                {/* Sparkles on hover */}
-                <svg className="reveal-sparkle absolute left-[10%] top-[20%] text-white/0 transition-colors duration-300 group-hover/reveal:text-white/60" style={{ width: 8, height: 8, animation: "revealSpark 1.5s ease-in-out infinite" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
-                <svg className="reveal-sparkle absolute left-[30%] top-[15%] text-white/0 transition-colors duration-300 group-hover/reveal:text-white/45" style={{ width: 6, height: 6, animation: "revealSpark 1.8s ease-in-out infinite 0.3s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
-                <svg className="reveal-sparkle absolute left-[55%] top-[70%] text-white/0 transition-colors duration-300 group-hover/reveal:text-white/55" style={{ width: 7, height: 7, animation: "revealSpark 1.6s ease-in-out infinite 0.6s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
-                <svg className="reveal-sparkle absolute left-[75%] top-[25%] text-white/0 transition-colors duration-300 group-hover/reveal:text-white/45" style={{ width: 8, height: 8, animation: "revealSpark 2s ease-in-out infinite 0.2s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
-                <svg className="reveal-sparkle absolute left-[90%] top-[60%] text-white/0 transition-colors duration-300 group-hover/reveal:text-white/55" style={{ width: 6, height: 6, animation: "revealSpark 1.7s ease-in-out infinite 0.8s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
-                {/* Text with letter spacing on hover */}
-                <span className="relative z-10 transition-all duration-300 group-hover/reveal:tracking-[0.25em]">
+                {/* Sparkles */}
+                <svg className="reveal-sparkle absolute left-[10%] top-[20%]" style={{ width: 8, height: 8, animation: "revealSpark 1.5s ease-in-out infinite" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
+                <svg className="reveal-sparkle absolute left-[30%] top-[15%]" style={{ width: 6, height: 6, animation: "revealSpark 1.8s ease-in-out infinite 0.3s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
+                <svg className="reveal-sparkle absolute left-[55%] top-[70%]" style={{ width: 7, height: 7, animation: "revealSpark 1.6s ease-in-out infinite 0.6s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
+                <svg className="reveal-sparkle absolute left-[75%] top-[25%]" style={{ width: 8, height: 8, animation: "revealSpark 2s ease-in-out infinite 0.2s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
+                <svg className="reveal-sparkle absolute left-[90%] top-[60%]" style={{ width: 6, height: 6, animation: "revealSpark 1.7s ease-in-out infinite 0.8s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
+                {/* Text */}
+                <span className="reveal-text relative z-10 transition-all duration-300">
                   reveal your code
                 </span>
-                <style jsx>{`
-                  @keyframes revealShimmer {
-                    0% { transform: translateX(-100%); }
-                    100% { transform: translateX(100%); }
-                  }
-                  @keyframes revealSpark {
-                    0%, 100% { opacity: 0.35; transform: scale(0.88); }
-                    50% { opacity: 1; transform: scale(1.05); }
-                  }
-                `}</style>
               </button>
             )}
 

@@ -835,6 +835,33 @@ body[data-bg="sunset"] {
   border-color: rgba(110, 82, 20, 0.18) !important;
 }
 
+/* Reveal-your-code button keyframes — must live in globals.css, not <style jsx>,
+   because styled-jsx scopes keyframe names and breaks the inline animation reference. */
+@keyframes revealShimmer {
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(100%); }
+}
+@keyframes revealSpark {
+  0%, 100% { opacity: 0.35; transform: scale(0.88); }
+  50%       { opacity: 1;    transform: scale(1.05); }
+}
+
+/* Hover (desktop) + active (mobile) — covers dark mode where Tailwind group-hover
+   alone is unreliable on touch. -webkit-text-fill-color needed for iOS Safari SVG fill. */
+.group\/reveal:hover .reveal-shimmer,
+.group\/reveal:active .reveal-shimmer {
+  opacity: 1 !important;
+}
+.group\/reveal:hover .reveal-sparkle,
+.group\/reveal:active .reveal-sparkle {
+  color: rgba(255, 255, 255, 0.55) !important;
+  -webkit-text-fill-color: rgba(255, 255, 255, 0.55) !important;
+}
+.group\/reveal:hover .reveal-text,
+.group\/reveal:active .reveal-text {
+  letter-spacing: 0.25em !important;
+}
+
 /* Tier gradient text — used in hamburger menu.
    Dark-mode uses light/pastel colors (visible on dark bg).
    Light-mode: same filter as profile-tier-section — brightness(0.48) saturate(1.4)
