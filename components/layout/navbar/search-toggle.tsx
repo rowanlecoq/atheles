@@ -118,18 +118,16 @@ export function SearchToggle() {
     }
 
     // Desktop: sticky navbar drifts scroll toward y=0 on every keystroke.
-    // Intercept and snap back.
+    // Intercept and snap back, but only when the page drifts upward (browser-caused).
+    // User-initiated downward scrolling is left untouched.
     let active = false;
     let savedY = window.scrollY;
 
-    const onStart = (e: Event) => {
-      const target = e.target as HTMLElement;
-      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return;
-      active = true;
-      savedY = window.scrollY;
-    };
+    const onStart = () => { active = true; savedY = window.scrollY; };
     const onEnd = () => { active = false; };
-    const onScroll = () => { if (active) window.scrollTo(0, savedY); };
+    const onScroll = () => {
+      if (active && window.scrollY < savedY) window.scrollTo(0, savedY);
+    };
 
     document.addEventListener("keydown", onStart, true);
     document.addEventListener("keyup", onEnd, true);
