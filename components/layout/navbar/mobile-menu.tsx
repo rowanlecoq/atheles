@@ -16,16 +16,6 @@ import { fetchSession } from "lib/session-cache";
 import type { Menu } from "lib/shopify/types";
 
 
-const TIER_THRESHOLDS: Record<string, { min: number; max: number; next: string | null }> = {
-  BRONZE:   { min: 0,     max: 5000,    next: "SILVER" },
-  SILVER:   { min: 5000,  max: 15000,   next: "GOLD" },
-  GOLD:     { min: 15000, max: 30000,   next: "PLATINUM" },
-  PLATINUM: { min: 30000, max: 50000,   next: "CHAMPION" },
-  CHAMPION: { min: 50000, max: Infinity, next: null },
-  ATHLETE:  { min: 0,     max: Infinity, next: null },
-  ADMIN:    { min: 0,     max: Infinity, next: null },
-};
-
 type CategoryLink = {
   title: string;
   path: string;

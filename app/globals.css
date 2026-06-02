@@ -659,7 +659,6 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .newsletter-top-fade {
   display: none;
 }
-/* Avatar circle: border-radius + overflow-hidden leaves 1-2px anti-aliasing pixels at the
 /* Profile theme appearance card: brand-grey opacity variants read well on dark cards
    but are too faint on the cream card in light mode — restore full legibility.
    Target both plain and opacity-suffixed variants. */
@@ -885,5 +884,14 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .tier-grad-admin,
 [data-color-mode="light"] .tier-grad-athlete {
   filter: brightness(0.48) saturate(1.4) !important;
+}
+
+/* Profile header text (name, email, member-since) sits directly on the canvas when
+   a background theme is active. In light mode the dark-brown palette is unreadable on
+   colorful canvases, so revert to gold/grey values for that subtree only. */
+[data-color-mode="light"] body[data-bg] .profile-hero-text {
+  --color-brand-gold: #ccb173;
+  --color-brand-dark-gold: #7f6f4c;
+  --color-brand-grey: #a09888;
 }
 
