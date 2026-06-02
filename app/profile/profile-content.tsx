@@ -1249,11 +1249,11 @@ export default function ProfileContent() {
                     animation: "revealShimmer 2s ease-in-out infinite",
                   }}
                 />
-                {/* Sparkles */}
-                <svg className="reveal-sparkle absolute left-[10%] top-[20%]" style={{ width: 8, height: 8, animation: "revealSpark 1.5s ease-in-out infinite" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
-                <svg className="reveal-sparkle absolute left-[30%] top-[15%]" style={{ width: 6, height: 6, animation: "revealSpark 1.8s ease-in-out infinite 0.3s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
-                <svg className="reveal-sparkle absolute left-[55%] top-[70%]" style={{ width: 7, height: 7, animation: "revealSpark 1.6s ease-in-out infinite 0.6s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
-                <svg className="reveal-sparkle absolute left-[75%] top-[25%]" style={{ width: 8, height: 8, animation: "revealSpark 2s ease-in-out infinite 0.2s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
+                {/* Sparkles — hidden by default, revealed on hover/active via CSS */}
+                <svg className="reveal-sparkle absolute left-[10%] top-[20%]" style={{ width: 6, height: 6, animation: "revealSpark 1.5s ease-in-out infinite" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
+                <svg className="reveal-sparkle absolute left-[30%] top-[15%]" style={{ width: 5, height: 5, animation: "revealSpark 1.8s ease-in-out infinite 0.3s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
+                <svg className="reveal-sparkle absolute left-[55%] top-[70%]" style={{ width: 6, height: 6, animation: "revealSpark 1.6s ease-in-out infinite 0.6s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
+                <svg className="reveal-sparkle absolute left-[75%] top-[25%]" style={{ width: 5, height: 5, animation: "revealSpark 2s ease-in-out infinite 0.2s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
                 <svg className="reveal-sparkle absolute left-[90%] top-[60%]" style={{ width: 6, height: 6, animation: "revealSpark 1.7s ease-in-out infinite 0.8s" }} viewBox="0 0 12 12" fill="currentColor" aria-hidden="true"><path d="M6 0L7.5 4.5 12 6 7.5 7.5 6 12 4.5 7.5 0 6 4.5 4.5Z"/></svg>
                 {/* Text */}
                 <span className="reveal-text relative z-10 transition-all duration-300">

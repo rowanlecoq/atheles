@@ -848,6 +848,10 @@ body[data-bg="sunset"] {
 
 /* Hover (desktop) + active (mobile) — covers dark mode where Tailwind group-hover
    alone is unreliable on touch. -webkit-text-fill-color needed for iOS Safari SVG fill. */
+.reveal-sparkle {
+  color: transparent;
+  -webkit-text-fill-color: transparent;
+}
 .group\/reveal:hover .reveal-shimmer,
 .group\/reveal:active .reveal-shimmer {
   opacity: 1 !important;
