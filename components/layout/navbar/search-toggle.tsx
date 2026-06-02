@@ -122,7 +122,12 @@ export function SearchToggle() {
     let active = false;
     let savedY = window.scrollY;
 
-    const onStart = () => { active = true; savedY = window.scrollY; };
+    const onStart = (e: Event) => {
+      const target = e.target as HTMLElement;
+      if (target.tagName === "INPUT" || target.tagName === "TEXTAREA" || target.isContentEditable) return;
+      active = true;
+      savedY = window.scrollY;
+    };
     const onEnd = () => { active = false; };
     const onScroll = () => { if (active) window.scrollTo(0, savedY); };
 
