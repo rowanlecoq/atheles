@@ -842,16 +842,15 @@ body[data-bg="sunset"] {
   100% { transform: translateX(100%); }
 }
 @keyframes revealSpark {
-  0%, 100% { opacity: 0.35; transform: scale(0.88); }
-  50%       { opacity: 1;    transform: scale(1.05); }
+  /* opacity removed — CSS transition owns opacity; animation owns only scale */
+  0%, 100% { transform: scale(0.88); }
+  50%       { transform: scale(1.05); }
 }
 
-/* Hover (desktop) + active (mobile) — covers dark mode where Tailwind group-hover
-   alone is unreliable on touch. -webkit-text-fill-color needed for iOS Safari SVG fill. */
+/* Hover (desktop) + active (mobile) */
 .reveal-sparkle {
-  color: transparent;
-  -webkit-text-fill-color: transparent;
-  transition: color 400ms ease, -webkit-text-fill-color 400ms ease;
+  opacity: 0;
+  transition: opacity 400ms ease;
 }
 .group\/reveal:hover .reveal-shimmer,
 .group\/reveal:active .reveal-shimmer {
@@ -859,8 +858,7 @@ body[data-bg="sunset"] {
 }
 .group\/reveal:hover .reveal-sparkle,
 .group\/reveal:active .reveal-sparkle {
-  color: rgba(255, 255, 255, 0.55) !important;
-  -webkit-text-fill-color: rgba(255, 255, 255, 0.55) !important;
+  opacity: 0.55 !important;
 }
 .group\/reveal:hover .reveal-text,
 .group\/reveal:active .reveal-text {
