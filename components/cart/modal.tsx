@@ -708,7 +708,7 @@ export default function CartModal() {
         <>
           {/* Backdrop — z-[65] covers the navbar (z-[60]) so it dims with the rest of the page */}
           <div
-            className={`fixed inset-0 z-[65] bg-black/50 transition-opacity duration-300 ${modalVisible ? "opacity-100" : "opacity-0"}`}
+            className={`fixed inset-0 z-[65] bg-black/50 transition-opacity duration-300 md:block ${modalVisible ? "opacity-100" : "opacity-0"} hidden`}
             aria-hidden="true"
             onClick={closeCart}
           />
