@@ -1,5 +1,6 @@
 "use client";
 
+import LogoSquare from "components/logo-square";
 import { useEffect, useState } from "react";
 
 type LockData = {
@@ -139,8 +140,12 @@ export default function ComingSoonPage() {
       {/* Content */}
       <div className="relative z-10 w-full max-w-sm space-y-10 text-center animate-profile-slide-up">
         {/* Brand */}
-        <div className="space-y-2">
-          <p className="text-xs uppercase tracking-[0.4em] text-brand-dark-gold">atheles 🔱</p>
+        <div className="space-y-4">
+          <div className="flex justify-center">
+            <div className="group">
+              <LogoSquare />
+            </div>
+          </div>
           <h1 className="font-heading text-3xl leading-snug text-brand-gold sm:text-4xl">
             {data.message}
           </h1>
