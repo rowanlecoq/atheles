@@ -98,10 +98,11 @@ export default function SiteLockPage() {
     setUploading(true);
     setUploadError("");
     try {
-      const blob = await upload(file.name, file, {
+      const ext = file.name.includes(".") ? file.name.slice(file.name.lastIndexOf(".")) : "";
+      const uniqueName = `site-lock-bg-${Date.now()}${ext}`;
+      const blob = await upload(uniqueName, file, {
         access: "public",
         handleUploadUrl: "/api/admin/images/upload",
-        addRandomSuffix: true,
       });
       setSettings((s) => ({ ...s, backgroundImage: blob.url }));
     } catch (err) {
