@@ -22,6 +22,8 @@ export async function GET() {
         countdownEndsAt: lock.countdownEndsAt ?? null,
         message: lock.message ?? "",
         backgroundImage: lock.backgroundImage ?? null,
+        bgGrayscale: !!lock.bgGrayscale,
+        bgOpacity: lock.bgOpacity ?? 100,
       },
       { headers: CACHE },
     );

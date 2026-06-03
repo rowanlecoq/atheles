@@ -8,6 +8,8 @@ type LockData = {
   countdownEndsAt: string | null;
   backgroundImage: string | null;
   hasPassword: boolean;
+  bgGrayscale: boolean;
+  bgOpacity: number;
 };
 
 function Countdown({ endsAt }: { endsAt: string }) {
@@ -54,6 +56,8 @@ export default function ComingSoonPage() {
     countdownEndsAt: null,
     backgroundImage: null,
     hasPassword: false,
+    bgGrayscale: false,
+    bgOpacity: 100,
   });
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
@@ -70,6 +74,8 @@ export default function ComingSoonPage() {
           countdownEndsAt: d.countdownEndsAt || null,
           backgroundImage: d.backgroundImage || null,
           hasPassword: true, // always show password entry — server validates
+          bgGrayscale: !!d.bgGrayscale,
+          bgOpacity: d.bgOpacity ?? 100,
         });
       })
       .catch(() => {});
@@ -132,6 +138,10 @@ export default function ComingSoonPage() {
             alt=""
             aria-hidden="true"
             className="absolute inset-0 h-full w-full object-cover"
+            style={{
+              opacity: data.bgOpacity / 100,
+              filter: data.bgGrayscale ? "grayscale(1)" : undefined,
+            }}
           />
           <div className="absolute inset-0 bg-brand-dark/70" />
         </>

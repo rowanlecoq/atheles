@@ -14,6 +14,8 @@ type LockSettings = {
   password: string;
   message: string;
   backgroundImage: string;
+  bgGrayscale: boolean;
+  bgOpacity: number;
 };
 
 export default function SiteLockPage() {
@@ -22,6 +24,8 @@ export default function SiteLockPage() {
     password: "",
     message: "Something big is coming.",
     backgroundImage: "",
+    bgGrayscale: false,
+    bgOpacity: 100,
   });
   const [countdownDate, setCountdownDate] = useState("");
   const [countdownTime, setCountdownTime] = useState("");
@@ -46,6 +50,8 @@ export default function SiteLockPage() {
           password: lock.password || "",
           message: lock.message || "Something big is coming.",
           backgroundImage: lock.backgroundImage || "",
+          bgGrayscale: !!lock.bgGrayscale,
+          bgOpacity: lock.bgOpacity ?? 100,
         });
         if (lock.countdownEndsAt) {
           const [date, time] = (lock.countdownEndsAt as string).split("T");
@@ -265,26 +271,56 @@ export default function SiteLockPage() {
           </label>
 
           {settings.backgroundImage ? (
-            <div className="relative overflow-hidden rounded-lg border border-brand-dark-gold/20">
-              {/* eslint-disable-next-line @next/next/no-img-element */}
-              <img
-                src={settings.backgroundImage}
-                alt="Background preview"
-                className="h-36 w-full object-cover"
-                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
-              />
-              <div className="absolute inset-0 bg-brand-dark/40" />
-              <button
-                type="button"
-                onClick={() => setSettings((s) => ({ ...s, backgroundImage: "" }))}
-                className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-brand-dark/70 text-brand-grey backdrop-blur-sm transition-colors hover:text-red-400"
-              >
-                <XMarkIcon className="h-4 w-4" />
-              </button>
-              <p className="absolute bottom-2 left-2 max-w-[80%] truncate rounded bg-brand-dark/60 px-2 py-0.5 text-[10px] text-white/70 backdrop-blur-sm">
-                {settings.backgroundImage}
-              </p>
-            </div>
+            <>
+              <div className="relative overflow-hidden rounded-lg border border-brand-dark-gold/20">
+                {/* eslint-disable-next-line @next/next/no-img-element */}
+                <img
+                  src={settings.backgroundImage}
+                  alt="Background preview"
+                  className="h-36 w-full object-cover"
+                  style={{
+                    opacity: settings.bgOpacity / 100,
+                    filter: settings.bgGrayscale ? "grayscale(1)" : undefined,
+                  }}
+                  onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+                />
+                <div className="absolute inset-0 bg-brand-dark/40" />
+                <button
+                  type="button"
+                  onClick={() => setSettings((s) => ({ ...s, backgroundImage: "" }))}
+                  className="absolute right-2 top-2 flex h-7 w-7 items-center justify-center rounded-full bg-brand-dark/70 text-brand-grey backdrop-blur-sm transition-colors hover:text-red-400"
+                >
+                  <XMarkIcon className="h-4 w-4" />
+                </button>
+                <p className="absolute bottom-2 left-2 max-w-[80%] truncate rounded bg-brand-dark/60 px-2 py-0.5 text-[10px] text-white/70 backdrop-blur-sm">
+                  {settings.backgroundImage}
+                </p>
+              </div>
+              <div className="mt-2 flex items-center gap-4">
+                <button
+                  type="button"
+                  onClick={() => setSettings((s) => ({ ...s, bgGrayscale: !s.bgGrayscale }))}
+                  className={`rounded-lg border px-3 py-1.5 text-xs transition-colors ${
+                    settings.bgGrayscale
+                      ? "border-brand-gold/40 text-brand-gold"
+                      : "border-brand-dark-gold/25 text-brand-grey hover:border-brand-gold/40 hover:text-brand-gold"
+                  }`}
+                >
+                  {settings.bgGrayscale ? "black & white" : "full color"}
+                </button>
+                <label className="text-xs text-brand-grey">opacity</label>
+                <input
+                  type="range"
+                  min={5}
+                  max={100}
+                  step={5}
+                  value={settings.bgOpacity}
+                  onChange={(e) => setSettings((s) => ({ ...s, bgOpacity: Number(e.target.value) }))}
+                  className="h-1.5 w-24 cursor-pointer appearance-none rounded-full bg-brand-medium-grey/30 accent-brand-gold"
+                />
+                <span className="text-xs text-brand-grey">{settings.bgOpacity}%</span>
+              </div>
+            </>
           ) : (
             <div className="flex gap-2">
               <button

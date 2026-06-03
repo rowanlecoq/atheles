@@ -7,6 +7,8 @@ export type SiteLock = {
   countdownEndsAt: string | null;
   message: string;
   backgroundImage: string | null;
+  bgGrayscale: boolean;
+  bgOpacity: number;
 };
 
 const DEFAULT: SiteLock = {
@@ -15,6 +17,8 @@ const DEFAULT: SiteLock = {
   countdownEndsAt: null,
   message: "Something big is coming.",
   backgroundImage: null,
+  bgGrayscale: false,
+  bgOpacity: 100,
 };
 
 export async function GET() {
