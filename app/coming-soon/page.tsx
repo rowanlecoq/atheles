@@ -59,6 +59,7 @@ export default function ComingSoonPage() {
     bgGrayscale: false,
     bgOpacity: 100,
   });
+  const [loaded, setLoaded] = useState(false);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [emailState, setEmailState] = useState<"idle" | "loading" | "done" | "error">("idle");
@@ -78,7 +79,8 @@ export default function ComingSoonPage() {
           bgOpacity: d.bgOpacity ?? 100,
         });
       })
-      .catch(() => {});
+      .catch(() => {})
+      .finally(() => setLoaded(true));
   }, []);
 
   const joinWaitlist = async (e: React.FormEvent) => {
@@ -147,8 +149,8 @@ export default function ComingSoonPage() {
         </>
       )}
 
-      {/* Content */}
-      <div className="relative z-10 w-full max-w-sm space-y-10 text-center animate-profile-slide-up">
+      {/* Content — hidden until real data loads to prevent default-text flash */}
+      <div className={`relative z-10 w-full max-w-sm space-y-10 text-center transition-opacity duration-300 ${loaded ? "animate-profile-slide-up opacity-100" : "opacity-0"}`}>
         {/* Brand */}
         <div className="space-y-4">
           <div className="flex justify-center">
