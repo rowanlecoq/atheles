@@ -17,7 +17,12 @@ export async function GET() {
     const lock = await fetchLock();
     if (!lock) return NextResponse.json({ isLocked: false, countdownEndsAt: null, message: "" }, { headers: CACHE });
     return NextResponse.json(
-      { isLocked: !!lock.isLocked, countdownEndsAt: lock.countdownEndsAt ?? null, message: lock.message ?? "" },
+      {
+        isLocked: !!lock.isLocked,
+        countdownEndsAt: lock.countdownEndsAt ?? null,
+        message: lock.message ?? "",
+        backgroundImage: lock.backgroundImage ?? null,
+      },
       { headers: CACHE },
     );
   } catch {

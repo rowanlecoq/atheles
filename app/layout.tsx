@@ -8,6 +8,7 @@ import { KonamiLightning } from "components/easter-eggs/konami-lightning";
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ColorModeApplier } from "components/color-mode-applier";
+import { headers } from "next/headers";
 import { ProfileBackgroundApplier } from "components/profile-background-applier";
 import { ScrollProgress } from "components/scroll-progress";
 import { SelfLinkScroll } from "components/self-link-scroll";
@@ -56,9 +57,13 @@ export default async function RootLayout({
   children: ReactNode;
 }) {
   const cart = getCart();
+  const headersList = await headers();
+  const pathname = headersList.get("x-pathname") || "";
+  const isComingSoon = pathname === "/coming-soon";
+
   const [siteImages, announcements] = await Promise.all([
     getSiteImagesData(),
-    getAnnouncementsData(),
+    isComingSoon ? Promise.resolve([]) : getAnnouncementsData(),
   ]);
 
   return (
@@ -139,8 +144,8 @@ export default async function RootLayout({
               <ThemeBackgroundCanvas />
               <KonamiLightning />
               <div id="thunder-shake-root">
-                <AnnouncementBar initialAnnouncements={announcements} />
-                <Navbar />
+                {!isComingSoon && <AnnouncementBar initialAnnouncements={announcements} />}
+                {!isComingSoon && <Navbar />}
                 <main className="relative z-[1] w-full">
                   <PageTransition>{children}</PageTransition>
                   <Toaster closeButton />

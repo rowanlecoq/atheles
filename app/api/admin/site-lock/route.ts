@@ -6,6 +6,7 @@ export type SiteLock = {
   password: string;
   countdownEndsAt: string | null;
   message: string;
+  backgroundImage: string | null;
 };
 
 const DEFAULT: SiteLock = {
@@ -13,6 +14,7 @@ const DEFAULT: SiteLock = {
   password: "",
   countdownEndsAt: null,
   message: "Something big is coming.",
+  backgroundImage: null,
 };
 
 export async function GET() {

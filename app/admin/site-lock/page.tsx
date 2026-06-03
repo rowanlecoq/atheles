@@ -8,6 +8,7 @@ type LockSettings = {
   password: string;
   countdownEndsAt: string;
   message: string;
+  backgroundImage: string;
 };
 
 export default function SiteLockPage() {
@@ -16,6 +17,7 @@ export default function SiteLockPage() {
     password: "",
     countdownEndsAt: "",
     message: "Something big is coming.",
+    backgroundImage: "",
   });
   const [waitlist, setWaitlist] = useState<string[]>([]);
   const [loading, setLoading] = useState(true);
@@ -35,6 +37,7 @@ export default function SiteLockPage() {
           password: lock.password || "",
           countdownEndsAt: lock.countdownEndsAt || "",
           message: lock.message || "Something big is coming.",
+          backgroundImage: lock.backgroundImage || "",
         });
         setWaitlist(waitlistData.waitlist || []);
       })
@@ -50,6 +53,7 @@ export default function SiteLockPage() {
         body: JSON.stringify({
           ...settings,
           countdownEndsAt: settings.countdownEndsAt || null,
+          backgroundImage: settings.backgroundImage || null,
         }),
       });
       setSaved(true);
@@ -96,7 +100,7 @@ export default function SiteLockPage() {
   }
 
   return (
-    <div className="mx-auto max-w-2xl px-4 py-12">
+    <div className="animate-profile-slide-up mx-auto max-w-2xl px-4 py-12">
       <div className="mb-8">
         <a href="/admin" className="text-xs text-brand-grey hover:text-brand-gold">
           ← back to dashboard
@@ -109,36 +113,40 @@ export default function SiteLockPage() {
 
       {/* Lock toggle */}
       <div className="mb-4 rounded-xl border border-brand-dark-gold/20 bg-brand-dark p-6">
-        <div className="flex items-center justify-between">
+        <div className="flex items-center justify-between gap-4">
           <div>
             <p className="text-sm font-medium text-white">site lock</p>
             <p className="mt-0.5 text-xs text-brand-grey">
-              when on, visitors see the coming-soon page instead of the store.
+              when on, all visitors are redirected to the coming-soon page.
             </p>
           </div>
           <button
             type="button"
             onClick={() => setSettings((s) => ({ ...s, isLocked: !s.isLocked }))}
-            className={`relative h-6 w-11 flex-none rounded-full transition-colors duration-200 ${
-              settings.isLocked ? "bg-brand-gold" : "bg-brand-dark-gold/30"
+            role="switch"
+            aria-checked={settings.isLocked}
+            className={`relative h-7 w-12 flex-none rounded-full border transition-colors duration-200 ${
+              settings.isLocked
+                ? "border-brand-gold/60 bg-brand-gold"
+                : "border-brand-dark-gold/30 bg-brand-dark-gold/20"
             }`}
           >
             <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow transition-transform duration-200 ${
+              className={`absolute top-0.5 h-6 w-6 rounded-full bg-white shadow-md transition-transform duration-200 ${
                 settings.isLocked ? "translate-x-5" : "translate-x-0.5"
               }`}
             />
           </button>
         </div>
-        {settings.isLocked && (
-          <div className="mt-3 rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
-            site is locked — visitors cannot access the store.
+        <div className={`mt-3 overflow-hidden transition-all duration-200 ${settings.isLocked ? "max-h-20 opacity-100" : "max-h-0 opacity-0"}`}>
+          <div className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
+            🔒 site is locked — visitors cannot access the store.
           </div>
-        )}
+        </div>
       </div>
 
       {/* Settings */}
-      <div className="mb-4 space-y-4 rounded-xl border border-brand-dark-gold/20 bg-brand-dark p-6">
+      <div className="mb-4 space-y-5 rounded-xl border border-brand-dark-gold/20 bg-brand-dark p-6">
         <p className="text-sm font-medium text-white">settings</p>
 
         <div>
@@ -150,7 +158,7 @@ export default function SiteLockPage() {
             value={settings.message}
             onChange={(e) => setSettings((s) => ({ ...s, message: e.target.value }))}
             placeholder="Something big is coming."
-            className="w-full rounded-lg border border-brand-dark-gold/25 bg-brand-medium-grey/10 px-3 py-2 text-sm text-white outline-none focus:border-brand-gold/50"
+            className="w-full rounded-lg border border-brand-dark-gold/25 bg-brand-medium-grey/10 px-3 py-2.5 text-sm text-white outline-none focus:border-brand-gold/50"
           />
         </div>
 
@@ -163,7 +171,7 @@ export default function SiteLockPage() {
             value={settings.password}
             onChange={(e) => setSettings((s) => ({ ...s, password: e.target.value }))}
             placeholder="leave empty to hide the password entry"
-            className="w-full rounded-lg border border-brand-dark-gold/25 bg-brand-medium-grey/10 px-3 py-2 text-sm text-white outline-none focus:border-brand-gold/50"
+            className="w-full rounded-lg border border-brand-dark-gold/25 bg-brand-medium-grey/10 px-3 py-2.5 text-sm text-white outline-none focus:border-brand-gold/50"
           />
           <p className="mt-1 text-[11px] text-brand-dark-gold/60">
             visitors who know this password can bypass the lock.
@@ -178,15 +186,40 @@ export default function SiteLockPage() {
             type="datetime-local"
             value={settings.countdownEndsAt}
             onChange={(e) => setSettings((s) => ({ ...s, countdownEndsAt: e.target.value }))}
-            className="w-full rounded-lg border border-brand-dark-gold/25 bg-brand-medium-grey/10 px-3 py-2 text-sm text-white outline-none focus:border-brand-gold/50 [color-scheme:dark]"
+            className="w-full rounded-lg border border-brand-dark-gold/25 bg-brand-medium-grey/10 px-3 py-2.5 text-sm text-white outline-none focus:border-brand-gold/50 [color-scheme:dark]"
           />
+          <p className="mt-1 text-[11px] text-brand-dark-gold/60">leave empty to hide the countdown timer.</p>
+        </div>
+
+        <div>
+          <label className="mb-1.5 block text-[11px] uppercase tracking-wider text-brand-dark-gold">
+            background image url
+          </label>
+          <input
+            type="url"
+            value={settings.backgroundImage}
+            onChange={(e) => setSettings((s) => ({ ...s, backgroundImage: e.target.value }))}
+            placeholder="https://... (leave empty for dark background)"
+            className="w-full rounded-lg border border-brand-dark-gold/25 bg-brand-medium-grey/10 px-3 py-2.5 text-sm text-white outline-none focus:border-brand-gold/50"
+          />
+          {settings.backgroundImage && (
+            <div className="mt-2 h-24 w-full overflow-hidden rounded-lg border border-brand-dark-gold/20">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={settings.backgroundImage}
+                alt="Background preview"
+                className="h-full w-full object-cover"
+                onError={(e) => { (e.target as HTMLImageElement).style.display = "none"; }}
+              />
+            </div>
+          )}
           <p className="mt-1 text-[11px] text-brand-dark-gold/60">
-            leave empty to hide the countdown timer.
+            shown behind the countdown and text. a dark overlay is added automatically.
           </p>
         </div>
       </div>
 
-      <div className="mb-8 flex items-center gap-3">
+      <div className="mb-8 flex items-center gap-4">
         <button
           type="button"
           onClick={save}
