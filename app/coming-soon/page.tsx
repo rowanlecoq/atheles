@@ -67,6 +67,11 @@ export default function ComingSoonPage() {
   const [passState, setPassState] = useState<"idle" | "loading" | "wrong">("idle");
 
   useEffect(() => {
+    document.body.style.overscrollBehavior = "none";
+    return () => { document.body.style.overscrollBehavior = ""; };
+  }, []);
+
+  useEffect(() => {
     fetch("/api/site-lock")
       .then((r) => r.json())
       .then((d) => {
@@ -130,7 +135,7 @@ export default function ComingSoonPage() {
   const countdownActive = data.countdownEndsAt && new Date(data.countdownEndsAt) > new Date();
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden px-4 py-16">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden overscroll-none px-4 py-16">
       {/* Background image with overlay */}
       {data.backgroundImage && (
         <>
