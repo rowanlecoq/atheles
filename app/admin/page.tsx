@@ -76,7 +76,7 @@ const CARDS = [
 
 export default function AdminDashboard() {
   return (
-    <div className="mx-auto max-w-4xl px-4 py-12">
+    <div className="animate-profile-slide-up mx-auto max-w-4xl px-4 py-12">
       <div className="mb-10">
         <h1 className="font-heading text-3xl text-brand-gold">admin</h1>
         <p className="mt-1 text-sm text-brand-grey">manage your site content and members.</p>
