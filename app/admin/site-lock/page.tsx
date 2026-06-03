@@ -101,6 +101,7 @@ export default function SiteLockPage() {
       const blob = await upload(file.name, file, {
         access: "public",
         handleUploadUrl: "/api/admin/images/upload",
+        addRandomSuffix: true,
       });
       setSettings((s) => ({ ...s, backgroundImage: blob.url }));
     } catch (err) {
