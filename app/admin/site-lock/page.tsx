@@ -171,7 +171,7 @@ export default function SiteLockPage() {
             }`}
           >
             <span
-              className={`absolute top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
+              className={`absolute left-0 top-0.5 h-5 w-5 rounded-full bg-white shadow-sm transition-transform duration-200 ${
                 settings.isLocked ? "translate-x-[22px]" : "translate-x-0.5"
               }`}
             />
@@ -183,7 +183,7 @@ export default function SiteLockPage() {
           }`}
         >
           <div className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-400">
-            🔒 site is locked — visitors cannot access the store.
+            🔒 site is locked 🔱 visitors cannot access the store.
           </div>
         </div>
       </div>
