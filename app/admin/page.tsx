@@ -10,6 +10,7 @@ import {
   TrophyIcon,
   ChatBubbleBottomCenterTextIcon,
   ShoppingBagIcon,
+  LockClosedIcon,
   TrashIcon,
   ArrowTopRightOnSquareIcon,
   ArrowRightIcon,
@@ -57,6 +58,12 @@ const CARDS = [
     description: "edit the rotating greek quotes shown across the site.",
     href: "/admin/quotes",
     Icon: ChatBubbleBottomCenterTextIcon,
+  },
+  {
+    title: "site lock",
+    description: "lock the site with a coming-soon page, countdown, and waitlist.",
+    href: "/admin/site-lock",
+    Icon: LockClosedIcon,
   },
   {
     title: "shopify admin",
