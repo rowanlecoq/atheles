@@ -175,7 +175,7 @@ export default function ComingSoonPage() {
         {/* Waitlist */}
         <div className="space-y-3">
           <p className="text-xs uppercase tracking-[0.2em] text-brand-dark-gold">join the club</p>
-          <p className="text-sm text-brand-grey">be the first to know when we launch.</p>
+          <p className="text-sm text-brand-grey">be the first to know about new drops, exclusive offers, and upcoming releases.</p>
           {emailState === "done" ? (
             <p className="text-sm text-brand-gold">{emailMsg}</p>
           ) : (
