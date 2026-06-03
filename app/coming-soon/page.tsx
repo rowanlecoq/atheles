@@ -37,7 +37,7 @@ function Countdown({ endsAt }: { endsAt: string }) {
         const val = [parts.d, parts.h, parts.m, parts.s][i];
         return (
           <div key={label}>
-            <div className="font-heading text-5xl tabular-nums text-brand-gold drop-shadow-lg sm:text-6xl">
+            <div className="font-heading text-5xl tabular-nums text-brand-gold sm:text-6xl">
               {String(val).padStart(2, "0")}
             </div>
             <div className="mt-1.5 text-[10px] uppercase tracking-[0.25em] text-brand-dark-gold">
