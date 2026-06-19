@@ -5,7 +5,8 @@
   "main": "bot.mjs",
   "scripts": {
     "start": "node bot.mjs",
-    "dev": "node --watch bot.mjs"
+    "dev": "node --watch bot.mjs",
+    "clear": "node clear-commands.mjs"
   },
   "dependencies": {
     "discord.js": "^14.16.3",
