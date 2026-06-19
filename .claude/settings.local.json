@@ -38,7 +38,8 @@
       "mcp__Vercel__get_deployment",
       "mcp__Vercel__list_deployments",
       "mcp__Vercel__get_deployment_build_logs",
-      "mcp__Vercel__web_fetch_vercel_url"
+      "mcp__Vercel__web_fetch_vercel_url",
+      "mcp__Vercel__get_access_to_vercel_url"
     ]
   }
 }
