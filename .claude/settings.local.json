@@ -31,7 +31,14 @@
       "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__deploy_to_vercel",
       "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__get_deployment_build_logs",
       "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__get_deployment",
-      "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__get_runtime_logs"
+      "mcp__22c9bb9e-d252-4c3a-bc2c-3ec94e9d270f__get_runtime_logs",
+      "mcp__Vercel__list_teams",
+      "mcp__Vercel__list_projects",
+      "mcp__Vercel__get_project",
+      "mcp__Vercel__get_deployment",
+      "mcp__Vercel__list_deployments",
+      "mcp__Vercel__get_deployment_build_logs",
+      "mcp__Vercel__web_fetch_vercel_url"
     ]
   }
 }
