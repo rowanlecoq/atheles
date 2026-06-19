@@ -1,8 +1,9 @@
 import { NextResponse } from "next/server";
 
-export async function POST(req: Request) {
-  const auth = req.headers.get("authorization");
-  if (auth !== `Bearer ${process.env.DISCORD_BOT_TOKEN}`) {
+export async function GET(req: Request) {
+  const { searchParams } = new URL(req.url);
+  const token = searchParams.get("token");
+  if (token !== process.env.DISCORD_BOT_TOKEN) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
