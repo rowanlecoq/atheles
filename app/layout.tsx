@@ -10,7 +10,6 @@ import { PageTransition } from "components/page-transition";
 import { ColorModeApplier } from "components/color-mode-applier";
 import { headers } from "next/headers";
 import { ProfileBackgroundApplier } from "components/profile-background-applier";
-import { ScrollProgress } from "components/scroll-progress";
 import { SelfLinkScroll } from "components/self-link-scroll";
 import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";

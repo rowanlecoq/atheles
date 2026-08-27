@@ -9,7 +9,7 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
 const endpoint = domain ? `${domain}${SHOPIFY_GRAPHQL_API_ENDPOINT}` : "";
 const token = process.env.SHOPIFY_STOREFRONT_ACCESS_TOKEN || "";
 const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
-const adminEndpoint = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
+const adminEndpoint = domain ? `${domain}/admin/api/2025-04/graphql.json` : "";
 
 async function shopifyCustomerFetch<T>(
   query: string,
