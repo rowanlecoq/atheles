@@ -31,7 +31,7 @@ export async function POST(request: Request) {
     }
 
     const id = numericId(customer.id);
-    const res = await fetch(`${domain}/admin/api/2024-10/customers/${id}.json`, {
+    const res = await fetch(`${domain}/admin/api/2025-04/customers/${id}.json`, {
       method: "PUT",
       headers: {
         "Content-Type": "application/json",

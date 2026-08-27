@@ -10,7 +10,7 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
     ? process.env.SHOPIFY_STORE_DOMAIN
     : `https://${process.env.SHOPIFY_STORE_DOMAIN}`
   : "";
-const adminEndpoint = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
+const adminEndpoint = domain ? `${domain}/admin/api/2025-04/graphql.json` : "";
 
 const DEFAULT_IMAGES: Record<string, string> = {
   hero_bg: "/statues/greek-god-hero.png",

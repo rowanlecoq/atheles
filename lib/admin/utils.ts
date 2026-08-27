@@ -6,7 +6,7 @@ const rawDomain = process.env.SHOPIFY_STORE_DOMAIN || "";
 const domain = rawDomain
   ? rawDomain.startsWith("https://") ? rawDomain : `https://${rawDomain}`
   : "";
-export const ADMIN_ENDPOINT = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
+export const ADMIN_ENDPOINT = domain ? `${domain}/admin/api/2025-04/graphql.json` : "";
 
 export async function adminFetch(
   query: string,

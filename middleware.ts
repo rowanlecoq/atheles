@@ -20,7 +20,7 @@ async function getSiteLockStatus(): Promise<boolean> {
   const timeout = setTimeout(() => controller.abort(), 3000);
 
   try {
-    const res = await fetch(`${base}/admin/api/2024-10/graphql.json`, {
+    const res = await fetch(`${base}/admin/api/2025-04/graphql.json`, {
       method: "POST",
       headers: { "Content-Type": "application/json", "X-Shopify-Access-Token": token },
       body: JSON.stringify({

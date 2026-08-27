@@ -9,7 +9,7 @@ const domain = process.env.SHOPIFY_STORE_DOMAIN
     : `https://${process.env.SHOPIFY_STORE_DOMAIN}`
   : "";
 const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
-const adminEndpoint = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
+const adminEndpoint = domain ? `${domain}/admin/api/2025-04/graphql.json` : "";
 
 async function adminFetch(query: string, variables: Record<string, unknown> = {}) {
   const res = await fetch(adminEndpoint, {

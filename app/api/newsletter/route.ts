@@ -9,7 +9,7 @@ const domain = rawDomain
   : "";
 
 async function adminRest(path: string, method: string, body?: object) {
-  return fetch(`${domain}/admin/api/2024-10${path}`, {
+  return fetch(`${domain}/admin/api/2025-04${path}`, {
     method,
     headers: {
       "Content-Type": "application/json",

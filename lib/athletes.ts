@@ -46,7 +46,7 @@ export async function getAthletes(): Promise<AthleteData[]> {
       ? rawDomain
       : `https://${rawDomain}`
     : "";
-  const adminEndpoint = domain ? `${domain}/admin/api/2024-10/graphql.json` : "";
+  const adminEndpoint = domain ? `${domain}/admin/api/2025-04/graphql.json` : "";
 
   if (!adminToken || !adminEndpoint) return DEFAULT_ATHLETES;
 
