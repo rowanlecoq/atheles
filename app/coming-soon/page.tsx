@@ -135,7 +135,7 @@ export default function ComingSoonPage() {
   const countdownActive = data.countdownEndsAt && new Date(data.countdownEndsAt) > new Date();
 
   return (
-    <div className="relative flex min-h-screen flex-col items-center justify-center overflow-hidden overscroll-none px-4 py-16">
+    <div className="relative flex min-h-screen flex-col items-center justify-center overscroll-none px-4 py-16">
       {/* Background image with overlay */}
       {data.backgroundImage && (
         <>
