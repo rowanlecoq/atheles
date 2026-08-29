@@ -64,10 +64,19 @@ export async function middleware(request: NextRequest) {
     return NextResponse.redirect(new URL("/profile", request.url));
   }
 
-  // Site lock — admin paths, API routes, static assets, and the coming-soon page are always exempt
+  // Site lock — admin paths, API routes, and static assets are always exempt
   const isLockExempt =
     lockExempt.some((p) => pathname.startsWith(p)) || pathname.startsWith("/admin");
   const hasBypass = request.cookies.get("atheles-site-bypass")?.value === "1";
+
+  // If visiting /coming-soon, redirect to home when the lock is off
+  if (pathname.startsWith("/coming-soon")) {
+    const locked = await getSiteLockStatus();
+    if (!locked) {
+      return NextResponse.redirect(new URL("/", request.url));
+    }
+    return NextResponse.next({ request: { headers: reqHeaders } });
+  }
 
   if (!isLockExempt && !hasBypass) {
     const locked = await getSiteLockStatus();
