@@ -3,12 +3,13 @@ import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 
 export async function GET() {
+  const siteUrl = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
   const cookieStore = await cookies();
   const token = cookieStore.get("atheles-auth-token")?.value;
-  if (!token) return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_SITE_URL!));
+  if (!token) return NextResponse.redirect(new URL("/login", siteUrl));
 
   const customer = await getCustomerByToken(token);
-  if (!customer) return NextResponse.redirect(new URL("/login", process.env.NEXT_PUBLIC_SITE_URL!));
+  if (!customer) return NextResponse.redirect(new URL("/login", siteUrl));
 
   const state = Buffer.from(customer.email).toString("base64url");
 

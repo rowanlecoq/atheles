@@ -1,5 +1,6 @@
 "use client";
 
+import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
 
@@ -17,6 +18,7 @@ export function AnnouncementBar({ initialAnnouncements }: { initialAnnouncements
   const [index, setIndex] = useState(0);
   const [entered, setEntered] = useState(false);
   const [paused, setPaused] = useState(false);
+  const prefersReducedMotion = useReducedMotion();
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const announcementsLenRef = useRef(announcements.length);
 
@@ -64,7 +66,7 @@ export function AnnouncementBar({ initialAnnouncements }: { initialAnnouncements
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{ duration: 0.35, ease: "easeInOut" }}
+          transition={{ duration: prefersReducedMotion ? 0 : 0.35, ease: "easeInOut" }}
           className="flex-1 text-center text-xs uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em]"
         >
           {announcements[index]}

@@ -78,7 +78,7 @@ export function SparkleBackground() {
     const resize = () => {
       canvas.width = window.innerWidth;
       canvas.height = window.innerHeight;
-      if (starsRef.current.length === 0) initStars(canvas.width, canvas.height);
+      initStars(canvas.width, canvas.height);
     };
     resize();
     window.addEventListener("resize", resize);

@@ -60,9 +60,7 @@ export function GoldParticles({ count = 18 }: { count?: number }) {
       const h = parent.clientHeight;
       canvas.width = w;
       canvas.height = h;
-      if (particlesRef.current.length === 0) {
-        initParticles(w, h);
-      }
+      initParticles(w, h);
     };
     resize();
     window.addEventListener("resize", resize);
