@@ -181,9 +181,9 @@ export function Gallery({
       {/* Dot indicators */}
       {images.length > 1 && (
         <div className="mt-4 flex items-center justify-center gap-2">
-          {images.map((_, index) => (
+          {images.map((image, index) => (
             <button
-              key={index}
+              key={image.src}
               type="button"
               onClick={() => goToImage(index)}
               aria-label={`View image ${index + 1}`}
