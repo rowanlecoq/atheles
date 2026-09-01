@@ -45,7 +45,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
       <div className="card-dark-bg relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark">
         <Link href={`/product/${product.handle}`} prefetch={true}>
           {/* Primary image */}
-          {product.featuredImage?.url && (
+          {product.featuredImage?.url ? (
             <Image
               src={product.featuredImage.url}
               alt={product.title}
@@ -56,6 +56,10 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                 hasMultipleImages ? "group-hover:opacity-0" : ""
               }`}
             />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[#222]">
+              <span className="text-4xl opacity-20" aria-hidden="true">🔱</span>
+            </div>
           )}
           {/* Second image on hover */}
           {hasMultipleImages && secondImage && (
