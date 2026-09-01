@@ -14,6 +14,7 @@ import {
   TrashIcon,
   ArrowTopRightOnSquareIcon,
   ArrowRightIcon,
+  HomeIcon,
 } from "@heroicons/react/24/outline";
 
 const CARDS = [
@@ -58,6 +59,12 @@ const CARDS = [
     description: "edit the rotating greek quotes shown across the site.",
     href: "/admin/quotes",
     Icon: ChatBubbleBottomCenterTextIcon,
+  },
+  {
+    title: "homepage content",
+    description: "edit the carousel title, subtitle, and featured section heading.",
+    href: "/admin/homepage",
+    Icon: HomeIcon,
   },
   {
     title: "site lock",

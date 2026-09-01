@@ -1,5 +1,6 @@
 import { CarouselControls } from "components/carousel-controls";
 import { CarouselProductCard } from "components/carousel-product-card";
+import { getHomepageContent } from "lib/homepage-content";
 import { getCollectionProducts, getProducts } from "lib/shopify";
 import type { Product } from "lib/shopify/types";
 
@@ -24,12 +25,14 @@ export async function Carousel() {
 
   if (!hasProducts) return null;
 
+  const content = await getHomepageContent();
+
   return (
     <section className="content-surface px-6 py-10 sm:py-14 lg:px-10">
       <CarouselControls
-        title="Coming Soon: This Summer"
-        subtitle="mens"
-        viewAllHref="/search"
+        title={content.carouselTitle}
+        subtitle={content.carouselSubtitle || undefined}
+        viewAllHref={content.carouselViewAllHref}
       >
         {products.map((product, index) => (
           <div

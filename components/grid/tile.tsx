@@ -36,7 +36,11 @@ export function GridTileImage({
           })}
           {...props}
         />
-      ) : null}
+      ) : (
+        <div className="flex h-full w-full items-center justify-center">
+          <span className="text-2xl opacity-20" aria-hidden="true">🔱</span>
+        </div>
+      )}
       {label ? (
         <Label
           title={label.title}

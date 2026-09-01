@@ -62,9 +62,7 @@ export function ProductCard({
           />
         ) : (
           <div className="flex h-full w-full items-center justify-center bg-[#222]">
-            <p className="font-heading text-lg tracking-wider text-brand-gold/30">
-              ATHELES
-            </p>
+            <span className="text-4xl opacity-20" aria-hidden="true">🔱</span>
           </div>
         )}
 

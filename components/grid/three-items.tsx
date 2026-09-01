@@ -1,5 +1,6 @@
 import { SplitText } from "components/animations";
 import { HomepageProductCard } from "components/homepage-product-card";
+import { getHomepageContent } from "lib/homepage-content";
 import { getCollectionProducts } from "lib/shopify";
 import type { Product } from "lib/shopify/types";
 
@@ -28,9 +29,10 @@ function ThreeItemGridItem({
 }
 
 export async function ThreeItemGrid() {
-  const homepageItems = await getCollectionProducts({
-    collection: "hidden-homepage-featured-items",
-  });
+  const [homepageItems, content] = await Promise.all([
+    getCollectionProducts({ collection: "hidden-homepage-featured-items" }),
+    getHomepageContent(),
+  ]);
 
   if (!homepageItems[0] || !homepageItems[1] || !homepageItems[2]) return null;
 
@@ -41,7 +43,7 @@ export async function ThreeItemGrid() {
       <div className="mb-8 px-4 text-center">
         <SplitText
           as="h2"
-          text="best selling"
+          text={content.featuredTitle}
           className="mb-2 font-heading text-xl font-bold tracking-[0.08em] text-brand-gold sm:text-2xl sm:tracking-wider md:text-3xl"
         />
         <div className="mx-auto h-px w-24 bg-brand-dark-gold/40" />
