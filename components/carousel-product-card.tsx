@@ -18,7 +18,7 @@ export function CarouselProductCard({ product }: { product: Product; index?: num
       {/* Image */}
       <div className="relative aspect-[3/4] overflow-hidden rounded-lg bg-brand-dark">
         <Link href={`/product/${product.handle}`} prefetch={true}>
-          {product.featuredImage?.url && (
+          {product.featuredImage?.url ? (
             <Image
               src={product.featuredImage.url}
               alt={product.title}
@@ -28,6 +28,10 @@ export function CarouselProductCard({ product }: { product: Product; index?: num
                 secondImage ? "group-hover:opacity-0" : ""
               }`}
             />
+          ) : (
+            <div className="flex h-full w-full items-center justify-center bg-[#222]">
+              <span className="text-4xl opacity-20" aria-hidden="true">🔱</span>
+            </div>
           )}
           {secondImage && (
             <Image
