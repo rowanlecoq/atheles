@@ -31,6 +31,6 @@ export async function POST(request: Request) {
   const err = await writeMetafield("homepage_content", value);
   if (err) return NextResponse.json({ error: err }, { status: 500 });
 
-  revalidateTag("homepage_content");
+  revalidateTag("homepage_content", "seconds");
   return NextResponse.json({ success: true, ...value });
 }
