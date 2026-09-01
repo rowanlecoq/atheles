@@ -149,7 +149,7 @@ export default function ImageCropModal({
     } else if (pointersRef.current.size === 2) {
       isDraggingRef.current = false;
       const pts = Array.from(pointersRef.current.values());
-      pinchStartDistRef.current = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      pinchStartDistRef.current = Math.hypot(pts[0]!.x - pts[1]!.x, pts[0]!.y - pts[1]!.y);
       pinchStartZoomRef.current = zoomRef.current;
       pinchStartOffsetRef.current = { ...offsetRef.current };
     }
@@ -163,7 +163,7 @@ export default function ImageCropModal({
     if (pointersRef.current.size === 2 && pinchStartDistRef.current !== null) {
       // Pinch-to-zoom
       const pts = Array.from(pointersRef.current.values());
-      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const dist = Math.hypot(pts[0]!.x - pts[1]!.x, pts[0]!.y - pts[1]!.y);
       const minZ = getMinZoom();
       const maxZ = minZ * 4;
       const newZoom = Math.max(minZ, Math.min(maxZ,
@@ -201,8 +201,8 @@ export default function ImageCropModal({
       isDraggingRef.current = true;
       const remaining = Array.from(pointersRef.current.values())[0];
       dragAnchorRef.current = {
-        x: remaining.x - offsetRef.current.x,
-        y: remaining.y - offsetRef.current.y,
+        x: remaining!.x - offsetRef.current.x,
+        y: remaining!.y - offsetRef.current.y,
       };
     }
   }, []);
