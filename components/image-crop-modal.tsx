@@ -17,15 +17,28 @@ export default function ImageCropModal({
   const imageRef = useRef<HTMLImageElement | null>(null);
   const zoomRef = useRef(1);
   const offsetRef = useRef({ x: 0, y: 0 });
-  const draggingRef = useRef(false);
-  const dragStartRef = useRef({ x: 0, y: 0 });
   const rafRef = useRef<number | null>(null);
   const [zoom, setZoom] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
 
+  // Multi-pointer tracking for pinch-to-zoom and single-finger drag
+  const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
+  const dragAnchorRef = useRef({ x: 0, y: 0 });
+  const isDraggingRef = useRef(false);
+  const pinchStartDistRef = useRef<number | null>(null);
+  const pinchStartZoomRef = useRef(1);
+  const pinchStartOffsetRef = useRef({ x: 0, y: 0 });
+
   const CANVAS_SIZE = 300;
   const OUTPUT_SIZE = 400;
   const RADIUS = CANVAS_SIZE / 2;
+
+  // CSS display size → canvas internal pixel scale
+  const getDisplayScale = useCallback(() => {
+    const c = canvasRef.current;
+    if (!c) return 1;
+    return c.getBoundingClientRect().width / CANVAS_SIZE;
+  }, []);
 
   const getMinZoom = useCallback(() => {
     const img = imageRef.current;
@@ -38,8 +51,8 @@ export default function ImageCropModal({
     if (!img) return { x: ox, y: oy };
     const drawW = img.width * z;
     const drawH = img.height * z;
-    const maxOx = (drawW - CANVAS_SIZE) / 2;
-    const maxOy = (drawH - CANVAS_SIZE) / 2;
+    const maxOx = Math.max(0, (drawW - CANVAS_SIZE) / 2);
+    const maxOy = Math.max(0, (drawH - CANVAS_SIZE) / 2);
     return {
       x: Math.max(-maxOx, Math.min(maxOx, ox)),
       y: Math.max(-maxOy, Math.min(maxOy, oy)),
@@ -60,12 +73,11 @@ export default function ImageCropModal({
     img.src = imageSrc;
   }, [imageSrc]);
 
-  // Draw to canvas using requestAnimationFrame
+  // Draw
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const img = imageRef.current;
     if (!canvas || !img) return;
-
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
@@ -90,20 +102,17 @@ export default function ImageCropModal({
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
     ctx.restore();
 
-    const isLight = typeof document !== "undefined" &&
-      document.documentElement.getAttribute("data-color-mode") === "light";
-
     // Shade outside circle
     ctx.save();
-    ctx.fillStyle = isLight ? "rgba(245, 240, 232, 0.65)" : "rgba(0, 0, 0, 0.5)";
+    ctx.fillStyle = "rgba(0,0,0,0.55)";
     ctx.beginPath();
     ctx.rect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
     ctx.arc(RADIUS, RADIUS, RADIUS, 0, Math.PI * 2, true);
     ctx.fill();
     ctx.restore();
 
-    // Circle boundary guide
-    ctx.strokeStyle = isLight ? "rgba(110, 82, 20, 0.35)" : "rgba(255, 255, 255, 0.15)";
+    // Circle outline
+    ctx.strokeStyle = "rgba(255,255,255,0.18)";
     ctx.lineWidth = 1;
     ctx.beginPath();
     ctx.arc(RADIUS, RADIUS, RADIUS - 0.5, 0, Math.PI * 2);
@@ -119,33 +128,87 @@ export default function ImageCropModal({
     if (imageLoaded) scheduleDraw();
   }, [imageLoaded, scheduleDraw, zoom]);
 
-  // Pointer handlers — use refs for smooth dragging without re-renders
-  const handlePointerDown = (e: React.PointerEvent) => {
-    draggingRef.current = true;
-    dragStartRef.current = {
-      x: e.clientX - offsetRef.current.x,
-      y: e.clientY - offsetRef.current.y,
-    };
+  // Convert clientX/Y to canvas-internal coordinates
+  const toCanvas = useCallback((clientX: number, clientY: number) => {
+    const scale = getDisplayScale();
+    return { x: clientX / scale, y: clientY / scale };
+  }, [getDisplayScale]);
+
+  const handlePointerDown = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
     (e.target as HTMLElement).setPointerCapture(e.pointerId);
-  };
+    const pos = toCanvas(e.clientX, e.clientY);
+    pointersRef.current.set(e.pointerId, pos);
 
-  const handlePointerMove = (e: React.PointerEvent) => {
-    if (!draggingRef.current) return;
-    const newOffset = clampOffset(
-      e.clientX - dragStartRef.current.x,
-      e.clientY - dragStartRef.current.y,
-      zoomRef.current,
-    );
-    offsetRef.current = newOffset;
-    scheduleDraw();
-  };
+    if (pointersRef.current.size === 1) {
+      isDraggingRef.current = true;
+      dragAnchorRef.current = {
+        x: pos.x - offsetRef.current.x,
+        y: pos.y - offsetRef.current.y,
+      };
+    } else if (pointersRef.current.size === 2) {
+      isDraggingRef.current = false;
+      const pts = Array.from(pointersRef.current.values());
+      pinchStartDistRef.current = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      pinchStartZoomRef.current = zoomRef.current;
+      pinchStartOffsetRef.current = { ...offsetRef.current };
+    }
+  }, [toCanvas]);
 
-  const handlePointerUp = () => {
-    draggingRef.current = false;
-  };
+  const handlePointerMove = useCallback((e: React.PointerEvent) => {
+    e.preventDefault();
+    const pos = toCanvas(e.clientX, e.clientY);
+    pointersRef.current.set(e.pointerId, pos);
 
-  // Scroll zoom
-  const handleWheel = (e: React.WheelEvent) => {
+    if (pointersRef.current.size === 2 && pinchStartDistRef.current !== null) {
+      // Pinch-to-zoom
+      const pts = Array.from(pointersRef.current.values());
+      const dist = Math.hypot(pts[0].x - pts[1].x, pts[0].y - pts[1].y);
+      const minZ = getMinZoom();
+      const maxZ = minZ * 4;
+      const newZoom = Math.max(minZ, Math.min(maxZ,
+        pinchStartZoomRef.current * (dist / pinchStartDistRef.current)
+      ));
+      zoomRef.current = newZoom;
+      offsetRef.current = clampOffset(
+        pinchStartOffsetRef.current.x,
+        pinchStartOffsetRef.current.y,
+        newZoom,
+      );
+      setZoom(newZoom);
+      scheduleDraw();
+    } else if (pointersRef.current.size === 1 && isDraggingRef.current) {
+      // Single-finger drag
+      offsetRef.current = clampOffset(
+        pos.x - dragAnchorRef.current.x,
+        pos.y - dragAnchorRef.current.y,
+        zoomRef.current,
+      );
+      scheduleDraw();
+    }
+  }, [toCanvas, getMinZoom, clampOffset, scheduleDraw]);
+
+  const handlePointerUp = useCallback((e: React.PointerEvent) => {
+    pointersRef.current.delete(e.pointerId);
+
+    if (pointersRef.current.size < 2) {
+      pinchStartDistRef.current = null;
+    }
+    if (pointersRef.current.size === 0) {
+      isDraggingRef.current = false;
+    } else if (pointersRef.current.size === 1) {
+      // Went from 2 fingers back to 1 — reset drag anchor to avoid position jump
+      isDraggingRef.current = true;
+      const remaining = Array.from(pointersRef.current.values())[0];
+      dragAnchorRef.current = {
+        x: remaining.x - offsetRef.current.x,
+        y: remaining.y - offsetRef.current.y,
+      };
+    }
+  }, []);
+
+  // Scroll wheel zoom (desktop)
+  const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
     const minZ = getMinZoom();
     const maxZ = minZ * 4;
@@ -154,14 +217,17 @@ export default function ImageCropModal({
     offsetRef.current = clampOffset(offsetRef.current.x, offsetRef.current.y, newZoom);
     setZoom(newZoom);
     scheduleDraw();
-  };
+  }, [getMinZoom, clampOffset, scheduleDraw]);
 
-  const handleZoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const newZoom = parseFloat(e.target.value);
+  const applyZoom = useCallback((newZoom: number) => {
     zoomRef.current = newZoom;
     offsetRef.current = clampOffset(offsetRef.current.x, offsetRef.current.y, newZoom);
     setZoom(newZoom);
     scheduleDraw();
+  }, [clampOffset, scheduleDraw]);
+
+  const handleZoomChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    applyZoom(parseFloat(e.target.value));
   };
 
   const handleReset = () => {
@@ -198,52 +264,53 @@ export default function ImageCropModal({
     onSave(out.toDataURL("image/jpeg", 0.85));
   };
 
+  // Lock scroll while open
   useEffect(() => {
     document.documentElement.style.overflow = "hidden";
-    const prevent = (e: TouchEvent) => { if (e.touches.length < 2) e.preventDefault(); };
-    document.addEventListener("touchmove", prevent, { passive: false });
-    return () => {
-      document.documentElement.style.overflow = "";
-      document.removeEventListener("touchmove", prevent);
-    };
+    return () => { document.documentElement.style.overflow = ""; };
   }, []);
 
   const minZoom = getMinZoom();
   const maxZoom = minZoom * 4;
 
   return (
-    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/50 p-4">
-      <div className="w-full max-w-md rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-8">
-        <h3 className="mb-2 text-center font-heading text-lg text-brand-gold">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/70 p-4">
+      <div className="w-full max-w-sm rounded-xl border border-brand-dark-gold/20 bg-brand-dark px-5 pb-6 pt-5">
+        <h3 className="mb-1 text-center font-heading text-lg text-brand-gold">
           adjust photo
         </h3>
         <p className="mb-4 text-center text-xs text-brand-grey">
-          drag to reposition, scroll or use slider to zoom
+          drag to reposition · pinch or slider to zoom
         </p>
 
-        {/* Canvas */}
-        <div className="mb-4 flex justify-center">
+        {/* Canvas — responsive width, fills the card */}
+        <div className="mb-5 flex justify-center">
           <canvas
             ref={canvasRef}
             width={CANVAS_SIZE}
             height={CANVAS_SIZE}
             className="cursor-grab rounded-full active:cursor-grabbing"
-            style={{ width: CANVAS_SIZE, height: CANVAS_SIZE, touchAction: "none" }}
+            style={{ width: "min(72vw, 280px)", height: "min(72vw, 280px)", touchAction: "none" }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
-            onPointerLeave={handlePointerUp}
+            onPointerCancel={handlePointerUp}
             onWheel={handleWheel}
           />
         </div>
 
-        {/* Zoom slider */}
-        <div className="mb-2 flex items-center gap-3 px-2">
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4 flex-none text-brand-grey">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            <line x1="8" y1="11" x2="14" y2="11" />
-          </svg>
+        {/* Zoom controls */}
+        <div className="mb-1 flex items-center gap-2 px-1">
+          <button
+            type="button"
+            aria-label="Zoom out"
+            onPointerDown={(e) => { e.preventDefault(); applyZoom(Math.max(minZoom, zoom - (maxZoom - minZoom) * 0.05)); }}
+            className="flex h-10 w-10 flex-none items-center justify-center rounded-full text-brand-grey active:text-brand-gold"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-5 w-5">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" />
+            </svg>
+          </button>
           <input
             type="range"
             min={minZoom}
@@ -251,14 +318,18 @@ export default function ImageCropModal({
             step={0.001}
             value={zoom}
             onChange={handleZoomChange}
-            className="crop-zoom-slider h-1 w-full cursor-pointer appearance-none rounded-full bg-brand-dark-gold/30 accent-brand-gold [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-gold"
+            className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-brand-dark-gold/30 accent-brand-gold [&::-webkit-slider-thumb]:h-5 [&::-webkit-slider-thumb]:w-5 [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-brand-gold"
           />
-          <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-4 w-4 flex-none text-brand-grey">
-            <circle cx="11" cy="11" r="8" />
-            <line x1="21" y1="21" x2="16.65" y2="16.65" />
-            <line x1="8" y1="11" x2="14" y2="11" />
-            <line x1="11" y1="8" x2="11" y2="14" />
-          </svg>
+          <button
+            type="button"
+            aria-label="Zoom in"
+            onPointerDown={(e) => { e.preventDefault(); applyZoom(Math.min(maxZoom, zoom + (maxZoom - minZoom) * 0.05)); }}
+            className="flex h-10 w-10 flex-none items-center justify-center rounded-full text-brand-grey active:text-brand-gold"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-5 w-5">
+              <circle cx="11" cy="11" r="8" /><line x1="21" y1="21" x2="16.65" y2="16.65" /><line x1="8" y1="11" x2="14" y2="11" /><line x1="11" y1="8" x2="11" y2="14" />
+            </svg>
+          </button>
         </div>
 
         {/* Reset */}
@@ -277,14 +348,14 @@ export default function ImageCropModal({
           <button
             type="button"
             onClick={onCancel}
-            className="flex-1 rounded border border-brand-dark-gold/30 px-4 py-2.5 text-sm text-brand-grey transition-colors hover:border-brand-gold/50 hover:bg-brand-gold/10 hover:text-brand-gold"
+            className="flex-1 rounded-lg border border-brand-dark-gold/30 px-4 py-3 text-sm text-brand-grey transition-colors hover:border-brand-gold/50 hover:text-brand-gold"
           >
             cancel
           </button>
           <button
             type="button"
             onClick={handleSave}
-            className="flex-1 rounded bg-brand-gold px-4 py-2.5 text-sm font-medium text-brand-dark transition-colors hover:bg-brand-light-gold"
+            className="flex-1 rounded-lg bg-brand-gold px-4 py-3 text-sm font-medium text-brand-dark transition-colors hover:opacity-90"
           >
             save photo
           </button>
