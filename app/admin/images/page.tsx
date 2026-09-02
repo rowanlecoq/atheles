@@ -233,6 +233,7 @@ function SlotEditor({
       const blob = await upload(file.name, file, {
         access: "public",
         handleUploadUrl: "/api/admin/images/upload",
+        addRandomSuffix: true,
       });
       const res = await fetch("/api/admin/images", {
         method: "POST",
