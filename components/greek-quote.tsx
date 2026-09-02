@@ -30,7 +30,7 @@ export function GreekQuote() {
   }, []);
 
   return (
-    <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 py-12 sm:py-16">
+    <section className="theme-section relative overflow-hidden bg-brand-dark border-t border-brand-dark-gold/20 py-12 sm:py-16">
       <SlideshowMedia
         slotKey="interstitial"
         className="object-cover object-center"
