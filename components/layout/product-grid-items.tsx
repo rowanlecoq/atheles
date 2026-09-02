@@ -100,7 +100,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             className="size-picker absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-brand-dark via-brand-dark/95 to-transparent p-4 pt-10"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
           >
-            <div className="grid auto-cols-fr grid-flow-col gap-1.5">
+            <div className="flex flex-wrap gap-2">
               {product.variants.map((variant) => {
                 const rawSize = variant.selectedOptions.find(
                   (o) => o.name.toLowerCase() === "size",
@@ -121,7 +121,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                     type="button"
                     disabled={!variant.availableForSale || added}
                     onClick={() => variant.availableForSale && handleAdd(variant.id)}
-                    className={`min-h-[40px] rounded-md py-2.5 text-xs font-medium transition-all ${
+                    className={`min-h-[44px] min-w-[44px] rounded-md px-3 py-2 text-sm font-medium transition-all ${
                       variant.availableForSale
                         ? "bg-white/10 text-white hover:bg-brand-gold hover:text-brand-dark active:bg-brand-gold active:text-brand-dark"
                         : "cursor-not-allowed text-white/20 line-through"
@@ -159,7 +159,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                 e.stopPropagation();
                 setShowSizes(!showSizes);
               }}
-              className="text-sm text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold sm:text-xs"
+              className="text-sm text-brand-grey transition-colors hover:text-brand-gold sm:text-xs"
             >
               {showSizes ? "close" : "quick add"}
             </button>
@@ -174,7 +174,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
                 if (variant) handleAdd(variant.id);
               }}
               disabled={added}
-              className="text-sm text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold sm:text-xs disabled:opacity-50"
+              className="text-sm text-brand-grey transition-colors hover:text-brand-gold sm:text-xs disabled:opacity-50"
             >
               {added ? "added!" : "quick add"}
             </button>
