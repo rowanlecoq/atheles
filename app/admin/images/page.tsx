@@ -245,9 +245,7 @@ function SlotEditor({
       else setUploadError(String(d.error || "uploaded but failed to save — try again"));
     } catch (err) {
       const msg = err instanceof Error ? err.message : String(err);
-      setUploadError(msg.toLowerCase().includes("blob")
-        ? "Vercel Blob not configured — add BLOB_READ_WRITE_TOKEN in environment variables"
-        : msg);
+      setUploadError(msg);
     }
     setUploading(false);
   };
