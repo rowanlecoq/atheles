@@ -1,20 +1,26 @@
+"use client";
+import { useId } from "react";
+
 export function WavyDivider({ className = "" }: { className?: string }) {
+  const uid = useId().replace(/:/g, "");
   return (
     <svg
       xmlns="http://www.w3.org/2000/svg"
-      viewBox="0 0 1200 8"
-      preserveAspectRatio="none"
       className={`block w-full ${className}`}
-      style={{ height: 8 }}
+      style={{ height: 6 }}
       aria-hidden="true"
     >
-      <path
-        d="M0,4 C50,2 150,6 200,4 C250,2 350,6 400,4 C450,2 550,6 600,4 C650,2 750,6 800,4 C850,2 950,6 1000,4 C1050,2 1150,6 1200,4"
-        stroke="rgba(204,177,115,0.2)"
-        strokeWidth="1.5"
-        fill="none"
-        strokeLinecap="round"
-      />
+      <defs>
+        <pattern id={uid} x="0" y="0" width="100" height="6" patternUnits="userSpaceOnUse">
+          <path
+            d="M0,3 C25,2 75,4 100,3"
+            stroke="rgba(204,177,115,0.22)"
+            strokeWidth="0.75"
+            fill="none"
+          />
+        </pattern>
+      </defs>
+      <rect width="100%" height="6" fill={`url(#${uid})`} />
     </svg>
   );
 }

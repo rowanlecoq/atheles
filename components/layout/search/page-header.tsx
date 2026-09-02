@@ -2,6 +2,7 @@
 
 import { SplitText } from "components/animations/split-text";
 import { SlideshowMedia } from "components/slideshow-media";
+import { WavyDivider } from "components/wavy-divider";
 import { usePathname } from "next/navigation";
 
 const collectionTitles: Record<string, string> = {
@@ -22,7 +23,7 @@ export default function SearchPageHeader() {
   const title = collection ? collectionTitles[collection] || collection : "store";
 
   return (
-    <div className="relative overflow-hidden border-b border-brand-dark-gold/20" style={{ position: "relative", overflow: "hidden" }}>
+    <div className="relative overflow-hidden" style={{ position: "relative", overflow: "hidden" }}>
       {/* Hero background image — slideshow */}
       <SlideshowMedia
         slotKey="store_header"
@@ -44,6 +45,7 @@ export default function SearchPageHeader() {
           />
         </div>
       </div>
+      <WavyDivider className="absolute inset-x-0 bottom-0" />
     </div>
   );
 }
