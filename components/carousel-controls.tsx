@@ -55,24 +55,24 @@ export function CarouselControls({
       {/* Header row: subtitle, title, view all, arrows */}
       <div className="flex items-end justify-between">
         <div>
-          {subtitle && (
-            <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-dark-gold">
-              {subtitle}
-            </p>
-          )}
-          <div className="mt-1.5 flex items-baseline gap-5">
-            <h2 className="font-heading text-xl font-bold tracking-wide text-white sm:text-2xl md:text-3xl">
-              {title}
-            </h2>
+          <div className="flex items-center gap-4">
+            {subtitle && (
+              <p className="text-xs font-bold uppercase tracking-[0.2em] text-brand-dark-gold">
+                {subtitle}
+              </p>
+            )}
             {viewAllHref && (
               <Link
                 href={viewAllHref}
-                className="text-sm tracking-wide text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold"
+                className="text-xs tracking-wide text-brand-grey transition-colors hover:text-brand-gold"
               >
-                View All
+                view all
               </Link>
             )}
           </div>
+          <h2 className="mt-1.5 font-heading text-xl font-bold tracking-wide text-white sm:text-2xl md:text-3xl">
+            {title}
+          </h2>
         </div>
 
         {/* Arrow buttons */}
