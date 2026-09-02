@@ -100,7 +100,7 @@ function ProductCard({ product, index }: { product: Product; index: number }) {
             className="size-picker absolute inset-x-0 bottom-0 z-10 bg-gradient-to-t from-brand-dark via-brand-dark/95 to-transparent p-4 pt-10"
             onClick={(e) => { e.preventDefault(); e.stopPropagation(); }}
           >
-            <div className="flex flex-wrap gap-2">
+            <div className="flex flex-wrap justify-center gap-2">
               {product.variants.map((variant) => {
                 const rawSize = variant.selectedOptions.find(
                   (o) => o.name.toLowerCase() === "size",
