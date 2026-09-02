@@ -67,7 +67,7 @@ export function CarouselControls({
             {viewAllHref && (
               <Link
                 href={viewAllHref}
-                className="hidden text-sm tracking-wide text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold sm:inline"
+                className="text-sm tracking-wide text-brand-grey underline underline-offset-4 transition-colors hover:text-brand-gold"
               >
                 View All
               </Link>
