@@ -1,6 +1,6 @@
 import { type NextRequest, NextResponse } from "next/server";
 
-const protectedPaths = ["/profile", "/account", "/admin"];
+const protectedPaths = ["/profile", "/account", "/orders", "/admin"];
 const authPaths = ["/login", "/register"];
 const lockExempt = ["/coming-soon", "/api/", "/_next/", "/favicon.", "/icon-", "/apple-"];
 

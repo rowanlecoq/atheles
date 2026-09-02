@@ -13,6 +13,16 @@ export default {
       destination: "/product/:handle",
       permanent: true,
     },
+    {
+      source: "/account",
+      destination: "/orders",
+      permanent: true,
+    },
+    {
+      source: "/account/order-help",
+      destination: "/orders/order-help",
+      permanent: true,
+    },
   ],
   images: {
     formats: ["image/avif", "image/webp"],

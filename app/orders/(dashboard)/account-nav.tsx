@@ -4,8 +4,8 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 
 const accountNav = [
-  { title: "orders", path: "/account" },
-  { title: "help", path: "/account/order-help" },
+  { title: "orders", path: "/orders" },
+  { title: "help", path: "/orders/order-help" },
 ];
 
 export function AccountNav() {
