@@ -61,6 +61,7 @@ export default function ImageCropModal({
 
   useEffect(() => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => {
       imageRef.current = img;
       const minZ = Math.max(CANVAS_W / img.width, CANVAS_H / img.height);

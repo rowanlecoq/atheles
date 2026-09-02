@@ -58,7 +58,7 @@ function isVideoUrl(url: string) {
 }
 
 function getYouTubeThumb(url: string) {
-  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)(\w-]+)/);
+  const match = url.match(/(?:youtube\.com\/(?:watch\?v=|shorts\/)|youtu\.be\/)([\w-]+)/);
   return match ? `https://img.youtube.com/vi/${match[1]}/hqdefault.jpg` : null;
 }
 
@@ -218,6 +218,7 @@ function SlotEditor({
   const [expanded, setExpanded] = useState(false);
   const [cropSrc, setCropSrc] = useState<string | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [recropIndex, setRecropIndex] = useState<number | null>(null);
   const [confirmReset, setConfirmReset] = useState(false);
   const fileRef = useRef<HTMLInputElement>(null);
   const opacityTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -269,20 +270,63 @@ function SlotEditor({
     setCropSrc(url);
   };
 
+  const doRecropUpload = async (file: File, replaceIdx: number) => {
+    setUploading(true);
+    setUploadError("");
+    try {
+      const uniqueName = `${Date.now()}-${file.name}`;
+      const blob = await upload(uniqueName, file, {
+        access: "public",
+        handleUploadUrl: "/api/admin/images/upload",
+      });
+      const newMedia = [...latestData.current.media];
+      newMedia[replaceIdx] = blob.url;
+      const next = { ...latestData.current, media: newMedia };
+      onUpdate(slotKey, next);
+      const res = await fetch("/api/admin/images", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ slot: slotKey, slotData: next }),
+      });
+      const d = await res.json().catch(() => ({}));
+      if ((d as Record<string, unknown>).success) flash();
+      else if (res.status === 401) setUploadError("session expired — please refresh the page and try again");
+      else setUploadError(String((d as Record<string, unknown>).error || "uploaded but failed to save — try again"));
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : String(err);
+      setUploadError(msg);
+    }
+    setUploading(false);
+  };
+
   const handleCropSave = async (croppedDataUrl: string) => {
+    const idx = recropIndex;
+    if (cropSrc?.startsWith("blob:")) URL.revokeObjectURL(cropSrc);
     setCropSrc(null);
+    setRecropIndex(null);
     const res = await fetch(croppedDataUrl);
     const blob = await res.blob();
-    const filename = pendingFile?.name?.replace(/\.[^.]+$/, ".jpg") || "image.jpg";
+    let filename: string;
+    if (idx !== null && data.media[idx]) {
+      const existingName = data.media[idx]!.split("/").pop()?.split("?")[0] || "image.jpg";
+      filename = /\.(jpe?g)$/i.test(existingName) ? existingName : existingName.replace(/\.[^.]+$/, ".jpg") || "image.jpg";
+    } else {
+      filename = pendingFile?.name?.replace(/\.[^.]+$/, ".jpg") || "image.jpg";
+    }
     const file = new File([blob], filename, { type: "image/jpeg" });
     setPendingFile(null);
-    doUpload(file);
+    if (idx !== null) {
+      doRecropUpload(file, idx);
+    } else {
+      doUpload(file);
+    }
   };
 
   const handleCropCancel = () => {
-    if (cropSrc) URL.revokeObjectURL(cropSrc);
+    if (cropSrc?.startsWith("blob:")) URL.revokeObjectURL(cropSrc);
     setCropSrc(null);
     setPendingFile(null);
+    setRecropIndex(null);
   };
 
   const addUrl = async (url: string) => {
@@ -311,6 +355,7 @@ function SlotEditor({
       });
       const d = await res.json();
       if (d.success) flash();
+      else if (res.status === 401) setUploadError("session expired — please refresh the page and try again");
       else setUploadError(d.error || "save failed");
     } catch { setUploadError("save failed"); }
   };
@@ -453,6 +498,15 @@ function SlotEditor({
                         {src.startsWith("blob:") ? "uploading…" : src.split("/").pop() || src}
                       </p>
                       <p className="mt-0.5 text-[10px] text-brand-grey/30">item {i + 1}</p>
+                      {!isVideoUrl(src) && !getYouTubeThumb(src) && (
+                        <button
+                          type="button"
+                          onClick={() => { setRecropIndex(i); setCropSrc(src); }}
+                          className="mt-1 text-[10px] text-brand-grey/50 underline-offset-2 underline active:text-brand-gold"
+                        >
+                          re-crop
+                        </button>
+                      )}
                     </div>
 
                     <div className="flex flex-col items-center gap-1 flex-shrink-0">
