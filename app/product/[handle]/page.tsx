@@ -97,7 +97,9 @@ export default async function ProductPage(props: {
         product={{
           handle: product.handle,
           title: product.title,
-          featuredImageUrl: product.featuredImage?.url,
+          featuredImageUrl: product.featuredImage?.url ?? "",
+          secondImageUrl: product.images?.[1]?.url,
+          availableForSale: product.availableForSale,
           price: product.priceRange.maxVariantPrice.amount,
           currencyCode: product.priceRange.maxVariantPrice.currencyCode,
         }}

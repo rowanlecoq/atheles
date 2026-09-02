@@ -9,6 +9,8 @@ export type RecentlyViewedItem = {
   handle: string;
   title: string;
   featuredImageUrl: string;
+  secondImageUrl?: string;
+  availableForSale: boolean;
   price: string;
   currencyCode: string;
 };

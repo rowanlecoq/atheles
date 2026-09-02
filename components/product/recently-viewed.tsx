@@ -1,5 +1,6 @@
 "use client";
 
+import { FavoriteCardButton } from "components/favorite-card-button";
 import {
   useRecentlyViewed,
   type RecentlyViewedItem,
@@ -53,7 +54,17 @@ export function RecentlyViewedProducts({
                       alt={product.title}
                       fill
                       sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 72vw"
-                      className="h-full w-full object-cover"
+                      className={`h-full w-full object-cover transition-opacity duration-500 ${product.secondImageUrl ? "group-hover:opacity-0" : ""}`}
+                    />
+                  )}
+                  {product.secondImageUrl && (
+                    <Image
+                      src={product.secondImageUrl}
+                      alt={`${product.title} - alternate`}
+                      fill
+                      sizes="(min-width: 1024px) 20vw, (min-width: 768px) 25vw, (min-width: 640px) 33vw, (min-width: 475px) 50vw, 72vw"
+                      loading="lazy"
+                      className="h-full w-full object-cover opacity-0 transition-opacity duration-500 group-hover:opacity-100"
                     />
                   )}
                   <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent p-4 pt-10">
@@ -61,6 +72,23 @@ export function RecentlyViewedProducts({
                     <Price className="text-sm text-brand-grey" amount={product.price} currencyCode={product.currencyCode} />
                   </div>
                 </Link>
+                <FavoriteCardButton handle={product.handle} />
+                <div className="absolute left-3 top-3 z-10">
+                  {product.availableForSale ? (
+                    <div className="flex items-center gap-1.5 rounded-full bg-brand-dark/70 px-2 py-1 backdrop-blur-sm">
+                      <span className="relative flex h-1.5 w-1.5">
+                        <span className="absolute inline-flex h-full w-full animate-ping rounded-full bg-green-400 opacity-75" />
+                        <span className="relative inline-flex h-1.5 w-1.5 rounded-full bg-green-500" />
+                      </span>
+                      <span className="text-xs text-green-400">In Stock</span>
+                    </div>
+                  ) : (
+                    <div className="flex items-center gap-1.5 rounded-full bg-brand-dark/70 px-2 py-1 backdrop-blur-sm">
+                      <span className="h-1.5 w-1.5 rounded-full bg-red-500" />
+                      <span className="text-xs text-red-400">Sold Out</span>
+                    </div>
+                  )}
+                </div>
               </div>
             </div>
           </li>
