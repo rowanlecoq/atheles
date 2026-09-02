@@ -121,6 +121,8 @@ export function SlideshowMedia({
     ...mediaStyle,
   };
 
+  if (!currentSrc) return null;
+
   if (!isSlideshow) {
     return (
       <div style={wrapperStyle}>

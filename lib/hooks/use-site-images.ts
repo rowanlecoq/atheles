@@ -10,9 +10,7 @@ const DEFAULT_IMAGES: Record<string, string> = {
   hero_left: "/statues/augustus-primaporta.jpg",
   hero_right: "/statues/trajan-louvre.jpg",
   store_header: "/statues/greek-god-hero.png",
-  newsletter: "/statues/roman-emperor-pergamon.jpg",
   brand_story: "/statues/roman-emperor-pergamon.jpg",
-  interstitial: "/statues/hadrian-cuirassed.jpg",
 };
 
 function defaultSlot(key: string): SlotData {
