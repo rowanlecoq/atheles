@@ -230,10 +230,10 @@ function SlotEditor({
     setUploading(true);
     setUploadError("");
     try {
-      const blob = await upload(file.name, file, {
+      const uniqueName = `${Date.now()}-${file.name}`;
+      const blob = await upload(uniqueName, file, {
         access: "public",
         handleUploadUrl: "/api/admin/images/upload",
-        addRandomSuffix: true,
       });
       const res = await fetch("/api/admin/images", {
         method: "POST",
