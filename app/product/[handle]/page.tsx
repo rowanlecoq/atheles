@@ -1,5 +1,5 @@
 import { FadeIn } from "components/animations/fade-in";
-import { HomepageProductCard } from "components/homepage-product-card";
+import { CarouselProductCard } from "components/carousel-product-card";
 import Footer from "components/layout/footer";
 import { Gallery } from "components/product/gallery";
 import { ProductDescription } from "components/product/product-description";
@@ -155,7 +155,7 @@ async function RelatedProducts({ id }: { id: string }) {
             key={product.handle}
             className="w-[72%] min-w-[200px] flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
           >
-            <HomepageProductCard product={product} size="half" />
+            <CarouselProductCard product={product} />
           </li>
         ))}
       </ul>
