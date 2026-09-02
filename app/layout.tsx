@@ -10,6 +10,7 @@ import { PageTransition } from "components/page-transition";
 import { ColorModeApplier } from "components/color-mode-applier";
 import { headers } from "next/headers";
 import { ProfileBackgroundApplier } from "components/profile-background-applier";
+import { ScrollProgress } from "components/scroll-progress";
 import { SelfLinkScroll } from "components/self-link-scroll";
 import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";
@@ -40,9 +41,15 @@ export const metadata = {
     icon: [
       { url: "/icon-32.png", sizes: "32x32", type: "image/png" },
       { url: "/icon-192.png", sizes: "192x192", type: "image/png" },
+      { url: "/icon-512.png", sizes: "512x512", type: "image/png" },
     ],
     apple: "/apple-touch-icon.png",
     shortcut: "/icon-32.png",
+  },
+  appleWebApp: {
+    capable: true,
+    title: "atheles",
+    statusBarStyle: "black-translucent",
   },
   robots: {
     follow: true,
