@@ -2,7 +2,6 @@
 
 import { FadeIn } from "components/animations";
 import { SlideshowMedia } from "components/slideshow-media";
-import { WavyDivider } from "components/wavy-divider";
 import { useEffect, useState } from "react";
 
 const defaultQuotes = [
@@ -31,8 +30,7 @@ export function GreekQuote() {
   }, []);
 
   return (
-    <section className="theme-section relative overflow-hidden py-12 sm:py-16">
-      <WavyDivider className="absolute inset-x-0 top-0" />
+    <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 py-12 sm:py-16">
       <SlideshowMedia
         slotKey="interstitial"
         className="object-cover object-center"

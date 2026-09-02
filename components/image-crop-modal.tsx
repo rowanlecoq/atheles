@@ -21,7 +21,6 @@ export default function ImageCropModal({
   const [zoom, setZoom] = useState(1);
   const [imageLoaded, setImageLoaded] = useState(false);
 
-  // Multi-pointer tracking for pinch-to-zoom and single-finger drag
   const pointersRef = useRef<Map<number, { x: number; y: number }>>(new Map());
   const dragAnchorRef = useRef({ x: 0, y: 0 });
   const isDraggingRef = useRef(false);
@@ -29,21 +28,22 @@ export default function ImageCropModal({
   const pinchStartZoomRef = useRef(1);
   const pinchStartOffsetRef = useRef({ x: 0, y: 0 });
 
-  const CANVAS_SIZE = 300;
-  const OUTPUT_SIZE = 400;
-  const RADIUS = CANVAS_SIZE / 2;
+  // 16:9 preview canvas; output at 1920×1080
+  const CANVAS_W = 320;
+  const CANVAS_H = 180;
+  const OUTPUT_W = 1920;
+  const OUTPUT_H = 1080;
 
-  // CSS display size → canvas internal pixel scale
   const getDisplayScale = useCallback(() => {
     const c = canvasRef.current;
     if (!c) return 1;
-    return c.getBoundingClientRect().width / CANVAS_SIZE;
+    return c.getBoundingClientRect().width / CANVAS_W;
   }, []);
 
   const getMinZoom = useCallback(() => {
     const img = imageRef.current;
     if (!img) return 1;
-    return Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height);
+    return Math.max(CANVAS_W / img.width, CANVAS_H / img.height);
   }, []);
 
   const clampOffset = useCallback((ox: number, oy: number, z: number) => {
@@ -51,20 +51,19 @@ export default function ImageCropModal({
     if (!img) return { x: ox, y: oy };
     const drawW = img.width * z;
     const drawH = img.height * z;
-    const maxOx = Math.max(0, (drawW - CANVAS_SIZE) / 2);
-    const maxOy = Math.max(0, (drawH - CANVAS_SIZE) / 2);
+    const maxOx = Math.max(0, (drawW - CANVAS_W) / 2);
+    const maxOy = Math.max(0, (drawH - CANVAS_H) / 2);
     return {
       x: Math.max(-maxOx, Math.min(maxOx, ox)),
       y: Math.max(-maxOy, Math.min(maxOy, oy)),
     };
   }, []);
 
-  // Load image
   useEffect(() => {
     const img = new Image();
     img.onload = () => {
       imageRef.current = img;
-      const minZ = Math.max(CANVAS_SIZE / img.width, CANVAS_SIZE / img.height);
+      const minZ = Math.max(CANVAS_W / img.width, CANVAS_H / img.height);
       zoomRef.current = minZ;
       setZoom(minZ);
       offsetRef.current = { x: 0, y: 0 };
@@ -73,7 +72,6 @@ export default function ImageCropModal({
     img.src = imageSrc;
   }, [imageSrc]);
 
-  // Draw
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
     const img = imageRef.current;
@@ -81,41 +79,30 @@ export default function ImageCropModal({
     const ctx = canvas.getContext("2d");
     if (!ctx) return;
 
-    canvas.width = CANVAS_SIZE;
-    canvas.height = CANVAS_SIZE;
+    canvas.width = CANVAS_W;
+    canvas.height = CANVAS_H;
 
     const z = zoomRef.current;
     const off = offsetRef.current;
 
     ctx.fillStyle = "#111";
-    ctx.fillRect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
+    ctx.fillRect(0, 0, CANVAS_W, CANVAS_H);
 
     const drawW = img.width * z;
     const drawH = img.height * z;
-    const drawX = (CANVAS_SIZE - drawW) / 2 + off.x;
-    const drawY = (CANVAS_SIZE - drawH) / 2 + off.y;
-
-    ctx.save();
-    ctx.beginPath();
-    ctx.arc(RADIUS, RADIUS, RADIUS, 0, Math.PI * 2);
-    ctx.clip();
+    const drawX = (CANVAS_W - drawW) / 2 + off.x;
+    const drawY = (CANVAS_H - drawH) / 2 + off.y;
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
-    ctx.restore();
 
-    // Shade outside circle
-    ctx.save();
-    ctx.fillStyle = "rgba(0,0,0,0.55)";
+    // Corner bracket guides
+    const g = 12;
+    ctx.strokeStyle = "rgba(255,255,255,0.4)";
+    ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.rect(0, 0, CANVAS_SIZE, CANVAS_SIZE);
-    ctx.arc(RADIUS, RADIUS, RADIUS, 0, Math.PI * 2, true);
-    ctx.fill();
-    ctx.restore();
-
-    // Circle outline
-    ctx.strokeStyle = "rgba(255,255,255,0.18)";
-    ctx.lineWidth = 1;
-    ctx.beginPath();
-    ctx.arc(RADIUS, RADIUS, RADIUS - 0.5, 0, Math.PI * 2);
+    ctx.moveTo(0, g); ctx.lineTo(0, 0); ctx.lineTo(g, 0);
+    ctx.moveTo(CANVAS_W - g, 0); ctx.lineTo(CANVAS_W, 0); ctx.lineTo(CANVAS_W, g);
+    ctx.moveTo(0, CANVAS_H - g); ctx.lineTo(0, CANVAS_H); ctx.lineTo(g, CANVAS_H);
+    ctx.moveTo(CANVAS_W - g, CANVAS_H); ctx.lineTo(CANVAS_W, CANVAS_H); ctx.lineTo(CANVAS_W, CANVAS_H - g);
     ctx.stroke();
   }, []);
 
@@ -128,7 +115,6 @@ export default function ImageCropModal({
     if (imageLoaded) scheduleDraw();
   }, [imageLoaded, scheduleDraw, zoom]);
 
-  // Convert clientX/Y to canvas-internal coordinates
   const toCanvas = useCallback((clientX: number, clientY: number) => {
     const scale = getDisplayScale();
     return { x: clientX / scale, y: clientY / scale };
@@ -161,7 +147,6 @@ export default function ImageCropModal({
     pointersRef.current.set(e.pointerId, pos);
 
     if (pointersRef.current.size === 2 && pinchStartDistRef.current !== null) {
-      // Pinch-to-zoom
       const pts = Array.from(pointersRef.current.values());
       const dist = Math.hypot(pts[0]!.x - pts[1]!.x, pts[0]!.y - pts[1]!.y);
       const minZ = getMinZoom();
@@ -178,7 +163,6 @@ export default function ImageCropModal({
       setZoom(newZoom);
       scheduleDraw();
     } else if (pointersRef.current.size === 1 && isDraggingRef.current) {
-      // Single-finger drag
       offsetRef.current = clampOffset(
         pos.x - dragAnchorRef.current.x,
         pos.y - dragAnchorRef.current.y,
@@ -190,14 +174,10 @@ export default function ImageCropModal({
 
   const handlePointerUp = useCallback((e: React.PointerEvent) => {
     pointersRef.current.delete(e.pointerId);
-
-    if (pointersRef.current.size < 2) {
-      pinchStartDistRef.current = null;
-    }
+    if (pointersRef.current.size < 2) pinchStartDistRef.current = null;
     if (pointersRef.current.size === 0) {
       isDraggingRef.current = false;
     } else if (pointersRef.current.size === 1) {
-      // Went from 2 fingers back to 1 — reset drag anchor to avoid position jump
       isDraggingRef.current = true;
       const remaining = Array.from(pointersRef.current.values())[0];
       dragAnchorRef.current = {
@@ -207,7 +187,6 @@ export default function ImageCropModal({
     }
   }, []);
 
-  // Scroll wheel zoom (desktop)
   const handleWheel = useCallback((e: React.WheelEvent) => {
     e.preventDefault();
     const minZ = getMinZoom();
@@ -243,28 +222,24 @@ export default function ImageCropModal({
     if (!img) return;
 
     const out = document.createElement("canvas");
-    out.width = OUTPUT_SIZE;
-    out.height = OUTPUT_SIZE;
+    out.width = OUTPUT_W;
+    out.height = OUTPUT_H;
     const ctx = out.getContext("2d");
     if (!ctx) return;
 
-    const scale = OUTPUT_SIZE / CANVAS_SIZE;
+    const scaleX = OUTPUT_W / CANVAS_W;
+    const scaleY = OUTPUT_H / CANVAS_H;
     const z = zoomRef.current;
     const off = offsetRef.current;
-    const drawW = img.width * z * scale;
-    const drawH = img.height * z * scale;
-    const drawX = (OUTPUT_SIZE - drawW) / 2 + off.x * scale;
-    const drawY = (OUTPUT_SIZE - drawH) / 2 + off.y * scale;
+    const drawW = img.width * z * scaleX;
+    const drawH = img.height * z * scaleY;
+    const drawX = (OUTPUT_W - drawW) / 2 + off.x * scaleX;
+    const drawY = (OUTPUT_H - drawH) / 2 + off.y * scaleY;
 
-    ctx.beginPath();
-    ctx.arc(OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, OUTPUT_SIZE / 2, 0, Math.PI * 2);
-    ctx.clip();
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
-
     onSave(out.toDataURL("image/jpeg", 0.85));
   };
 
-  // Lock scroll while open
   useEffect(() => {
     document.documentElement.style.overflow = "hidden";
     return () => { document.documentElement.style.overflow = ""; };
@@ -283,14 +258,13 @@ export default function ImageCropModal({
           drag to reposition · pinch or slider to zoom
         </p>
 
-        {/* Canvas — responsive width, fills the card */}
-        <div className="mb-5 flex justify-center">
+        <div className="mb-5">
           <canvas
             ref={canvasRef}
-            width={CANVAS_SIZE}
-            height={CANVAS_SIZE}
-            className="cursor-grab rounded-full active:cursor-grabbing"
-            style={{ width: "min(72vw, 280px)", height: "min(72vw, 280px)", touchAction: "none" }}
+            width={CANVAS_W}
+            height={CANVAS_H}
+            className="w-full cursor-grab rounded-lg active:cursor-grabbing"
+            style={{ display: "block", touchAction: "none" }}
             onPointerDown={handlePointerDown}
             onPointerMove={handlePointerMove}
             onPointerUp={handlePointerUp}
@@ -299,7 +273,6 @@ export default function ImageCropModal({
           />
         </div>
 
-        {/* Zoom controls */}
         <div className="mb-1 flex items-center gap-2 px-1">
           <button
             type="button"
@@ -332,7 +305,6 @@ export default function ImageCropModal({
           </button>
         </div>
 
-        {/* Reset */}
         <div className="mb-5 text-center">
           <button
             type="button"
@@ -343,7 +315,6 @@ export default function ImageCropModal({
           </button>
         </div>
 
-        {/* Actions */}
         <div className="flex gap-3">
           <button
             type="button"

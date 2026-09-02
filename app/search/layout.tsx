@@ -1,6 +1,5 @@
 import { FadeIn } from "components/animations/fade-in";
 import Footer from "components/layout/footer";
-import { WavyDivider } from "components/wavy-divider";
 import Collections, { MobileCollections } from "components/layout/search/collections";
 import FilterList from "components/layout/search/filter";
 import { ClearFilters } from "components/layout/search/clear-filters";
@@ -24,13 +23,12 @@ export default function SearchLayout({
           <div className="mb-2">
             <MobileCollections />
           </div>
-          <div className="flex items-center justify-end gap-3 px-4 pb-3">
+          <div className="mb-4 flex items-center justify-end gap-3 border-b border-brand-dark-gold/20 px-4 pb-3">
             <Suspense fallback={null}>
               <ClearFilters />
             </Suspense>
             <FilterList list={sorting} title="Sort by" />
           </div>
-          <WavyDivider className="mb-4" />
         </div>
       </FadeIn>
 

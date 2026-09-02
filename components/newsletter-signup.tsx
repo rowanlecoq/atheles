@@ -1,7 +1,6 @@
 "use client";
 
 import { SlideshowMedia } from "components/slideshow-media";
-import { WavyDivider } from "components/wavy-divider";
 import { useEffect, useState } from "react";
 
 export function NewsletterSignup() {
@@ -13,9 +12,7 @@ export function NewsletterSignup() {
   const [loggedIn, setLoggedIn] = useState(false);
   const [userEmail, setUserEmail] = useState("");
 
-  // Check if user is already subscribed (acceptsMarketing)
   useEffect(() => {
-    // Gate: guests never need to call the session API
     if (!document.cookie.includes("atheles-logged-in=1")) return;
     try {
       const cached = localStorage.getItem("atheles-session");
@@ -25,9 +22,8 @@ export function NewsletterSignup() {
         setUserEmail(u.email || "");
         if (u.acceptsMarketing === true) {
           setAlreadySubscribed(true);
-          return; // Confirmed subscribed — skip API
+          return;
         }
-        // Logged in but acceptsMarketing not confirmed — fall through to fetch
       }
     } catch {}
     fetch("/api/auth/session")
@@ -38,7 +34,6 @@ export function NewsletterSignup() {
           setUserEmail(d.user.email || "");
           if (d.user.acceptsMarketing) {
             setAlreadySubscribed(true);
-            // Sync into cache so next visit skips the API
             try {
               const cached = localStorage.getItem("atheles-session");
               if (cached) {
@@ -71,7 +66,6 @@ export function NewsletterSignup() {
         setAlreadySubscribed(true);
         if (!data.alreadySubscribed) setSubmitted(true);
         setEmail("");
-        // Update session cache so it persists
         try {
           const cached = localStorage.getItem("atheles-session");
           if (cached) {
@@ -91,8 +85,7 @@ export function NewsletterSignup() {
   };
 
   return (
-    <section className="theme-section relative overflow-hidden py-20">
-      <WavyDivider className="absolute inset-x-0 top-0" />
+    <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 py-20">
       <SlideshowMedia
         slotKey="newsletter"
         className="object-cover object-center"
