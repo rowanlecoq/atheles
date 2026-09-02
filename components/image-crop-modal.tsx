@@ -6,12 +6,14 @@ interface ImageCropModalProps {
   imageSrc: string;
   onSave: (croppedDataUrl: string) => void;
   onCancel: () => void;
+  aspect?: "square" | "16:9";
 }
 
 export default function ImageCropModal({
   imageSrc,
   onSave,
   onCancel,
+  aspect = "square",
 }: ImageCropModalProps) {
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const imageRef = useRef<HTMLImageElement | null>(null);
@@ -28,23 +30,22 @@ export default function ImageCropModal({
   const pinchStartZoomRef = useRef(1);
   const pinchStartOffsetRef = useRef({ x: 0, y: 0 });
 
-  // 16:9 preview canvas; output at 1920×1080
   const CANVAS_W = 320;
-  const CANVAS_H = 180;
-  const OUTPUT_W = 1920;
-  const OUTPUT_H = 1080;
+  const CANVAS_H = aspect === "16:9" ? 180 : 320;
+  const OUTPUT_W = aspect === "16:9" ? 1920 : 800;
+  const OUTPUT_H = aspect === "16:9" ? 1080 : 800;
 
   const getDisplayScale = useCallback(() => {
     const c = canvasRef.current;
     if (!c) return 1;
     return c.getBoundingClientRect().width / CANVAS_W;
-  }, []);
+  }, [CANVAS_W]);
 
   const getMinZoom = useCallback(() => {
     const img = imageRef.current;
     if (!img) return 1;
     return Math.max(CANVAS_W / img.width, CANVAS_H / img.height);
-  }, []);
+  }, [CANVAS_W, CANVAS_H]);
 
   const clampOffset = useCallback((ox: number, oy: number, z: number) => {
     const img = imageRef.current;
@@ -57,7 +58,7 @@ export default function ImageCropModal({
       x: Math.max(-maxOx, Math.min(maxOx, ox)),
       y: Math.max(-maxOy, Math.min(maxOy, oy)),
     };
-  }, []);
+  }, [CANVAS_W, CANVAS_H]);
 
   useEffect(() => {
     const img = new Image();
@@ -71,7 +72,7 @@ export default function ImageCropModal({
       setImageLoaded(true);
     };
     img.src = imageSrc;
-  }, [imageSrc]);
+  }, [imageSrc, CANVAS_W, CANVAS_H]);
 
   const draw = useCallback(() => {
     const canvas = canvasRef.current;
@@ -95,17 +96,36 @@ export default function ImageCropModal({
     const drawY = (CANVAS_H - drawH) / 2 + off.y;
     ctx.drawImage(img, drawX, drawY, drawW, drawH);
 
-    // Corner bracket guides
-    const g = 12;
-    ctx.strokeStyle = "rgba(255,255,255,0.4)";
-    ctx.lineWidth = 1.5;
-    ctx.beginPath();
-    ctx.moveTo(0, g); ctx.lineTo(0, 0); ctx.lineTo(g, 0);
-    ctx.moveTo(CANVAS_W - g, 0); ctx.lineTo(CANVAS_W, 0); ctx.lineTo(CANVAS_W, g);
-    ctx.moveTo(0, CANVAS_H - g); ctx.lineTo(0, CANVAS_H); ctx.lineTo(g, CANVAS_H);
-    ctx.moveTo(CANVAS_W - g, CANVAS_H); ctx.lineTo(CANVAS_W, CANVAS_H); ctx.lineTo(CANVAS_W, CANVAS_H - g);
-    ctx.stroke();
-  }, []);
+    if (aspect === "square") {
+      // Circular crop guide with dim outside
+      const cx = CANVAS_W / 2;
+      const cy = CANVAS_H / 2;
+      const r = Math.min(CANVAS_W, CANVAS_H) / 2 - 2;
+      ctx.save();
+      ctx.fillStyle = "rgba(0,0,0,0.45)";
+      ctx.beginPath();
+      ctx.rect(0, 0, CANVAS_W, CANVAS_H);
+      ctx.arc(cx, cy, r, 0, Math.PI * 2, true);
+      ctx.fill("evenodd");
+      ctx.restore();
+      ctx.strokeStyle = "rgba(255,255,255,0.5)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, r, 0, Math.PI * 2);
+      ctx.stroke();
+    } else {
+      // Corner bracket guides
+      const g = 12;
+      ctx.strokeStyle = "rgba(255,255,255,0.4)";
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.moveTo(0, g); ctx.lineTo(0, 0); ctx.lineTo(g, 0);
+      ctx.moveTo(CANVAS_W - g, 0); ctx.lineTo(CANVAS_W, 0); ctx.lineTo(CANVAS_W, g);
+      ctx.moveTo(0, CANVAS_H - g); ctx.lineTo(0, CANVAS_H); ctx.lineTo(g, CANVAS_H);
+      ctx.moveTo(CANVAS_W - g, CANVAS_H); ctx.lineTo(CANVAS_W, CANVAS_H); ctx.lineTo(CANVAS_W, CANVAS_H - g);
+      ctx.stroke();
+    }
+  }, [CANVAS_W, CANVAS_H, aspect]);
 
   const scheduleDraw = useCallback(() => {
     if (rafRef.current) cancelAnimationFrame(rafRef.current);

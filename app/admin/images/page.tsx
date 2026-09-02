@@ -430,6 +430,7 @@ function SlotEditor({
           imageSrc={cropSrc}
           onSave={handleCropSave}
           onCancel={handleCropCancel}
+          aspect="16:9"
         />
       )}
 
