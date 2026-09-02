@@ -30,7 +30,7 @@ export function GreekQuote() {
   }, []);
 
   return (
-    <section className="theme-section relative overflow-hidden bg-brand-dark border-t border-brand-dark-gold/20 py-12 sm:py-16">
+    <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 py-12 sm:py-16">
       <SlideshowMedia
         slotKey="interstitial"
         className="object-cover object-center"
@@ -38,7 +38,6 @@ export function GreekQuote() {
         sizes="100vw"
       />
       <div className="absolute inset-0 bg-brand-dark/60" />
-      <div className="absolute inset-x-0 top-0 h-20 bg-gradient-to-b from-brand-dark via-brand-dark/60 to-transparent" />
       <FadeIn className="relative z-10 mx-auto max-w-2xl px-4 text-center">
         <p className="mb-3 font-heading text-sm italic leading-relaxed text-brand-pale-gold sm:text-base">
           &ldquo;{quote.text}&rdquo;

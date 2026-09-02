@@ -90,7 +90,7 @@ export function NewsletterSignup() {
   };
 
   return (
-    <section className="theme-section relative overflow-hidden bg-brand-dark border-t border-brand-dark-gold/20 py-20">
+    <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 py-20">
       <SlideshowMedia
         slotKey="newsletter"
         className="object-cover object-center"
@@ -98,7 +98,6 @@ export function NewsletterSignup() {
         sizes="100vw"
       />
       <div className="absolute inset-0 bg-brand-dark/60" />
-      <div className="newsletter-top-fade absolute inset-x-0 top-0 h-24 bg-gradient-to-b from-brand-dark via-brand-dark/60 to-transparent" />
       <div className="relative z-10 mx-auto max-w-2xl px-4 text-center">
         {alreadySubscribed ? (
           <>
