@@ -2,7 +2,6 @@
 
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { AnimatePresence, motion } from "motion/react";
 
 const DEFAULT_ANNOUNCEMENTS = [
   "to ascend.",
@@ -22,8 +21,6 @@ export function AnnouncementBar({ initialAnnouncements }: { initialAnnouncements
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const announcementsLenRef = useRef(announcements.length);
 
-  // Keep ref in sync so the interval closure always sees the current length
-  // without needing to be recreated when announcements change.
   useEffect(() => {
     announcementsLenRef.current = announcements.length;
   }, [announcements.length]);
@@ -57,23 +54,15 @@ export function AnnouncementBar({ initialAnnouncements }: { initialAnnouncements
 
   return (
     <div className={`announcement-bar-root relative flex h-8 items-center border-b border-brand-dark-gold/20 overflow-hidden bg-transparent ${entered ? "animate-announcement-bar-enter" : "navbar-pre-enter"}`}>
-      {/* Spacer balances the pause button on the right */}
       <div className="min-w-[44px] flex-none" />
 
-      <AnimatePresence mode="wait">
-        <motion.p
-          key={index}
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: prefersReducedMotion ? 0 : 0.35, ease: "easeInOut" }}
-          className="flex-1 text-center text-xs uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em]"
-        >
-          {announcements[index]}
-        </motion.p>
-      </AnimatePresence>
+      <p
+        key={index}
+        className={`flex-1 text-center text-xs uppercase tracking-[0.18em] text-brand-dark-gold sm:text-[11px] sm:tracking-[0.25em] ${prefersReducedMotion ? "" : "animate-announce-fade"}`}
+      >
+        {announcements[index]}
+      </p>
 
-      {/* Pause / Play */}
       <button
         type="button"
         onClick={togglePause}

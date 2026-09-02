@@ -4,6 +4,7 @@ import { ThreeItemGrid } from "components/grid/three-items";
 import { Hero } from "components/hero";
 import Footer from "components/layout/footer";
 import { NewsletterSignup } from "components/newsletter-signup";
+import { Suspense } from "react";
 
 export const metadata = {
   description:
@@ -17,8 +18,12 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <Carousel />
-      <ThreeItemGrid />
+      <Suspense fallback={null}>
+        <Carousel />
+      </Suspense>
+      <Suspense fallback={null}>
+        <ThreeItemGrid />
+      </Suspense>
       <NewsletterSignup />
       <GreekQuote />
       <Footer />

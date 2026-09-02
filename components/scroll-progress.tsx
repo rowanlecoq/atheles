@@ -1,15 +1,27 @@
 "use client";
 
-import { motion, useScroll, useTransform } from "motion/react";
+import { useEffect, useRef } from "react";
 
 export function ScrollProgress() {
-  const { scrollYProgress } = useScroll();
-  const x = useTransform(scrollYProgress, [0, 1], ["-100%", "0%"]);
+  const barRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const update = () => {
+      const el = document.documentElement;
+      const progress = el.scrollTop / (el.scrollHeight - el.clientHeight) || 0;
+      if (barRef.current) {
+        barRef.current.style.transform = `translateX(${(progress - 1) * 100}%)`;
+      }
+    };
+    window.addEventListener("scroll", update, { passive: true });
+    return () => window.removeEventListener("scroll", update);
+  }, []);
 
   return (
-    <motion.div
+    <div
+      ref={barRef}
       className="pointer-events-none fixed left-0 top-0 z-40 h-[2px] w-full bg-brand-gold/60"
-      style={{ x }}
+      style={{ transform: "translateX(-100%)" }}
     />
   );
 }

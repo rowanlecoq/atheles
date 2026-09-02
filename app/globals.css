@@ -211,6 +211,17 @@ html { scrollbar-width: none; }
   animation: header-enter 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
 }
 
+@keyframes announce-fade {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+.animate-announce-fade {
+  animation: announce-fade 0.35s ease-in-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .animate-announce-fade { animation: none; }
+}
+
 /* Header entrance — translateY only. No opacity so backdrop-blur on child
    elements doesn't cause compositor flicker. */
 @keyframes header-enter {

@@ -4,7 +4,10 @@ import { AnnouncementBar } from "components/announcement-bar";
 import { CartProvider } from "components/cart/cart-context";
 import { ThemeBackgroundCanvas } from "components/canvas-loader";
 import { CurrencyProvider } from "components/currency-context";
-import { KonamiLightning } from "components/easter-eggs/konami-lightning";
+import dynamic from "next/dynamic";
+const KonamiLightning = dynamic(
+  () => import("components/easter-eggs/konami-lightning").then((m) => m.KonamiLightning),
+);
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
 import { ColorModeApplier } from "components/color-mode-applier";
