@@ -3,6 +3,7 @@
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { AnimatePresence, motion } from "motion/react";
+import { WavyDivider } from "components/wavy-divider";
 
 const DEFAULT_ANNOUNCEMENTS = [
   "to ascend.",
@@ -56,7 +57,7 @@ export function AnnouncementBar({ initialAnnouncements }: { initialAnnouncements
   };
 
   return (
-    <div className={`announcement-bar-root flex h-8 items-center overflow-hidden border-b border-brand-dark-gold/20 bg-transparent ${entered ? "animate-announcement-bar-enter" : "navbar-pre-enter"}`}>
+    <div className={`announcement-bar-root relative flex h-8 items-center overflow-visible bg-transparent ${entered ? "animate-announcement-bar-enter" : "navbar-pre-enter"}`}>
       {/* Spacer balances the pause button on the right */}
       <div className="min-w-[44px] flex-none" />
 
@@ -91,6 +92,7 @@ export function AnnouncementBar({ initialAnnouncements }: { initialAnnouncements
           </svg>
         )}
       </button>
+      <WavyDivider className="absolute inset-x-0 bottom-0" />
     </div>
   );
 }

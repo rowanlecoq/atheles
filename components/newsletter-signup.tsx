@@ -1,6 +1,7 @@
 "use client";
 
 import { SlideshowMedia } from "components/slideshow-media";
+import { WavyDivider } from "components/wavy-divider";
 import { useEffect, useState } from "react";
 
 export function NewsletterSignup() {
@@ -90,7 +91,8 @@ export function NewsletterSignup() {
   };
 
   return (
-    <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 py-20">
+    <section className="theme-section relative overflow-hidden py-20">
+      <WavyDivider className="absolute inset-x-0 top-0" />
       <SlideshowMedia
         slotKey="newsletter"
         className="object-cover object-center"

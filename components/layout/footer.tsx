@@ -1,6 +1,7 @@
 import Link from "next/link";
 
 import LogoSquare from "components/logo-square";
+import { WavyDivider } from "components/wavy-divider";
 import { getMenu } from "lib/shopify";
 import { Suspense } from "react";
 import FooterMenu from "./footer-menu";
@@ -32,7 +33,8 @@ export default async function Footer() {
   const menu = await getMenu("next-js-frontend-footer-menu");
 
   return (
-    <footer className="border-t border-brand-dark-gold/20 bg-brand-dark text-sm text-brand-grey [transform:translateZ(0)]">
+    <footer className="relative bg-brand-dark text-sm text-brand-grey [transform:translateZ(0)]">
+      <WavyDivider className="absolute inset-x-0 top-0" />
       <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6 sm:py-12 min-[1320px]:px-0">
         <div className="grid grid-cols-1 gap-8 sm:grid-cols-2 lg:grid-cols-4">
           {/* Column 1: Logo + Tagline */}
@@ -206,7 +208,7 @@ export default async function Footer() {
           </div>
         </div>
 
-        <div className="my-8 h-px w-full bg-brand-dark-gold/20" />
+        <WavyDivider className="my-8" />
 
         {/* Bottom bar */}
         <div className="flex flex-col items-center gap-4 text-center text-xs text-brand-grey md:flex-row md:justify-between md:text-left">

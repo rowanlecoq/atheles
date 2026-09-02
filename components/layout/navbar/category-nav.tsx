@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { WavyDivider } from "components/wavy-divider";
 
 // Hidden on homepage since HeroCategoryNav handles it there
 
@@ -74,7 +75,7 @@ export function CategoryNav() {
   return (
     <div className="relative hidden md:block">
       {/* Category bar */}
-      <nav className="category-nav-bar border-b border-brand-dark-gold/20 bg-brand-dark/90 backdrop-blur-sm">
+      <nav className="category-nav-bar relative bg-brand-dark/90 backdrop-blur-sm">
         <div className="mx-auto flex items-center justify-center gap-8 px-6 py-2.5">
           {categories.map((cat, i) => {
             const hasDropdown = cat.subcategories.length > 0 && !cat.comingSoon;
@@ -113,6 +114,7 @@ export function CategoryNav() {
             );
           })}
         </div>
+        <WavyDivider className="absolute inset-x-0 bottom-0" />
       </nav>
 
       {/* Dropdown panels — coming-soon categories excluded until launch */}
