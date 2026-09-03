@@ -1,6 +1,15 @@
 import { getCustomerByToken, updateCustomerTier } from "lib/auth/shopify-customer";
+import { unstable_cache } from "next/cache";
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
+
+// Cache customer lookups per token for 60s — avoids hitting Shopify on every
+// navbar render and repeated profile page loads within the same minute.
+const getCachedCustomer = unstable_cache(
+  async (token: string) => getCustomerByToken(token),
+  ["customer-session"],
+  { revalidate: 60 },
+);
 
 const TIERS = [
   { name: "bronze", min: 0, max: 5000 },
@@ -23,7 +32,7 @@ export async function GET() {
       return NextResponse.json({ user: null });
     }
 
-    const customer = await getCustomerByToken(token);
+    const customer = await getCachedCustomer(token);
     if (!customer) {
       cookieStore.delete("atheles-auth-token");
       cookieStore.delete("atheles-logged-in");

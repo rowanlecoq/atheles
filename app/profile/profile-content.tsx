@@ -1,7 +1,6 @@
 "use client";
 
 import Link from "next/link";
-import { motion } from "motion/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
@@ -822,11 +821,8 @@ export default function ProfileContent() {
 
       {/* Avatar Preview Modal — portaled to cover everything including navbar */}
       {showAvatarPreview && avatar && typeof document !== "undefined" && createPortal(
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.2 }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/50 p-4"
+        <div
+          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-black/50 p-4 animate-announce-fade"
           onClick={() => setShowAvatarPreview(false)}
         >
           <button
@@ -840,11 +836,9 @@ export default function ProfileContent() {
               <line x1="6" y1="6" x2="18" y2="18" />
             </svg>
           </button>
-          <motion.div
-            initial={{ scale: 0.88, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.28, ease: [0.22, 1, 0.36, 1] }}
+          <div
             className="flex flex-col items-center gap-4"
+            style={{ animation: "fi-up 0.28s cubic-bezier(0.22,1,0.36,1) both" }}
             onClick={(e) => e.stopPropagation()}
           >
             <div className="h-64 w-64 overflow-hidden rounded-full sm:h-80 sm:w-80">
@@ -855,8 +849,8 @@ export default function ProfileContent() {
                 className="h-full w-full object-cover"
               />
             </div>
-          </motion.div>
-        </motion.div>,
+          </div>
+        </div>,
         document.body,
       )}
 
