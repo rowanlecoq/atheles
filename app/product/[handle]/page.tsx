@@ -7,6 +7,7 @@ import {
   RecentlyViewedProducts,
   RecentlyViewedTracker,
 } from "components/product/recently-viewed";
+import { ReviewSection } from "components/product/reviews";
 import { HIDDEN_PRODUCT_TAG } from "lib/constants";
 import { getProduct, getProductRecommendations } from "lib/shopify";
 import type { Image } from "lib/shopify/types";
@@ -127,6 +128,7 @@ export default async function ProductPage(props: {
               </Suspense>
             </div>
           </div>
+        <ReviewSection productHandle={product.handle} />
         <RelatedProducts id={product.id} />
         <Suspense fallback={null}>
           <RecentlyViewedProducts currentHandle={product.handle} />
