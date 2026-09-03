@@ -10,6 +10,7 @@ const KonamiLightning = dynamic(
 );
 import { Navbar } from "components/layout/navbar";
 import { PageTransition } from "components/page-transition";
+import { ReviewSideTab } from "components/reviews-gallery";
 import { ColorModeApplier } from "components/color-mode-applier";
 import { headers } from "next/headers";
 import { ProfileBackgroundApplier } from "components/profile-background-applier";
@@ -146,6 +147,7 @@ export default async function RootLayout({
             <ProfileBackgroundApplier />
             <ThemeBackgroundCanvas />
             <KonamiLightning />
+            <ReviewSideTab />
             <div id="thunder-shake-root">
               {!isComingSoon && <AnnouncementBar />}
               {!isComingSoon && <Navbar />}

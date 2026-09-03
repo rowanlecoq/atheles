@@ -37,20 +37,24 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Invalid session." }, { status: 401 });
     }
 
-    const body = await req.json() as { rating?: number; title?: string; body?: string };
-    const { rating, title, body: reviewBody } = body;
+    const body = await req.json() as { rating?: number; title?: string; body?: string; displayName?: string };
+    const { rating, title, body: reviewBody, displayName } = body;
 
     if (!rating || rating < 1 || rating > 5) {
-      return NextResponse.json({ error: "Rating must be between 1 and 5." }, { status: 400 });
+      return NextResponse.json({ error: "rating must be between 1 and 5." }, { status: 400 });
     }
     if (!title?.trim()) {
-      return NextResponse.json({ error: "Title is required." }, { status: 400 });
+      return NextResponse.json({ error: "title is required." }, { status: 400 });
     }
     if (!reviewBody?.trim()) {
-      return NextResponse.json({ error: "Review body is required." }, { status: 400 });
+      return NextResponse.json({ error: "review body is required." }, { status: 400 });
     }
 
-    const authorName = customer.firstName || customer.displayName || "Member";
+    const authorName =
+      displayName?.trim() ||
+      customer.firstName ||
+      customer.displayName ||
+      "atheles member";
     const review = await addSiteReview({
       authorName,
       authorEmail: customer.email,

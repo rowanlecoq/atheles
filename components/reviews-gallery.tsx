@@ -3,9 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import type { PublicSiteReview } from "lib/site-reviews";
 
-// ---- Stars ----
-
-function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
+function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
     <span className="inline-flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
       {[1, 2, 3, 4, 5].map((n) => (
@@ -25,12 +23,10 @@ function Stars({ rating, size = 16 }: { rating: number; size?: number }) {
   );
 }
 
-// ---- StarInput ----
-
 function StarInput({ value, onChange }: { value: number; onChange: (n: number) => void }) {
   const [hovered, setHovered] = useState(0);
   return (
-    <span className="inline-flex gap-1" role="group" aria-label="Star rating">
+    <span className="inline-flex gap-1" role="group" aria-label="star rating">
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
@@ -42,8 +38,8 @@ function StarInput({ value, onChange }: { value: number; onChange: (n: number) =
           className="transition-transform hover:scale-110 focus:outline-none"
         >
           <svg
-            width={30}
-            height={30}
+            width={28}
+            height={28}
             viewBox="0 0 20 20"
             fill="currentColor"
             aria-hidden="true"
@@ -57,7 +53,124 @@ function StarInput({ value, onChange }: { value: number; onChange: (n: number) =
   );
 }
 
-// ---- ReviewCard ----
+type Session = { firstName?: string; name?: string; isAdmin?: boolean; email?: string };
+
+function ReviewForm({
+  session,
+  onSuccess,
+}: {
+  session: Session | null;
+  onSuccess: (review: PublicSiteReview) => void;
+}) {
+  const profileName = session?.firstName || session?.name || "";
+  const [displayName, setDisplayName] = useState(profileName);
+  const [rating, setRating] = useState(0);
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  // Keep name in sync if session loads after mount
+  useEffect(() => {
+    if (profileName && !displayName) setDisplayName(profileName);
+  }, [profileName]); // eslint-disable-line react-hooks/exhaustive-deps
+
+  async function handleSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (rating === 0) { setError("please select a rating."); return; }
+    if (!title.trim()) { setError("please add a title."); return; }
+    if (!body.trim()) { setError("please write your review."); return; }
+
+    setSubmitting(true);
+    setError("");
+    try {
+      const res = await fetch("/api/site-reviews", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          rating,
+          title: title.trim(),
+          body: body.trim(),
+          displayName: displayName.trim() || undefined,
+        }),
+      });
+      const data = await res.json() as { review?: PublicSiteReview; error?: string };
+      if (!res.ok) { setError(data.error || "failed to submit."); return; }
+      if (data.review) { onSuccess(data.review); setDone(true); }
+    } catch {
+      setError("network error. please try again.");
+    } finally {
+      setSubmitting(false);
+    }
+  }
+
+  if (done) {
+    return (
+      <div className="rounded-xl border border-brand-gold/20 bg-brand-gold/5 p-5 text-center">
+        <p className="font-heading text-lg text-brand-gold">thanks for sharing 🔱</p>
+        <p className="mt-1 text-sm text-white/50">your review is now live.</p>
+      </div>
+    );
+  }
+
+  return (
+    <form onSubmit={handleSubmit} className="space-y-4">
+      <div>
+        <label className="mb-1.5 block text-xs text-white/40">your name</label>
+        <input
+          type="text"
+          maxLength={60}
+          value={displayName}
+          onChange={(e) => setDisplayName(e.target.value)}
+          placeholder="atheles member"
+          className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <label className="mb-1.5 block text-xs text-white/40">rating</label>
+        <StarInput value={rating} onChange={setRating} />
+      </div>
+
+      <div>
+        <label htmlFor="sr-title" className="mb-1.5 block text-xs text-white/40">title</label>
+        <input
+          id="sr-title"
+          type="text"
+          maxLength={100}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          placeholder="sum it up in a few words"
+          className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
+        />
+      </div>
+
+      <div>
+        <label htmlFor="sr-body" className="mb-1.5 block text-xs text-white/40">review</label>
+        <textarea
+          id="sr-body"
+          rows={3}
+          maxLength={1000}
+          value={body}
+          onChange={(e) => setBody(e.target.value)}
+          placeholder="tell the community about your experience with atheles"
+          className="w-full resize-none rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
+        />
+      </div>
+
+      {error && <p className="text-sm text-red-400">{error}</p>}
+
+      <button
+        type="submit"
+        disabled={submitting}
+        className="w-full rounded-lg bg-brand-gold py-2.5 text-sm font-bold text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50"
+      >
+        {submitting ? "submitting…" : "submit review"}
+      </button>
+    </form>
+  );
+}
 
 function ReviewCard({
   review,
@@ -87,9 +200,7 @@ function ReviewCard({
         body: JSON.stringify({ reviewId: review.id }),
       });
       onFlag(review.id);
-    } finally {
-      setFlagging(false);
-    }
+    } finally { setFlagging(false); }
   }
 
   async function handleModerate() {
@@ -101,198 +212,66 @@ function ReviewCard({
         body: JSON.stringify({ reviewId: review.id, hidden: !review.hidden }),
       });
       if (res.ok) onModerate(review.id, !review.hidden);
-    } finally {
-      setModerating(false);
-    }
+    } finally { setModerating(false); }
   }
 
   return (
     <div
       className={[
-        "break-inside-avoid rounded-xl border p-5 space-y-3 transition-colors",
-        review.flagged && isAdmin
-          ? "border-amber-500/30 bg-amber-500/5"
-          : "border-brand-dark-gold/20 bg-white/[0.03]",
+        "rounded-xl border p-4 space-y-2",
+        review.flagged && isAdmin ? "border-amber-500/30 bg-amber-500/5" : "border-brand-dark-gold/20 bg-white/[0.03]",
         review.hidden ? "opacity-50" : "",
-      ]
-        .filter(Boolean)
-        .join(" ")}
+      ].filter(Boolean).join(" ")}
     >
-      {/* Quote mark */}
-      <span className="block font-heading text-4xl leading-none text-brand-gold/30 select-none" aria-hidden="true">
-        &ldquo;
-      </span>
-
-      <Stars rating={review.rating} size={14} />
-
-      <p className="text-sm leading-relaxed text-white/80">{review.body}</p>
-
+      <span className="block font-heading text-3xl leading-none text-brand-gold/25 select-none" aria-hidden="true">&ldquo;</span>
+      <Stars rating={review.rating} />
+      <p className="text-sm leading-relaxed text-white/75">{review.body}</p>
       <p className="text-xs font-semibold text-brand-gold">{review.title}</p>
-
-      <div className="flex items-center justify-between pt-1 border-t border-white/5">
-        <p className="text-xs text-white/35">
-          {review.authorName} · {date}
-        </p>
-        <div className="flex items-center gap-3">
-          {isAdmin && review.flagged && (
-            <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-400">
-              {review.flagCount} flag{review.flagCount !== 1 ? "s" : ""}
-            </span>
-          )}
-          {isAdmin ? (
-            <button
-              onClick={handleModerate}
-              disabled={moderating}
-              className="text-[11px] text-white/30 hover:text-white transition-colors disabled:opacity-40"
-            >
-              {moderating ? "…" : review.hidden ? "show" : "hide"}
-            </button>
-          ) : (
-            <button
-              onClick={handleFlag}
-              disabled={flagging}
-              aria-label="Report this review"
-              className="text-[11px] text-white/20 hover:text-amber-400 transition-colors disabled:opacity-40"
-            >
-              {flagging ? "…" : "report"}
-            </button>
-          )}
-        </div>
+      <div className="flex items-center justify-between border-t border-white/5 pt-2">
+        <p className="text-xs text-white/30">{review.authorName} · {date}</p>
+        {isAdmin && review.flagged && (
+          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-400">
+            {review.flagCount} flag{review.flagCount !== 1 ? "s" : ""}
+          </span>
+        )}
+        {isAdmin ? (
+          <button onClick={handleModerate} disabled={moderating} className="text-[11px] text-white/30 hover:text-white transition-colors disabled:opacity-40">
+            {moderating ? "…" : review.hidden ? "show" : "hide"}
+          </button>
+        ) : (
+          <button onClick={handleFlag} disabled={flagging} aria-label="report this review" className="text-[11px] text-white/20 hover:text-amber-400 transition-colors disabled:opacity-40">
+            {flagging ? "…" : "report"}
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-// ---- ReviewForm ----
-
-function ReviewForm({
-  onSuccess,
-  onCancel,
-}: {
-  onSuccess: (review: PublicSiteReview) => void;
-  onCancel: () => void;
-}) {
-  const [rating, setRating] = useState(0);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
-  const [submitting, setSubmitting] = useState(false);
-  const [error, setError] = useState("");
-
-  async function handleSubmit(e: React.FormEvent) {
-    e.preventDefault();
-    if (rating === 0) { setError("please select a rating."); return; }
-    if (!title.trim()) { setError("please add a title."); return; }
-    if (!body.trim()) { setError("please write your review."); return; }
-
-    setSubmitting(true);
-    setError("");
-    try {
-      const res = await fetch("/api/site-reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ rating, title: title.trim(), body: body.trim() }),
-      });
-      const data = await res.json() as { review?: PublicSiteReview; error?: string };
-      if (!res.ok) { setError(data.error || "failed to submit."); return; }
-      if (data.review) onSuccess(data.review);
-    } catch {
-      setError("network error. please try again.");
-    } finally {
-      setSubmitting(false);
-    }
-  }
-
-  return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-xl border border-brand-dark-gold/30 bg-white/[0.03] p-6 space-y-4"
-    >
-      <h3 className="font-heading text-lg font-bold text-brand-gold">share your experience</h3>
-
-      <div>
-        <label className="mb-1.5 block text-xs text-white/40">rating</label>
-        <StarInput value={rating} onChange={setRating} />
-      </div>
-
-      <div>
-        <label htmlFor="sr-title" className="mb-1.5 block text-xs text-white/40">
-          title
-        </label>
-        <input
-          id="sr-title"
-          type="text"
-          maxLength={100}
-          value={title}
-          onChange={(e) => setTitle(e.target.value)}
-          placeholder="sum it up in a few words"
-          className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
-        />
-      </div>
-
-      <div>
-        <label htmlFor="sr-body" className="mb-1.5 block text-xs text-white/40">
-          review
-        </label>
-        <textarea
-          id="sr-body"
-          rows={4}
-          maxLength={1000}
-          value={body}
-          onChange={(e) => setBody(e.target.value)}
-          placeholder="tell the community about your experience with atheles"
-          className="w-full resize-none rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
-        />
-      </div>
-
-      {error && <p className="text-sm text-red-400">{error}</p>}
-
-      <div className="flex gap-3 pt-1">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-lg bg-brand-gold px-6 py-2.5 text-sm font-bold text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50"
-        >
-          {submitting ? "submitting…" : "submit review"}
-        </button>
-        <button
-          type="button"
-          onClick={onCancel}
-          className="rounded-lg border border-brand-dark-gold/20 px-6 py-2.5 text-sm text-white/50 transition-colors hover:border-brand-gold/30 hover:text-white"
-        >
-          Cancel
-        </button>
-      </div>
-    </form>
-  );
-}
-
-// ---- ReviewsGallery (main export) ----
-
-type Session = { isAdmin?: boolean; email?: string };
-
-export function ReviewsGallery() {
+export function ReviewSideTab() {
+  const [open, setOpen] = useState(false);
   const [reviews, setReviews] = useState<PublicSiteReview[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [showForm, setShowForm] = useState(false);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
-  const formRef = useRef<HTMLDivElement>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     let parsed: Session | null = null;
     try {
       const raw = localStorage.getItem("atheles-session");
       if (raw) parsed = JSON.parse(raw) as Session;
-    } catch {
-      // ignore
-    }
+    } catch { /* ignore */ }
     const hasCookie = document.cookie.includes("atheles-logged-in=1");
     setLoggedIn(!!(parsed?.email || hasCookie));
     setSession(parsed);
   }, []);
 
+  // Load reviews when panel opens
   useEffect(() => {
+    if (!open || reviews.length > 0) return;
+    setLoading(true);
     const url = `/api/site-reviews${session?.isAdmin ? "?all=1" : ""}`;
     fetch(url)
       .then((r) => r.json())
@@ -301,15 +280,14 @@ export function ReviewsGallery() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [session?.isAdmin]);
+  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
 
+  // Check if admin user already reviewed
   useEffect(() => {
     if (session?.email && reviews.length > 0) {
-      // admins have email in session — use it; regular users rely on 409 from API
       const email = session.email.toLowerCase();
       const found = reviews.some(
-        (r) =>
-          "authorEmail" in r &&
+        (r) => "authorEmail" in r &&
           typeof (r as { authorEmail?: string }).authorEmail === "string" &&
           (r as { authorEmail: string }).authorEmail.toLowerCase() === email,
       );
@@ -317,115 +295,133 @@ export function ReviewsGallery() {
     }
   }, [reviews, session?.email]);
 
+  // Close on Escape
+  useEffect(() => {
+    if (!open) return;
+    const handler = (e: KeyboardEvent) => { if (e.key === "Escape") setOpen(false); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [open]);
+
   function handleReviewAdded(review: PublicSiteReview) {
     setReviews((prev) => [review, ...prev]);
-    setShowForm(false);
     setAlreadyReviewed(true);
   }
 
   function handleFlag(id: string) {
     setReviews((prev) =>
-      prev.map((r) =>
-        r.id === id
-          ? { ...r, flagCount: (r.flagCount || 0) + 1, flagged: (r.flagCount || 0) + 1 >= 3 }
-          : r,
-      ),
+      prev.map((r) => r.id === id ? { ...r, flagCount: (r.flagCount || 0) + 1, flagged: (r.flagCount || 0) + 1 >= 3 } : r),
     );
   }
 
   function handleModerate(id: string, hidden: boolean) {
-    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, hidden } : r)));
-  }
-
-  function openForm() {
-    setShowForm(true);
-    setTimeout(() => formRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" }), 50);
+    setReviews((prev) => prev.map((r) => r.id === id ? { ...r, hidden } : r));
   }
 
   const visibleReviews = session?.isAdmin ? reviews : reviews.filter((r) => !r.hidden);
-  const avgRating =
-    visibleReviews.length > 0
-      ? visibleReviews.reduce((s, r) => s + r.rating, 0) / visibleReviews.length
-      : 0;
-
   const canReview = loggedIn && !alreadyReviewed;
 
   return (
-    <section className="w-full px-4 py-16 sm:px-6 lg:px-8">
-      <div className="mx-auto max-w-7xl">
-        {/* Header */}
-        <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-          <div>
-            <p className="mb-1 text-xs tracking-[0.2em] text-brand-gold/60">community</p>
-            <h2 className="font-heading text-3xl font-bold text-brand-gold sm:text-4xl">
-              what athletes say
-            </h2>
-            {visibleReviews.length > 0 && (
-              <div className="mt-2 flex items-center gap-2">
-                <Stars rating={Math.round(avgRating)} size={14} />
-                <span className="text-sm text-white/40">
-                  {avgRating.toFixed(1)} · {visibleReviews.length} review{visibleReviews.length !== 1 ? "s" : ""}
-                </span>
-              </div>
-            )}
-          </div>
-
-          {canReview && !showForm && (
-            <button
-              onClick={openForm}
-              className="shrink-0 self-start rounded-lg border border-brand-gold/40 px-5 py-2.5 text-sm font-semibold text-brand-gold transition-colors hover:bg-brand-gold hover:text-brand-dark sm:self-auto"
-            >
-              Write a Review
-            </button>
-          )}
-          {!loggedIn && (
-            <a
-              href="/account/login"
-              className="shrink-0 self-start text-sm text-white/40 underline underline-offset-4 transition-colors hover:text-brand-gold sm:self-auto"
-            >
-              Sign in to review
-            </a>
-          )}
-        </div>
-
-        {/* Form */}
-        {showForm && (
-          <div ref={formRef} className="mb-10 max-w-lg">
-            <ReviewForm onSuccess={handleReviewAdded} onCancel={() => setShowForm(false)} />
-          </div>
-        )}
-
-        {/* Gallery */}
-        {loading ? (
-          <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-            {[...Array(6)].map((_, i) => (
-              <div key={i} className="mb-4 break-inside-avoid h-40 animate-pulse rounded-xl bg-white/[0.03]" />
-            ))}
-          </div>
-        ) : visibleReviews.length === 0 ? (
-          <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <p className="font-heading text-xl text-white/30">no reviews yet.</p>
-            {canReview && (
-              <p className="text-sm text-white/30">
-                be the first to share your experience with the community.
-              </p>
-            )}
-          </div>
-        ) : (
-          <div className="columns-1 gap-4 sm:columns-2 lg:columns-3">
-            {visibleReviews.map((review) => (
-              <div key={review.id} className="mb-4">
-                <ReviewCard
-                  review={review}
-                  isAdmin={!!session?.isAdmin}
-                  onFlag={handleFlag}
-                  onModerate={handleModerate}
-                />
-              </div>
-            ))}
-          </div>
-        )}
+    <>
+      {/* Side tab */}
+      <div className="fixed right-0 top-1/2 z-40 -translate-y-1/2">
+        <button
+          onClick={() => setOpen(true)}
+          className="flex items-center gap-1.5 rounded-l-lg border border-r-0 border-brand-gold/30 bg-brand-dark px-2.5 py-4 text-[11px] font-semibold text-brand-gold/80 transition-colors hover:border-brand-gold/60 hover:text-brand-gold"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+          aria-label="open reviews"
+        >
+          write your review
+        </button>
       </div>
-    </section>
+
+      {/* Modal overlay */}
+      {open && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-end sm:justify-center"
+          role="dialog"
+          aria-modal="true"
+          aria-label="community reviews"
+        >
+          {/* Backdrop */}
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={() => setOpen(false)}
+          />
+
+          {/* Panel */}
+          <div
+            ref={panelRef}
+            className="relative z-10 flex h-full w-full max-w-md flex-col bg-[#0d0c09] sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border sm:border-brand-dark-gold/20"
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between border-b border-white/5 px-6 py-4">
+              <div>
+                <p className="text-[10px] tracking-[0.2em] text-brand-gold/50">community</p>
+                <h2 className="font-heading text-xl font-bold text-brand-gold">what athletes say</h2>
+              </div>
+              <button
+                onClick={() => setOpen(false)}
+                className="rounded-lg p-1.5 text-white/40 transition-colors hover:text-white"
+                aria-label="close"
+              >
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                  <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+                </svg>
+              </button>
+            </div>
+
+            {/* Scrollable body */}
+            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
+              {/* Write a review section */}
+              {canReview && (
+                <div>
+                  <p className="mb-3 text-xs text-white/40">share your experience</p>
+                  <ReviewForm session={session} onSuccess={handleReviewAdded} />
+                </div>
+              )}
+
+              {!loggedIn && (
+                <p className="text-sm text-white/40">
+                  <a href="/account/login" className="text-brand-gold underline underline-offset-2">sign in</a> to leave a review.
+                </p>
+              )}
+
+              {alreadyReviewed && !session?.isAdmin && (
+                <p className="text-sm text-white/40">you&apos;ve already left a review — thanks!</p>
+              )}
+
+              {/* Divider if both form and reviews show */}
+              {canReview && visibleReviews.length > 0 && (
+                <div className="border-t border-white/5" />
+              )}
+
+              {/* Reviews list */}
+              {loading ? (
+                <div className="space-y-3">
+                  {[...Array(3)].map((_, i) => (
+                    <div key={i} className="h-28 animate-pulse rounded-xl bg-white/[0.03]" />
+                  ))}
+                </div>
+              ) : visibleReviews.length === 0 ? (
+                <p className="py-8 text-center text-sm text-white/30">no reviews yet — be the first!</p>
+              ) : (
+                <div className="space-y-3">
+                  {visibleReviews.map((review) => (
+                    <ReviewCard
+                      key={review.id}
+                      review={review}
+                      isAdmin={!!session?.isAdmin}
+                      onFlag={handleFlag}
+                      onModerate={handleModerate}
+                    />
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+    </>
   );
 }
