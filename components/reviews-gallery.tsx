@@ -606,8 +606,8 @@ export function ReviewSideTab() {
       <button
         onClick={() => setOpen(true)}
         aria-label="open community reviews"
-        className="relative overflow-hidden border border-brand-gold bg-transparent text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
-        style={{ width: "26px", height: "130px" }}
+        className="relative border border-brand-gold bg-transparent text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
+        style={{ width: "26px", height: "160px" }}
       >
         <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
           <span
