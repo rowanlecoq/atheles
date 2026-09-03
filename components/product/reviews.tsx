@@ -3,8 +3,6 @@
 import { useEffect, useState } from "react";
 import type { PublicReview } from "lib/reviews";
 
-// ---- Stars (display only) ----
-
 function Stars({ rating, size = 20 }: { rating: number; size?: number }) {
   return (
     <span className="inline-flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
@@ -25,19 +23,10 @@ function Stars({ rating, size = 20 }: { rating: number; size?: number }) {
   );
 }
 
-// ---- StarInput (interactive) ----
-
-function StarInput({
-  value,
-  onChange,
-}: {
-  value: number;
-  onChange: (n: number) => void;
-}) {
+function StarInput({ value, onChange }: { value: number; onChange: (n: number) => void }) {
   const [hovered, setHovered] = useState(0);
-
   return (
-    <span className="inline-flex gap-1" role="group" aria-label="Star rating">
+    <span className="inline-flex gap-1" role="group" aria-label="star rating">
       {[1, 2, 3, 4, 5].map((n) => (
         <button
           key={n}
@@ -64,8 +53,6 @@ function StarInput({
   );
 }
 
-// ---- ReviewForm ----
-
 function ReviewForm({
   productHandle,
   onSuccess,
@@ -83,18 +70,9 @@ function ReviewForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (rating === 0) {
-      setError("Please select a star rating.");
-      return;
-    }
-    if (!title.trim()) {
-      setError("Please add a title.");
-      return;
-    }
-    if (!body.trim()) {
-      setError("Please write your review.");
-      return;
-    }
+    if (rating === 0) { setError("please select a star rating."); return; }
+    if (!title.trim()) { setError("please add a title."); return; }
+    if (!body.trim()) { setError("please write your review."); return; }
 
     setSubmitting(true);
     setError("");
@@ -105,13 +83,10 @@ function ReviewForm({
         body: JSON.stringify({ handle: productHandle, rating, title: title.trim(), body: body.trim() }),
       });
       const data = await res.json() as { review?: PublicReview; error?: string };
-      if (!res.ok) {
-        setError(data.error || "Failed to submit review.");
-        return;
-      }
+      if (!res.ok) { setError(data.error || "failed to submit review."); return; }
       if (data.review) onSuccess(data.review);
     } catch {
-      setError("Network error. Please try again.");
+      setError("network error. please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -120,18 +95,18 @@ function ReviewForm({
   return (
     <form
       onSubmit={handleSubmit}
-      className="rounded-lg border border-brand-dark-gold/20 bg-brand-dark/50 p-5 space-y-4"
+      className="rounded-xl border border-brand-dark-gold/20 bg-white/[0.03] p-5 space-y-4"
     >
-      <h3 className="font-heading text-lg font-bold text-brand-gold">Write a Review</h3>
+      <h3 className="font-heading text-lg font-bold text-brand-gold">write a review</h3>
 
       <div>
-        <label className="mb-1 block text-sm text-brand-grey">Rating</label>
+        <label className="mb-1.5 block text-xs uppercase tracking-widest text-white/40">rating</label>
         <StarInput value={rating} onChange={setRating} />
       </div>
 
       <div>
-        <label htmlFor="review-title" className="mb-1 block text-sm text-brand-grey">
-          Title
+        <label htmlFor="review-title" className="mb-1.5 block text-xs uppercase tracking-widest text-white/40">
+          title
         </label>
         <input
           id="review-title"
@@ -139,14 +114,14 @@ function ReviewForm({
           maxLength={100}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Summarise your experience"
-          className="w-full rounded border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder-white/30 focus:border-brand-gold/50 focus:outline-none"
+          placeholder="sum it up in a few words"
+          className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
         />
       </div>
 
       <div>
-        <label htmlFor="review-body" className="mb-1 block text-sm text-brand-grey">
-          Review
+        <label htmlFor="review-body" className="mb-1.5 block text-xs uppercase tracking-widest text-white/40">
+          review
         </label>
         <textarea
           id="review-body"
@@ -154,8 +129,8 @@ function ReviewForm({
           maxLength={1000}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Tell others about your experience with this product"
-          className="w-full rounded border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder-white/30 focus:border-brand-gold/50 focus:outline-none resize-none"
+          placeholder="tell others about your experience with this product"
+          className="w-full resize-none rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
         />
       </div>
 
@@ -165,23 +140,21 @@ function ReviewForm({
         <button
           type="submit"
           disabled={submitting}
-          className="rounded bg-brand-gold px-5 py-2 text-sm font-semibold text-brand-dark transition-opacity disabled:opacity-60"
+          className="rounded-lg bg-brand-gold px-5 py-2 text-sm font-bold text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-60"
         >
-          {submitting ? "Submitting…" : "Submit Review"}
+          {submitting ? "submitting…" : "submit review"}
         </button>
         <button
           type="button"
           onClick={onCancel}
-          className="rounded border border-brand-dark-gold/20 px-5 py-2 text-sm text-brand-grey transition-colors hover:border-brand-gold/40 hover:text-white"
+          className="rounded-lg border border-brand-dark-gold/20 px-5 py-2 text-sm text-white/50 transition-colors hover:border-brand-gold/30 hover:text-white"
         >
-          Cancel
+          cancel
         </button>
       </div>
     </form>
   );
 }
-
-// ---- ReviewCard ----
 
 function ReviewCard({
   review,
@@ -233,21 +206,21 @@ function ReviewCard({
     }
   }
 
-  const cardClass = [
-    "rounded-lg border p-4 space-y-2 transition-colors",
-    review.flagged && isAdmin
-      ? "border-amber-500/30 bg-amber-500/5"
-      : "border-brand-dark-gold/20 bg-brand-dark/50",
-    review.hidden ? "opacity-60" : "",
-  ]
-    .filter(Boolean)
-    .join(" ");
-
   return (
-    <div className={cardClass}>
+    <div
+      className={[
+        "rounded-xl border p-4 space-y-2 transition-colors",
+        review.flagged && isAdmin
+          ? "border-amber-500/30 bg-amber-500/5"
+          : "border-brand-dark-gold/20 bg-white/[0.03]",
+        review.hidden ? "opacity-60" : "",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <div className="flex items-start justify-between gap-2">
-        <div className="space-y-0.5">
-          <Stars rating={review.rating} size={16} />
+        <div className="space-y-1">
+          <Stars rating={review.rating} size={15} />
           <p className="font-medium text-white">{review.title}</p>
         </div>
         {isAdmin && review.flagged && (
@@ -256,44 +229,35 @@ function ReviewCard({
           </span>
         )}
       </div>
-      <p className="text-sm text-brand-grey leading-relaxed">{review.body}</p>
-      <div className="flex items-center justify-between gap-2 pt-1">
-        <p className="text-xs text-white/40">
+      <p className="text-sm text-white/70 leading-relaxed">{review.body}</p>
+      <div className="flex items-center justify-between gap-2 pt-1 border-t border-white/5">
+        <p className="text-xs text-white/35">
           {review.authorName} · {date}
         </p>
-        <div className="flex items-center gap-2">
-          {isAdmin ? (
-            <button
-              onClick={handleModerate}
-              disabled={moderating}
-              className="text-xs text-brand-grey transition-colors hover:text-white disabled:opacity-50"
-            >
-              {moderating ? "…" : review.hidden ? "Show review" : "Hide review"}
-            </button>
-          ) : (
-            <button
-              onClick={handleFlag}
-              disabled={flagging}
-              aria-label="Report this review"
-              className="text-xs text-white/30 transition-colors hover:text-amber-400 disabled:opacity-50"
-            >
-              {flagging ? "Reporting…" : "Report"}
-            </button>
-          )}
-        </div>
+        {isAdmin ? (
+          <button
+            onClick={handleModerate}
+            disabled={moderating}
+            className="text-xs text-white/30 transition-colors hover:text-white disabled:opacity-40"
+          >
+            {moderating ? "…" : review.hidden ? "show" : "hide"}
+          </button>
+        ) : (
+          <button
+            onClick={handleFlag}
+            disabled={flagging}
+            aria-label="report this review"
+            className="text-xs text-white/20 transition-colors hover:text-amber-400 disabled:opacity-40"
+          >
+            {flagging ? "reporting…" : "report"}
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-// ---- ReviewSection (main export) ----
-
-type Session = {
-  firstName?: string;
-  name?: string;
-  isAdmin?: boolean;
-  email?: string;
-};
+type Session = { firstName?: string; name?: string; isAdmin?: boolean; email?: string };
 
 export function ReviewSection({ productHandle }: { productHandle: string }) {
   const [reviews, setReviews] = useState<PublicReview[]>([]);
@@ -311,16 +275,13 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
     } catch {
       // ignore
     }
-
     const hasCookie = document.cookie.includes("atheles-logged-in=1");
-    const isLoggedIn = !!(parsed?.email || hasCookie);
-    setLoggedIn(isLoggedIn);
+    setLoggedIn(!!(parsed?.email || hasCookie));
     setSession(parsed);
   }, []);
 
   useEffect(() => {
     const url = `/api/reviews?product=${encodeURIComponent(productHandle)}${session?.isAdmin ? "&all=1" : ""}`;
-
     fetch(url)
       .then((r) => r.json())
       .then((data: { reviews?: PublicReview[] }) => {
@@ -332,12 +293,12 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
 
   useEffect(() => {
     if (session?.email && reviews.length > 0) {
-      // For regular users emails are stripped; rely on API 409 instead.
-      // For admins, emails are present.
       const email = session.email.toLowerCase();
       const found = reviews.some(
-        (r) => "authorEmail" in r && typeof (r as { authorEmail?: string }).authorEmail === "string"
-          && (r as { authorEmail: string }).authorEmail.toLowerCase() === email,
+        (r) =>
+          "authorEmail" in r &&
+          typeof (r as { authorEmail?: string }).authorEmail === "string" &&
+          (r as { authorEmail: string }).authorEmail.toLowerCase() === email,
       );
       setAlreadyReviewed(found);
     }
@@ -350,51 +311,59 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
   }
 
   function handleModerate(id: string, hidden: boolean) {
-    setReviews((prev) =>
-      prev.map((r) => (r.id === id ? { ...r, hidden } : r)),
-    );
+    setReviews((prev) => prev.map((r) => (r.id === id ? { ...r, hidden } : r)));
   }
 
   function handleFlag(id: string) {
     setReviews((prev) =>
-      prev.map((r) => r.id === id ? { ...r, flagCount: (r.flagCount || 0) + 1, flagged: (r.flagCount || 0) + 1 >= 3 } : r),
+      prev.map((r) =>
+        r.id === id
+          ? { ...r, flagCount: (r.flagCount || 0) + 1, flagged: (r.flagCount || 0) + 1 >= 3 }
+          : r,
+      ),
     );
   }
 
-  const visibleReviews = session?.isAdmin
-    ? reviews
-    : reviews.filter((r) => !r.hidden);
-
+  const visibleReviews = session?.isAdmin ? reviews : reviews.filter((r) => !r.hidden);
   const avgRating =
     visibleReviews.length > 0
       ? visibleReviews.reduce((sum, r) => sum + r.rating, 0) / visibleReviews.length
       : 0;
-
   const canWriteReview = loggedIn && !alreadyReviewed;
 
   return (
-    <section className="py-8">
+    <section className="py-10">
       <div className="mb-6 flex items-center justify-between gap-4">
-        <h2 className="font-heading text-xl font-bold text-brand-gold sm:text-2xl">
-          Customer Reviews
-        </h2>
+        <div>
+          <h2 className="font-heading text-xl font-bold text-brand-gold sm:text-2xl">
+            customer reviews
+          </h2>
+          {visibleReviews.length > 0 && (
+            <div className="mt-1.5 flex items-center gap-2">
+              <Stars rating={Math.round(avgRating)} size={14} />
+              <span className="text-xs text-white/40">
+                {avgRating.toFixed(1)} · {visibleReviews.length} review{visibleReviews.length !== 1 ? "s" : ""}
+              </span>
+            </div>
+          )}
+        </div>
         {canWriteReview && !showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="rounded bg-brand-gold px-4 py-2 text-sm font-semibold text-brand-dark transition-opacity hover:opacity-90"
+            className="rounded-lg border border-brand-gold/40 px-4 py-2 text-sm font-semibold text-brand-gold transition-colors hover:bg-brand-gold hover:text-brand-dark"
           >
-            Write a Review
+            write a review
           </button>
         )}
       </div>
 
-      {visibleReviews.length > 0 && (
-        <div className="mb-6 flex items-center gap-3">
-          <Stars rating={Math.round(avgRating)} size={20} />
-          <span className="text-sm text-brand-grey">
-            {avgRating.toFixed(1)} out of 5 ({visibleReviews.length} review{visibleReviews.length !== 1 ? "s" : ""})
-          </span>
-        </div>
+      {!loggedIn && !loading && (
+        <p className="mb-4 text-sm text-white/40">
+          <a href="/account/login" className="text-brand-gold underline underline-offset-2">
+            sign in
+          </a>{" "}
+          to leave a review.
+        </p>
       )}
 
       {showForm && (
@@ -407,23 +376,14 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
         </div>
       )}
 
-      {!loggedIn && !loading && (
-        <p className="mb-4 text-sm text-brand-grey">
-          <a href="/account/login" className="text-brand-gold underline underline-offset-2">
-            Sign in
-          </a>{" "}
-          to leave a review.
-        </p>
-      )}
-
       {loading ? (
         <div className="space-y-3">
-          <div className="h-28 animate-pulse rounded-lg bg-brand-dark/50" />
-          <div className="h-28 animate-pulse rounded-lg bg-brand-dark/50" />
+          <div className="h-28 animate-pulse rounded-xl bg-white/[0.03]" />
+          <div className="h-28 animate-pulse rounded-xl bg-white/[0.03]" />
         </div>
       ) : visibleReviews.length === 0 ? (
-        <p className="text-sm text-brand-grey">
-          No reviews yet. {canWriteReview ? "Be the first to review this product!" : ""}
+        <p className="text-sm text-white/40">
+          no reviews yet.{canWriteReview ? " be the first to review this product!" : ""}
         </p>
       ) : (
         <ul className="space-y-4">

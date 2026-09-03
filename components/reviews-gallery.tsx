@@ -145,7 +145,7 @@ function ReviewCard({
               disabled={moderating}
               className="text-[11px] text-white/30 hover:text-white transition-colors disabled:opacity-40"
             >
-              {moderating ? "…" : review.hidden ? "Show" : "Hide"}
+              {moderating ? "…" : review.hidden ? "show" : "hide"}
             </button>
           ) : (
             <button
@@ -154,7 +154,7 @@ function ReviewCard({
               aria-label="Report this review"
               className="text-[11px] text-white/20 hover:text-amber-400 transition-colors disabled:opacity-40"
             >
-              {flagging ? "…" : "Report"}
+              {flagging ? "…" : "report"}
             </button>
           )}
         </div>
@@ -180,9 +180,9 @@ function ReviewForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (rating === 0) { setError("Please select a rating."); return; }
-    if (!title.trim()) { setError("Please add a title."); return; }
-    if (!body.trim()) { setError("Please write your review."); return; }
+    if (rating === 0) { setError("please select a rating."); return; }
+    if (!title.trim()) { setError("please add a title."); return; }
+    if (!body.trim()) { setError("please write your review."); return; }
 
     setSubmitting(true);
     setError("");
@@ -193,10 +193,10 @@ function ReviewForm({
         body: JSON.stringify({ rating, title: title.trim(), body: body.trim() }),
       });
       const data = await res.json() as { review?: PublicSiteReview; error?: string };
-      if (!res.ok) { setError(data.error || "Failed to submit."); return; }
+      if (!res.ok) { setError(data.error || "failed to submit."); return; }
       if (data.review) onSuccess(data.review);
     } catch {
-      setError("Network error. Please try again.");
+      setError("network error. please try again.");
     } finally {
       setSubmitting(false);
     }
@@ -207,16 +207,16 @@ function ReviewForm({
       onSubmit={handleSubmit}
       className="rounded-xl border border-brand-dark-gold/30 bg-white/[0.03] p-6 space-y-4"
     >
-      <h3 className="font-heading text-lg font-bold text-brand-gold">Share Your Experience</h3>
+      <h3 className="font-heading text-lg font-bold text-brand-gold">share your experience</h3>
 
       <div>
-        <label className="mb-1.5 block text-xs uppercase tracking-widest text-white/40">Rating</label>
+        <label className="mb-1.5 block text-xs text-white/40">rating</label>
         <StarInput value={rating} onChange={setRating} />
       </div>
 
       <div>
-        <label htmlFor="sr-title" className="mb-1.5 block text-xs uppercase tracking-widest text-white/40">
-          Title
+        <label htmlFor="sr-title" className="mb-1.5 block text-xs text-white/40">
+          title
         </label>
         <input
           id="sr-title"
@@ -224,14 +224,14 @@ function ReviewForm({
           maxLength={100}
           value={title}
           onChange={(e) => setTitle(e.target.value)}
-          placeholder="Sum it up in a few words"
+          placeholder="sum it up in a few words"
           className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
         />
       </div>
 
       <div>
-        <label htmlFor="sr-body" className="mb-1.5 block text-xs uppercase tracking-widest text-white/40">
-          Review
+        <label htmlFor="sr-body" className="mb-1.5 block text-xs text-white/40">
+          review
         </label>
         <textarea
           id="sr-body"
@@ -239,7 +239,7 @@ function ReviewForm({
           maxLength={1000}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="Tell the community about your experience with atheles"
+          placeholder="tell the community about your experience with atheles"
           className="w-full resize-none rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
         />
       </div>
@@ -252,7 +252,7 @@ function ReviewForm({
           disabled={submitting}
           className="rounded-lg bg-brand-gold px-6 py-2.5 text-sm font-bold text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50"
         >
-          {submitting ? "Submitting…" : "Submit Review"}
+          {submitting ? "submitting…" : "submit review"}
         </button>
         <button
           type="button"
@@ -356,9 +356,9 @@ export function ReviewsGallery() {
         {/* Header */}
         <div className="mb-10 flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
           <div>
-            <p className="mb-1 text-xs uppercase tracking-[0.2em] text-brand-gold/60">Community</p>
+            <p className="mb-1 text-xs tracking-[0.2em] text-brand-gold/60">community</p>
             <h2 className="font-heading text-3xl font-bold text-brand-gold sm:text-4xl">
-              What Athletes Say
+              what athletes say
             </h2>
             {visibleReviews.length > 0 && (
               <div className="mt-2 flex items-center gap-2">
@@ -404,10 +404,10 @@ export function ReviewsGallery() {
           </div>
         ) : visibleReviews.length === 0 ? (
           <div className="flex flex-col items-center gap-3 py-16 text-center">
-            <p className="font-heading text-xl text-white/30">No reviews yet.</p>
+            <p className="font-heading text-xl text-white/30">no reviews yet.</p>
             {canReview && (
               <p className="text-sm text-white/30">
-                Be the first to share your experience with the community.
+                be the first to share your experience with the community.
               </p>
             )}
           </div>

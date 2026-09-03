@@ -41,18 +41,20 @@ async function getProductIdAndReviews(
   handle: string,
 ): Promise<{ productId: string; reviews: Review[] }> {
   const data = await adminFetch<{
-    product: { id: string; metafield: { value: string } | null } | null;
+    products: { nodes: { id: string; metafield: { value: string } | null }[] };
   }>(
-    `query($handle: String!) {
-      product(handle: $handle) {
-        id
-        metafield(namespace: "atheles", key: "reviews") { value }
+    `query($query: String!) {
+      products(first: 1, query: $query) {
+        nodes {
+          id
+          metafield(namespace: "atheles", key: "reviews") { value }
+        }
       }
     }`,
-    { handle },
+    { query: `handle:${handle}` },
   );
 
-  const product = data.product;
+  const product = data.products.nodes[0];
   if (!product) throw new Error(`Product not found: ${handle}`);
 
   const raw = product.metafield?.value;
