@@ -1,4 +1,4 @@
-import { getCustomerByToken } from "lib/auth/shopify-customer";
+import { getCustomerByToken, getCustomerMetafield } from "lib/auth/shopify-customer";
 import { addProductReview, getProductReviews } from "lib/reviews";
 import { addSiteReview } from "lib/site-reviews";
 import { cookies } from "next/headers";
@@ -82,7 +82,11 @@ export async function POST(req: NextRequest) {
       .split("-")
       .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
-    addSiteReview({ authorName, authorEmail, rating, title, body: reviewBody, productTitle: productDisplayTitle }).catch(() => {});
+    getCustomerMetafield(authorEmail, "atheles", "avatar")
+      .then((avatarUrl) =>
+        addSiteReview({ authorName, authorEmail, rating, title, body: reviewBody, productTitle: productDisplayTitle, avatarUrl: avatarUrl || undefined }),
+      )
+      .catch(() => {});
 
     return NextResponse.json({ review }, { status: 201 });
   } catch (err) {

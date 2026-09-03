@@ -18,6 +18,7 @@ export type SiteReview = {
   hidden: boolean;
   flagCount: number;
   productTitle?: string;
+  avatarUrl?: string;
 };
 
 export type PublicSiteReview = Omit<SiteReview, "authorEmail">;
@@ -113,6 +114,7 @@ export async function addSiteReview({
   title,
   body,
   productTitle,
+  avatarUrl,
 }: {
   authorName: string;
   authorEmail: string;
@@ -120,6 +122,7 @@ export async function addSiteReview({
   title: string;
   body: string;
   productTitle?: string;
+  avatarUrl?: string;
 }): Promise<PublicSiteReview> {
   const { shopId, reviews } = await getShopIdAndReviews();
 
@@ -149,6 +152,7 @@ export async function addSiteReview({
     hidden: false,
     flagCount: 0,
     ...(productTitle && { productTitle }),
+    ...(avatarUrl && { avatarUrl }),
   };
 
   reviews.push(newReview);
@@ -189,7 +193,7 @@ export async function deleteSiteReview(reviewId: string, authorEmail: string): P
 export async function editSiteReview(
   reviewId: string,
   authorEmail: string,
-  update: { rating: number; title: string; body: string },
+  update: { rating: number; title: string; body: string; avatarUrl?: string },
 ): Promise<PublicSiteReview> {
   const { shopId, reviews } = await getShopIdAndReviews();
   const review = reviews.find((r) => r.id === reviewId);
@@ -200,6 +204,7 @@ export async function editSiteReview(
   review.rating = update.rating;
   review.title = update.title;
   review.body = update.body;
+  if (update.avatarUrl !== undefined) review.avatarUrl = update.avatarUrl || undefined;
   await saveReviews(shopId, reviews);
   const { authorEmail: _email, ...publicReview } = review;
   return publicReview;
