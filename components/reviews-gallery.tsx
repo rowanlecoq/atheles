@@ -667,8 +667,8 @@ export function ReviewSideTab() {
         <button
           onClick={() => setOpen(true)}
           aria-label="open community reviews"
-          className="flex items-center justify-center border border-brand-gold bg-brand-dark px-2 py-6 text-[10px] uppercase tracking-[0.18em] text-brand-gold transition-colors hover:bg-brand-gold hover:text-brand-dark"
-          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", minHeight: "8rem" }}
+          className="flex items-center justify-center border border-brand-gold bg-transparent px-2 py-3 text-[10px] uppercase tracking-[0.18em] text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
         >
           write your review
         </button>
