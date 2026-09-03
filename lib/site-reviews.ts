@@ -236,6 +236,7 @@ export async function addSiteReview({
     downCount: 0,
     myReaction: null,
     replies: [],
+    isOwn: true,
   };
 }
 
@@ -312,6 +313,7 @@ export async function editSiteReview(
     downCount,
     myReaction,
     replies,
+    isOwn: true,
   };
 }
 
