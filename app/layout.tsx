@@ -17,11 +17,11 @@ import { ScrollProgress } from "components/scroll-progress";
 import { SelfLinkScroll } from "components/self-link-scroll";
 import { SiteImagesProvider } from "components/site-images-context";
 import { SiteThemeProvider } from "components/site-theme-provider";
-import { getAnnouncementsData } from "lib/announcements-server";
 import { getCart } from "lib/shopify";
 import { getSiteImagesData } from "lib/site-images-server";
 import localFont from "next/font/local";
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import { Toaster } from "sonner";
 import "./globals.css";
 import { baseUrl } from "lib/utils";
@@ -69,11 +69,6 @@ export default async function RootLayout({
   const headersList = await headers();
   const pathname = headersList.get("x-pathname") || "";
   const isComingSoon = pathname === "/coming-soon";
-
-  const [siteImages, announcements] = await Promise.all([
-    getSiteImagesData(),
-    isComingSoon ? Promise.resolve([]) : getAnnouncementsData(),
-  ]);
 
   return (
     <html
@@ -143,29 +138,38 @@ export default async function RootLayout({
             }catch(e){}`,
           }}
         />
-        <SiteImagesProvider data={siteImages}>
-          <CurrencyProvider>
-            <CartProvider cartPromise={cart}>
-              <SelfLinkScroll />
-              <SiteThemeProvider />
-              <ColorModeApplier />
-              <ProfileBackgroundApplier />
-              <ThemeBackgroundCanvas />
-              <KonamiLightning />
-              <div id="thunder-shake-root">
-                {!isComingSoon && <AnnouncementBar initialAnnouncements={announcements} />}
-                {!isComingSoon && <Navbar />}
-                <main className="relative z-[1] w-full">
-                  <PageTransition>{children}</PageTransition>
-                  <Toaster closeButton />
-                </main>
-              </div>
-            </CartProvider>
-          </CurrencyProvider>
-        </SiteImagesProvider>
+        <CurrencyProvider>
+          <CartProvider cartPromise={cart}>
+            <SelfLinkScroll />
+            <SiteThemeProvider />
+            <ColorModeApplier />
+            <ProfileBackgroundApplier />
+            <ThemeBackgroundCanvas />
+            <KonamiLightning />
+            <div id="thunder-shake-root">
+              {!isComingSoon && <AnnouncementBar />}
+              {!isComingSoon && <Navbar />}
+              {/* Navbar renders immediately → counts as FCP. Site images data
+                  streams in after via Suspense so it never blocks the nav. */}
+              <main className="relative z-[1] w-full">
+                <PageTransition>
+                  <Suspense fallback={null}>
+                    <SiteImagesLoader>{children}</SiteImagesLoader>
+                  </Suspense>
+                </PageTransition>
+                <Toaster closeButton />
+              </main>
+            </div>
+          </CartProvider>
+        </CurrencyProvider>
         <Analytics />
         <SpeedInsights />
       </body>
     </html>
   );
+}
+
+async function SiteImagesLoader({ children }: { children: ReactNode }) {
+  const siteImages = await getSiteImagesData();
+  return <SiteImagesProvider data={siteImages}>{children}</SiteImagesProvider>;
 }
