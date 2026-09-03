@@ -91,10 +91,17 @@ async function saveReviews(shopId: string, reviews: SiteReview[]): Promise<void>
   }
 }
 
-export async function getSiteReviews(includeAll = false): Promise<PublicSiteReview[]> {
+export async function getSiteReviews(
+  includeAll = false,
+  currentUserEmail?: string,
+): Promise<{ reviews: PublicSiteReview[]; myReviewId: string | null }> {
   const { reviews } = await getShopIdAndReviews();
   const filtered = includeAll ? reviews : reviews.filter((r) => !r.hidden);
-  return filtered.map(({ authorEmail: _email, ...rest }) => rest);
+  const publicReviews = filtered.map(({ authorEmail: _email, ...rest }) => rest);
+  const myReviewId = currentUserEmail
+    ? (reviews.find((r) => r.authorEmail.toLowerCase() === currentUserEmail.toLowerCase())?.id ?? null)
+    : null;
+  return { reviews: publicReviews, myReviewId };
 }
 
 export async function addSiteReview({

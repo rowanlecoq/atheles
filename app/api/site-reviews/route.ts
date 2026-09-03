@@ -7,20 +7,22 @@ export async function GET(req: NextRequest) {
   try {
     const all = req.nextUrl.searchParams.get("all") === "1";
     let isAdmin = false;
+    let currentUserEmail: string | undefined;
 
-    if (all) {
-      const cookieStore = await cookies();
-      const token = cookieStore.get("atheles-auth-token")?.value;
-      if (token) {
-        const customer = await getCustomerByToken(token);
-        isAdmin = !!customer?.isAdmin;
+    const cookieStore = await cookies();
+    const token = cookieStore.get("atheles-auth-token")?.value;
+    if (token) {
+      const customer = await getCustomerByToken(token);
+      if (customer) {
+        currentUserEmail = customer.email;
+        isAdmin = !!customer.isAdmin;
       }
     }
 
-    const reviews = await getSiteReviews(isAdmin && all);
-    return NextResponse.json({ reviews });
+    const { reviews, myReviewId } = await getSiteReviews(isAdmin && all, currentUserEmail);
+    return NextResponse.json({ reviews, myReviewId });
   } catch {
-    return NextResponse.json({ reviews: [] });
+    return NextResponse.json({ reviews: [], myReviewId: null });
   }
 }
 

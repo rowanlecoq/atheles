@@ -503,26 +503,20 @@ export function ReviewSideTab() {
     setFetched(true);
     fetch(`/api/site-reviews${session?.isAdmin ? "?all=1" : ""}`)
       .then((r) => r.json())
-      .then((data: { reviews?: PublicSiteReview[] }) => {
+      .then((data: { reviews?: PublicSiteReview[]; myReviewId?: string | null }) => {
         if (Array.isArray(data.reviews)) setReviews(data.reviews);
+        if (data.myReviewId) {
+          setMyReviewId(data.myReviewId);
+          setAlreadyReviewed(true);
+          try {
+            if (session?.email) localStorage.setItem(`atheles-my-site-review-${session.email}`, data.myReviewId);
+          } catch { /* ignore */ }
+        }
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [open, fetched, session?.isAdmin]);
+  }, [open, fetched, session?.isAdmin, session?.email]);
 
-  // Detect if current admin user already reviewed
-  useEffect(() => {
-    if (session?.email && reviews.length > 0) {
-      const email = session.email.toLowerCase();
-      const found = reviews.some(
-        (r) =>
-          "authorEmail" in r &&
-          typeof (r as { authorEmail?: string }).authorEmail === "string" &&
-          (r as { authorEmail: string }).authorEmail.toLowerCase() === email,
-      );
-      setAlreadyReviewed(found);
-    }
-  }, [reviews, session?.email]);
 
   useEffect(() => {
     if (!open) return;
@@ -667,8 +661,8 @@ export function ReviewSideTab() {
         <button
           onClick={() => setOpen(true)}
           aria-label="open community reviews"
-          className="flex items-center justify-center border border-brand-gold bg-transparent px-2 py-3 text-[10px] uppercase tracking-[0.18em] text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
-          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
+          className="border border-brand-gold bg-transparent px-2 py-3 text-[10px] uppercase tracking-[0.18em] text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", textAlign: "center" }}
         >
           write your review
         </button>
