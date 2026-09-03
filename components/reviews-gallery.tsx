@@ -598,22 +598,40 @@ export function ReviewSideTab() {
     </>
   );
 
+  const tab = (
+    <div
+      className="fixed right-0 top-1/2 z-40"
+      style={{ transform: "translateY(-50%)" }}
+    >
+      <button
+        onClick={() => setOpen(true)}
+        aria-label="open community reviews"
+        className="relative overflow-hidden border border-brand-gold bg-transparent text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
+        style={{ width: "26px", height: "130px" }}
+      >
+        <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
+          <span
+            className="text-[10px] uppercase tracking-[0.18em]"
+            style={{ whiteSpace: "nowrap", transform: "rotate(-90deg)" }}
+          >
+            write your review
+          </span>
+        </span>
+      </button>
+    </div>
+  );
+
   return (
     <>
-      {/* Side tab — matches enter store button */}
-      <div className="fixed right-0 top-1/2 z-40 -translate-y-1/2">
-        <button
-          onClick={() => setOpen(true)}
-          aria-label="open community reviews"
-          className="flex items-center justify-center border border-brand-gold bg-transparent px-2 py-4 text-[10px] uppercase tracking-[0.18em] text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
-          style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}
-        >
-          write your review
-        </button>
-      </div>
-
-      {/* Portal — always mounted so exit animation plays; visibility gated by CSS */}
-      {mounted && createPortal(modal, document.body)}
+      {/* Both tab and modal are portaled to document.body so fixed positioning
+          is never broken by a transformed ancestor (e.g. konami shake root) */}
+      {mounted && createPortal(
+        <>
+          {!open && tab}
+          {modal}
+        </>,
+        document.body,
+      )}
     </>
   );
 }
