@@ -1,8 +1,4 @@
-/**
- * Server-side fetch of site images data from Shopify metafields.
- * Called from the root layout to inject data into the page as a
- * synchronous <script> tag — eliminates client-side fetch delay.
- */
+import { unstable_cache } from "next/cache";
 
 const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
 const domain = process.env.SHOPIFY_STORE_DOMAIN
@@ -51,7 +47,7 @@ function normalizeSlot(val: unknown, key: string): SlotData {
   return base;
 }
 
-export async function getSiteImagesData(): Promise<Record<string, SlotData>> {
+async function fetchSiteImagesData(): Promise<Record<string, SlotData>> {
   const images: Record<string, SlotData> = {};
 
   try {
@@ -81,3 +77,9 @@ export async function getSiteImagesData(): Promise<Record<string, SlotData>> {
 
   return images;
 }
+
+export const getSiteImagesData = unstable_cache(
+  fetchSiteImagesData,
+  ["site-images"],
+  { revalidate: 300, tags: ["site-images"] },
+);

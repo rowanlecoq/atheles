@@ -1,3 +1,5 @@
+import { unstable_cache } from "next/cache";
+
 const adminToken = process.env.SHOPIFY_ADMIN_ACCESS_TOKEN || "";
 const domain = process.env.SHOPIFY_STORE_DOMAIN
   ? process.env.SHOPIFY_STORE_DOMAIN.startsWith("https://")
@@ -13,7 +15,7 @@ const DEFAULT_ANNOUNCEMENTS = [
   "follow us at @atheles.co to share your aesthetic.",
 ];
 
-export async function getAnnouncementsData(): Promise<string[]> {
+async function fetchAnnouncementsData(): Promise<string[]> {
   try {
     if (!adminEndpoint) return DEFAULT_ANNOUNCEMENTS;
     const res = await fetch(adminEndpoint, {
@@ -33,3 +35,9 @@ export async function getAnnouncementsData(): Promise<string[]> {
     return DEFAULT_ANNOUNCEMENTS;
   }
 }
+
+export const getAnnouncementsData = unstable_cache(
+  fetchAnnouncementsData,
+  ["announcements"],
+  { revalidate: 300, tags: ["announcements"] },
+);

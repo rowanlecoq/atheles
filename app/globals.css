@@ -325,6 +325,32 @@ html { scrollbar-width: none; }
   cursor: url("data:image/svg+xml,%3Csvg width='24' height='24' xmlns='http://www.w3.org/2000/svg'%3E%3Cline x1='3' y1='12' x2='21' y2='12' stroke='%23000' stroke-width='2.5' stroke-linecap='round' opacity='0.5'/%3E%3Cline x1='3' y1='12' x2='21' y2='12' stroke='white' stroke-width='1.2' stroke-linecap='round'/%3E%3C/svg%3E") 12 12, zoom-out;
 }
 
+/* Thunder overlay flash (easter egg) */
+@keyframes thunder-flash {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  100% { opacity: 0; }
+}
+.animate-thunder-flash {
+  animation: thunder-flash 0.4s ease-out forwards;
+}
+@keyframes thunder-radial {
+  from { transform: scale(0.5); opacity: 0.8; }
+  to { transform: scale(1.5); opacity: 0; }
+}
+.animate-thunder-radial {
+  animation: thunder-radial 0.4s ease-out forwards;
+}
+
+/* Favorite card button toast */
+@keyframes toast-pop {
+  from { opacity: 0; transform: translateX(-50%) translateY(4px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+.animate-toast-pop {
+  animation: toast-pop 0.18s ease-out both;
+}
+
 /* Thunder shake easter egg */
 @keyframes thunder-shake {
   0%,

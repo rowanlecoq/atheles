@@ -2,8 +2,7 @@
 
 import { useMobileViewport } from "lib/hooks/use-mobile-viewport";
 import { useReducedMotion } from "lib/hooks/use-reduced-motion";
-import { motion, useMotionValue, useSpring } from "motion/react";
-import type { MouseEvent, ReactNode } from "react";
+import { useRef, type MouseEvent, type ReactNode } from "react";
 
 export function MagneticHover({
   children,
@@ -17,38 +16,31 @@ export function MagneticHover({
   const isMobileViewport = useMobileViewport();
   const prefersReducedMotion = useReducedMotion();
   const motionDisabled = prefersReducedMotion || isMobileViewport;
-  const x = useMotionValue(0);
-  const y = useMotionValue(0);
-  const springX = useSpring(x, { stiffness: 260, damping: 18, mass: 0.45 });
-  const springY = useSpring(y, { stiffness: 260, damping: 18, mass: 0.45 });
+  const ref = useRef<HTMLDivElement>(null);
 
   const handlePointerMove = (event: MouseEvent<HTMLDivElement>) => {
+    if (motionDisabled || !ref.current) return;
     const bounds = event.currentTarget.getBoundingClientRect();
-    const centerX = bounds.width / 2;
-    const centerY = bounds.height / 2;
-    const distanceX = event.clientX - bounds.left - centerX;
-    const distanceY = event.clientY - bounds.top - centerY;
-
-    x.set((distanceX / centerX) * strength);
-    y.set((distanceY / centerY) * strength);
+    const cx = bounds.width / 2;
+    const cy = bounds.height / 2;
+    const dx = ((event.clientX - bounds.left - cx) / cx) * strength;
+    const dy = ((event.clientY - bounds.top - cy) / cy) * strength;
+    ref.current.style.transform = `translate(${dx}px,${dy}px)`;
   };
 
   const handlePointerLeave = () => {
-    x.set(0);
-    y.set(0);
+    if (ref.current) ref.current.style.transform = "translate(0px,0px)";
   };
 
   return (
-    <motion.div
+    <div
+      ref={ref}
       className={className}
-      style={{
-        x: motionDisabled ? 0 : springX,
-        y: motionDisabled ? 0 : springY,
-      }}
+      style={{ transition: "transform 0.4s cubic-bezier(0.22,1,0.36,1)" }}
       onMouseMove={motionDisabled ? undefined : handlePointerMove}
       onMouseLeave={motionDisabled ? undefined : handlePointerLeave}
     >
       {children}
-    </motion.div>
+    </div>
   );
 }
