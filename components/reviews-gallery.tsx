@@ -247,9 +247,9 @@ function ReviewForm({
 
 // ---- ReviewCard ----
 
-function ThumbIcon({ dir }: { dir: "up" | "down" }) {
+function ThumbIcon({ dir, className }: { dir: "up" | "down"; className?: string }) {
   return (
-    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
+    <svg viewBox="0 0 20 20" fill="currentColor" className={className ?? "h-5 w-5"} aria-hidden="true">
       {dir === "up" ? (
         <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
       ) : (
@@ -281,18 +281,20 @@ function ReviewCard({
   const [myReaction, setMyReaction] = useState<"up" | "down" | null>(review.myReaction);
   const [replies, setReplies] = useState<PublicReply[]>(review.replies);
   const [showReplies, setShowReplies] = useState(false);
+  const [showReplyInput, setShowReplyInput] = useState(false);
   const [replyBody, setReplyBody] = useState("");
   const [submittingReply, setSubmittingReply] = useState(false);
   const [reactingTo, setReactingTo] = useState<"up" | "down" | null>(null);
   const [moderating, setModerating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
+  const replyInputRef = useRef<HTMLInputElement>(null);
 
-  const date = new Date(review.createdAt).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
+  const d = new Date(review.createdAt);
+  const date = `${d.getMonth() + 1}-${d.getDate()}`;
 
   async function handleReact(type: "up" | "down") {
     if (!loggedIn || reactingTo) return;
-    // Optimistic update
     const removing = myReaction === type;
     const switching = myReaction !== null && myReaction !== type;
     setUpCount((c) => {
@@ -317,8 +319,14 @@ function ReviewCard({
         setDownCount(data.downCount);
         setMyReaction(data.myReaction);
       }
-    } catch { /* revert on error would be nice but keep simple */ }
+    } catch { /* keep optimistic */ }
     finally { setReactingTo(null); }
+  }
+
+  function openReply() {
+    setShowReplyInput(true);
+    setShowReplies(true);
+    setTimeout(() => replyInputRef.current?.focus(), 50);
   }
 
   async function handleReplySubmit(e: React.FormEvent) {
@@ -335,7 +343,7 @@ function ReviewCard({
       if (res.ok && data.reply) {
         setReplies((prev) => [...prev, data.reply!]);
         setReplyBody("");
-        setShowReplies(true);
+        setShowReplyInput(false);
       }
     } finally { setSubmittingReply(false); }
   }
@@ -374,114 +382,142 @@ function ReviewCard({
   }
 
   return (
-    <div className={["border-b border-white/5 px-5 py-4 space-y-2", review.flagged && isAdmin ? "bg-amber-500/5" : "", review.hidden ? "opacity-50" : ""].filter(Boolean).join(" ")}>
-      <div className="flex items-center gap-2.5">
-        <Avatar src={avatarSrc} name={review.authorName} />
-        <div className="flex-1 min-w-0">
-          <p className="text-sm font-semibold text-white truncate">{review.authorName}</p>
-          <p className="text-xs text-white/30">{date}</p>
+    <div className={["border-b border-white/5 px-4 py-4", review.flagged && isAdmin ? "bg-amber-500/5" : "", review.hidden ? "opacity-50" : ""].filter(Boolean).join(" ")}>
+      {/* Main content row: avatar | body | reactions */}
+      <div className="flex items-start gap-3">
+        {/* Avatar */}
+        <div className="shrink-0 pt-0.5">
+          <Avatar src={avatarSrc} name={review.authorName} />
         </div>
-        {isAdmin && review.flagged && (
-          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-400 shrink-0">
-            {review.flagCount} flag{review.flagCount !== 1 ? "s" : ""}
-          </span>
-        )}
-      </div>
-      <Stars rating={review.rating} />
-      {review.productTitle && (
-        <p className="text-[10px] uppercase tracking-wider text-brand-gold/40">for {review.productTitle}</p>
-      )}
-      <p className="text-xs font-semibold text-brand-gold">{review.title}</p>
-      <p className="text-sm leading-relaxed text-white/70">{review.body}</p>
 
-      {/* Actions row */}
-      <div className="flex items-center gap-3 pt-1">
-        {/* Thumbs up */}
-        <button
-          onClick={() => handleReact("up")}
-          disabled={!loggedIn || !!reactingTo}
-          title={loggedIn ? undefined : "sign in to react"}
-          className={["flex items-center gap-1 text-[11px] transition-colors disabled:opacity-40", myReaction === "up" ? "text-brand-gold" : "text-white/25 hover:text-white/60"].join(" ")}
-        >
-          <ThumbIcon dir="up" />
-          {upCount > 0 && <span>{upCount}</span>}
-        </button>
-        {/* Thumbs down */}
-        <button
-          onClick={() => handleReact("down")}
-          disabled={!loggedIn || !!reactingTo}
-          title={loggedIn ? undefined : "sign in to react"}
-          className={["flex items-center gap-1 text-[11px] transition-colors disabled:opacity-40", myReaction === "down" ? "text-red-400" : "text-white/25 hover:text-white/60"].join(" ")}
-        >
-          <ThumbIcon dir="down" />
-          {downCount > 0 && <span>{downCount}</span>}
-        </button>
-        {/* Reply toggle */}
-        <button
-          onClick={() => setShowReplies((v) => !v)}
-          className="flex items-center gap-1 text-[11px] text-white/25 hover:text-white/60 transition-colors"
-        >
-          <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
-            <path fillRule="evenodd" d="M10 2c-2.236 0-4.43.18-6.57.524C1.993 2.755 1 4.014 1 5.426v5.148c0 1.413.993 2.67 2.43 2.902 1.168.188 2.352.327 3.55.414.28.02.521.18.642.413l1.713 3.293a.75.75 0 001.33 0l1.713-3.293a.633.633 0 01.642-.413 41.102 41.102 0 003.55-.414c1.437-.231 2.43-1.49 2.43-2.902V5.426c0-1.413-.993-2.67-2.43-2.902A41.289 41.289 0 0010 2zM6.75 6a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5zm0 2.5a.75.75 0 000 1.5h3.5a.75.75 0 000-1.5h-3.5z" clipRule="evenodd" />
-          </svg>
-          {replies.length > 0 ? `${replies.length} repl${replies.length !== 1 ? "ies" : "y"}` : "reply"}
-        </button>
+        {/* Centre column */}
+        <div className="flex-1 min-w-0 space-y-1">
+          <div className="flex items-center gap-2 flex-wrap">
+            <p className="text-sm font-semibold text-white leading-snug">{review.authorName}</p>
+            {isAdmin && review.flagged && (
+              <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-400">
+                {review.flagCount} flag{review.flagCount !== 1 ? "s" : ""}
+              </span>
+            )}
+          </div>
+          <Stars rating={review.rating} />
+          {review.productTitle && (
+            <p className="text-[10px] uppercase tracking-wider text-brand-gold/40">for {review.productTitle}</p>
+          )}
+          <p className="text-xs font-semibold text-brand-gold leading-snug">{review.title}</p>
+          <p className="text-sm leading-relaxed text-white/70">{review.body}</p>
 
-        {/* Spacer */}
-        <span className="flex-1" />
-
-        {/* Own review delete */}
-        {isOwn && !isAdmin && (
-          confirmDelete ? (
-            <>
-              <button onClick={handleDelete} disabled={deleting} className="text-[11px] text-red-400 hover:text-red-300 transition-colors disabled:opacity-40">
-                {deleting ? "…" : "confirm"}
+          {/* Bottom meta row — TikTok style */}
+          <div className="flex items-center gap-4 pt-1">
+            <span className="text-xs text-white/30">{date}</span>
+            <button
+              onClick={openReply}
+              className="text-xs font-semibold text-white/40 hover:text-white/80 transition-colors active:scale-95"
+            >
+              Reply
+            </button>
+            {replies.length > 0 && (
+              <button
+                onClick={() => setShowReplies((v) => !v)}
+                className="flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors"
+              >
+                <span className="inline-block w-4 border-t border-white/20" />
+                {showReplies ? "Hide replies" : `View ${replies.length} repl${replies.length !== 1 ? "ies" : "y"}`}
               </button>
-              <button onClick={() => setConfirmDelete(false)} className="text-[11px] text-white/30 hover:text-white transition-colors">cancel</button>
-            </>
-          ) : (
-            <button onClick={() => setConfirmDelete(true)} className="text-[11px] text-white/20 hover:text-red-400 transition-colors">delete</button>
-          )
-        )}
-        {/* Admin hide/show */}
-        {isAdmin && (
-          <button onClick={handleModerate} disabled={moderating} className="text-[11px] text-white/30 hover:text-white transition-colors disabled:opacity-40">
-            {moderating ? "…" : review.hidden ? "show" : "hide"}
+            )}
+            {/* Own review delete */}
+            {isOwn && !isAdmin && (
+              confirmDelete ? (
+                <div className="flex items-center gap-2 ml-auto">
+                  <button onClick={handleDelete} disabled={deleting} className="text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-40">
+                    {deleting ? "…" : "confirm"}
+                  </button>
+                  <button onClick={() => setConfirmDelete(false)} className="text-xs text-white/30 hover:text-white transition-colors">cancel</button>
+                </div>
+              ) : (
+                <button onClick={() => setConfirmDelete(true)} className="ml-auto text-xs text-white/20 hover:text-red-400 transition-colors">delete</button>
+              )
+            )}
+            {/* Admin controls */}
+            {isAdmin && (
+              <button onClick={handleModerate} disabled={moderating} className="ml-auto text-xs text-white/30 hover:text-white transition-colors disabled:opacity-40">
+                {moderating ? "…" : review.hidden ? "show" : "hide"}
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Right column — reactions (TikTok style) */}
+        <div className="shrink-0 flex flex-col items-center gap-3 pl-1 pt-1">
+          <button
+            onClick={() => handleReact("up")}
+            disabled={!loggedIn || !!reactingTo}
+            title={loggedIn ? undefined : "sign in to react"}
+            className={["flex flex-col items-center gap-0.5 transition-all active:scale-90 disabled:opacity-30", myReaction === "up" ? "text-brand-gold" : "text-white/40 hover:text-white/80"].join(" ")}
+          >
+            <ThumbIcon dir="up" className="h-5 w-5" />
+            <span className="text-[11px] leading-none tabular-nums">{upCount || ""}</span>
           </button>
-        )}
+          <button
+            onClick={() => handleReact("down")}
+            disabled={!loggedIn || !!reactingTo}
+            title={loggedIn ? undefined : "sign in to react"}
+            className={["flex flex-col items-center gap-0.5 transition-all active:scale-90 disabled:opacity-30", myReaction === "down" ? "text-red-400" : "text-white/40 hover:text-white/80"].join(" ")}
+          >
+            <ThumbIcon dir="down" className="h-5 w-5" />
+            <span className="text-[11px] leading-none tabular-nums">{downCount || ""}</span>
+          </button>
+        </div>
       </div>
 
-      {/* Replies section */}
-      {showReplies && (
-        <div className="mt-1 space-y-2 border-t border-white/5 pt-3">
-          {replies.map((rp) => (
-            <div key={rp.id} className="flex items-start gap-2">
-              <Avatar src={rp.avatarUrl} name={rp.authorName} />
-              <div className="flex-1 min-w-0">
-                <p className="text-xs font-semibold text-white/80">{rp.authorName}</p>
-                <p className="text-xs leading-relaxed text-white/50">{rp.body}</p>
+      {/* Replies thread */}
+      {(showReplies || showReplyInput) && (
+        <div className="ml-12 mt-3 space-y-3">
+          {showReplies && replies.map((rp) => {
+            const rd = new Date(rp.createdAt);
+            const rDate = `${rd.getMonth() + 1}-${rd.getDate()}`;
+            return (
+              <div key={rp.id} className="flex items-start gap-2.5">
+                <Avatar src={rp.avatarUrl} name={rp.authorName} />
+                <div className="flex-1 min-w-0">
+                  <p className="text-xs font-semibold text-white/90 leading-snug">{rp.authorName}</p>
+                  <p className="text-sm leading-relaxed text-white/60">{rp.body}</p>
+                  <div className="flex items-center gap-3 mt-1">
+                    <span className="text-xs text-white/25">{rDate}</span>
+                    {(rp.isOwn || isAdmin) && (
+                      <button onClick={() => handleDeleteReply(rp.id)} className="text-xs text-white/20 hover:text-red-400 transition-colors">delete</button>
+                    )}
+                  </div>
+                </div>
               </div>
-              {(rp.isOwn || isAdmin) && (
-                <button onClick={() => handleDeleteReply(rp.id)} className="shrink-0 text-[10px] text-white/15 hover:text-red-400 transition-colors">×</button>
-              )}
-            </div>
-          ))}
-          {loggedIn && (
-            <form onSubmit={handleReplySubmit} className="flex gap-2 pt-1">
+            );
+          })}
+
+          {/* Reply input */}
+          {showReplyInput && loggedIn && (
+            <form onSubmit={handleReplySubmit} className="flex items-center gap-2 pt-1">
               <input
+                ref={replyInputRef}
                 type="text"
                 value={replyBody}
                 onChange={(e) => setReplyBody(e.target.value)}
                 maxLength={500}
-                placeholder="write a reply…"
-                className="flex-1 rounded-sm border border-white/10 bg-white/3 px-3 py-1.5 text-xs text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+                placeholder="add a reply…"
+                className="flex-1 border-b border-white/15 bg-transparent pb-1.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/50 focus:outline-none"
               />
+              <button
+                type="button"
+                onClick={() => { setShowReplyInput(false); setReplyBody(""); }}
+                className="shrink-0 text-xs text-white/30 hover:text-white transition-colors px-1"
+              >
+                cancel
+              </button>
               <button
                 type="submit"
                 disabled={submittingReply || !replyBody.trim()}
-                className="shrink-0 rounded-sm border border-brand-gold/30 px-3 py-1.5 text-[10px] uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:opacity-40"
+                className="shrink-0 text-sm font-semibold text-brand-gold hover:text-brand-gold/80 transition-colors disabled:opacity-40"
               >
-                {submittingReply ? "…" : "post"}
+                {submittingReply ? "…" : "Post"}
               </button>
             </form>
           )}
