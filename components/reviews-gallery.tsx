@@ -564,7 +564,7 @@ export function ReviewSideTab() {
     <>
       {/* Backdrop — z-[65] dims navbar */}
       <div
-        className={`fixed inset-0 z-[65] bg-black/50 transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0"}`}
+        className={`fixed inset-0 z-[65] bg-black/50 transition-opacity duration-300 ${visible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
         aria-hidden="true"
         onClick={() => setOpen(false)}
       />
@@ -574,7 +574,7 @@ export function ReviewSideTab() {
         role="dialog"
         aria-modal="true"
         aria-label="community reviews"
-        className={`fixed inset-y-0 right-0 z-[70] flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] border-l border-brand-dark-gold/20 transition-transform duration-300 ease-out will-change-transform ${visible ? "translate-x-0" : "translate-x-full"}`}
+        className={`fixed inset-y-0 right-0 z-[70] flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] border-l border-brand-dark-gold/20 transition-transform duration-300 ease-out will-change-transform ${visible ? "translate-x-0" : "translate-x-full pointer-events-none"}`}
         style={{ overscrollBehavior: "contain" }}
       >
         {/* Header */}
@@ -617,9 +617,6 @@ export function ReviewSideTab() {
             </p>
           )}
 
-          {alreadyReviewed && !session?.isAdmin && (
-            <p className="px-5 py-4 text-sm text-white/40">you&apos;ve already reviewed — thanks 🔱</p>
-          )}
 
           {/* Reviews list */}
           {loading ? (
@@ -661,15 +658,15 @@ export function ReviewSideTab() {
         <button
           onClick={() => setOpen(true)}
           aria-label="open community reviews"
-          className="border border-brand-gold bg-transparent px-2 py-3 text-[10px] uppercase tracking-[0.18em] text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
-          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", textAlign: "center" }}
+          className="flex items-center justify-center border border-brand-gold bg-transparent px-2 py-4 text-[10px] uppercase tracking-[0.18em] text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
+          style={{ writingMode: "vertical-lr", transform: "rotate(180deg)" }}
         >
           write your review
         </button>
       </div>
 
-      {/* Portal — renders at document.body, above all stacking contexts */}
-      {mounted && open && createPortal(modal, document.body)}
+      {/* Portal — always mounted so exit animation plays; visibility gated by CSS */}
+      {mounted && createPortal(modal, document.body)}
     </>
   );
 }
