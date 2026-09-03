@@ -398,7 +398,8 @@ export function ReviewSideTab() {
   // Mount guard for createPortal
   useEffect(() => { setMounted(true); }, []);
 
-  // Read session + avatar + persisted review ID from localStorage
+  // On mount: read localStorage for instant display, then fetch reviews + avatar
+  // from the server in the background so data is ready before the drawer opens
   useEffect(() => {
     let parsed: Session | null = null;
     try {
@@ -409,6 +410,7 @@ export function ReviewSideTab() {
     setLoggedIn(!!(parsed?.email || hasCookie));
     setSession(parsed);
 
+    // Show cached avatar immediately (works on same device)
     if (parsed?.email) {
       try {
         const avatarCached = localStorage.getItem(`atheles-avatar-${parsed.email}`);
@@ -419,7 +421,38 @@ export function ReviewSideTab() {
         if (storedReviewId) setMyReviewId(storedReviewId);
       } catch { /* ignore */ }
     }
-  }, []);
+
+    // Prefetch reviews so they're ready the moment the drawer opens
+    setLoading(true);
+    fetch(`/api/site-reviews${parsed?.isAdmin ? "?all=1" : ""}`)
+      .then((r) => r.json())
+      .then((data: { reviews?: PublicSiteReview[]; myReviewId?: string | null }) => {
+        if (Array.isArray(data.reviews)) setReviews(data.reviews);
+        if (data.myReviewId) {
+          setMyReviewId(data.myReviewId);
+          setAlreadyReviewed(true);
+          try {
+            if (parsed?.email) localStorage.setItem(`atheles-my-site-review-${parsed.email}`, data.myReviewId);
+          } catch { /* ignore */ }
+        }
+        setFetched(true);
+      })
+      .catch(() => {})
+      .finally(() => setLoading(false));
+
+    // Fetch avatar from server so it works across devices (not just same-device localStorage)
+    fetch("/api/auth/avatar")
+      .then((r) => (r.ok ? r.json() : null))
+      .then((d) => {
+        if (d?.avatar) {
+          setMyAvatar(d.avatar);
+          try {
+            if (parsed?.email) localStorage.setItem(`atheles-avatar-${parsed.email}`, d.avatar);
+          } catch { /* ignore */ }
+        }
+      })
+      .catch(() => {});
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
   // Slide open/close — compensate for scrollbar width to prevent layout shift
   useEffect(() => {
@@ -439,27 +472,6 @@ export function ReviewSideTab() {
       document.body.style.paddingRight = "";
     };
   }, [open]);
-
-  // Fetch reviews on first open
-  useEffect(() => {
-    if (!open || fetched) return;
-    setLoading(true);
-    setFetched(true);
-    fetch(`/api/site-reviews${session?.isAdmin ? "?all=1" : ""}`)
-      .then((r) => r.json())
-      .then((data: { reviews?: PublicSiteReview[]; myReviewId?: string | null }) => {
-        if (Array.isArray(data.reviews)) setReviews(data.reviews);
-        if (data.myReviewId) {
-          setMyReviewId(data.myReviewId);
-          setAlreadyReviewed(true);
-          try {
-            if (session?.email) localStorage.setItem(`atheles-my-site-review-${session.email}`, data.myReviewId);
-          } catch { /* ignore */ }
-        }
-      })
-      .catch(() => {})
-      .finally(() => setLoading(false));
-  }, [open, fetched, session?.isAdmin, session?.email]);
 
 
   useEffect(() => {
@@ -609,8 +621,8 @@ export function ReviewSideTab() {
         aria-label="open community reviews"
         className="group flex w-full items-center justify-center gap-3 border-y border-brand-gold/25 bg-transparent py-4 text-[11px] uppercase tracking-[0.22em] text-brand-gold transition-colors duration-200 hover:bg-brand-gold/[0.04]"
       >
-        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
-          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0 transition-all duration-200 group-hover:fill-current" aria-hidden="true">
+          <path strokeLinecap="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
         </svg>
         <span>community reviews</span>
         <span className="text-brand-gold/30">·</span>

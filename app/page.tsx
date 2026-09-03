@@ -19,7 +19,6 @@ export default function HomePage() {
   return (
     <>
       <Hero />
-      <ReviewSideTab />
       <Suspense fallback={null}>
         <Carousel />
       </Suspense>
@@ -27,6 +26,7 @@ export default function HomePage() {
         <ThreeItemGrid />
       </Suspense>
       <NewsletterSignup />
+      <ReviewSideTab />
       <GreekQuote />
       <Footer />
     </>
