@@ -3,6 +3,21 @@
 import { useEffect, useRef, useState } from "react";
 import type { PublicSiteReview } from "lib/site-reviews";
 
+// ---- Trident avatar (no photo storage) ----
+
+function Avatar() {
+  return (
+    <div
+      className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full border border-brand-dark-gold/30 bg-brand-dark text-sm"
+      aria-hidden="true"
+    >
+      🔱
+    </div>
+  );
+}
+
+// ---- Stars ----
+
 function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
   return (
     <span className="inline-flex gap-0.5" aria-label={`${rating} out of 5 stars`}>
@@ -22,6 +37,8 @@ function Stars({ rating, size = 14 }: { rating: number; size?: number }) {
     </span>
   );
 }
+
+// ---- StarInput ----
 
 function StarInput({ value, onChange }: { value: number; onChange: (n: number) => void }) {
   const [hovered, setHovered] = useState(0);
@@ -53,6 +70,8 @@ function StarInput({ value, onChange }: { value: number; onChange: (n: number) =
   );
 }
 
+// ---- ReviewForm ----
+
 type Session = { firstName?: string; name?: string; isAdmin?: boolean; email?: string };
 
 function ReviewForm({
@@ -71,7 +90,6 @@ function ReviewForm({
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
 
-  // Keep name in sync if session loads after mount
   useEffect(() => {
     if (profileName && !displayName) setDisplayName(profileName);
   }, [profileName]); // eslint-disable-line react-hooks/exhaustive-deps
@@ -107,7 +125,7 @@ function ReviewForm({
 
   if (done) {
     return (
-      <div className="rounded-xl border border-brand-gold/20 bg-brand-gold/5 p-5 text-center">
+      <div className="rounded-lg border border-brand-gold/20 bg-brand-gold/5 p-5 text-center">
         <p className="font-heading text-lg text-brand-gold">thanks for sharing 🔱</p>
         <p className="mt-1 text-sm text-white/50">your review is now live.</p>
       </div>
@@ -124,15 +142,13 @@ function ReviewForm({
           value={displayName}
           onChange={(e) => setDisplayName(e.target.value)}
           placeholder="atheles member"
-          className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
+          className="w-full rounded-sm border border-brand-dark-gold/30 bg-transparent px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/60 focus:outline-none"
         />
       </div>
-
       <div>
         <label className="mb-1.5 block text-xs text-white/40">rating</label>
         <StarInput value={rating} onChange={setRating} />
       </div>
-
       <div>
         <label htmlFor="sr-title" className="mb-1.5 block text-xs text-white/40">title</label>
         <input
@@ -142,10 +158,9 @@ function ReviewForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="sum it up in a few words"
-          className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
+          className="w-full rounded-sm border border-brand-dark-gold/30 bg-transparent px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/60 focus:outline-none"
         />
       </div>
-
       <div>
         <label htmlFor="sr-body" className="mb-1.5 block text-xs text-white/40">review</label>
         <textarea
@@ -155,22 +170,22 @@ function ReviewForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="tell the community about your experience with atheles"
-          className="w-full resize-none rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
+          className="w-full resize-none rounded-sm border border-brand-dark-gold/30 bg-transparent px-4 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/60 focus:outline-none"
         />
       </div>
-
       {error && <p className="text-sm text-red-400">{error}</p>}
-
       <button
         type="submit"
         disabled={submitting}
-        className="w-full rounded-lg bg-brand-gold py-2.5 text-sm font-bold text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50"
+        className="w-full border border-brand-gold py-2.5 text-sm uppercase tracking-[0.18em] text-brand-gold transition-colors hover:bg-brand-gold hover:text-brand-dark disabled:opacity-50"
       >
         {submitting ? "submitting…" : "submit review"}
       </button>
     </form>
   );
 }
+
+// ---- ReviewCard ----
 
 function ReviewCard({
   review,
@@ -218,22 +233,30 @@ function ReviewCard({
   return (
     <div
       className={[
-        "rounded-xl border p-4 space-y-2",
-        review.flagged && isAdmin ? "border-amber-500/30 bg-amber-500/5" : "border-brand-dark-gold/20 bg-white/[0.03]",
+        "border p-4 space-y-2",
+        review.flagged && isAdmin ? "border-amber-500/30 bg-amber-500/5" : "border-brand-dark-gold/20",
         review.hidden ? "opacity-50" : "",
       ].filter(Boolean).join(" ")}
     >
-      <span className="block font-heading text-3xl leading-none text-brand-gold/25 select-none" aria-hidden="true">&ldquo;</span>
-      <Stars rating={review.rating} />
-      <p className="text-sm leading-relaxed text-white/75">{review.body}</p>
-      <p className="text-xs font-semibold text-brand-gold">{review.title}</p>
-      <div className="flex items-center justify-between border-t border-white/5 pt-2">
-        <p className="text-xs text-white/30">{review.authorName} · {date}</p>
+      {/* Author row with avatar */}
+      <div className="flex items-center gap-2.5">
+        <Avatar />
+        <div>
+          <p className="text-sm font-semibold text-white">{review.authorName}</p>
+          <p className="text-xs text-white/30">{date}</p>
+        </div>
         {isAdmin && review.flagged && (
-          <span className="rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-400">
+          <span className="ml-auto rounded-full bg-amber-500/20 px-2 py-0.5 text-[10px] text-amber-400">
             {review.flagCount} flag{review.flagCount !== 1 ? "s" : ""}
           </span>
         )}
+      </div>
+
+      <Stars rating={review.rating} />
+      <p className="text-xs font-semibold text-brand-gold">{review.title}</p>
+      <p className="text-sm leading-relaxed text-white/70">{review.body}</p>
+
+      <div className="flex justify-end border-t border-white/5 pt-2">
         {isAdmin ? (
           <button onClick={handleModerate} disabled={moderating} className="text-[11px] text-white/30 hover:text-white transition-colors disabled:opacity-40">
             {moderating ? "…" : review.hidden ? "show" : "hide"}
@@ -248,15 +271,18 @@ function ReviewCard({
   );
 }
 
+// ---- ReviewSideTab (main export) ----
+
 export function ReviewSideTab() {
   const [open, setOpen] = useState(false);
   const [reviews, setReviews] = useState<PublicSiteReview[]>([]);
   const [loading, setLoading] = useState(false);
+  const [fetched, setFetched] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
   const [alreadyReviewed, setAlreadyReviewed] = useState(false);
-  const panelRef = useRef<HTMLDivElement>(null);
 
+  // Read session once on mount
   useEffect(() => {
     let parsed: Session | null = null;
     try {
@@ -268,10 +294,21 @@ export function ReviewSideTab() {
     setSession(parsed);
   }, []);
 
-  // Load reviews when panel opens
+  // Lock body scroll while open
   useEffect(() => {
-    if (!open || reviews.length > 0) return;
+    if (open) {
+      document.body.classList.add("overflow-hidden");
+    } else {
+      document.body.classList.remove("overflow-hidden");
+    }
+    return () => document.body.classList.remove("overflow-hidden");
+  }, [open]);
+
+  // Fetch reviews when panel first opens
+  useEffect(() => {
+    if (!open || fetched) return;
     setLoading(true);
+    setFetched(true);
     const url = `/api/site-reviews${session?.isAdmin ? "?all=1" : ""}`;
     fetch(url)
       .then((r) => r.json())
@@ -280,14 +317,15 @@ export function ReviewSideTab() {
       })
       .catch(() => {})
       .finally(() => setLoading(false));
-  }, [open]); // eslint-disable-line react-hooks/exhaustive-deps
+  }, [open, fetched, session?.isAdmin]);
 
-  // Check if admin user already reviewed
+  // Check if admin/user already reviewed (admins have email in session)
   useEffect(() => {
     if (session?.email && reviews.length > 0) {
       const email = session.email.toLowerCase();
       const found = reviews.some(
-        (r) => "authorEmail" in r &&
+        (r) =>
+          "authorEmail" in r &&
           typeof (r as { authorEmail?: string }).authorEmail === "string" &&
           (r as { authorEmail: string }).authorEmail.toLowerCase() === email,
       );
@@ -323,22 +361,22 @@ export function ReviewSideTab() {
 
   return (
     <>
-      {/* Side tab */}
+      {/* Side tab — matches "enter store" button style */}
       <div className="fixed right-0 top-1/2 z-40 -translate-y-1/2">
         <button
           onClick={() => setOpen(true)}
-          className="flex items-center gap-1.5 rounded-l-lg border border-r-0 border-brand-gold/30 bg-brand-dark px-2.5 py-4 text-[11px] font-semibold text-brand-gold/80 transition-colors hover:border-brand-gold/60 hover:text-brand-gold"
+          aria-label="open community reviews"
+          className="border border-brand-gold bg-brand-dark px-2 py-4 text-[10px] uppercase tracking-[0.18em] text-brand-gold transition-colors hover:bg-brand-gold hover:text-brand-dark"
           style={{ writingMode: "vertical-rl", transform: "rotate(180deg)" }}
-          aria-label="open reviews"
         >
           write your review
         </button>
       </div>
 
-      {/* Modal overlay */}
+      {/* Modal — z-[70] sits above navbar (z-[60] on desktop) */}
       {open && (
         <div
-          className="fixed inset-0 z-50 flex items-center justify-end sm:justify-center"
+          className="fixed inset-0 z-[70] flex items-stretch justify-end"
           role="dialog"
           aria-modal="true"
           aria-label="community reviews"
@@ -349,62 +387,65 @@ export function ReviewSideTab() {
             onClick={() => setOpen(false)}
           />
 
-          {/* Panel */}
+          {/* Drawer panel */}
           <div
-            ref={panelRef}
-            className="relative z-10 flex h-full w-full max-w-md flex-col bg-[#0d0c09] sm:h-auto sm:max-h-[90vh] sm:rounded-2xl sm:border sm:border-brand-dark-gold/20"
+            className="relative z-10 flex w-full max-w-sm flex-col bg-brand-dark border-l border-brand-dark-gold/20"
+            style={{ height: "100dvh" }}
           >
-            {/* Header */}
-            <div className="flex items-center justify-between border-b border-white/5 px-6 py-4">
+            {/* Sticky header — always visible */}
+            <div className="flex shrink-0 items-center justify-between border-b border-white/5 px-5 py-4">
               <div>
-                <p className="text-[10px] tracking-[0.2em] text-brand-gold/50">community</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] text-brand-gold/50">community</p>
                 <h2 className="font-heading text-xl font-bold text-brand-gold">what athletes say</h2>
               </div>
               <button
                 onClick={() => setOpen(false)}
-                className="rounded-lg p-1.5 text-white/40 transition-colors hover:text-white"
+                className="flex h-9 w-9 items-center justify-center border border-brand-gold/30 text-white/50 transition-colors hover:border-brand-gold hover:text-brand-gold"
                 aria-label="close"
               >
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round">
                   <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
                 </svg>
               </button>
             </div>
 
-            {/* Scrollable body */}
-            <div className="flex-1 overflow-y-auto px-6 py-5 space-y-6">
-              {/* Write a review section */}
+            {/* Scrollable content */}
+            <div className="flex-1 overflow-y-auto px-5 py-5 space-y-6">
+              {/* Write a review */}
               {canReview && (
                 <div>
-                  <p className="mb-3 text-xs text-white/40">share your experience</p>
+                  <p className="mb-3 text-xs uppercase tracking-[0.15em] text-white/30">share your experience</p>
                   <ReviewForm session={session} onSuccess={handleReviewAdded} />
                 </div>
               )}
 
               {!loggedIn && (
                 <p className="text-sm text-white/40">
-                  <a href="/account/login" className="text-brand-gold underline underline-offset-2">sign in</a> to leave a review.
+                  <a href="/account/login" className="text-brand-gold underline underline-offset-2">sign in</a>{" "}
+                  to leave a review.
                 </p>
               )}
 
               {alreadyReviewed && !session?.isAdmin && (
-                <p className="text-sm text-white/40">you&apos;ve already left a review — thanks!</p>
+                <p className="text-sm text-white/40">you&apos;ve already reviewed — thanks 🔱</p>
               )}
 
-              {/* Divider if both form and reviews show */}
-              {canReview && visibleReviews.length > 0 && (
+              {/* Divider */}
+              {(canReview || alreadyReviewed || !loggedIn) && visibleReviews.length > 0 && (
                 <div className="border-t border-white/5" />
               )}
 
-              {/* Reviews list */}
+              {/* Reviews */}
               {loading ? (
                 <div className="space-y-3">
                   {[...Array(3)].map((_, i) => (
-                    <div key={i} className="h-28 animate-pulse rounded-xl bg-white/[0.03]" />
+                    <div key={i} className="h-28 animate-pulse bg-white/[0.03]" />
                   ))}
                 </div>
               ) : visibleReviews.length === 0 ? (
-                <p className="py-8 text-center text-sm text-white/30">no reviews yet — be the first!</p>
+                <p className="py-8 text-center text-sm text-white/30">
+                  no reviews yet — be the first!
+                </p>
               ) : (
                 <div className="space-y-3">
                   {visibleReviews.map((review) => (
