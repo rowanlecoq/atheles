@@ -397,7 +397,7 @@ function ReviewCard({
   loggedIn: boolean;
   onModerate: (id: string, hidden: boolean) => void;
   onDelete: (id: string) => void;
-  onEditRequest?: () => void;
+  onEditRequest?: (review: PublicSiteReview) => void;
 }) {
   const [upCount, setUpCount] = useState(review.upCount);
   const [downCount, setDownCount] = useState(review.downCount);
@@ -535,7 +535,7 @@ function ReviewCard({
             ? () => handleDeleteReply(contextMenu.replyId!)
             : () => { fetch("/api/site-reviews", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reviewId: review.id }) }).then((r) => { if (r.ok) onDelete(review.id); }).catch(() => {}); }
           }
-          onEdit={contextMenu.isReview ? onEditRequest : undefined}
+          onEdit={contextMenu.isReview ? () => onEditRequest?.(review) : undefined}
         />
       )}
       {/* Main content row: avatar | body | reactions */}
@@ -677,8 +677,7 @@ export function ReviewSideTab() {
   const [loggedIn, setLoggedIn] = useState(false);
 
   const [myAvatar, setMyAvatar] = useState<string | null>(null);
-  const [myReviewId, setMyReviewId] = useState<string | null>(null);
-  const [editingReview, setEditingReview] = useState(false);
+  const [editingReviewData, setEditingReviewData] = useState<PublicSiteReview | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
 
@@ -703,24 +702,14 @@ export function ReviewSideTab() {
         const avatarCached = localStorage.getItem(`atheles-avatar-${parsed.email}`);
         if (avatarCached) setMyAvatar(avatarCached);
       } catch { /* ignore */ }
-      try {
-        const storedReviewId = localStorage.getItem(`atheles-my-site-review-${parsed.email}`);
-        if (storedReviewId) setMyReviewId(storedReviewId);
-      } catch { /* ignore */ }
     }
 
     // Prefetch reviews so they're ready the moment the drawer opens
     setLoading(true);
     fetch(`/api/site-reviews${parsed?.isAdmin ? "?all=1" : ""}`)
       .then((r) => r.json())
-      .then((data: { reviews?: PublicSiteReview[]; myReviewId?: string | null }) => {
+      .then((data: { reviews?: PublicSiteReview[] }) => {
         if (Array.isArray(data.reviews)) setReviews(data.reviews);
-        if (data.myReviewId) {
-          setMyReviewId(data.myReviewId);
-                    try {
-            if (parsed?.email) localStorage.setItem(`atheles-my-site-review-${parsed.email}`, data.myReviewId);
-          } catch { /* ignore */ }
-        }
         setFetched(true);
       })
       .catch(() => {})
@@ -768,11 +757,7 @@ export function ReviewSideTab() {
   }, [open]);
 
   function handleReviewAdded(review: PublicSiteReview) {
-    setReviews((prev) => [review, ...prev]);
-        setMyReviewId(review.id);
-    try {
-      if (session?.email) localStorage.setItem(`atheles-my-site-review-${session.email}`, review.id);
-    } catch { /* ignore */ }
+    setReviews((prev) => [{ ...review, isOwn: true }, ...prev]);
   }
 
   function handleModerate(id: string, hidden: boolean) {
@@ -781,10 +766,6 @@ export function ReviewSideTab() {
 
   function handleDelete(id: string) {
     setReviews((prev) => prev.filter((r) => r.id !== id));
-    setMyReviewId(null);
-    try {
-      if (session?.email) localStorage.removeItem(`atheles-my-site-review-${session.email}`);
-    } catch { /* ignore */ }
   }
 
   function handleEdit(id: string, updated: Pick<PublicSiteReview, "rating" | "title" | "body">) {
@@ -792,7 +773,6 @@ export function ReviewSideTab() {
   }
 
   const visibleReviews = session?.isAdmin ? reviews : reviews.filter((r) => !r.hidden);
-  const myExistingReview = myReviewId ? visibleReviews.find((r) => r.id === myReviewId) ?? null : null;
 
   const modal = (
     <>
@@ -835,21 +815,21 @@ export function ReviewSideTab() {
 
         {/* Scrollable body */}
         <div ref={scrollBodyRef} className="flex-1 overflow-y-auto">
-          {/* Form — shown for new reviewers, or when edit is triggered via long-press */}
-          {loggedIn && (!myExistingReview || editingReview) && (
+          {/* Form — always shown for logged-in users */}
+          {loggedIn && (
             <>
               <p className="px-5 pt-5 text-xs uppercase tracking-[0.15em] text-white/30">
-                {editingReview ? "edit your review" : "share your experience"}
+                {editingReviewData ? "edit your review" : "share your experience"}
               </p>
               <ReviewForm
                 session={session}
-                existingReview={editingReview ? myExistingReview : null}
-                onSuccess={handleReviewAdded}
-                onUpdate={(id, updated) => { handleEdit(id, updated); setEditingReview(false); }}
+                existingReview={editingReviewData}
+                onSuccess={(review) => { handleReviewAdded(review); setEditingReviewData(null); }}
+                onUpdate={(id, updated) => { handleEdit(id, updated); setEditingReviewData(null); }}
               />
-              {editingReview && (
+              {editingReviewData && (
                 <div className="px-5 pb-3">
-                  <button onClick={() => setEditingReview(false)} className="text-xs text-white/30 hover:text-white transition-colors">cancel</button>
+                  <button onClick={() => setEditingReviewData(null)} className="text-xs text-white/30 hover:text-white transition-colors">cancel</button>
                 </div>
               )}
               <div className="border-t border-white/5" />
@@ -881,13 +861,13 @@ export function ReviewSideTab() {
                 <ReviewCard
                   key={review.id}
                   review={review}
-                  avatarSrc={review.id === myReviewId ? (myAvatar ?? review.avatarUrl ?? null) : (review.avatarUrl ?? null)}
+                  avatarSrc={review.isOwn ? (myAvatar ?? review.avatarUrl ?? null) : (review.avatarUrl ?? null)}
                   isAdmin={!!session?.isAdmin}
-                  isOwn={review.id === myReviewId}
+                  isOwn={review.isOwn}
                   loggedIn={loggedIn}
                   onModerate={handleModerate}
                   onDelete={handleDelete}
-                  onEditRequest={() => { setEditingReview(true); setTimeout(() => scrollBodyRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 50); }}
+                  onEditRequest={(r) => { setEditingReviewData(r); setTimeout(() => scrollBodyRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 50); }}
                 />
               ))}
             </div>

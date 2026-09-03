@@ -58,6 +58,7 @@ export type PublicSiteReview = {
   downCount: number;
   myReaction: "up" | "down" | null;
   replies: PublicReply[];
+  isOwn: boolean;
 };
 
 async function adminFetch<T>(query: string, variables: Record<string, unknown>): Promise<T> {
@@ -152,7 +153,8 @@ export async function getSiteReviews(
       createdAt: rp.createdAt,
       isOwn: currentUserEmail ? rp.authorEmail.toLowerCase() === currentUserEmail.toLowerCase() : false,
     }));
-    return { ...rest, upCount, downCount, myReaction, replies };
+    const isOwn = currentUserEmail ? r.authorEmail.toLowerCase() === currentUserEmail.toLowerCase() : false;
+    return { ...rest, upCount, downCount, myReaction, replies, isOwn };
   });
 
   // myReviewId is only for brand-level reviews (not product cross-posts)
@@ -198,11 +200,6 @@ export async function addSiteReview({
       (r) => r.authorEmail.toLowerCase() === authorEmail.toLowerCase() && r.productTitle === productTitle,
     );
     if (duplicate) throw new Error("already reviewed this product in community.");
-  } else {
-    const alreadyReviewed = reviews.some(
-      (r) => r.authorEmail.toLowerCase() === authorEmail.toLowerCase() && !r.productTitle,
-    );
-    if (alreadyReviewed) throw new Error("You have already left a review.");
   }
 
   const newReview: SiteReview = {
