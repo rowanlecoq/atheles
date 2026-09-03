@@ -94,12 +94,14 @@ function StarInput({ value, onChange }: { value: number; onChange: (n: number) =
           <svg
             width={28}
             height={28}
-            viewBox="0 0 20 20"
-            fill="currentColor"
+            viewBox="0 0 24 24"
+            fill={n <= (hovered || value) ? "currentColor" : "none"}
+            stroke="currentColor"
+            strokeWidth={1.5}
             aria-hidden="true"
-            className={n <= (hovered || value) ? "text-brand-gold" : "text-white/20"}
+            className={n <= (hovered || value) ? "text-brand-gold" : "text-white/30"}
           >
-            <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
           </svg>
         </button>
       ))}
@@ -414,15 +416,14 @@ function ReviewCard({
               onClick={openReply}
               className="text-xs font-semibold text-white/40 hover:text-white/80 transition-colors active:scale-95"
             >
-              Reply
+              reply
             </button>
             {replies.length > 0 && (
               <button
                 onClick={() => setShowReplies((v) => !v)}
-                className="flex items-center gap-1 text-xs text-white/40 hover:text-white/70 transition-colors"
+                className="text-xs text-white/40 hover:text-white/70 transition-colors"
               >
-                <span className="inline-block w-4 border-t border-white/20" />
-                {showReplies ? "Hide replies" : `View ${replies.length} repl${replies.length !== 1 ? "ies" : "y"}`}
+                {showReplies ? "hide replies" : `view ${replies.length} repl${replies.length !== 1 ? "ies" : "y"}`}
               </button>
             )}
             {/* Own review delete */}
@@ -447,8 +448,8 @@ function ReviewCard({
           </div>
         </div>
 
-        {/* Right column — reactions (TikTok style) */}
-        <div className="shrink-0 flex flex-col items-center gap-3 pl-1 pt-1">
+        {/* Right column — reactions */}
+        <div className="shrink-0 flex flex-row items-center gap-3 pl-1 pt-1">
           <button
             onClick={() => handleReact("up")}
             disabled={!loggedIn || !!reactingTo}
@@ -517,7 +518,7 @@ function ReviewCard({
                 disabled={submittingReply || !replyBody.trim()}
                 className="shrink-0 text-sm font-semibold text-brand-gold hover:text-brand-gold/80 transition-colors disabled:opacity-40"
               >
-                {submittingReply ? "…" : "Post"}
+                {submittingReply ? "…" : "post"}
               </button>
             </form>
           )}
