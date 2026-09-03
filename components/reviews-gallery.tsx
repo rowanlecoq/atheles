@@ -678,6 +678,7 @@ export function ReviewSideTab() {
 
   const [myAvatar, setMyAvatar] = useState<string | null>(null);
   const [myReviewId, setMyReviewId] = useState<string | null>(null);
+  const [editingReview, setEditingReview] = useState(false);
   const closeRef = useRef<HTMLButtonElement>(null);
   const scrollBodyRef = useRef<HTMLDivElement>(null);
 
@@ -834,18 +835,23 @@ export function ReviewSideTab() {
 
         {/* Scrollable body */}
         <div ref={scrollBodyRef} className="flex-1 overflow-y-auto">
-          {/* Form — always shown for logged-in users; pre-filled when editing */}
-          {loggedIn && (
+          {/* Form — shown for new reviewers, or when edit is triggered via long-press */}
+          {loggedIn && (!myExistingReview || editingReview) && (
             <>
               <p className="px-5 pt-5 text-xs uppercase tracking-[0.15em] text-white/30">
-                {myExistingReview ? "your review" : "share your experience"}
+                {editingReview ? "edit your review" : "share your experience"}
               </p>
               <ReviewForm
                 session={session}
-                existingReview={myExistingReview}
+                existingReview={editingReview ? myExistingReview : null}
                 onSuccess={handleReviewAdded}
-                onUpdate={handleEdit}
+                onUpdate={(id, updated) => { handleEdit(id, updated); setEditingReview(false); }}
               />
+              {editingReview && (
+                <div className="px-5 pb-3">
+                  <button onClick={() => setEditingReview(false)} className="text-xs text-white/30 hover:text-white transition-colors">cancel</button>
+                </div>
+              )}
               <div className="border-t border-white/5" />
             </>
           )}
@@ -881,7 +887,7 @@ export function ReviewSideTab() {
                   loggedIn={loggedIn}
                   onModerate={handleModerate}
                   onDelete={handleDelete}
-                  onEditRequest={() => scrollBodyRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
+                  onEditRequest={() => { setEditingReview(true); setTimeout(() => scrollBodyRef.current?.scrollTo({ top: 0, behavior: "smooth" }), 50); }}
                 />
               ))}
             </div>
