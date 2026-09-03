@@ -3,7 +3,7 @@
 import { XMarkIcon } from "@heroicons/react/24/outline";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
-import type { PublicSiteReview } from "lib/site-reviews";
+import type { PublicReply, PublicSiteReview } from "lib/site-reviews";
 
 // ---- Avatar ----
 
@@ -247,12 +247,24 @@ function ReviewForm({
 
 // ---- ReviewCard ----
 
+function ThumbIcon({ dir }: { dir: "up" | "down" }) {
+  return (
+    <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
+      {dir === "up" ? (
+        <path d="M2 10.5a1.5 1.5 0 113 0v6a1.5 1.5 0 01-3 0v-6zM6 10.333v5.43a2 2 0 001.106 1.79l.05.025A4 4 0 008.943 18h5.416a2 2 0 001.962-1.608l1.2-6A2 2 0 0015.56 8H12V4a2 2 0 00-2-2 1 1 0 00-1 1v.667a4 4 0 01-.8 2.4L6.8 7.933a4 4 0 00-.8 2.4z" />
+      ) : (
+        <path d="M18 9.5a1.5 1.5 0 11-3 0v-6a1.5 1.5 0 013 0v6zM14 9.667v-5.43a2 2 0 00-1.105-1.79l-.05-.025A4 4 0 0011.055 2H5.64a2 2 0 00-1.962 1.608l-1.2 6A2 2 0 004.44 12H8v4a2 2 0 002 2 1 1 0 001-1v-.667a4 4 0 01.8-2.4l1.4-1.866a4 4 0 00.8-2.4z" />
+      )}
+    </svg>
+  );
+}
+
 function ReviewCard({
   review,
   avatarSrc,
   isAdmin,
   isOwn,
-  onFlag,
+  loggedIn,
   onModerate,
   onDelete,
 }: {
@@ -260,30 +272,81 @@ function ReviewCard({
   avatarSrc?: string | null;
   isAdmin: boolean;
   isOwn: boolean;
-  onFlag: (id: string) => void;
+  loggedIn: boolean;
   onModerate: (id: string, hidden: boolean) => void;
   onDelete: (id: string) => void;
 }) {
-  const [flagging, setFlagging] = useState(false);
+  const [upCount, setUpCount] = useState(review.upCount);
+  const [downCount, setDownCount] = useState(review.downCount);
+  const [myReaction, setMyReaction] = useState<"up" | "down" | null>(review.myReaction);
+  const [replies, setReplies] = useState<PublicReply[]>(review.replies);
+  const [showReplies, setShowReplies] = useState(false);
+  const [replyBody, setReplyBody] = useState("");
+  const [submittingReply, setSubmittingReply] = useState(false);
+  const [reactingTo, setReactingTo] = useState<"up" | "down" | null>(null);
   const [moderating, setModerating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
 
-  const date = new Date(review.createdAt).toLocaleDateString("en-GB", {
-    month: "short",
-    year: "numeric",
-  });
+  const date = new Date(review.createdAt).toLocaleDateString("en-GB", { month: "short", year: "numeric" });
 
-  async function handleFlag() {
-    setFlagging(true);
+  async function handleReact(type: "up" | "down") {
+    if (!loggedIn || reactingTo) return;
+    // Optimistic update
+    const removing = myReaction === type;
+    const switching = myReaction !== null && myReaction !== type;
+    setUpCount((c) => {
+      if (type === "up") return removing ? c - 1 : c + 1;
+      return switching && myReaction === "up" ? c - 1 : c;
+    });
+    setDownCount((c) => {
+      if (type === "down") return removing ? c - 1 : c + 1;
+      return switching && myReaction === "down" ? c - 1 : c;
+    });
+    setMyReaction(removing ? null : type);
+    setReactingTo(type);
     try {
-      await fetch("/api/site-reviews/flag", {
+      const res = await fetch("/api/site-reviews/react", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reviewId: review.id }),
+        body: JSON.stringify({ reviewId: review.id, type }),
       });
-      onFlag(review.id);
-    } finally { setFlagging(false); }
+      if (res.ok) {
+        const data = await res.json() as { upCount: number; downCount: number; myReaction: "up" | "down" | null };
+        setUpCount(data.upCount);
+        setDownCount(data.downCount);
+        setMyReaction(data.myReaction);
+      }
+    } catch { /* revert on error would be nice but keep simple */ }
+    finally { setReactingTo(null); }
+  }
+
+  async function handleReplySubmit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!replyBody.trim() || submittingReply) return;
+    setSubmittingReply(true);
+    try {
+      const res = await fetch("/api/site-reviews/reply", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId: review.id, body: replyBody.trim() }),
+      });
+      const data = await res.json() as { reply?: PublicReply };
+      if (res.ok && data.reply) {
+        setReplies((prev) => [...prev, data.reply!]);
+        setReplyBody("");
+        setShowReplies(true);
+      }
+    } finally { setSubmittingReply(false); }
+  }
+
+  async function handleDeleteReply(replyId: string) {
+    const res = await fetch("/api/site-reviews/reply", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reviewId: review.id, replyId }),
+    });
+    if (res.ok) setReplies((prev) => prev.filter((r) => r.id !== replyId));
   }
 
   async function handleModerate() {
@@ -311,13 +374,7 @@ function ReviewCard({
   }
 
   return (
-    <div
-      className={[
-        "border-b border-white/5 px-5 py-4 space-y-2",
-        review.flagged && isAdmin ? "bg-amber-500/5" : "",
-        review.hidden ? "opacity-50" : "",
-      ].filter(Boolean).join(" ")}
-    >
+    <div className={["border-b border-white/5 px-5 py-4 space-y-2", review.flagged && isAdmin ? "bg-amber-500/5" : "", review.hidden ? "opacity-50" : ""].filter(Boolean).join(" ")}>
       <div className="flex items-center gap-2.5">
         <Avatar src={avatarSrc} name={review.authorName} />
         <div className="flex-1 min-w-0">
@@ -336,45 +393,100 @@ function ReviewCard({
       )}
       <p className="text-xs font-semibold text-brand-gold">{review.title}</p>
       <p className="text-sm leading-relaxed text-white/70">{review.body}</p>
-      <div className="flex items-center justify-end gap-3 pt-1">
+
+      {/* Actions row */}
+      <div className="flex items-center gap-3 pt-1">
+        {/* Thumbs up */}
+        <button
+          onClick={() => handleReact("up")}
+          disabled={!loggedIn || !!reactingTo}
+          title={loggedIn ? undefined : "sign in to react"}
+          className={["flex items-center gap-1 text-[11px] transition-colors disabled:opacity-40", myReaction === "up" ? "text-brand-gold" : "text-white/25 hover:text-white/60"].join(" ")}
+        >
+          <ThumbIcon dir="up" />
+          {upCount > 0 && <span>{upCount}</span>}
+        </button>
+        {/* Thumbs down */}
+        <button
+          onClick={() => handleReact("down")}
+          disabled={!loggedIn || !!reactingTo}
+          title={loggedIn ? undefined : "sign in to react"}
+          className={["flex items-center gap-1 text-[11px] transition-colors disabled:opacity-40", myReaction === "down" ? "text-red-400" : "text-white/25 hover:text-white/60"].join(" ")}
+        >
+          <ThumbIcon dir="down" />
+          {downCount > 0 && <span>{downCount}</span>}
+        </button>
+        {/* Reply toggle */}
+        <button
+          onClick={() => setShowReplies((v) => !v)}
+          className="flex items-center gap-1 text-[11px] text-white/25 hover:text-white/60 transition-colors"
+        >
+          <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5" aria-hidden="true">
+            <path fillRule="evenodd" d="M10 2c-2.236 0-4.43.18-6.57.524C1.993 2.755 1 4.014 1 5.426v5.148c0 1.413.993 2.67 2.43 2.902 1.168.188 2.352.327 3.55.414.28.02.521.18.642.413l1.713 3.293a.75.75 0 001.33 0l1.713-3.293a.633.633 0 01.642-.413 41.102 41.102 0 003.55-.414c1.437-.231 2.43-1.49 2.43-2.902V5.426c0-1.413-.993-2.67-2.43-2.902A41.289 41.289 0 0010 2zM6.75 6a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5zm0 2.5a.75.75 0 000 1.5h3.5a.75.75 0 000-1.5h-3.5z" clipRule="evenodd" />
+          </svg>
+          {replies.length > 0 ? `${replies.length} repl${replies.length !== 1 ? "ies" : "y"}` : "reply"}
+        </button>
+
+        {/* Spacer */}
+        <span className="flex-1" />
+
+        {/* Own review delete */}
         {isOwn && !isAdmin && (
-          <>
-            {confirmDelete ? (
-              <>
-                <button
-                  onClick={handleDelete}
-                  disabled={deleting}
-                  className="text-[11px] text-red-400 hover:text-red-300 transition-colors disabled:opacity-40"
-                >
-                  {deleting ? "…" : "confirm delete"}
-                </button>
-                <button
-                  onClick={() => setConfirmDelete(false)}
-                  className="text-[11px] text-white/30 hover:text-white transition-colors"
-                >
-                  cancel
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => setConfirmDelete(true)}
-                className="text-[11px] text-white/20 hover:text-red-400 transition-colors"
-              >
-                delete
+          confirmDelete ? (
+            <>
+              <button onClick={handleDelete} disabled={deleting} className="text-[11px] text-red-400 hover:text-red-300 transition-colors disabled:opacity-40">
+                {deleting ? "…" : "confirm"}
               </button>
-            )}
-          </>
+              <button onClick={() => setConfirmDelete(false)} className="text-[11px] text-white/30 hover:text-white transition-colors">cancel</button>
+            </>
+          ) : (
+            <button onClick={() => setConfirmDelete(true)} className="text-[11px] text-white/20 hover:text-red-400 transition-colors">delete</button>
+          )
         )}
-        {isAdmin ? (
+        {/* Admin hide/show */}
+        {isAdmin && (
           <button onClick={handleModerate} disabled={moderating} className="text-[11px] text-white/30 hover:text-white transition-colors disabled:opacity-40">
             {moderating ? "…" : review.hidden ? "show" : "hide"}
           </button>
-        ) : !isOwn ? (
-          <button onClick={handleFlag} disabled={flagging} aria-label="report this review" className="text-[11px] text-white/20 hover:text-amber-400 transition-colors disabled:opacity-40">
-            {flagging ? "…" : "report"}
-          </button>
-        ) : null}
+        )}
       </div>
+
+      {/* Replies section */}
+      {showReplies && (
+        <div className="mt-1 space-y-2 border-t border-white/5 pt-3">
+          {replies.map((rp) => (
+            <div key={rp.id} className="flex items-start gap-2">
+              <Avatar src={rp.avatarUrl} name={rp.authorName} />
+              <div className="flex-1 min-w-0">
+                <p className="text-xs font-semibold text-white/80">{rp.authorName}</p>
+                <p className="text-xs leading-relaxed text-white/50">{rp.body}</p>
+              </div>
+              {(rp.isOwn || isAdmin) && (
+                <button onClick={() => handleDeleteReply(rp.id)} className="shrink-0 text-[10px] text-white/15 hover:text-red-400 transition-colors">×</button>
+              )}
+            </div>
+          ))}
+          {loggedIn && (
+            <form onSubmit={handleReplySubmit} className="flex gap-2 pt-1">
+              <input
+                type="text"
+                value={replyBody}
+                onChange={(e) => setReplyBody(e.target.value)}
+                maxLength={500}
+                placeholder="write a reply…"
+                className="flex-1 rounded-sm border border-white/10 bg-white/3 px-3 py-1.5 text-xs text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+              />
+              <button
+                type="submit"
+                disabled={submittingReply || !replyBody.trim()}
+                className="shrink-0 rounded-sm border border-brand-gold/30 px-3 py-1.5 text-[10px] uppercase tracking-wider text-brand-gold transition-colors hover:bg-brand-gold/10 disabled:opacity-40"
+              >
+                {submittingReply ? "…" : "post"}
+              </button>
+            </form>
+          )}
+        </div>
+      )}
     </div>
   );
 }
@@ -390,7 +502,7 @@ export function ReviewSideTab() {
   const [fetched, setFetched] = useState(false);
   const [session, setSession] = useState<Session | null>(null);
   const [loggedIn, setLoggedIn] = useState(false);
-  const [alreadyReviewed, setAlreadyReviewed] = useState(false);
+
   const [myAvatar, setMyAvatar] = useState<string | null>(null);
   const [myReviewId, setMyReviewId] = useState<string | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
@@ -430,8 +542,7 @@ export function ReviewSideTab() {
         if (Array.isArray(data.reviews)) setReviews(data.reviews);
         if (data.myReviewId) {
           setMyReviewId(data.myReviewId);
-          setAlreadyReviewed(true);
-          try {
+                    try {
             if (parsed?.email) localStorage.setItem(`atheles-my-site-review-${parsed.email}`, data.myReviewId);
           } catch { /* ignore */ }
         }
@@ -483,17 +594,10 @@ export function ReviewSideTab() {
 
   function handleReviewAdded(review: PublicSiteReview) {
     setReviews((prev) => [review, ...prev]);
-    setAlreadyReviewed(true);
-    setMyReviewId(review.id);
+        setMyReviewId(review.id);
     try {
       if (session?.email) localStorage.setItem(`atheles-my-site-review-${session.email}`, review.id);
     } catch { /* ignore */ }
-  }
-
-  function handleFlag(id: string) {
-    setReviews((prev) =>
-      prev.map((r) => r.id === id ? { ...r, flagCount: (r.flagCount || 0) + 1, flagged: (r.flagCount || 0) + 1 >= 3 } : r),
-    );
   }
 
   function handleModerate(id: string, hidden: boolean) {
@@ -503,7 +607,6 @@ export function ReviewSideTab() {
   function handleDelete(id: string) {
     setReviews((prev) => prev.filter((r) => r.id !== id));
     setMyReviewId(null);
-    setAlreadyReviewed(false);
     try {
       if (session?.email) localStorage.removeItem(`atheles-my-site-review-${session.email}`);
     } catch { /* ignore */ }
@@ -601,7 +704,7 @@ export function ReviewSideTab() {
                   avatarSrc={review.id === myReviewId ? (myAvatar ?? review.avatarUrl ?? null) : (review.avatarUrl ?? null)}
                   isAdmin={!!session?.isAdmin}
                   isOwn={review.id === myReviewId}
-                  onFlag={handleFlag}
+                  loggedIn={loggedIn}
                   onModerate={handleModerate}
                   onDelete={handleDelete}
                 />
@@ -619,7 +722,7 @@ export function ReviewSideTab() {
       <button
         onClick={() => setOpen(true)}
         aria-label="open community reviews"
-        className="group flex w-full items-center justify-center gap-3 bg-transparent py-5 text-[11px] uppercase tracking-[0.22em] text-brand-gold transition-colors duration-200 hover:bg-brand-gold/[0.04]"
+        className="group flex w-full items-center justify-center gap-3 border-t border-brand-dark-gold/20 bg-transparent py-5 text-[11px] uppercase tracking-[0.22em] text-brand-gold transition-colors duration-200 hover:bg-brand-gold/[0.04]"
       >
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0 transition-all duration-200 group-hover:fill-current" aria-hidden="true">
           <path strokeLinecap="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />

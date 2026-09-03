@@ -1,5 +1,5 @@
 import { getCustomerByToken, getCustomerMetafield } from "lib/auth/shopify-customer";
-import { addSiteReview, deleteSiteReview, editSiteReview, getSiteReviews } from "lib/site-reviews";
+import { addSiteReview, backfillReviewAvatar, deleteSiteReview, editSiteReview, getSiteReviews } from "lib/site-reviews";
 import { cookies } from "next/headers";
 import { type NextRequest, NextResponse } from "next/server";
 
@@ -16,6 +16,10 @@ export async function GET(req: NextRequest) {
       if (customer) {
         currentUserEmail = customer.email;
         isAdmin = !!customer.isAdmin;
+        // Lazily backfill avatarUrl for this user's existing reviews that predate the field
+        getCustomerMetafield(customer.email, "atheles", "avatar")
+          .then((url) => { if (url) backfillReviewAvatar(customer.email, url).catch(() => {}); })
+          .catch(() => {});
       }
     }
 
