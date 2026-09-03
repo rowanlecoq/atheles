@@ -236,17 +236,31 @@ function ReviewCard({
   review,
   avatarSrc,
   isAdmin,
+  isOwn,
   onFlag,
   onModerate,
+  onDelete,
+  onEdit,
 }: {
   review: PublicSiteReview;
   avatarSrc?: string | null;
   isAdmin: boolean;
+  isOwn: boolean;
   onFlag: (id: string) => void;
   onModerate: (id: string, hidden: boolean) => void;
+  onDelete: (id: string) => void;
+  onEdit: (id: string, updated: Pick<PublicSiteReview, "rating" | "title" | "body">) => void;
 }) {
   const [flagging, setFlagging] = useState(false);
   const [moderating, setModerating] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [editRating, setEditRating] = useState(review.rating);
+  const [editTitle, setEditTitle] = useState(review.title);
+  const [editBody, setEditBody] = useState(review.body);
+  const [saving, setSaving] = useState(false);
+  const [editError, setEditError] = useState("");
 
   const date = new Date(review.createdAt).toLocaleDateString("en-GB", {
     month: "short",
@@ -277,6 +291,84 @@ function ReviewCard({
     } finally { setModerating(false); }
   }
 
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const res = await fetch("/api/site-reviews", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId: review.id }),
+      });
+      if (res.ok) onDelete(review.id);
+    } finally { setDeleting(false); setConfirmDelete(false); }
+  }
+
+  async function handleSaveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (editRating === 0) { setEditError("please select a rating."); return; }
+    if (!editTitle.trim()) { setEditError("please add a title."); return; }
+    if (!editBody.trim()) { setEditError("please write your review."); return; }
+    setSaving(true);
+    setEditError("");
+    try {
+      const res = await fetch("/api/site-reviews", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ reviewId: review.id, rating: editRating, title: editTitle.trim(), body: editBody.trim() }),
+      });
+      const data = await res.json() as { review?: PublicSiteReview; error?: string };
+      if (!res.ok) { setEditError(data.error || "failed to save."); return; }
+      if (data.review) {
+        onEdit(review.id, { rating: data.review.rating, title: data.review.title, body: data.review.body });
+        setEditing(false);
+      }
+    } catch { setEditError("network error."); }
+    finally { setSaving(false); }
+  }
+
+  if (editing) {
+    return (
+      <form
+        onSubmit={handleSaveEdit}
+        className="border-b border-white/5 px-5 py-4 space-y-3"
+      >
+        <p className="text-xs text-white/40">editing your review</p>
+        <StarInput value={editRating} onChange={setEditRating} />
+        <input
+          type="text"
+          maxLength={100}
+          value={editTitle}
+          onChange={(e) => setEditTitle(e.target.value)}
+          className="w-full rounded-sm border border-white/10 bg-white/3 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+        />
+        <textarea
+          rows={3}
+          maxLength={1000}
+          value={editBody}
+          onChange={(e) => setEditBody(e.target.value)}
+          className="w-full resize-none rounded-sm border border-white/10 bg-white/3 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+        />
+        {editError && <p className="text-sm text-red-400">{editError}</p>}
+        <div className="flex gap-2">
+          <button
+            type="submit"
+            disabled={saving}
+            className="rounded-full bg-brand-gold px-4 py-1.5 text-xs font-heading uppercase tracking-wider text-brand-dark disabled:opacity-60"
+          >
+            {saving ? "saving…" : "save"}
+          </button>
+          <button
+            type="button"
+            onClick={() => { setEditing(false); setEditError(""); }}
+            className="rounded-full border border-white/10 px-4 py-1.5 text-xs text-white/50 hover:text-white"
+          >
+            cancel
+          </button>
+        </div>
+      </form>
+    );
+  }
+
   return (
     <div
       className={[
@@ -300,16 +392,50 @@ function ReviewCard({
       <Stars rating={review.rating} />
       <p className="text-xs font-semibold text-brand-gold">{review.title}</p>
       <p className="text-sm leading-relaxed text-white/70">{review.body}</p>
-      <div className="flex justify-end pt-1">
+      <div className="flex items-center justify-end gap-3 pt-1">
+        {isOwn && !isAdmin && (
+          <>
+            <button
+              onClick={() => setEditing(true)}
+              className="text-[11px] text-white/30 hover:text-brand-gold transition-colors"
+            >
+              edit
+            </button>
+            {confirmDelete ? (
+              <>
+                <button
+                  onClick={handleDelete}
+                  disabled={deleting}
+                  className="text-[11px] text-red-400 hover:text-red-300 transition-colors disabled:opacity-40"
+                >
+                  {deleting ? "…" : "confirm delete"}
+                </button>
+                <button
+                  onClick={() => setConfirmDelete(false)}
+                  className="text-[11px] text-white/30 hover:text-white transition-colors"
+                >
+                  cancel
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => setConfirmDelete(true)}
+                className="text-[11px] text-white/20 hover:text-red-400 transition-colors"
+              >
+                delete
+              </button>
+            )}
+          </>
+        )}
         {isAdmin ? (
           <button onClick={handleModerate} disabled={moderating} className="text-[11px] text-white/30 hover:text-white transition-colors disabled:opacity-40">
             {moderating ? "…" : review.hidden ? "show" : "hide"}
           </button>
-        ) : (
+        ) : !isOwn ? (
           <button onClick={handleFlag} disabled={flagging} aria-label="report this review" className="text-[11px] text-white/20 hover:text-amber-400 transition-colors disabled:opacity-40">
             {flagging ? "…" : "report"}
           </button>
-        )}
+        ) : null}
       </div>
     </div>
   );
@@ -334,7 +460,7 @@ export function ReviewSideTab() {
   // Mount guard for createPortal
   useEffect(() => { setMounted(true); }, []);
 
-  // Read session + avatar from localStorage
+  // Read session + avatar + persisted review ID from localStorage
   useEffect(() => {
     let parsed: Session | null = null;
     try {
@@ -345,11 +471,14 @@ export function ReviewSideTab() {
     setLoggedIn(!!(parsed?.email || hasCookie));
     setSession(parsed);
 
-    // Load cached avatar
     if (parsed?.email) {
       try {
-        const cached = localStorage.getItem(`atheles-avatar-${parsed.email}`);
-        if (cached) setMyAvatar(cached);
+        const avatarCached = localStorage.getItem(`atheles-avatar-${parsed.email}`);
+        if (avatarCached) setMyAvatar(avatarCached);
+      } catch { /* ignore */ }
+      try {
+        const storedReviewId = localStorage.getItem(`atheles-my-site-review-${parsed.email}`);
+        if (storedReviewId) setMyReviewId(storedReviewId);
       } catch { /* ignore */ }
     }
   }, []);
@@ -406,6 +535,9 @@ export function ReviewSideTab() {
     setReviews((prev) => [review, ...prev]);
     setAlreadyReviewed(true);
     setMyReviewId(review.id);
+    try {
+      if (session?.email) localStorage.setItem(`atheles-my-site-review-${session.email}`, review.id);
+    } catch { /* ignore */ }
   }
 
   function handleFlag(id: string) {
@@ -416,6 +548,19 @@ export function ReviewSideTab() {
 
   function handleModerate(id: string, hidden: boolean) {
     setReviews((prev) => prev.map((r) => r.id === id ? { ...r, hidden } : r));
+  }
+
+  function handleDelete(id: string) {
+    setReviews((prev) => prev.filter((r) => r.id !== id));
+    setMyReviewId(null);
+    setAlreadyReviewed(false);
+    try {
+      if (session?.email) localStorage.removeItem(`atheles-my-site-review-${session.email}`);
+    } catch { /* ignore */ }
+  }
+
+  function handleEdit(id: string, updated: Pick<PublicSiteReview, "rating" | "title" | "body">) {
+    setReviews((prev) => prev.map((r) => r.id === id ? { ...r, ...updated } : r));
   }
 
   const visibleReviews = session?.isAdmin ? reviews : reviews.filter((r) => !r.hidden);
@@ -501,8 +646,11 @@ export function ReviewSideTab() {
                   review={review}
                   avatarSrc={review.id === myReviewId ? myAvatar : null}
                   isAdmin={!!session?.isAdmin}
+                  isOwn={review.id === myReviewId}
                   onFlag={handleFlag}
                   onModerate={handleModerate}
+                  onDelete={handleDelete}
+                  onEdit={handleEdit}
                 />
               ))}
             </div>

@@ -155,3 +155,33 @@ export async function moderateSiteReview(reviewId: string, hidden: boolean): Pro
   review.hidden = hidden;
   await saveReviews(shopId, reviews);
 }
+
+export async function deleteSiteReview(reviewId: string, authorEmail: string): Promise<void> {
+  const { shopId, reviews } = await getShopIdAndReviews();
+  const idx = reviews.findIndex((r) => r.id === reviewId);
+  if (idx === -1) throw new Error("Review not found.");
+  if (reviews[idx]!.authorEmail.toLowerCase() !== authorEmail.toLowerCase()) {
+    throw new Error("Not authorized.");
+  }
+  reviews.splice(idx, 1);
+  await saveReviews(shopId, reviews);
+}
+
+export async function editSiteReview(
+  reviewId: string,
+  authorEmail: string,
+  update: { rating: number; title: string; body: string },
+): Promise<PublicSiteReview> {
+  const { shopId, reviews } = await getShopIdAndReviews();
+  const review = reviews.find((r) => r.id === reviewId);
+  if (!review) throw new Error("Review not found.");
+  if (review.authorEmail.toLowerCase() !== authorEmail.toLowerCase()) {
+    throw new Error("Not authorized.");
+  }
+  review.rating = update.rating;
+  review.title = update.title;
+  review.body = update.body;
+  await saveReviews(shopId, reviews);
+  const { authorEmail: _email, ...publicReview } = review;
+  return publicReview;
+}
