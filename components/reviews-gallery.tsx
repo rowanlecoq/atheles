@@ -7,16 +7,40 @@ import type { PublicSiteReview } from "lib/site-reviews";
 
 // ---- Avatar ----
 
-function Avatar({ src }: { src?: string | null }) {
-  if (src) {
+function getInitials(name: string): string {
+  return name
+    .split(" ")
+    .map((w) => w[0])
+    .join("")
+    .toUpperCase()
+    .slice(0, 2);
+}
+
+function Avatar({ src, name }: { src?: string | null; name?: string | null }) {
+  const [imgError, setImgError] = useState(false);
+  const showInitials = !src || imgError;
+  const hasRealName = name && name !== "atheles member" && name.trim().length > 0;
+
+  if (!showInitials) {
     return (
       // eslint-disable-next-line @next/next/no-img-element
       <img
-        src={src}
+        src={src!}
         alt=""
         aria-hidden="true"
+        onError={() => setImgError(true)}
         className="h-9 w-9 shrink-0 rounded-full border border-brand-dark-gold/30 object-cover"
       />
+    );
+  }
+  if (hasRealName) {
+    return (
+      <span
+        className="flex h-9 w-9 shrink-0 items-center justify-center rounded-full bg-brand-dark-gold/20 text-xs font-bold text-brand-gold"
+        aria-hidden="true"
+      >
+        {getInitials(name)}
+      </span>
     );
   }
   return (
@@ -190,9 +214,17 @@ function ReviewForm({
       <button
         type="submit"
         disabled={submitting}
-        className="relative w-full overflow-hidden border border-brand-gold py-2.5 text-sm uppercase tracking-[0.18em] text-brand-gold transition-colors hover:bg-brand-gold hover:text-brand-dark disabled:opacity-50"
+        className="group relative flex w-full items-center justify-center overflow-hidden rounded-full bg-brand-gold p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300 disabled:opacity-60"
       >
-        {submitting ? "submitting…" : "submit review"}
+        {!submitting && (
+          <div
+            className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            style={{ background: "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)", animation: "cartShimmer 2s ease-in-out infinite" }}
+          />
+        )}
+        <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
+          {submitting ? "submitting…" : "submit review"}
+        </span>
       </button>
     </form>
   );
@@ -254,7 +286,7 @@ function ReviewCard({
       ].filter(Boolean).join(" ")}
     >
       <div className="flex items-center gap-2.5">
-        <Avatar src={avatarSrc} />
+        <Avatar src={avatarSrc} name={review.authorName} />
         <div className="flex-1 min-w-0">
           <p className="text-sm font-semibold text-white truncate">{review.authorName}</p>
           <p className="text-xs text-white/30">{date}</p>
@@ -487,8 +519,8 @@ export function ReviewSideTab() {
         <button
           onClick={() => setOpen(true)}
           aria-label="open community reviews"
-          className="flex items-center justify-center border border-brand-gold bg-brand-dark px-3 py-6 text-[10px] uppercase tracking-[0.18em] text-brand-gold transition-colors hover:bg-brand-gold hover:text-brand-dark"
-          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", minHeight: "10rem" }}
+          className="flex items-center justify-center border border-brand-gold bg-brand-dark px-2 py-6 text-[10px] uppercase tracking-[0.18em] text-brand-gold transition-colors hover:bg-brand-gold hover:text-brand-dark"
+          style={{ writingMode: "vertical-rl", transform: "rotate(180deg)", minHeight: "8rem" }}
         >
           write your review
         </button>
