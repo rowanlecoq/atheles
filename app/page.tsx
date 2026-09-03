@@ -18,8 +18,8 @@ export const metadata = {
 export default function HomePage() {
   return (
     <>
-      <ReviewSideTab />
       <Hero />
+      <ReviewSideTab />
       <Suspense fallback={null}>
         <Carousel />
       </Suspense>

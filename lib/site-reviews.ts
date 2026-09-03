@@ -17,6 +17,7 @@ export type SiteReview = {
   flagged: boolean;
   hidden: boolean;
   flagCount: number;
+  productTitle?: string;
 };
 
 export type PublicSiteReview = Omit<SiteReview, "authorEmail">;
@@ -98,8 +99,9 @@ export async function getSiteReviews(
   const { reviews } = await getShopIdAndReviews();
   const filtered = includeAll ? reviews : reviews.filter((r) => !r.hidden);
   const publicReviews = filtered.map(({ authorEmail: _email, ...rest }) => rest);
+  // myReviewId is only for brand-level reviews (not product cross-posts)
   const myReviewId = currentUserEmail
-    ? (reviews.find((r) => r.authorEmail.toLowerCase() === currentUserEmail.toLowerCase())?.id ?? null)
+    ? (reviews.find((r) => r.authorEmail.toLowerCase() === currentUserEmail.toLowerCase() && !r.productTitle)?.id ?? null)
     : null;
   return { reviews: publicReviews, myReviewId };
 }
@@ -110,20 +112,29 @@ export async function addSiteReview({
   rating,
   title,
   body,
+  productTitle,
 }: {
   authorName: string;
   authorEmail: string;
   rating: number;
   title: string;
   body: string;
+  productTitle?: string;
 }): Promise<PublicSiteReview> {
   const { shopId, reviews } = await getShopIdAndReviews();
 
-  const alreadyReviewed = reviews.some(
-    (r) => r.authorEmail.toLowerCase() === authorEmail.toLowerCase(),
-  );
-  if (alreadyReviewed) {
-    throw new Error("You have already left a review.");
+  if (productTitle) {
+    // Cross-posted product review: one entry per product per user
+    const duplicate = reviews.some(
+      (r) => r.authorEmail.toLowerCase() === authorEmail.toLowerCase() && r.productTitle === productTitle,
+    );
+    if (duplicate) throw new Error("already reviewed this product in community.");
+  } else {
+    // Brand-level review: one per user
+    const alreadyReviewed = reviews.some(
+      (r) => r.authorEmail.toLowerCase() === authorEmail.toLowerCase() && !r.productTitle,
+    );
+    if (alreadyReviewed) throw new Error("You have already left a review.");
   }
 
   const newReview: SiteReview = {
@@ -137,6 +148,7 @@ export async function addSiteReview({
     flagged: false,
     hidden: false,
     flagCount: 0,
+    ...(productTitle && { productTitle }),
   };
 
   reviews.push(newReview);

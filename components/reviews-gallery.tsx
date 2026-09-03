@@ -331,6 +331,9 @@ function ReviewCard({
         )}
       </div>
       <Stars rating={review.rating} />
+      {review.productTitle && (
+        <p className="text-[10px] uppercase tracking-wider text-brand-gold/40">for {review.productTitle}</p>
+      )}
       <p className="text-xs font-semibold text-brand-gold">{review.title}</p>
       <p className="text-sm leading-relaxed text-white/70">{review.body}</p>
       <div className="flex items-center justify-end gap-3 pt-1">
@@ -376,7 +379,7 @@ function ReviewCard({
   );
 }
 
-// ---- ReviewSideTab (main export) ----
+// ---- ReviewStrip (main export) ----
 
 export function ReviewSideTab() {
   const [mounted, setMounted] = useState(false);
@@ -598,40 +601,27 @@ export function ReviewSideTab() {
     </>
   );
 
-  const tab = (
-    <div
-      className="fixed right-0 top-1/2 z-40"
-      style={{ transform: "translateY(-50%)" }}
-    >
+  return (
+    <>
+      {/* Full-width outlined strip — sits between hero and carousel */}
       <button
         onClick={() => setOpen(true)}
         aria-label="open community reviews"
-        className="relative border border-brand-gold bg-transparent text-brand-gold backdrop-blur-sm transition-colors hover:bg-brand-gold hover:text-brand-dark"
-        style={{ width: "26px", height: "160px" }}
+        className="group flex w-full items-center justify-center gap-3 border-y border-brand-gold/25 bg-transparent py-4 text-[11px] uppercase tracking-[0.22em] text-brand-gold transition-colors duration-200 hover:bg-brand-gold/[0.04]"
       >
-        <span className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <span
-            className="text-[10px] uppercase tracking-[0.18em]"
-            style={{ whiteSpace: "nowrap", transform: "rotate(-90deg)" }}
-          >
-            write your review
-          </span>
-        </span>
+        <svg viewBox="0 0 20 20" fill="currentColor" className="h-3.5 w-3.5 shrink-0" aria-hidden="true">
+          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+        </svg>
+        <span>community reviews</span>
+        <span className="text-brand-gold/30">·</span>
+        <span className="text-brand-gold/55 transition-colors duration-200 group-hover:text-brand-gold">write yours</span>
+        <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-3.5 w-3.5 shrink-0 text-brand-gold/40 transition-transform duration-200 group-hover:translate-x-0.5" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+        </svg>
       </button>
-    </div>
-  );
 
-  return (
-    <>
-      {/* Both tab and modal are portaled to document.body so fixed positioning
-          is never broken by a transformed ancestor (e.g. konami shake root) */}
-      {mounted && createPortal(
-        <>
-          {!open && tab}
-          {modal}
-        </>,
-        document.body,
-      )}
+      {/* Modal portaled to document.body so it renders above all stacking contexts */}
+      {mounted && createPortal(modal, document.body)}
     </>
   );
 }
