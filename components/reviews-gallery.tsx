@@ -247,6 +247,125 @@ function ReviewForm({
   );
 }
 
+// ---- Context bottom sheet ----
+
+function ContextBottomSheet({
+  isOwn,
+  isReview,
+  text,
+  loggedIn,
+  onClose,
+  onReport,
+  onDelete,
+  onEdit,
+}: {
+  isOwn: boolean;
+  isReview: boolean;
+  text: string;
+  loggedIn: boolean;
+  onClose: () => void;
+  onReport: () => void;
+  onDelete: () => void;
+  onEdit?: () => void;
+}) {
+  const [vis, setVis] = useState(false);
+  useEffect(() => { requestAnimationFrame(() => requestAnimationFrame(() => setVis(true))); }, []);
+
+  function dismiss() { setVis(false); setTimeout(onClose, 250); }
+
+  type Option = { label: string; icon: React.ReactNode; action: () => void; danger?: boolean };
+  const groups: Option[][] = [];
+
+  const mainGroup: Option[] = [];
+  if (!isOwn && loggedIn) mainGroup.push({
+    label: "report",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-5 w-5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M3 3v1.5M3 21v-6m0 0l2.77-.693a9 9 0 016.208.682l.108.054a9 9 0 006.086.71l3.114-.732a48.524 48.524 0 01-.005-10.499l-3.11.732a9 9 0 01-6.085-.711l-.108-.054a9 9 0 00-6.208-.682L3 4.5M3 15V4.5" />
+      </svg>
+    ),
+    action: () => { onReport(); dismiss(); },
+    danger: true,
+  });
+  mainGroup.push({
+    label: "copy",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-5 w-5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M15.666 3.888A2.25 2.25 0 0013.5 2.25h-3c-1.03 0-1.9.693-2.166 1.638m7.332 0c.055.194.084.4.084.612v0a.75.75 0 01-.75.75H9a.75.75 0 01-.75-.75v0c0-.212.03-.418.084-.612m7.332 0c.646.049 1.288.11 1.927.184 1.1.128 1.907 1.077 1.907 2.185V19.5a2.25 2.25 0 01-2.25 2.25H6.75A2.25 2.25 0 014.5 19.5V6.257c0-1.108.806-2.057 1.907-2.185a48.208 48.208 0 011.927-.184" />
+      </svg>
+    ),
+    action: () => { navigator.clipboard?.writeText(text).catch(() => {}); dismiss(); },
+  });
+  mainGroup.push({
+    label: "translate",
+    icon: (
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-5 w-5">
+        <path strokeLinecap="round" strokeLinejoin="round" d="M10.5 21l5.25-11.25L21 21m-9-3h7.5M3 5.621a48.474 48.474 0 016-.371m0 0c1.12 0 2.233.038 3.334.114M9 5.25V3m3.334 2.364C11.176 10.658 7.69 15.08 3 17.502m9.334-12.138c.896.061 1.785.147 2.666.257m-4.589 8.495a18.023 18.023 0 01-3.827-5.802" />
+      </svg>
+    ),
+    action: () => { window.open(`https://translate.google.com/?sl=auto&tl=en&text=${encodeURIComponent(text)}&op=translate`, "_blank"); dismiss(); },
+  });
+  groups.push(mainGroup);
+
+  if (isOwn) {
+    const ownGroup: Option[] = [];
+    if (isReview && onEdit) ownGroup.push({
+      label: "edit",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-5 w-5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+        </svg>
+      ),
+      action: () => { onEdit(); dismiss(); },
+    });
+    ownGroup.push({
+      label: "delete",
+      icon: (
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} className="h-5 w-5">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M14.74 9l-.346 9m-4.788 0L9.26 9m9.968-3.21c.342.052.682.107 1.022.166m-1.022-.165L18.16 19.673a2.25 2.25 0 01-2.244 2.077H8.084a2.25 2.25 0 01-2.244-2.077L4.772 5.79m14.456 0a48.108 48.108 0 00-3.478-.397m-12 .562c.34-.059.68-.114 1.022-.165m0 0a48.11 48.11 0 013.478-.397m7.5 0v-.916c0-1.18-.91-2.164-2.09-2.201a51.964 51.964 0 00-3.32 0c-1.18.037-2.09 1.022-2.09 2.201v.916m7.5 0a48.667 48.667 0 00-7.5 0" />
+        </svg>
+      ),
+      action: () => { onDelete(); dismiss(); },
+      danger: true,
+    });
+    groups.push(ownGroup);
+  }
+
+  return createPortal(
+    <>
+      <div className="fixed inset-0 z-[80] bg-black/50" onClick={dismiss} />
+      <div
+        className={`fixed inset-x-0 bottom-0 z-[85] px-3 pb-8 transition-transform duration-[250ms] ease-out ${vis ? "translate-y-0" : "translate-y-full"}`}
+        style={{ willChange: "transform" }}
+      >
+        {groups.map((group, gi) => (
+          <div key={gi} className="mb-3 overflow-hidden rounded-2xl bg-[#2c2c2e]">
+            {group.map((item, ii) => (
+              <button
+                key={item.label}
+                onClick={item.action}
+                className={`flex w-full items-center gap-4 px-5 py-[15px] text-left text-[15px] ${item.danger ? "text-red-400" : "text-white"} ${ii > 0 ? "border-t border-white/[0.08]" : ""} active:bg-white/10 transition-colors`}
+              >
+                <span className={item.danger ? "text-red-400/70" : "text-white/40"}>{item.icon}</span>
+                {item.label}
+              </button>
+            ))}
+          </div>
+        ))}
+        <div className="overflow-hidden rounded-2xl bg-[#2c2c2e]">
+          <button
+            onClick={dismiss}
+            className="w-full px-5 py-[15px] text-center text-[15px] font-semibold text-white active:bg-white/10 transition-colors"
+          >
+            cancel
+          </button>
+        </div>
+      </div>
+    </>,
+    document.body,
+  );
+}
+
 // ---- ReviewCard ----
 
 function ThumbIcon({ dir, className }: { dir: "up" | "down"; className?: string }) {
@@ -269,6 +388,7 @@ function ReviewCard({
   loggedIn,
   onModerate,
   onDelete,
+  onEditRequest,
 }: {
   review: PublicSiteReview;
   avatarSrc?: string | null;
@@ -277,6 +397,7 @@ function ReviewCard({
   loggedIn: boolean;
   onModerate: (id: string, hidden: boolean) => void;
   onDelete: (id: string) => void;
+  onEditRequest?: () => void;
 }) {
   const [upCount, setUpCount] = useState(review.upCount);
   const [downCount, setDownCount] = useState(review.downCount);
@@ -288,9 +409,9 @@ function ReviewCard({
   const [submittingReply, setSubmittingReply] = useState(false);
   const [reactingTo, setReactingTo] = useState<"up" | "down" | null>(null);
   const [moderating, setModerating] = useState(false);
-  const [deleting, setDeleting] = useState(false);
-  const [confirmDelete, setConfirmDelete] = useState(false);
+  const [contextMenu, setContextMenu] = useState<{ isOwn: boolean; isReview: boolean; text: string; replyId?: string } | null>(null);
   const replyInputRef = useRef<HTMLInputElement>(null);
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const d = new Date(review.createdAt);
   const date = `${d.getMonth() + 1}-${d.getDate()}`;
@@ -359,6 +480,28 @@ function ReviewCard({
     if (res.ok) setReplies((prev) => prev.filter((r) => r.id !== replyId));
   }
 
+  async function handleReport() {
+    await fetch("/api/site-reviews/flag", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ reviewId: review.id }),
+    }).catch(() => {});
+  }
+
+  function makeLongPress(target: { isOwn: boolean; isReview: boolean; text: string; replyId?: string }) {
+    return {
+      onTouchStart: () => {
+        longPressTimer.current = setTimeout(() => {
+          if (navigator.vibrate) navigator.vibrate(40);
+          setContextMenu(target);
+        }, 500);
+      },
+      onTouchEnd: () => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; } },
+      onTouchMove: () => { if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null; } },
+      onContextMenu: (e: React.MouseEvent) => { e.preventDefault(); setContextMenu(target); },
+    };
+  }
+
   async function handleModerate() {
     setModerating(true);
     try {
@@ -371,22 +514,32 @@ function ReviewCard({
     } finally { setModerating(false); }
   }
 
-  async function handleDelete() {
-    setDeleting(true);
-    try {
-      const res = await fetch("/api/site-reviews", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reviewId: review.id }),
-      });
-      if (res.ok) onDelete(review.id);
-    } finally { setDeleting(false); setConfirmDelete(false); }
-  }
+  const reviewLongPress = makeLongPress({
+    isOwn,
+    isReview: true,
+    text: `${review.title}\n${review.body}`,
+  });
 
   return (
-    <div className={["border-b border-white/5 px-4 py-4", review.flagged && isAdmin ? "bg-amber-500/5" : "", review.hidden ? "opacity-50" : ""].filter(Boolean).join(" ")}>
+    <div className={["border-b border-white/5 px-4 py-4 select-none", review.flagged && isAdmin ? "bg-amber-500/5" : "", review.hidden ? "opacity-50" : ""].filter(Boolean).join(" ")}>
+      {/* Context bottom sheet */}
+      {contextMenu && (
+        <ContextBottomSheet
+          isOwn={contextMenu.isOwn}
+          isReview={contextMenu.isReview}
+          text={contextMenu.text}
+          loggedIn={loggedIn}
+          onClose={() => setContextMenu(null)}
+          onReport={handleReport}
+          onDelete={contextMenu.replyId
+            ? () => handleDeleteReply(contextMenu.replyId!)
+            : () => { fetch("/api/site-reviews", { method: "DELETE", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ reviewId: review.id }) }).then((r) => { if (r.ok) onDelete(review.id); }).catch(() => {}); }
+          }
+          onEdit={contextMenu.isReview ? onEditRequest : undefined}
+        />
+      )}
       {/* Main content row: avatar | body | reactions */}
-      <div className="flex items-start gap-3">
+      <div className="flex items-start gap-3" {...reviewLongPress}>
         {/* Avatar */}
         <div className="shrink-0 pt-0.5">
           <Avatar src={avatarSrc} name={review.authorName} />
@@ -426,19 +579,6 @@ function ReviewCard({
                 {showReplies ? "hide replies" : `view ${replies.length} repl${replies.length !== 1 ? "ies" : "y"}`}
               </button>
             )}
-            {/* Own review delete */}
-            {isOwn && !isAdmin && (
-              confirmDelete ? (
-                <div className="flex items-center gap-2 ml-auto">
-                  <button onClick={handleDelete} disabled={deleting} className="text-xs text-red-400 hover:text-red-300 transition-colors disabled:opacity-40">
-                    {deleting ? "…" : "confirm"}
-                  </button>
-                  <button onClick={() => setConfirmDelete(false)} className="text-xs text-white/30 hover:text-white transition-colors">cancel</button>
-                </div>
-              ) : (
-                <button onClick={() => setConfirmDelete(true)} className="ml-auto text-xs text-white/20 hover:text-red-400 transition-colors">delete</button>
-              )
-            )}
             {/* Admin controls */}
             {isAdmin && (
               <button onClick={handleModerate} disabled={moderating} className="ml-auto text-xs text-white/30 hover:text-white transition-colors disabled:opacity-40">
@@ -477,18 +617,14 @@ function ReviewCard({
           {showReplies && replies.map((rp) => {
             const rd = new Date(rp.createdAt);
             const rDate = `${rd.getMonth() + 1}-${rd.getDate()}`;
+            const replyLongPress = makeLongPress({ isOwn: rp.isOwn || isAdmin, isReview: false, text: rp.body, replyId: rp.id });
             return (
-              <div key={rp.id} className="flex items-start gap-2.5">
+              <div key={rp.id} className="flex items-start gap-2.5 select-none" {...replyLongPress}>
                 <Avatar src={rp.avatarUrl} name={rp.authorName} />
                 <div className="flex-1 min-w-0">
                   <p className="text-xs font-semibold text-white/90 leading-snug">{rp.authorName}</p>
                   <p className="text-sm leading-relaxed text-white/60">{rp.body}</p>
-                  <div className="flex items-center gap-3 mt-1">
-                    <span className="text-xs text-white/25">{rDate}</span>
-                    {(rp.isOwn || isAdmin) && (
-                      <button onClick={() => handleDeleteReply(rp.id)} className="text-xs text-white/20 hover:text-red-400 transition-colors">delete</button>
-                    )}
-                  </div>
+                  <span className="text-xs text-white/25">{rDate}</span>
                 </div>
               </div>
             );
@@ -543,6 +679,7 @@ export function ReviewSideTab() {
   const [myAvatar, setMyAvatar] = useState<string | null>(null);
   const [myReviewId, setMyReviewId] = useState<string | null>(null);
   const closeRef = useRef<HTMLButtonElement>(null);
+  const scrollBodyRef = useRef<HTMLDivElement>(null);
 
   // Mount guard for createPortal
   useEffect(() => { setMounted(true); }, []);
@@ -696,7 +833,7 @@ export function ReviewSideTab() {
         </div>
 
         {/* Scrollable body */}
-        <div className="flex-1 overflow-y-auto">
+        <div ref={scrollBodyRef} className="flex-1 overflow-y-auto">
           {/* Form — always shown for logged-in users; pre-filled when editing */}
           {loggedIn && (
             <>
@@ -744,6 +881,7 @@ export function ReviewSideTab() {
                   loggedIn={loggedIn}
                   onModerate={handleModerate}
                   onDelete={handleDelete}
+                  onEditRequest={() => scrollBodyRef.current?.scrollTo({ top: 0, behavior: "smooth" })}
                 />
               ))}
             </div>
