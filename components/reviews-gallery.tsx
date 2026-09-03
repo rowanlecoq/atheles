@@ -113,23 +113,34 @@ type Session = { firstName?: string; name?: string; isAdmin?: boolean; email?: s
 
 function ReviewForm({
   session,
+  existingReview,
   onSuccess,
+  onUpdate,
 }: {
   session: Session | null;
+  existingReview?: PublicSiteReview | null;
   onSuccess: (review: PublicSiteReview) => void;
+  onUpdate?: (id: string, updated: Pick<PublicSiteReview, "rating" | "title" | "body">) => void;
 }) {
+  const isEditing = !!existingReview;
   const profileName = session?.firstName || session?.name || "";
-  const [displayName, setDisplayName] = useState(profileName);
-  const [rating, setRating] = useState(0);
-  const [title, setTitle] = useState("");
-  const [body, setBody] = useState("");
+  const [displayName, setDisplayName] = useState(existingReview?.authorName || profileName);
+  const [rating, setRating] = useState(existingReview?.rating ?? 0);
+  const [title, setTitle] = useState(existingReview?.title ?? "");
+  const [body, setBody] = useState(existingReview?.body ?? "");
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState("");
-  const [done, setDone] = useState(false);
+  const [savedMsg, setSavedMsg] = useState("");
 
+  // Sync form when existingReview loads after fetch
   useEffect(() => {
-    if (profileName && !displayName) setDisplayName(profileName);
-  }, [profileName]); // eslint-disable-line react-hooks/exhaustive-deps
+    if (existingReview) {
+      setDisplayName(existingReview.authorName);
+      setRating(existingReview.rating);
+      setTitle(existingReview.title);
+      setBody(existingReview.body);
+    }
+  }, [existingReview?.id]); // eslint-disable-line react-hooks/exhaustive-deps
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -140,19 +151,29 @@ function ReviewForm({
     setSubmitting(true);
     setError("");
     try {
-      const res = await fetch("/api/site-reviews", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          rating,
-          title: title.trim(),
-          body: body.trim(),
-          displayName: displayName.trim() || undefined,
-        }),
-      });
-      const data = await res.json() as { review?: PublicSiteReview; error?: string };
-      if (!res.ok) { setError(data.error || "failed to submit."); return; }
-      if (data.review) { onSuccess(data.review); setDone(true); }
+      if (isEditing && existingReview) {
+        const res = await fetch("/api/site-reviews", {
+          method: "PUT",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ reviewId: existingReview.id, rating, title: title.trim(), body: body.trim() }),
+        });
+        const data = await res.json() as { review?: PublicSiteReview; error?: string };
+        if (!res.ok) { setError(data.error || "failed to save."); return; }
+        if (data.review && onUpdate) {
+          onUpdate(existingReview.id, { rating: data.review.rating, title: data.review.title, body: data.review.body });
+          setSavedMsg("saved!");
+          setTimeout(() => setSavedMsg(""), 2000);
+        }
+      } else {
+        const res = await fetch("/api/site-reviews", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ rating, title: title.trim(), body: body.trim(), displayName: displayName.trim() || undefined }),
+        });
+        const data = await res.json() as { review?: PublicSiteReview; error?: string };
+        if (!res.ok) { setError(data.error || "failed to submit."); return; }
+        if (data.review) onSuccess(data.review);
+      }
     } catch {
       setError("network error. please try again.");
     } finally {
@@ -160,28 +181,21 @@ function ReviewForm({
     }
   }
 
-  if (done) {
-    return (
-      <div className="rounded-sm border border-brand-gold/20 bg-brand-gold/5 px-5 py-6 text-center">
-        <p className="font-heading text-lg text-brand-gold">thanks for sharing 🔱</p>
-        <p className="mt-1 text-sm text-white/50">your review is now live.</p>
-      </div>
-    );
-  }
-
   return (
     <form onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
-      <div>
-        <label className="mb-1.5 block text-xs text-white/40">your name</label>
-        <input
-          type="text"
-          maxLength={60}
-          value={displayName}
-          onChange={(e) => setDisplayName(e.target.value)}
-          placeholder="atheles member"
-          className="w-full rounded-sm border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
-        />
-      </div>
+      {!isEditing && (
+        <div>
+          <label className="mb-1.5 block text-xs text-white/40">your name</label>
+          <input
+            type="text"
+            maxLength={60}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="atheles member"
+            className="w-full rounded-sm border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+          />
+        </div>
+      )}
       <div>
         <label className="mb-1.5 block text-xs text-white/40">rating</label>
         <StarInput value={rating} onChange={setRating} />
@@ -211,6 +225,7 @@ function ReviewForm({
         />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}
+      {savedMsg && <p className="text-sm text-brand-gold">{savedMsg}</p>}
       <button
         type="submit"
         disabled={submitting}
@@ -223,7 +238,7 @@ function ReviewForm({
           />
         )}
         <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
-          {submitting ? "submitting…" : "submit review"}
+          {submitting ? "saving…" : isEditing ? "update review" : "submit review"}
         </span>
       </button>
     </form>
@@ -240,7 +255,6 @@ function ReviewCard({
   onFlag,
   onModerate,
   onDelete,
-  onEdit,
 }: {
   review: PublicSiteReview;
   avatarSrc?: string | null;
@@ -249,18 +263,11 @@ function ReviewCard({
   onFlag: (id: string) => void;
   onModerate: (id: string, hidden: boolean) => void;
   onDelete: (id: string) => void;
-  onEdit: (id: string, updated: Pick<PublicSiteReview, "rating" | "title" | "body">) => void;
 }) {
   const [flagging, setFlagging] = useState(false);
   const [moderating, setModerating] = useState(false);
   const [deleting, setDeleting] = useState(false);
   const [confirmDelete, setConfirmDelete] = useState(false);
-  const [editing, setEditing] = useState(false);
-  const [editRating, setEditRating] = useState(review.rating);
-  const [editTitle, setEditTitle] = useState(review.title);
-  const [editBody, setEditBody] = useState(review.body);
-  const [saving, setSaving] = useState(false);
-  const [editError, setEditError] = useState("");
 
   const date = new Date(review.createdAt).toLocaleDateString("en-GB", {
     month: "short",
@@ -303,72 +310,6 @@ function ReviewCard({
     } finally { setDeleting(false); setConfirmDelete(false); }
   }
 
-  async function handleSaveEdit(e: React.FormEvent) {
-    e.preventDefault();
-    if (editRating === 0) { setEditError("please select a rating."); return; }
-    if (!editTitle.trim()) { setEditError("please add a title."); return; }
-    if (!editBody.trim()) { setEditError("please write your review."); return; }
-    setSaving(true);
-    setEditError("");
-    try {
-      const res = await fetch("/api/site-reviews", {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ reviewId: review.id, rating: editRating, title: editTitle.trim(), body: editBody.trim() }),
-      });
-      const data = await res.json() as { review?: PublicSiteReview; error?: string };
-      if (!res.ok) { setEditError(data.error || "failed to save."); return; }
-      if (data.review) {
-        onEdit(review.id, { rating: data.review.rating, title: data.review.title, body: data.review.body });
-        setEditing(false);
-      }
-    } catch { setEditError("network error."); }
-    finally { setSaving(false); }
-  }
-
-  if (editing) {
-    return (
-      <form
-        onSubmit={handleSaveEdit}
-        className="border-b border-white/5 px-5 py-4 space-y-3"
-      >
-        <p className="text-xs text-white/40">editing your review</p>
-        <StarInput value={editRating} onChange={setEditRating} />
-        <input
-          type="text"
-          maxLength={100}
-          value={editTitle}
-          onChange={(e) => setEditTitle(e.target.value)}
-          className="w-full rounded-sm border border-white/10 bg-white/3 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
-        />
-        <textarea
-          rows={3}
-          maxLength={1000}
-          value={editBody}
-          onChange={(e) => setEditBody(e.target.value)}
-          className="w-full resize-none rounded-sm border border-white/10 bg-white/3 px-3 py-2 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
-        />
-        {editError && <p className="text-sm text-red-400">{editError}</p>}
-        <div className="flex gap-2">
-          <button
-            type="submit"
-            disabled={saving}
-            className="rounded-full bg-brand-gold px-4 py-1.5 text-xs font-heading uppercase tracking-wider text-brand-dark disabled:opacity-60"
-          >
-            {saving ? "saving…" : "save"}
-          </button>
-          <button
-            type="button"
-            onClick={() => { setEditing(false); setEditError(""); }}
-            className="rounded-full border border-white/10 px-4 py-1.5 text-xs text-white/50 hover:text-white"
-          >
-            cancel
-          </button>
-        </div>
-      </form>
-    );
-  }
-
   return (
     <div
       className={[
@@ -395,12 +336,6 @@ function ReviewCard({
       <div className="flex items-center justify-end gap-3 pt-1">
         {isOwn && !isAdmin && (
           <>
-            <button
-              onClick={() => setEditing(true)}
-              className="text-[11px] text-white/30 hover:text-brand-gold transition-colors"
-            >
-              edit
-            </button>
             {confirmDelete ? (
               <>
                 <button
@@ -483,17 +418,23 @@ export function ReviewSideTab() {
     }
   }, []);
 
-  // Slide open/close
+  // Slide open/close — compensate for scrollbar width to prevent layout shift
   useEffect(() => {
     if (open) {
+      const sw = window.innerWidth - document.documentElement.clientWidth;
+      if (sw > 0) document.body.style.paddingRight = `${sw}px`;
       document.body.classList.add("overflow-hidden");
-      requestAnimationFrame(() => setVisible(true));
+      requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
       setTimeout(() => closeRef.current?.focus(), 50);
     } else {
       setVisible(false);
       document.body.classList.remove("overflow-hidden");
+      document.body.style.paddingRight = "";
     }
-    return () => document.body.classList.remove("overflow-hidden");
+    return () => {
+      document.body.classList.remove("overflow-hidden");
+      document.body.style.paddingRight = "";
+    };
   }, [open]);
 
   // Fetch reviews on first open
@@ -558,7 +499,7 @@ export function ReviewSideTab() {
   }
 
   const visibleReviews = session?.isAdmin ? reviews : reviews.filter((r) => !r.hidden);
-  const canReview = loggedIn && !alreadyReviewed;
+  const myExistingReview = myReviewId ? visibleReviews.find((r) => r.id === myReviewId) ?? null : null;
 
   const modal = (
     <>
@@ -601,11 +542,18 @@ export function ReviewSideTab() {
 
         {/* Scrollable body */}
         <div className="flex-1 overflow-y-auto">
-          {/* Write a review form */}
-          {canReview && (
+          {/* Form — always shown for logged-in users; pre-filled when editing */}
+          {loggedIn && (
             <>
-              <p className="px-5 pt-5 text-xs uppercase tracking-[0.15em] text-white/30">share your experience</p>
-              <ReviewForm session={session} onSuccess={handleReviewAdded} />
+              <p className="px-5 pt-5 text-xs uppercase tracking-[0.15em] text-white/30">
+                {myExistingReview ? "your review" : "share your experience"}
+              </p>
+              <ReviewForm
+                session={session}
+                existingReview={myExistingReview}
+                onSuccess={handleReviewAdded}
+                onUpdate={handleEdit}
+              />
               <div className="border-t border-white/5" />
             </>
           )}
@@ -641,7 +589,6 @@ export function ReviewSideTab() {
                   onFlag={handleFlag}
                   onModerate={handleModerate}
                   onDelete={handleDelete}
-                  onEdit={handleEdit}
                 />
               ))}
             </div>
