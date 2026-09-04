@@ -793,7 +793,7 @@ export function ReviewSideTab() {
         role="dialog"
         aria-modal="true"
         aria-label="community reviews"
-        className={`fixed inset-y-0 right-0 z-[70] flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] border-l border-brand-dark-gold/20 transition-transform duration-300 ease-out will-change-transform ${visible ? "translate-x-0" : "translate-x-full pointer-events-none"}`}
+        className={`fixed inset-x-0 right-0 top-0 z-[70] flex h-dvh w-full flex-col bg-brand-dark text-white md:left-auto md:w-[400px] border-l border-brand-dark-gold/20 transition-transform duration-300 ease-out will-change-transform ${visible ? "translate-x-0" : "translate-x-full pointer-events-none"}`}
         style={{ overscrollBehavior: "contain" }}
       >
         {/* Header */}

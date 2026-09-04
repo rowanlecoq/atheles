@@ -719,7 +719,7 @@ export default function CartModal() {
             role="dialog"
             aria-modal="true"
             aria-label="Shopping cart"
-            className={`fixed inset-y-0 right-0 flex h-full w-full flex-col bg-brand-dark text-white md:w-[400px] will-change-transform border-l border-brand-dark-gold/20 z-[70] transition-transform duration-300 ease-out ${modalVisible ? "translate-x-0" : "translate-x-full"}`}
+            className={`fixed inset-x-0 right-0 top-0 flex h-dvh w-full flex-col bg-brand-dark text-white md:left-auto md:w-[400px] will-change-transform border-l border-brand-dark-gold/20 z-[70] transition-transform duration-300 ease-out ${modalVisible ? "translate-x-0" : "translate-x-full"}`}
             style={{ overscrollBehavior: "contain" }}
           >
 
