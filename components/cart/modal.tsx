@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  ChevronDownIcon,
   MinusIcon,
   PlusIcon,
   ShoppingCartIcon,
@@ -267,6 +268,7 @@ function FavoritesCarousel({
   addingHandle: string | null;
 }) {
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [collapsed, setCollapsed] = useState(false);
 
   return (
     <div className="py-3">
@@ -282,8 +284,16 @@ function FavoritesCarousel({
             from your favorites
           </span>
         </Link>
+        <button
+          type="button"
+          onClick={() => setCollapsed((c) => !c)}
+          aria-label={collapsed ? "show favorites" : "hide favorites"}
+          className="flex h-7 w-7 items-center justify-center rounded-full text-white/30 transition-colors hover:text-white/60"
+        >
+          <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "-rotate-90" : ""}`} />
+        </button>
       </div>
-      <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ touchAction: "pan-x" }}>
+      {!collapsed && <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ touchAction: "pan-x" }}>
         {loading && products.length === 0 && (
           <>
             {[0, 1, 2].map((i) => (
@@ -342,7 +352,7 @@ function FavoritesCarousel({
             </button>
           );
         })}
-      </div>
+      </div>}
     </div>
   );
 }
