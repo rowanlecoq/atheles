@@ -729,12 +729,13 @@ export function ReviewSideTab() {
       .catch(() => {});
   }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // Slide open/close + scroll lock (matches cart: wheel/touchmove interception)
+  // Slide open/close + scroll lock
   useEffect(() => {
     if (open) {
       requestAnimationFrame(() => requestAnimationFrame(() => setVisible(true)));
       setTimeout(() => closeRef.current?.focus(), 50);
 
+      document.documentElement.classList.add("drawer-open");
       const prevent = (e: WheelEvent | TouchEvent) => {
         const panel = document.querySelector("[data-reviews-panel]");
         if (panel && panel.contains(e.target as Node)) return;
@@ -743,6 +744,7 @@ export function ReviewSideTab() {
       document.addEventListener("wheel", prevent, { passive: false });
       document.addEventListener("touchmove", prevent, { passive: false });
       return () => {
+        document.documentElement.classList.remove("drawer-open");
         document.removeEventListener("wheel", prevent);
         document.removeEventListener("touchmove", prevent);
       };

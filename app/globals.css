@@ -120,6 +120,11 @@ body.cart-open .site-header-root {
   pointer-events: none;
 }
 
+/* Lock page scroll when any drawer/panel is open (overflow on html doesn't break sticky) */
+html.drawer-open {
+  overflow: hidden;
+}
+
 body {
   font-family: var(--font-family-body);
   background-color: var(--color-brand-dark);

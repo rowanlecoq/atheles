@@ -411,13 +411,14 @@ export default function CartModal() {
     return () => document.removeEventListener("keydown", handler);
   }, [isOpen, closeCart]);
 
-  // Block page scroll while cart is open without touching overflow or position —
-  // both of those approaches break sticky navbar positioning.
-  // Instead we intercept wheel + touchmove events at the document level and only
-  // allow them when the touch/scroll originates inside the cart panel itself.
+  // Block page scroll while cart is open.
+  // overflow:hidden on html is reliable (including iOS momentum scroll) and
+  // doesn't break sticky navbar positioning the way body overflow:hidden does.
   useEffect(() => {
     if (!isOpen) return;
 
+    document.documentElement.classList.add("drawer-open");
+    document.body.classList.add("cart-open");
     const prevent = (e: WheelEvent | TouchEvent) => {
       const panel = document.querySelector("[data-cart-panel]");
       if (panel && panel.contains(e.target as Node)) return;
@@ -426,11 +427,11 @@ export default function CartModal() {
 
     document.addEventListener("wheel", prevent, { passive: false });
     document.addEventListener("touchmove", prevent, { passive: false });
-    document.body.classList.add("cart-open");
     return () => {
+      document.documentElement.classList.remove("drawer-open");
+      document.body.classList.remove("cart-open");
       document.removeEventListener("wheel", prevent);
       document.removeEventListener("touchmove", prevent);
-      document.body.classList.remove("cart-open");
     };
   }, [isOpen]);
 
@@ -708,7 +709,7 @@ export default function CartModal() {
         <>
           {/* Backdrop — z-[65] covers the navbar (z-[60]) so it dims with the rest of the page */}
           <div
-            className={`fixed inset-0 z-[65] bg-black/50 transition-opacity duration-300 md:block ${modalVisible ? "opacity-100" : "opacity-0"} hidden`}
+            className={`fixed inset-0 z-[65] bg-black/50 transition-opacity duration-300 ${modalVisible ? "opacity-100" : "opacity-0 pointer-events-none"}`}
             aria-hidden="true"
             onClick={closeCart}
           />
