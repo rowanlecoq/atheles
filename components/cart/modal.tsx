@@ -290,10 +290,11 @@ function FavoritesCarousel({
           aria-label={collapsed ? "show favorites" : "hide favorites"}
           className="flex h-7 w-7 items-center justify-center rounded-full text-white/30 transition-colors hover:text-white/60"
         >
-          <ChevronDownIcon className={`h-4 w-4 transition-transform duration-200 ${collapsed ? "-rotate-90" : ""}`} />
+          <ChevronDownIcon className={`h-4 w-4 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
         </button>
       </div>
-      {!collapsed && <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ touchAction: "pan-x" }}>
+      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${collapsed ? "max-h-0 opacity-0" : "max-h-[400px] opacity-100"}`}>
+      <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ touchAction: "pan-x" }}>
         {loading && products.length === 0 && (
           <>
             {[0, 1, 2].map((i) => (
@@ -352,7 +353,8 @@ function FavoritesCarousel({
             </button>
           );
         })}
-      </div>}
+      </div>
+      </div>
     </div>
   );
 }
