@@ -293,8 +293,8 @@ function FavoritesCarousel({
           <ChevronDownIcon className={`h-4 w-4 transition-transform duration-300 ${collapsed ? "rotate-180" : ""}`} />
         </button>
       </div>
-      <div className={`overflow-hidden transition-all duration-300 ease-in-out ${collapsed ? "max-h-0 opacity-0" : "max-h-[400px] opacity-100"}`}>
-      <div ref={scrollRef} className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ touchAction: "pan-x" }}>
+      <div className={`overflow-hidden transition-[max-height] duration-300 ease-in-out ${collapsed ? "max-h-0" : "max-h-[400px]"}`}>
+      <div ref={scrollRef} data-fav-carousel className="flex gap-2 overflow-x-auto pb-1 scrollbar-hide" style={{ touchAction: "pan-x" }}>
         {loading && products.length === 0 && (
           <>
             {[0, 1, 2].map((i) => (
@@ -434,6 +434,8 @@ export default function CartModal() {
     const prevent = (e: WheelEvent | TouchEvent) => {
       const panel = document.querySelector("[data-cart-panel]");
       if (panel && panel.contains(e.target as Node)) return;
+      const fav = document.querySelector("[data-fav-carousel]");
+      if (fav && fav.contains(e.target as Node)) return;
       e.preventDefault();
     };
 
