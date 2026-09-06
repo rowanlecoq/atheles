@@ -98,7 +98,7 @@ export function NewsletterSignup() {
         {alreadySubscribed ? (
           <div className="animate-fade-in space-y-4">
             <h2 className="font-heading text-3xl font-light text-brand-gold sm:text-4xl">
-              you&apos;re in.
+              you&apos;re in the club.
             </h2>
             <div className="mx-auto h-px w-24 bg-brand-gold/50" />
             <p className="text-sm leading-relaxed text-brand-grey">
