@@ -60,7 +60,7 @@ export async function generateMetadata(props: {
     description:
       collection.seo?.description ||
       collection.description ||
-      `${collection.title} products`,
+      `${collection.title} items`,
   };
 }
 

@@ -31,7 +31,7 @@ export function ShareButton({ title }: { title: string }) {
       type="button"
       onClick={handleShare}
       className="flex h-10 w-10 items-center justify-center rounded-full border border-brand-dark-gold/30 text-brand-grey transition-colors hover:border-brand-gold hover:text-brand-gold"
-      aria-label="Share product"
+      aria-label="Share item"
       title={copied ? "Link copied!" : "Share"}
     >
       {copied ? (
