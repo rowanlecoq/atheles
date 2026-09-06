@@ -194,7 +194,7 @@ function ReviewForm({
             value={displayName}
             onChange={(e) => setDisplayName(e.target.value)}
             placeholder="atheles member"
-            className="w-full rounded-sm border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+            className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
           />
         </div>
       )}
@@ -211,7 +211,7 @@ function ReviewForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="sum it up in a few words"
-          className="w-full rounded-sm border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+          className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
         />
       </div>
       <div>
@@ -223,7 +223,7 @@ function ReviewForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="tell the community about your experience with atheles"
-          className="w-full resize-none rounded-sm border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none"
+          className="w-full resize-none rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
         />
       </div>
       {error && <p className="text-sm text-red-400">{error}</p>}

@@ -88,7 +88,7 @@ export default function LoginForm() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-4 py-2.5 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+                className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
                 placeholder="your@email.com"
               />
             </div>
@@ -160,7 +160,7 @@ export default function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded bg-brand-gold px-6 py-3 font-heading text-sm uppercase tracking-wider text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50"
+              className="w-full rounded-lg bg-brand-gold px-6 py-3 font-heading text-sm uppercase tracking-wider text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50"
             >
               {loading ? "signing in..." : "sign in"}
             </button>

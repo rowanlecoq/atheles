@@ -878,7 +878,7 @@ export default function CartModal() {
                               placeholder="enter code"
                               enterKeyHint="done"
                               disabled={applyingDiscount}
-                              className="flex-1 rounded-lg border border-white/10 bg-white/3 px-3 py-2.5 text-sm text-white placeholder:text-white/20 focus:border-brand-gold/40 focus:outline-none disabled:opacity-60"
+                              className="flex-1 rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-3 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors disabled:opacity-60"
                             />
                             <button
                               type="button"

@@ -1290,7 +1290,7 @@ export default function ProfileContent() {
                 type="button"
                 onClick={handleSave}
                 disabled={saving}
-                className="rounded bg-brand-gold px-3 py-1 text-xs font-medium text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50"
+                className="rounded-lg bg-brand-gold px-3 py-1 text-xs font-medium text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50"
               >
                 {saving ? "saving..." : "save"}
               </button>
@@ -1318,7 +1318,7 @@ export default function ProfileContent() {
                 value={firstName}
                 onChange={(e) => setFirstName(e.target.value)}
                 required
-                className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
+                className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
                 placeholder="first name"
               />
             ) : (
@@ -1343,7 +1343,7 @@ export default function ProfileContent() {
                 type="text"
                 value={lastName}
                 onChange={(e) => setLastName(e.target.value)}
-                className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
+                className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
                 placeholder="last name"
               />
             ) : (
@@ -1380,7 +1380,7 @@ export default function ProfileContent() {
                   value={newEmail}
                   onChange={(e) => { setNewEmail(e.target.value); setEmailError(""); }}
                   placeholder="new email address"
-                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold/50 focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
                 />
                 {emailError && <p className="text-xs text-red-400">{emailError}</p>}
                 <button
@@ -1405,7 +1405,7 @@ export default function ProfileContent() {
                 <select
                   value={dobDay}
                   onChange={(e) => setDobDay(e.target.value)}
-                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold/50 focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold/40 focus:outline-none transition-colors"
                   aria-label="Day"
                 >
                   <option value="">day</option>
@@ -1418,7 +1418,7 @@ export default function ProfileContent() {
                 <select
                   value={dobMonth}
                   onChange={(e) => setDobMonth(e.target.value)}
-                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold/50 focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold/40 focus:outline-none transition-colors"
                   aria-label="Month"
                 >
                   <option value="">month</option>
@@ -1444,7 +1444,7 @@ export default function ProfileContent() {
                 <select
                   value={dobYear}
                   onChange={(e) => setDobYear(e.target.value)}
-                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white focus:border-brand-gold/50 focus:outline-none"
+                  className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white focus:border-brand-gold/40 focus:outline-none transition-colors"
                   aria-label="Year"
                 >
                   <option value="">year</option>
@@ -1494,7 +1494,7 @@ export default function ProfileContent() {
                   }
                   setPhone(formatPhoneDisplay(raw));
                 }}
-                className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold/50 focus:outline-none"
+                className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
                 placeholder="+44 7911 123456"
               />
             ) : (
@@ -1722,7 +1722,7 @@ export default function ProfileContent() {
               value={deleteEmail}
               onChange={(e) => { setDeleteEmail(e.target.value); setDeleteError(""); }}
               placeholder={user.email}
-              className="mb-3 w-full rounded-lg border border-red-900/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/30 focus:border-red-700/50 focus:outline-none"
+              className="mb-3 w-full rounded-lg border border-red-900/30 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-red-700/50 focus:outline-none transition-colors"
             />
             {deleteError && <p className="mb-3 text-xs text-red-400">{deleteError}</p>}
             <div className="flex gap-3">

@@ -320,7 +320,7 @@ function ReviewForm({
           value={title}
           onChange={(e) => setTitle(e.target.value)}
           placeholder="sum it up in a few words"
-          className="w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
+          className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
         />
       </div>
 
@@ -333,7 +333,7 @@ function ReviewForm({
           value={body}
           onChange={(e) => setBody(e.target.value)}
           placeholder="tell others about your experience with this product"
-          className="w-full resize-none rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-3 py-2.5 text-sm text-white placeholder-white/25 focus:border-brand-gold/50 focus:outline-none"
+          className="w-full resize-none rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
         />
       </div>
 

@@ -3,7 +3,7 @@
 import { useState } from "react";
 
 const fieldClass =
-  "w-full rounded-lg border border-brand-dark-gold/20 bg-brand-dark px-4 py-3 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold/50 focus:outline-none transition-colors duration-150";
+  "w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors";
 
 export function ContactForm() {
   const [submitted, setSubmitted] = useState(false);
@@ -146,7 +146,7 @@ export function ContactForm() {
         <button
           type="submit"
           disabled={loading}
-          className="group relative flex w-full items-center justify-center overflow-hidden rounded-full bg-brand-gold p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300 disabled:opacity-50"
+          className="group relative flex w-full items-center justify-center overflow-hidden rounded-lg bg-brand-gold px-6 py-3 font-heading text-sm uppercase text-brand-dark transition-all duration-300 disabled:opacity-50"
         >
           <div
             className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"

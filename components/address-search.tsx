@@ -88,7 +88,7 @@ export function AddressSearch({
       <div className="relative">
         <MagnifyingGlassIcon className="pointer-events-none absolute left-3 top-1/2 h-3.5 w-3.5 -translate-y-1/2 text-brand-grey/40" />
         <input
-          className="w-full rounded border border-brand-dark-gold/30 bg-brand-dark py-2 pl-8 pr-3 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none"
+          className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] py-2.5 pl-8 pr-3 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
           placeholder="search your address…"
           value={query}
           onChange={(e) => setQuery(e.target.value)}

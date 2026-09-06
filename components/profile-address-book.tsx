@@ -34,7 +34,7 @@ const EMPTY: FormState = {
   city: "", province: "", zip: "", country: "",
 };
 
-const inputCls = "w-full rounded border border-brand-dark-gold/30 bg-brand-dark px-3 py-2 text-sm text-white placeholder:text-brand-grey/50 focus:border-brand-gold focus:outline-none";
+const inputCls = "w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors";
 const labelCls = "mb-1 block text-sm uppercase tracking-wider text-brand-grey sm:text-xs";
 
 function AddressForm({ initial, onSave, onCancel, saving }: {
@@ -103,7 +103,7 @@ function AddressForm({ initial, onSave, onCancel, saving }: {
           type="button"
           onClick={() => onSave(form)}
           disabled={saving || !form.address1.trim() || !form.city.trim()}
-          className="flex items-center gap-1.5 rounded bg-brand-gold px-3 py-1 text-xs font-medium text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50"
+          className="flex items-center gap-1.5 rounded-lg bg-brand-gold px-3 py-1 text-xs font-medium text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-50"
         >
           <CheckIcon className="h-3 w-3" /> {saving ? "saving..." : "save"}
         </button>
