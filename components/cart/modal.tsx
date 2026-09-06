@@ -800,7 +800,7 @@ export default function CartModal() {
                         <Link
                           href="/search/mens"
                           onClick={closeCart}
-                          className="flex items-center justify-center rounded-full bg-brand-gold py-3 text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90"
+                          className="flex items-center justify-center rounded-full bg-brand-gold py-3 text-sm font-medium uppercase tracking-wider text-brand-dark transition-colors hover:bg-brand-light-gold"
                         >
                           Shop Mens
                         </Link>
@@ -963,7 +963,7 @@ function CheckoutButton() {
     <button
       type="submit"
       disabled={pending}
-      className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brand-gold py-3.5 font-heading text-sm font-medium uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-60"
+      className="group relative flex w-full items-center justify-center gap-2 overflow-hidden rounded-full bg-brand-gold py-3.5 font-heading text-sm font-medium uppercase tracking-wider text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-60"
     >
       {!pending && (
         <div

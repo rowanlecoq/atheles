@@ -344,7 +344,7 @@ function ReviewForm({
         <button
           type="submit"
           disabled={submitting}
-          className="rounded-lg bg-brand-gold px-5 py-2 text-sm font-bold text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-60"
+          className="rounded-lg bg-brand-gold px-5 py-2 text-sm font-bold text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-60"
         >
           {submitting ? "saving…" : isEditing ? "update review" : "submit review"}
         </button>

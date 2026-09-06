@@ -231,7 +231,7 @@ function ReviewForm({
       <button
         type="submit"
         disabled={submitting}
-        className="group relative flex w-full items-center justify-center overflow-hidden rounded-full bg-brand-gold p-4 font-heading text-sm uppercase text-brand-dark transition-all duration-300 disabled:opacity-60"
+        className="group relative flex w-full items-center justify-center overflow-hidden rounded-full bg-brand-gold p-4 font-heading text-sm uppercase text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-60"
       >
         {!submitting && (
           <div
