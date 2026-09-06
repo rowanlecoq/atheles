@@ -106,6 +106,7 @@ export default async function ProductPage(props: {
         }}
       />
       <div className="mx-auto max-w-(--breakpoint-2xl) px-4 py-6">
+        <FadeIn direction="up" duration={0.3}>
           <div className="flex flex-col rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-4 sm:p-6 md:p-10 lg:flex-row lg:gap-8 lg:p-12">
             <div className="w-full basis-full lg:basis-4/6">
               <Suspense
@@ -128,6 +129,7 @@ export default async function ProductPage(props: {
               </Suspense>
             </div>
           </div>
+        </FadeIn>
         <ReviewSection productHandle={product.handle} />
         <RelatedProducts id={product.id} />
         <Suspense fallback={null}>
