@@ -85,7 +85,7 @@ export function NewsletterSignup() {
   };
 
   return (
-    <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 py-24 sm:py-28">
+    <section className="theme-section relative overflow-hidden border-t border-brand-dark-gold/20 py-14 sm:py-16">
       <SlideshowMedia
         slotKey="newsletter"
         className="object-cover object-center"
@@ -96,14 +96,11 @@ export function NewsletterSignup() {
 
       <div className="relative z-10 mx-auto max-w-lg px-6 text-center">
         {alreadySubscribed ? (
-          <div className="animate-fade-in space-y-5">
-            <p className="text-xs lowercase tracking-[0.25em] text-brand-dark-gold">
-              atheles club
-            </p>
-            <div className="mx-auto h-px w-24 bg-brand-gold/50" />
+          <div className="animate-fade-in space-y-4">
             <h2 className="font-heading text-3xl font-light text-brand-gold sm:text-4xl">
               you&apos;re in.
             </h2>
+            <div className="mx-auto h-px w-24 bg-brand-gold/50" />
             <p className="text-sm leading-relaxed text-brand-grey">
               thank you for joining. you&apos;ll be the first to know about new drops,
               exclusive offers, and upcoming releases.
@@ -111,14 +108,11 @@ export function NewsletterSignup() {
           </div>
         ) : (
           <div className="space-y-6">
-            <div className="animate-fade-in space-y-5">
-              <p className="text-xs lowercase tracking-[0.25em] text-brand-dark-gold">
-                atheles club
-              </p>
-              <div className="mx-auto h-px w-24 bg-brand-gold/50" />
+            <div className="animate-fade-in space-y-4">
               <h2 className="font-heading text-3xl font-light text-brand-gold sm:text-4xl">
                 join the club.
               </h2>
+              <div className="mx-auto h-px w-24 bg-brand-gold/50" />
               <p className="text-sm leading-relaxed text-brand-grey [animation-delay:150ms]">
                 be the first to know about new drops, exclusive offers, and
                 upcoming releases. free, always.
