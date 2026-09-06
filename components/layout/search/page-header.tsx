@@ -12,6 +12,7 @@ const collectionTitles: Record<string, string> = {
   tees: "tees",
   "t-shirts": "tees",
   sweatpants: "sweatpants",
+  beaters: "beaters",
   "og-series": "og series",
 };
 

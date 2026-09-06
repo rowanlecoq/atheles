@@ -20,6 +20,7 @@ const categories: Category[] = [
       { title: "compressions", href: "/search/compressions" },
       { title: "tees", href: "/search/tees" },
       { title: "sweatpants", href: "/search/sweatpants" },
+      { title: "beaters", href: "/search/beaters" },
     ],
   },
   {

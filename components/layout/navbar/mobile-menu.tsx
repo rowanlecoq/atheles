@@ -31,6 +31,7 @@ const categoryLinks: CategoryLink[] = [
       { title: "compressions", path: "/search/compressions" },
       { title: "tees", path: "/search/tees" },
       { title: "sweatpants", path: "/search/sweatpants" },
+      { title: "beaters", path: "/search/beaters" },
     ],
   },
   {
