@@ -54,9 +54,10 @@ export async function POST(req: NextRequest) {
       rating?: number;
       title?: string;
       body?: string;
+      displayName?: string;
     };
 
-    const { handle, rating, title, body: reviewBody } = body;
+    const { handle, rating, title, body: reviewBody, displayName } = body;
 
     if (!handle || !rating || !title || !reviewBody) {
       return NextResponse.json({ error: "Missing required fields." }, { status: 400 });
@@ -66,7 +67,7 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: "Rating must be between 1 and 5." }, { status: 400 });
     }
 
-    const authorName = customer.displayName || customer.firstName || "Member";
+    const authorName = (displayName?.trim()) || customer.displayName || customer.firstName || "atheles member";
     const authorEmail = customer.email;
 
     const avatarUrl = await getCustomerMetafield(authorEmail, "atheles", "avatar").catch(() => null);
@@ -86,7 +87,7 @@ export async function POST(req: NextRequest) {
       .map((w: string) => w.charAt(0).toUpperCase() + w.slice(1))
       .join(" ");
     addSiteReview({
-      authorName,
+      authorName: authorName,
       authorEmail,
       rating,
       title,

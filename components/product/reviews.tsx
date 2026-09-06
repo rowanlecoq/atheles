@@ -229,20 +229,26 @@ function ContextBottomSheet({
 
 // ---- ReviewForm ----
 
+type Session = { firstName?: string; name?: string; isAdmin?: boolean; email?: string };
+
 function ReviewForm({
   productHandle,
+  session,
   existingReview,
   onSuccess,
   onUpdate,
   onCancel,
 }: {
   productHandle: string;
+  session: Session | null;
   existingReview?: PublicReview | null;
   onSuccess: (review: PublicReview) => void;
   onUpdate?: (id: string, updated: Pick<PublicReview, "rating" | "title" | "body">) => void;
   onCancel?: () => void;
 }) {
   const isEditing = !!existingReview;
+  const profileName = session?.firstName || session?.name || "";
+  const [displayName, setDisplayName] = useState(existingReview?.authorName || profileName);
   const [rating, setRating] = useState(existingReview?.rating ?? 0);
   const [title, setTitle] = useState(existingReview?.title ?? "");
   const [body, setBody] = useState(existingReview?.body ?? "");
@@ -252,6 +258,7 @@ function ReviewForm({
 
   useEffect(() => {
     if (existingReview) {
+      setDisplayName(existingReview.authorName);
       setRating(existingReview.rating);
       setTitle(existingReview.title);
       setBody(existingReview.body);
@@ -260,7 +267,7 @@ function ReviewForm({
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (rating === 0) { setError("please select a star rating."); return; }
+    if (rating === 0) { setError("please select a rating."); return; }
     if (!title.trim()) { setError("please add a title."); return; }
     if (!body.trim()) { setError("please write your review."); return; }
 
@@ -284,7 +291,7 @@ function ReviewForm({
         const res = await fetch("/api/reviews", {
           method: "POST",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ handle: productHandle, rating, title: title.trim(), body: body.trim() }),
+          body: JSON.stringify({ handle: productHandle, rating, title: title.trim(), body: body.trim(), displayName: displayName.trim() || undefined }),
         });
         const data = await res.json() as { review?: PublicReview; error?: string };
         if (!res.ok) { setError(data.error || "failed to submit review."); return; }
@@ -298,21 +305,28 @@ function ReviewForm({
   }
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="rounded-xl border border-brand-dark-gold/20 bg-white/[0.03] p-5 space-y-4"
-    >
-      <h3 className="font-heading text-lg font-bold text-brand-gold">
-        {isEditing ? "edit review" : "write a review"}
-      </h3>
+    <form onSubmit={handleSubmit} className="space-y-4 px-5 py-5">
+      {!isEditing && (
+        <div>
+          <label className="mb-1.5 block text-xs text-white/40">your name</label>
+          <input
+            type="text"
+            maxLength={60}
+            value={displayName}
+            onChange={(e) => setDisplayName(e.target.value)}
+            placeholder="atheles member"
+            className="w-full rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
+          />
+        </div>
+      )}
 
       <div>
-        <label className="mb-1.5 block text-xs uppercase tracking-widest text-white/40">rating</label>
+        <label className="mb-1.5 block text-xs text-white/40">rating</label>
         <StarInput value={rating} onChange={setRating} />
       </div>
 
       <div>
-        <label htmlFor="review-title" className="mb-1.5 block text-xs uppercase tracking-widest text-white/40">title</label>
+        <label htmlFor="review-title" className="mb-1.5 block text-xs text-white/40">title</label>
         <input
           id="review-title"
           type="text"
@@ -325,14 +339,14 @@ function ReviewForm({
       </div>
 
       <div>
-        <label htmlFor="review-body" className="mb-1.5 block text-xs uppercase tracking-widest text-white/40">review</label>
+        <label htmlFor="review-body" className="mb-1.5 block text-xs text-white/40">review</label>
         <textarea
           id="review-body"
-          rows={4}
+          rows={3}
           maxLength={1000}
           value={body}
           onChange={(e) => setBody(e.target.value)}
-          placeholder="tell others about your experience with this product"
+          placeholder="tell others about your experience with this item"
           className="w-full resize-none rounded-lg border border-brand-dark-gold/20 bg-white/[0.03] px-4 py-2.5 text-sm text-white placeholder:text-white/25 focus:border-brand-gold/40 focus:outline-none transition-colors"
         />
       </div>
@@ -340,24 +354,33 @@ function ReviewForm({
       {error && <p className="text-sm text-red-400">{error}</p>}
       {savedMsg && <p className="text-sm text-brand-gold">{savedMsg}</p>}
 
-      <div className="flex gap-3">
-        <button
-          type="submit"
-          disabled={submitting}
-          className="rounded-lg bg-brand-gold px-5 py-2 text-sm font-bold text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-60"
-        >
+      <button
+        type="submit"
+        disabled={submitting}
+        className="group relative flex w-full items-center justify-center overflow-hidden rounded-full bg-brand-gold p-4 font-heading text-sm uppercase text-brand-dark transition-colors hover:bg-brand-light-gold disabled:opacity-60"
+      >
+        {!submitting && (
+          <div
+            className="absolute inset-0 opacity-0 transition-opacity duration-500 group-hover:opacity-100"
+            style={{ background: "linear-gradient(120deg, transparent 30%, rgba(255,255,255,0.15) 48%, rgba(255,255,255,0.22) 50%, rgba(255,255,255,0.15) 52%, transparent 70%)", animation: "cartShimmer 2s ease-in-out infinite" }}
+          />
+        )}
+        <span className="relative z-10 tracking-wider transition-all duration-300 group-hover:tracking-[0.2em]">
           {submitting ? "saving…" : isEditing ? "update review" : "submit review"}
-        </button>
-        {onCancel && (
+        </span>
+      </button>
+
+      {onCancel && (
+        <div className="text-center">
           <button
             type="button"
             onClick={onCancel}
-            className="rounded-lg border border-brand-dark-gold/20 px-5 py-2 text-sm text-white/50 transition-colors hover:border-brand-gold/30 hover:text-white"
+            className="text-xs text-white/30 hover:text-white transition-colors"
           >
             cancel
           </button>
-        )}
-      </div>
+        </div>
+      )}
     </form>
   );
 }
@@ -662,8 +685,6 @@ function ReviewCard({
 
 // ---- ReviewSection ----
 
-type Session = { firstName?: string; name?: string; isAdmin?: boolean; email?: string };
-
 export function ReviewSection({ productHandle }: { productHandle: string }) {
   const [reviews, setReviews] = useState<PublicReview[]>([]);
   const [loading, setLoading] = useState(true);
@@ -746,12 +767,13 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
       )}
 
       {loggedIn && (
-        <div className="mb-8">
-          <p className="mb-3 text-xs uppercase tracking-[0.15em] text-white/30">
+        <div className="mb-8 rounded-xl border border-brand-dark-gold/20 bg-white/[0.03]">
+          <p className="px-5 pt-5 text-xs uppercase tracking-[0.15em] text-white/30">
             {editingReview ? "edit your review" : "share your experience"}
           </p>
           <ReviewForm
             productHandle={productHandle}
+            session={session}
             existingReview={editingReview}
             onSuccess={handleReviewAdded}
             onUpdate={handleReviewUpdated}
@@ -767,7 +789,7 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
         </div>
       ) : visibleReviews.length === 0 ? (
         <p className="text-sm text-white/40">
-          no reviews yet.{loggedIn ? " be the first to review this product!" : ""}
+          no reviews yet.{loggedIn ? " be the first to review this item!" : ""}
         </p>
       ) : (
         <div className="divide-y divide-white/5 border-t border-white/5">

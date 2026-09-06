@@ -171,7 +171,7 @@ export default function SizeGuidePage() {
       <FadeIn direction="up">
       <h1 className="mb-2 font-heading text-4xl text-brand-gold">Size Guide</h1>
       <p className="mb-8 text-sm text-brand-grey">
-        All measurements are in inches. Find your perfect fit across our product
+        All measurements are in inches. Find your perfect fit across our item
         categories.
       </p>
       </FadeIn>

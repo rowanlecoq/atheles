@@ -6,7 +6,7 @@ import type { Metadata } from "next";
 export const metadata: Metadata = {
   title: "faq",
   description:
-    "frequently asked questions about atheles products, sizing, shipping, returns, and more.",
+    "frequently asked questions about atheles items, sizing, shipping, returns, and more.",
 };
 
 const sections = [
@@ -16,7 +16,7 @@ const sections = [
       {
         question: "what sizes do you offer?",
         answer:
-          "we offer sizes xs through xl across all our product categories. please refer to our size guide for detailed measurements for compressions, regular tops, oversized tops, and sweatpants.",
+          "we offer sizes xs through xl across all our item categories. please refer to our size guide for detailed measurements for compressions, regular tops, oversized tops, and sweatpants.",
       },
     ],
   },
