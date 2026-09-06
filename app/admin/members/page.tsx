@@ -213,7 +213,7 @@ export default function AdminMembersPage() {
           <button
             type="button"
             onClick={loadMembers}
-            className="mt-2 text-xs text-brand-gold hover:underline"
+            className="mt-2 text-xs text-brand-gold hover:text-brand-light-gold transition-colors"
           >
             retry
           </button>

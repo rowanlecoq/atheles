@@ -843,7 +843,7 @@ export function ReviewSideTab() {
 
           {!loggedIn && (
             <p className="px-5 py-5 text-sm text-white/40">
-              <a href="/account/login" className="text-brand-gold underline underline-offset-2">sign in</a>{" "}
+              <a href="/account/login" className="text-brand-gold">sign in</a>{" "}
               to leave a review.
             </p>
           )}

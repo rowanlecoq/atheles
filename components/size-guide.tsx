@@ -13,7 +13,7 @@ export function SizeGuideButton() {
       <button
         type="button"
         onClick={() => setOpen(true)}
-        className="mb-4 text-xs uppercase tracking-wider text-brand-grey underline underline-offset-4 hover:text-brand-gold transition-colors"
+        className="mb-4 text-xs uppercase tracking-wider text-brand-grey hover:text-brand-gold transition-colors"
       >
         Size Guide
       </button>

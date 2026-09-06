@@ -54,7 +54,7 @@ export default async function Footer() {
               <li>
                 <Link
                   href="/athletes"
-                  className="text-sm text-brand-grey underline-offset-4 transition-colors hover:text-brand-gold hover:underline"
+                  className="text-sm text-brand-grey transition-colors hover:text-brand-gold"
                 >
                   our athletes
                 </Link>
@@ -64,7 +64,7 @@ export default async function Footer() {
                   href="https://forms.gle/h9KqFyp67jmGL3KM6"
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="text-sm text-brand-grey underline-offset-4 transition-colors hover:text-brand-gold hover:underline"
+                  className="text-sm text-brand-grey transition-colors hover:text-brand-gold"
                 >
                   careers
                 </a>
@@ -82,7 +82,7 @@ export default async function Footer() {
                 <li key={link.path}>
                   <Link
                     href={link.path}
-                    className="text-sm text-brand-grey hover:text-brand-gold hover:underline underline-offset-4 transition-colors"
+                    className="text-sm text-brand-grey hover:text-brand-gold transition-colors"
                   >
                     {link.title}
                   </Link>

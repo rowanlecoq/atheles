@@ -66,7 +66,7 @@ export default function ForgotPasswordForm() {
               <div className="pt-2">
                 <Link
                   href="/login"
-                  className="text-xs text-brand-gold underline underline-offset-4 hover:text-brand-light-gold"
+                  className="text-xs text-brand-gold hover:text-brand-light-gold"
                 >
                   back to sign in
                 </Link>
@@ -105,7 +105,7 @@ export default function ForgotPasswordForm() {
               remember your password?{" "}
               <Link
                 href="/login"
-                className="text-brand-gold underline underline-offset-4 hover:text-brand-light-gold"
+                className="text-brand-gold hover:text-brand-light-gold"
               >
                 sign in
               </Link>

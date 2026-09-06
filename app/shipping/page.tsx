@@ -111,7 +111,7 @@ export default function ShippingPage() {
               Have a question about shipping?{" "}
               <a
                 href="/contact"
-                className="text-brand-gold underline underline-offset-4 hover:text-brand-light-gold"
+                className="text-brand-gold hover:text-brand-light-gold transition-colors"
               >
                 Contact us
               </a>

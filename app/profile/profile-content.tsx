@@ -1366,7 +1366,7 @@ export default function ProfileContent() {
                 <button
                   type="button"
                   onClick={() => { setShowChangeEmail(!showChangeEmail); setNewEmail(""); setEmailError(""); }}
-                  className="text-xs text-brand-dark-gold/60 underline underline-offset-2 hover:text-brand-gold transition-colors"
+                  className="text-xs text-brand-dark-gold/60 hover:text-brand-gold transition-colors"
                 >
                   {showChangeEmail ? "cancel" : "change"}
                 </button>

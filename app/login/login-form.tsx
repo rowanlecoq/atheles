@@ -152,7 +152,7 @@ export default function LoginForm() {
             <div className="text-right">
               <Link
                 href="/forgot-password"
-                className="text-xs text-brand-grey hover:text-brand-gold transition-colors underline underline-offset-4"
+                className="text-xs text-brand-grey hover:text-brand-gold transition-colors"
               >
                 forgot password?
               </Link>
@@ -170,7 +170,7 @@ export default function LoginForm() {
               don&apos;t have an account?{" "}
               <Link
                 href="/register"
-                className="text-brand-gold underline underline-offset-4 hover:text-brand-light-gold"
+                className="text-brand-gold hover:text-brand-light-gold transition-colors"
               >
                 create one
               </Link>

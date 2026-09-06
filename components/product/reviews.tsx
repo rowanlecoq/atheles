@@ -738,7 +738,7 @@ export function ReviewSection({ productHandle }: { productHandle: string }) {
 
       {!loggedIn && !loading && (
         <p className="mb-6 text-sm text-white/40">
-          <a href="/account/login" className="text-brand-gold underline underline-offset-2">
+          <a href="/account/login" className="text-brand-gold">
             sign in
           </a>{" "}
           to leave a review.

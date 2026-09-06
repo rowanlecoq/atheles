@@ -258,7 +258,7 @@ export function ProfileAddressBook({ triggerAdd }: { triggerAdd?: number }) {
                       <button
                         type="button"
                         onClick={() => handleSetDefault(addr.id)}
-                        className="mt-1 text-xs text-brand-grey/50 underline-offset-2 transition-colors hover:text-brand-gold hover:underline"
+                        className="mt-1 text-xs text-brand-grey/50 transition-colors hover:text-brand-gold"
                       >
                         set as default →
                       </button>

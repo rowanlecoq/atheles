@@ -103,7 +103,7 @@ export default function RegisterForm() {
               <div className="pt-2">
                 <Link
                   href="/login"
-                  className="text-xs text-brand-gold underline underline-offset-4 hover:text-brand-light-gold"
+                  className="text-xs text-brand-gold hover:text-brand-light-gold"
                 >
                   go to sign in
                 </Link>
@@ -307,7 +307,7 @@ export default function RegisterForm() {
                   {alreadyExists && (
                     <Link
                       href="/forgot-password"
-                      className="mt-2 block text-xs font-medium text-brand-gold underline underline-offset-4 hover:text-brand-light-gold"
+                      className="mt-2 block text-xs font-medium text-brand-gold hover:text-brand-light-gold"
                     >
                       set your password →
                     </Link>
@@ -328,7 +328,7 @@ export default function RegisterForm() {
               already have an account?{" "}
               <Link
                 href="/login"
-                className="text-brand-gold underline underline-offset-4 hover:text-brand-light-gold"
+                className="text-brand-gold hover:text-brand-light-gold"
               >
                 sign in
               </Link>

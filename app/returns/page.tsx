@@ -60,7 +60,7 @@ export default function ReturnsPage() {
                   Contact us at{" "}
                   <a
                     href="mailto:athelesbrand@gmail.com"
-                    className="text-brand-gold underline underline-offset-4"
+                    className="text-brand-gold"
                   >
                     athelesbrand@gmail.com
                   </a>{" "}
@@ -130,7 +130,7 @@ export default function ReturnsPage() {
               Need help with a return?{" "}
               <a
                 href="/contact"
-                className="text-brand-gold underline underline-offset-4 hover:text-brand-light-gold"
+                className="text-brand-gold hover:text-brand-light-gold"
               >
                 Contact us
               </a>

@@ -503,7 +503,7 @@ function SlotEditor({
                         <button
                           type="button"
                           onClick={() => { setRecropIndex(i); setCropSrc(src); }}
-                          className="mt-1 text-[10px] text-brand-grey/50 underline-offset-2 underline active:text-brand-gold"
+                          className="mt-1 text-[10px] text-brand-grey/50 active:text-brand-gold transition-colors"
                         >
                           re-crop
                         </button>

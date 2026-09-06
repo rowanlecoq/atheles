@@ -19,7 +19,7 @@ export function FooterMenuItem({ item }: { item: Menu }) {
       <Link
         href={item.path}
         className={clsx(
-          "block p-2 text-sm text-brand-grey underline-offset-4 hover:text-brand-gold hover:underline md:inline-block",
+          "block p-2 text-sm text-brand-grey hover:text-brand-gold transition-colors md:inline-block",
           {
             "text-brand-gold": active,
           },
