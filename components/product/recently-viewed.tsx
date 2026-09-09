@@ -39,11 +39,11 @@ export function RecentlyViewedProducts({
       <h2 className="mb-4 font-heading text-2xl font-bold text-brand-gold">
         Recently Viewed
       </h2>
-      <ul className="flex w-full gap-4 overflow-x-auto scrollbar-hide pt-1 pb-2">
+      <ul className="flex w-full gap-4 overflow-x-auto scrollbar-hide pt-1 pb-2 pr-1">
         {filtered.map((product) => (
           <li
             key={product.handle}
-            className="w-[72%] min-w-[200px] flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-1/5"
+            className="w-[72%] min-w-[200px] flex-none min-[475px]:w-1/2 sm:w-1/3 md:w-1/4 lg:w-[calc(20%-13px)]"
           >
             <div className="group">
               {/* Image */}
@@ -101,6 +101,7 @@ export function RecentlyViewedProducts({
             </div>
           </li>
         ))}
+        <li className="w-1 shrink-0" aria-hidden="true" />
       </ul>
     </div>
   );
