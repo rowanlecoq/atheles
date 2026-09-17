@@ -35,7 +35,7 @@ const playfair = localFont({
 export const metadata = {
   metadataBase: new URL(baseUrl),
   title: {
-    default: "atheles: official store 🔱 TO ASCEND.",
+    default: "atheles: official store 🔱 to ascend.",
     template: `%s | atheles 🔱`,
   },
   description:

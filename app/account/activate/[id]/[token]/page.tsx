@@ -1,7 +1,7 @@
 import ActivateForm from "./activate-form";
 
 export const metadata = {
-  title: "Activate Account",
+  title: "activate account",
 };
 
 export default async function ActivatePage({
