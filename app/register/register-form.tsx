@@ -70,7 +70,7 @@ export default function RegisterForm() {
           <h1 className="mb-2 font-heading text-3xl text-brand-gold sm:text-4xl">
             create account
           </h1>
-          <p className="text-sm text-brand-grey">join the atheles club.</p>
+          <p className="text-sm text-brand-grey">become an atheles member.</p>
         </div>
         </FadeIn>
         <FadeIn direction="up" delay={0.12}>
