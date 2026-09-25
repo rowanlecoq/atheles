@@ -48,7 +48,11 @@ export async function GET() {
     return false;
   });
 
-  return NextResponse.json({ athlete: athlete ?? null });
+  // Athlete-tier users always get the section — canCreate tells the UI to show
+  // a blank profile they can fill in even before admin has linked their account
+  const canCreate = customer.isAthlete && !athlete;
+
+  return NextResponse.json({ athlete: athlete ?? null, canCreate });
 }
 
 export async function PATCH(request: Request) {
@@ -80,7 +84,27 @@ export async function PATCH(request: Request) {
   });
 
   if (idx === -1) {
-    return NextResponse.json({ error: "athlete profile not found" }, { status: 404 });
+    if (!customer.isAthlete) {
+      return NextResponse.json({ error: "athlete profile not found" }, { status: 404 });
+    }
+    // Athlete-tier user with no entry yet — create one for them
+    const displayName = customer.firstName || customer.displayName || "athlete";
+    const newAthlete: AthleteData = {
+      name: displayName,
+      age: 0,
+      role: "athlete",
+      description: description ?? "",
+      image: image ?? null,
+      images: images ?? [],
+      socials: socials ?? [],
+      hobbies: hobbies ?? [],
+      slug: nameToSlug(displayName),
+      linkedEmail: email ?? undefined,
+    };
+    athletes.push(newAthlete);
+    const err0 = await writeMetafield("athletes", athletes);
+    if (err0) return NextResponse.json({ error: err0 }, { status: 500 });
+    return NextResponse.json({ success: true, athlete: newAthlete });
   }
 
   const existing = athletes[idx]!;

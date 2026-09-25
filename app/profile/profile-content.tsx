@@ -207,6 +207,7 @@ function AthleteProfileSection() {
   };
 
   const [athlete, setAthlete] = useState<AthleteSelf | null>(null);
+  const [canCreate, setCanCreate] = useState(false);
   const [loaded, setLoaded] = useState(false);
   const [editing, setEditing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -234,6 +235,10 @@ function AthleteProfileSection() {
           setSocials(Array.isArray(a.socials) ? a.socials : []);
           setImage(a.image);
           setImages(a.images || []);
+        }
+        if (d?.canCreate) {
+          setCanCreate(true);
+          setEditing(true);
         }
         setLoaded(true);
       })
@@ -293,17 +298,19 @@ function AthleteProfileSection() {
   };
 
   if (!loaded) return null;
-  if (!athlete) return null;
+  if (!athlete && !canCreate) return null;
 
-  const slug = athlete.slug || athlete.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+  const slug = athlete ? (athlete.slug || athlete.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "")) : null;
 
   return (
     <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
       <div className="mb-4 flex items-center justify-between">
         <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">athlete profile</h2>
-        <a href={`/athletes/${slug}`} className="text-xs text-brand-gold hover:text-brand-light-gold transition-colors">
-          view page →
-        </a>
+        {slug && (
+          <a href={`/athletes/${slug}`} className="text-xs text-brand-gold hover:text-brand-light-gold transition-colors">
+            view page →
+          </a>
+        )}
       </div>
 
       {!editing ? (
@@ -314,11 +321,11 @@ function AthleteProfileSection() {
               : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-dark-gold/10 text-brand-gold text-lg">🔱</div>
             }
             <div>
-              <p className="text-sm text-white">{athlete.name}</p>
-              <p className="text-xs text-brand-dark-gold">{athlete.role}</p>
+              <p className="text-sm text-white">{athlete?.name}</p>
+              <p className="text-xs text-brand-dark-gold">{athlete?.role}</p>
             </div>
           </div>
-          {athlete.description && <p className="text-xs leading-relaxed text-brand-grey">{athlete.description}</p>}
+          {athlete?.description && <p className="text-xs leading-relaxed text-brand-grey">{athlete.description}</p>}
           {saveMsg && <p className="text-xs text-green-400">{saveMsg}</p>}
           <button type="button" onClick={() => setEditing(true)} className="text-xs text-brand-gold hover:text-brand-light-gold transition-colors">
             edit profile
