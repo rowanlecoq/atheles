@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { getAthletes, nameToSlug, normalizeSocials } from "lib/athletes";
 import AthleteProfilePage from "./athlete-profile-page";
+import Footer from "components/layout/footer";
 import type { Metadata } from "next";
 
 export const revalidate = 60;
@@ -37,5 +38,10 @@ export default async function AthleteSlugPage({
 
   const socials = normalizeSocials(athlete.socials);
 
-  return <AthleteProfilePage athlete={{ ...athlete, socials }} />;
+  return (
+    <>
+      <AthleteProfilePage athlete={{ ...athlete, socials }} />
+      <Footer />
+    </>
+  );
 }

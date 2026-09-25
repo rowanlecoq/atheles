@@ -6,7 +6,6 @@ import { motion } from "motion/react";
 import Link from "next/link";
 import { FadeIn } from "components/animations";
 import { type AthleteData } from "lib/athletes";
-import Footer from "components/layout/footer";
 
 type Social = { platform: string; url: string };
 
@@ -129,8 +128,7 @@ export default function AthleteProfilePage({ athlete }: { athlete: AthleteWithSo
   };
 
   return (
-    <>
-      <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
+    <div className="mx-auto max-w-4xl px-4 py-10 sm:px-6 sm:py-14">
         <FadeIn direction="up">
           <Link href="/athletes" className="mb-6 inline-flex items-center gap-1.5 text-xs text-brand-grey hover:text-brand-gold transition-colors">
             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5"><path d="M19 12H5M12 5l-7 7 7 7" /></svg>
@@ -279,10 +277,6 @@ export default function AthleteProfilePage({ athlete }: { athlete: AthleteWithSo
             </div>
           </FadeIn>
         </div>
-      </div>
-
-      <Footer />
-
       {/* Lightbox */}
       {lightbox && typeof document !== "undefined" && createPortal(
         <motion.div
@@ -327,6 +321,6 @@ export default function AthleteProfilePage({ athlete }: { athlete: AthleteWithSo
         </motion.div>,
         document.body,
       )}
-    </>
+    </div>
   );
 }
