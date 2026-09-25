@@ -1862,8 +1862,8 @@ export default function ProfileContent() {
         </div>
       </div>
 
-      {/* Athlete Profile */}
-      {user.isAthlete && <AthleteProfileSection />}
+      {/* Athlete Profile — shown for athlete-tier accounts and any account linked to an athlete profile */}
+      <AthleteProfileSection />
 
       {/* Address Book */}
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">

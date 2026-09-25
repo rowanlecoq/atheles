@@ -31,38 +31,53 @@ async function getCurrentCustomer() {
 
 export async function GET() {
   const customer = await getCurrentCustomer();
-  if (!customer?.isAthlete) {
+  if (!customer) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const raw = await readMetafield("athletes");
   const athletes: AthleteData[] = Array.isArray(raw) ? raw : [];
   const email = customer.email?.toLowerCase();
-  const athlete = athletes.find(
-    (a) => a.linkedEmail?.toLowerCase() === email ||
-      nameToSlug(a.name) === nameToSlug(customer.firstName || customer.displayName || ""),
-  );
+
+  // Match by linked email first, then fall back to name slug for athlete-tier accounts
+  const athlete = athletes.find((a) => {
+    if (email && a.linkedEmail?.toLowerCase() === email) return true;
+    if (customer.isAthlete && email) {
+      return nameToSlug(a.name) === nameToSlug(customer.firstName || customer.displayName || "");
+    }
+    return false;
+  });
 
   return NextResponse.json({ athlete: athlete ?? null });
 }
 
 export async function PATCH(request: Request) {
   const customer = await getCurrentCustomer();
-  if (!customer?.isAthlete) {
+  if (!customer) {
+    return NextResponse.json({ error: "unauthorized" }, { status: 401 });
+  }
+
+  const email = customer.email?.toLowerCase();
+
+  // Must be athlete tier OR have a linked email matching an athlete profile
+  const raw0 = await readMetafield("athletes");
+  const athletes0: AthleteData[] = Array.isArray(raw0) ? raw0 : [];
+  const isLinked = email && athletes0.some((a) => a.linkedEmail?.toLowerCase() === email);
+  if (!customer.isAthlete && !isLinked) {
     return NextResponse.json({ error: "unauthorized" }, { status: 401 });
   }
 
   const body = await request.json();
   const { description, image, images, socials, hobbies } = body;
 
-  const raw = await readMetafield("athletes");
-  const athletes: AthleteData[] = Array.isArray(raw) ? raw : [];
-
-  const email = customer.email?.toLowerCase();
-  const idx = athletes.findIndex(
-    (a) => a.linkedEmail?.toLowerCase() === email ||
-      nameToSlug(a.name) === nameToSlug(customer.firstName || customer.displayName || ""),
-  );
+  const athletes: AthleteData[] = athletes0;
+  const idx = athletes.findIndex((a) => {
+    if (email && a.linkedEmail?.toLowerCase() === email) return true;
+    if (customer.isAthlete && email) {
+      return nameToSlug(a.name) === nameToSlug(customer.firstName || customer.displayName || "");
+    }
+    return false;
+  });
 
   if (idx === -1) {
     return NextResponse.json({ error: "athlete profile not found" }, { status: 404 });
