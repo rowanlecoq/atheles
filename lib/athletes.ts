@@ -7,7 +7,27 @@ export type AthleteData = {
   images?: string[];
   socials: { platform: string; url: string }[] | Record<string, string>;
   hobbies: string[];
+  slug?: string;
+  linkedEmail?: string;
 };
+
+export function nameToSlug(name: string): string {
+  return name
+    .toLowerCase()
+    .trim()
+    .replace(/[^a-z0-9\s-]/g, "")
+    .replace(/\s+/g, "-")
+    .replace(/-+/g, "-");
+}
+
+export function computeAge(dob: string): number {
+  const birth = new Date(dob);
+  const today = new Date();
+  let age = today.getFullYear() - birth.getFullYear();
+  const m = today.getMonth() - birth.getMonth();
+  if (m < 0 || (m === 0 && today.getDate() < birth.getDate())) age--;
+  return age;
+}
 
 const DEFAULT_ATHLETES: AthleteData[] = [
   {

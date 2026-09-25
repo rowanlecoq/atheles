@@ -193,6 +193,235 @@ function phoneToE164(raw: string): string {
   return `+${digits}`;
 }
 
+function AthleteProfileSection() {
+  type AthleteSelf = {
+    name: string;
+    age: number;
+    role: string;
+    description?: string;
+    image: string | null;
+    images?: string[];
+    socials: { platform: string; url: string }[];
+    hobbies: string[];
+    slug?: string;
+  };
+
+  const [athlete, setAthlete] = useState<AthleteSelf | null>(null);
+  const [loaded, setLoaded] = useState(false);
+  const [editing, setEditing] = useState(false);
+  const [saving, setSaving] = useState(false);
+  const [saveMsg, setSaveMsg] = useState("");
+  const [uploadingPhoto, setUploadingPhoto] = useState(false);
+  const [uploadingGallery, setUploadingGallery] = useState(false);
+  const [description, setDescription] = useState("");
+  const [hobbies, setHobbies] = useState<string[]>([]);
+  const [socials, setSocials] = useState<{ platform: string; url: string }[]>([]);
+  const [image, setImage] = useState<string | null>(null);
+  const [images, setImages] = useState<string[]>([]);
+  const [galleryUrlInput, setGalleryUrlInput] = useState("");
+
+  const SOCIAL_PLATFORMS = ["tiktok","instagram","youtube","linkedin","snapchat","email","twitter","facebook","website"];
+
+  useEffect(() => {
+    fetch("/api/athlete-profile")
+      .then((r) => r.ok ? r.json() : null)
+      .then((d) => {
+        if (d?.athlete) {
+          const a: AthleteSelf = d.athlete;
+          setAthlete(a);
+          setDescription(a.description || "");
+          setHobbies(a.hobbies || []);
+          setSocials(Array.isArray(a.socials) ? a.socials : []);
+          setImage(a.image);
+          setImages(a.images || []);
+        }
+        setLoaded(true);
+      })
+      .catch(() => setLoaded(true));
+  }, []);
+
+  const handleSave = async () => {
+    setSaving(true);
+    setSaveMsg("");
+    try {
+      const res = await fetch("/api/athlete-profile", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ description, hobbies, socials, image, images }),
+      });
+      const d = await res.json();
+      if (d.success) {
+        setAthlete((a) => a ? { ...a, description, hobbies, socials, image, images } : a);
+        setSaveMsg("saved!");
+        setEditing(false);
+        setTimeout(() => setSaveMsg(""), 3000);
+      } else {
+        setSaveMsg(d.error || "save failed.");
+      }
+    } catch {
+      setSaveMsg("save failed.");
+    }
+    setSaving(false);
+  };
+
+  const uploadProfilePhoto = async (file: File) => {
+    const { upload } = await import("@vercel/blob/client");
+    setUploadingPhoto(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const blob = await upload(`athlete-${Date.now()}.${ext}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/athlete-profile/upload",
+      });
+      setImage(blob.url);
+    } catch { /* ignore */ }
+    setUploadingPhoto(false);
+  };
+
+  const uploadGalleryFile = async (file: File) => {
+    const { upload } = await import("@vercel/blob/client");
+    setUploadingGallery(true);
+    try {
+      const ext = file.name.split(".").pop() || "jpg";
+      const blob = await upload(`athlete-gallery-${Date.now()}.${ext}`, file, {
+        access: "public",
+        handleUploadUrl: "/api/athlete-profile/upload",
+      });
+      setImages((prev) => [...prev, blob.url]);
+    } catch { /* ignore */ }
+    setUploadingGallery(false);
+  };
+
+  if (!loaded) return null;
+  if (!athlete) return null;
+
+  const slug = athlete.slug || athlete.name.toLowerCase().replace(/\s+/g, "-").replace(/[^a-z0-9-]/g, "");
+
+  return (
+    <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">
+      <div className="mb-4 flex items-center justify-between">
+        <h2 className="font-heading text-xl text-brand-pale-gold sm:text-lg">athlete profile</h2>
+        <a href={`/athletes/${slug}`} className="text-xs text-brand-gold hover:text-brand-light-gold transition-colors">
+          view page →
+        </a>
+      </div>
+
+      {!editing ? (
+        <div className="space-y-3">
+          <div className="flex items-center gap-3">
+            {image
+              ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={image} alt="" className="h-12 w-12 rounded-full object-cover" />
+              : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-dark-gold/10 text-brand-gold text-lg">🔱</div>
+            }
+            <div>
+              <p className="text-sm text-white">{athlete.name}</p>
+              <p className="text-xs text-brand-dark-gold">{athlete.role}</p>
+            </div>
+          </div>
+          {athlete.description && <p className="text-xs leading-relaxed text-brand-grey">{athlete.description}</p>}
+          {saveMsg && <p className="text-xs text-green-400">{saveMsg}</p>}
+          <button type="button" onClick={() => setEditing(true)} className="text-xs text-brand-gold hover:text-brand-light-gold transition-colors">
+            edit profile
+          </button>
+        </div>
+      ) : (
+        <div className="space-y-4">
+          {/* Profile photo */}
+          <div>
+            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">profile photo</label>
+            <div className="flex items-center gap-3">
+              {image
+                ? /* eslint-disable-next-line @next/next/no-img-element */ <img src={image} alt="" className="h-12 w-12 rounded-full object-cover" />
+                : <div className="flex h-12 w-12 items-center justify-center rounded-full bg-brand-dark-gold/10 text-brand-gold">🔱</div>
+              }
+              <label className={`cursor-pointer text-xs text-brand-gold hover:text-brand-pale-gold ${uploadingPhoto ? "opacity-50" : ""}`}>
+                {uploadingPhoto ? "uploading..." : image ? "change photo" : "upload photo"}
+                <input type="file" accept="image/png,image/jpeg,image/webp" disabled={uploadingPhoto} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadProfilePhoto(f); e.target.value = ""; }} className="hidden" />
+              </label>
+              {image && <button type="button" onClick={() => setImage(null)} className="text-xs text-brand-grey hover:text-red-400">remove</button>}
+            </div>
+          </div>
+
+          {/* Bio */}
+          <div>
+            <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">bio</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="tell people about yourself..." rows={3} className="w-full resize-none rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
+          </div>
+
+          {/* Interests */}
+          <div>
+            <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">interests</label>
+            <div className="space-y-2">
+              {hobbies.map((h, j) => (
+                <div key={j} className="flex gap-2">
+                  <input type="text" value={h} onChange={(e) => setHobbies((prev) => prev.map((x, k) => k === j ? e.target.value : x))} placeholder="e.g. working out" className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
+                  <button type="button" onClick={() => setHobbies((prev) => prev.filter((_, k) => k !== j))} className="p-1 text-brand-grey/40 hover:text-red-400">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={() => setHobbies((prev) => [...prev, ""])} className="mt-2 text-xs text-brand-gold hover:text-brand-pale-gold">+ add interest</button>
+          </div>
+
+          {/* Gallery */}
+          <div>
+            <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">gallery</label>
+            <div className="flex flex-wrap gap-2">
+              {images.map((src, j) => (
+                <div key={j} className="group relative h-16 w-16 overflow-hidden rounded-lg border border-white/10">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img src={src} alt="" className="h-full w-full object-cover" />
+                  <button type="button" onClick={() => setImages((prev) => prev.filter((_, k) => k !== j))} className="absolute inset-0 flex items-center justify-center bg-black/50 text-white opacity-0 transition-opacity group-hover:opacity-100">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-4 w-4"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  </button>
+                </div>
+              ))}
+              <label className={`flex h-16 w-16 cursor-pointer items-center justify-center rounded-lg border border-dashed border-brand-dark-gold/30 text-brand-gold hover:border-brand-gold/60 ${uploadingGallery ? "opacity-50" : ""}`}>
+                {uploadingGallery ? <span className="text-[10px]">...</span> : <span className="text-lg leading-none">+</span>}
+                <input type="file" accept="image/png,image/jpeg,image/webp,video/mp4,video/webm" disabled={uploadingGallery} onChange={(e) => { const f = e.target.files?.[0]; if (f) uploadGalleryFile(f); e.target.value = ""; }} className="hidden" />
+              </label>
+            </div>
+            <div className="mt-2 flex gap-2">
+              <input type="text" value={galleryUrlInput} onChange={(e) => setGalleryUrlInput(e.target.value)} placeholder="paste video/image url..." className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-1.5 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" onKeyDown={(e) => { if (e.key === "Enter" && galleryUrlInput.trim()) { setImages((p) => [...p, galleryUrlInput.trim()]); setGalleryUrlInput(""); } }} />
+              <button type="button" onClick={() => { if (galleryUrlInput.trim()) { setImages((p) => [...p, galleryUrlInput.trim()]); setGalleryUrlInput(""); } }} className="rounded border border-brand-dark-gold/20 px-3 py-1.5 text-xs text-brand-gold hover:border-brand-gold/60">add</button>
+            </div>
+          </div>
+
+          {/* Socials */}
+          <div>
+            <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">socials</label>
+            <div className="space-y-2">
+              {socials.map((s, j) => (
+                <div key={j} className="flex gap-2">
+                  <select value={s.platform} onChange={(e) => setSocials((prev) => prev.map((x, k) => k === j ? { ...x, platform: e.target.value } : x))} className="w-1/3 rounded border border-brand-dark-gold/20 bg-brand-dark px-2 py-2 text-xs text-white focus:border-brand-gold focus:outline-none">
+                    <option value="">select</option>
+                    {SOCIAL_PLATFORMS.map((p) => <option key={p} value={p}>{p}</option>)}
+                  </select>
+                  <input type="text" value={s.url} onChange={(e) => setSocials((prev) => prev.map((x, k) => k === j ? { ...x, url: e.target.value } : x))} placeholder="url or username" className="flex-1 rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
+                  <button type="button" onClick={() => setSocials((prev) => prev.filter((_, k) => k !== j))} className="p-1 text-brand-grey/40 hover:text-red-400">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={2} className="h-3.5 w-3.5"><line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" /></svg>
+                  </button>
+                </div>
+              ))}
+            </div>
+            <button type="button" onClick={() => setSocials((prev) => [...prev, { platform: "", url: "" }])} className="mt-2 text-xs text-brand-gold hover:text-brand-pale-gold">+ add social</button>
+          </div>
+
+          {saveMsg && <p className="text-xs text-red-400">{saveMsg}</p>}
+
+          <div className="flex items-center gap-3 pt-1">
+            <button type="button" onClick={handleSave} disabled={saving} className="rounded-full bg-brand-gold px-5 py-2 text-xs uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50">
+              {saving ? "saving..." : "save"}
+            </button>
+            <button type="button" onClick={() => { setEditing(false); setSaveMsg(""); }} className="text-xs text-brand-grey hover:text-white transition-colors">cancel</button>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 export default function ProfileContent() {
   const { currency, convert } = useCurrency();
   const [user, setUser] = useState<User | null>(null);
@@ -1632,6 +1861,9 @@ export default function ProfileContent() {
           )}
         </div>
       </div>
+
+      {/* Athlete Profile */}
+      {user.isAthlete && <AthleteProfileSection />}
 
       {/* Address Book */}
       <div className="mb-8 rounded-lg border border-brand-dark-gold/20 bg-brand-dark p-5">

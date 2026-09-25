@@ -20,6 +20,8 @@ type Athlete = {
   images: string[];
   socials: Social[];
   hobbies: string[];
+  slug?: string;
+  linkedEmail?: string;
 };
 
 function getYouTubeId(url: string) {
@@ -49,6 +51,8 @@ function MediaThumb({ src }: { src: string }) {
   return <img src={src} alt="" className="h-full w-full object-cover" />;
 }
 
+type CustomerSearchResult = { email: string; firstName: string; lastName: string; dob: string | null; age: number | null };
+
 export default function AdminAthletesPage() {
   const [athletes, setAthletes] = useState<Athlete[]>([]);
   const [loading, setLoading] = useState(true);
@@ -57,6 +61,9 @@ export default function AdminAthletesPage() {
   const [saveError, setSaveError] = useState("");
   const [uploading, setUploading] = useState<string | null>(null);
   const [uploadError, setUploadError] = useState("");
+  const [emailSearch, setEmailSearch] = useState<Record<number, string>>({});
+  const [emailResults, setEmailResults] = useState<Record<number, CustomerSearchResult[]>>({});
+  const [emailSearching, setEmailSearching] = useState<Record<number, boolean>>({});
 
   useEffect(() => {
     fetch("/api/admin/athletes")
@@ -76,6 +83,8 @@ export default function AdminAthletesPage() {
                   .filter(([, v]) => v)
                   .map(([k, v]) => ({ platform: k, url: v })),
             hobbies: Array.isArray(a.hobbies) ? a.hobbies : [],
+            slug: a.slug as string | undefined,
+            linkedEmail: a.linkedEmail as string | undefined,
           })));
         }
       })
@@ -108,6 +117,25 @@ export default function AdminAthletesPage() {
 
   const update = (index: number, field: string, value: unknown) =>
     setAthletes((prev) => prev.map((a, i) => (i === index ? { ...a, [field]: value } : a)));
+
+  const searchCustomer = async (athleteIdx: number, query: string) => {
+    if (!query.trim()) { setEmailResults((r) => ({ ...r, [athleteIdx]: [] })); return; }
+    setEmailSearching((s) => ({ ...s, [athleteIdx]: true }));
+    try {
+      const res = await fetch(`/api/admin/athletes?email=${encodeURIComponent(query)}`);
+      const d = await res.json();
+      setEmailResults((r) => ({ ...r, [athleteIdx]: d.customers || [] }));
+    } catch { /* ignore */ }
+    setEmailSearching((s) => ({ ...s, [athleteIdx]: false }));
+  };
+
+  const linkCustomer = (athleteIdx: number, customer: CustomerSearchResult) => {
+    setAthletes((prev) => prev.map((a, i) =>
+      i === athleteIdx ? { ...a, linkedEmail: customer.email, age: customer.age ?? a.age } : a,
+    ));
+    setEmailResults((r) => ({ ...r, [athleteIdx]: [] }));
+    setEmailSearch((s) => ({ ...s, [athleteIdx]: "" }));
+  };
 
   const uploadPhoto = async (athleteIdx: number, file: File) => {
     if (file.size > 10 * 1024 * 1024) {
@@ -270,6 +298,50 @@ export default function AdminAthletesPage() {
                   <textarea value={a.description} onChange={(e) => update(i, "description", e.target.value)} placeholder="short bio..." rows={3} className="w-full resize-none rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-sm text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none" />
                 </div>
 
+                {/* Link account */}
+                <div className="mt-3">
+                  <label className="mb-1 block text-[10px] uppercase tracking-wider text-brand-grey">linked account</label>
+                  {a.linkedEmail ? (
+                    <div className="flex items-center gap-2 rounded border border-brand-dark-gold/20 bg-white/[0.02] px-3 py-2">
+                      <span className="flex-1 text-xs text-white">{a.linkedEmail}</span>
+                      {a.age ? <span className="text-[10px] text-brand-grey">age {a.age}</span> : null}
+                      <button type="button" onClick={() => update(i, "linkedEmail", undefined)} className="text-[10px] text-brand-grey hover:text-red-400">unlink</button>
+                    </div>
+                  ) : (
+                    <div className="relative">
+                      <input
+                        type="text"
+                        value={emailSearch[i] || ""}
+                        onChange={(e) => {
+                          const v = e.target.value;
+                          setEmailSearch((s) => ({ ...s, [i]: v }));
+                          const t = setTimeout(() => searchCustomer(i, v), 400);
+                          return () => clearTimeout(t);
+                        }}
+                        placeholder="search by customer email..."
+                        className="w-full rounded border border-brand-dark-gold/20 bg-transparent px-3 py-2 text-xs text-white placeholder:text-brand-grey/40 focus:border-brand-gold focus:outline-none"
+                      />
+                      {emailSearching[i] && <span className="absolute right-3 top-1/2 -translate-y-1/2 text-[10px] text-brand-grey">searching...</span>}
+                      {(emailResults[i] || []).length > 0 && (
+                        <div className="absolute left-0 right-0 top-full z-10 mt-1 rounded border border-brand-dark-gold/20 bg-brand-dark shadow-lg">
+                          {(emailResults[i] || []).map((c) => (
+                            <button
+                              key={c.email}
+                              type="button"
+                              onClick={() => linkCustomer(i, c)}
+                              className="flex w-full items-center gap-2 px-3 py-2 text-left text-xs hover:bg-white/5"
+                            >
+                              <span className="flex-1 text-white">{c.firstName} {c.lastName} — {c.email}</span>
+                              {c.age !== null && <span className="text-brand-grey">age {c.age}</span>}
+                            </button>
+                          ))}
+                        </div>
+                      )}
+                    </div>
+                  )}
+                  <p className="mt-1 text-[10px] text-brand-grey/50">when linked, age auto-updates from their birthday.</p>
+                </div>
+
                 {/* Interests */}
                 <div className="mt-3">
                   <label className="mb-2 block text-[10px] uppercase tracking-wider text-brand-grey">interests</label>
@@ -333,7 +405,7 @@ export default function AdminAthletesPage() {
             ))}
           </div>
 
-          <button type="button" onClick={() => setAthletes((prev) => [...prev, { name: "", age: 18, role: "athlete", description: "", image: null, images: [], socials: [], hobbies: [] }])} className="mt-4 flex items-center gap-1.5 text-xs text-brand-gold hover:text-brand-pale-gold"><PlusIcon className="h-3.5 w-3.5" />add athlete</button>
+          <button type="button" onClick={() => setAthletes((prev) => [...prev, { name: "", age: 18, role: "athlete", description: "", image: null, images: [], socials: [], hobbies: [], linkedEmail: undefined }])} className="mt-4 flex items-center gap-1.5 text-xs text-brand-gold hover:text-brand-pale-gold"><PlusIcon className="h-3.5 w-3.5" />add athlete</button>
 
           <div className="mt-6 flex items-center gap-3">
             <button type="button" onClick={save} disabled={saving} className="rounded-full bg-brand-gold px-6 py-2.5 text-sm uppercase tracking-wider text-brand-dark transition-opacity hover:opacity-90 disabled:opacity-50">

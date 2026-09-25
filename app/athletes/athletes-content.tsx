@@ -3,9 +3,10 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import { motion } from "motion/react";
+import Link from "next/link";
 import { useAnimateInView } from "lib/hooks/use-animate-in-view";
 import { FadeIn } from "components/animations";
-import { normalizeSocials as _normalizeSocials, type AthleteData } from "lib/athletes";
+import { normalizeSocials as _normalizeSocials, nameToSlug, type AthleteData } from "lib/athletes";
 
 type Social = { platform: string; url: string };
 type Athlete = AthleteData;
@@ -272,10 +273,10 @@ function AthleteCard({
 
       {/* Info */}
       <div className="p-5">
-        <div className="mb-1 flex items-baseline justify-between">
-          <h2 className="font-heading text-lg text-brand-gold">{athlete.name}</h2>
+        <Link href={`/athletes/${athlete.slug || nameToSlug(athlete.name)}`} className="group mb-1 flex items-baseline justify-between hover:opacity-80 transition-opacity">
+          <h2 className="font-heading text-lg text-brand-gold group-hover:text-brand-light-gold transition-colors">{athlete.name}</h2>
           <span className="text-xs text-brand-grey">age {athlete.age}</span>
-        </div>
+        </Link>
         <p className="mb-3 text-xs uppercase tracking-wider text-brand-dark-gold">{athlete.role}</p>
 
         {athlete.description && (
