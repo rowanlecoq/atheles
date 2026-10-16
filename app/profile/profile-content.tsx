@@ -1570,7 +1570,7 @@ export default function ProfileContent() {
           <div>
             <label className="mb-1 flex items-baseline gap-1.5 text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
               last name
-              <span className="normal-case tracking-normal text-brand-grey/40">
+              <span className="normal-case tracking-normal text-xs text-brand-grey/40">
                 optional
               </span>
             </label>
@@ -1713,7 +1713,7 @@ export default function ProfileContent() {
           <div>
             <label className="mb-1 flex items-baseline gap-1.5 text-sm uppercase tracking-wider text-brand-grey sm:text-xs">
               phone number
-              <span className="normal-case tracking-normal text-brand-grey/40">
+              <span className="normal-case tracking-normal text-xs text-brand-grey/40">
                 optional
               </span>
             </label>

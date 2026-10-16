@@ -709,6 +709,15 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .profile-settings-section [class*="text-brand-grey"] {
   color: #3d2e1a !important;
 }
+/* Restore visual distinction for faded "optional" qualifiers and "not set" hints —
+   the wildcard rule above overrides /40 and /50 opacity variants to full opacity.
+   Using rgba preserves the muted feel in light mode too. */
+[data-color-mode="light"] .profile-settings-section [class*="text-brand-grey/40"],
+[data-color-mode="light"] .profile-settings-section [class*="text-brand-grey/50"],
+[data-color-mode="light"] .profile-theme-section [class*="text-brand-grey/40"],
+[data-color-mode="light"] .profile-theme-section [class*="text-brand-grey/50"] {
+  color: rgba(61, 46, 26, 0.45) !important;
+}
 /* Tier/rankings card: gradient text uses light Tailwind colours (to-yellow-300, to-white,
    to-amber-200) invisible on cream. Darken via filter while keeping each tier's unique hue. */
 [data-color-mode="light"] .profile-tier-section [class*="text-transparent"],
