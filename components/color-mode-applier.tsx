@@ -15,6 +15,13 @@ function getEffective(mode: string): string {
 
 function applyColorMode() {
   try {
+    const loggedIn = document.cookie.includes("atheles-logged-in=1");
+    if (!loggedIn) {
+      localStorage.removeItem(CM_KEY);
+      document.documentElement.removeAttribute("data-color-mode");
+      document.documentElement.style.colorScheme = "";
+      return;
+    }
     const mode = localStorage.getItem(CM_KEY) ?? "dark";
     const effective = getEffective(mode);
     document.documentElement.setAttribute("data-color-mode", effective);

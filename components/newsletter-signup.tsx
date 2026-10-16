@@ -92,7 +92,7 @@ export function NewsletterSignup() {
         iframeClass="absolute inset-0 h-[120%] w-[120%] -left-[10%] -top-[10%] pointer-events-none"
         sizes="100vw"
       />
-      <div className="absolute inset-0 bg-brand-dark/65" />
+      <div className="newsletter-overlay absolute inset-0 bg-brand-dark/65" />
 
       <div className="relative z-10 mx-auto max-w-lg px-6 text-center">
         {alreadySubscribed ? (

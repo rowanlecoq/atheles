@@ -692,6 +692,10 @@ body[data-bg="sunset"] {
 [data-color-mode="light"] .newsletter-top-fade {
   display: none;
 }
+/* Newsletter overlay: keep semi-transparent so the background image shows through */
+[data-color-mode="light"] .newsletter-overlay {
+  background-color: rgba(232, 223, 201, 0.55) !important;
+}
 /* Profile theme appearance card: brand-grey opacity variants read well on dark cards
    but are too faint on the cream card in light mode — restore full legibility.
    Target both plain and opacity-suffixed variants. */
