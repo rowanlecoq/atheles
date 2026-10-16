@@ -945,3 +945,22 @@ body[data-bg="sunset"] {
   --color-brand-grey: #a09888;
 }
 
+/* Hard-coded dark backgrounds not caught by the general bg-brand-dark rule.
+   Each hex is used in a single well-known component; attribute substring match
+   converts them to warm cream equivalents in light mode. */
+[data-color-mode="light"] [class*="bg-[#2c2c2e]"] {
+  background-color: #ede4cf !important;
+}
+[data-color-mode="light"] [class*="bg-[#1a1a16]"] {
+  background-color: #ede4cf !important;
+}
+[data-color-mode="light"] [class*="bg-[#1e1e1e]"] {
+  background-color: #e0d8c5 !important;
+}
+/* text-brand-grey/40 globally: ensure faint/disabled text (struck-through sizes,
+   disabled nav items, subtle links) stays legible on cream. Profile-section rules
+   above are more specific and keep their own values. */
+[data-color-mode="light"] [class*="text-brand-grey/40"] {
+  color: rgba(61, 46, 26, 0.55) !important;
+}
+
