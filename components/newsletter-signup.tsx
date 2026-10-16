@@ -100,7 +100,6 @@ export function NewsletterSignup() {
             <h2 className="font-heading text-3xl font-light text-brand-gold sm:text-4xl">
               you&apos;re in the club.
             </h2>
-            <div className="mx-auto h-px w-24 bg-brand-gold/50" />
             <p className="text-sm leading-relaxed text-brand-grey">
               thank you for joining. you&apos;ll be the first to know about new drops,
               exclusive offers, and upcoming releases.
@@ -112,7 +111,6 @@ export function NewsletterSignup() {
               <h2 className="font-heading text-3xl font-light text-brand-gold sm:text-4xl">
                 join the club.
               </h2>
-              <div className="mx-auto h-px w-24 bg-brand-gold/50" />
               <p className="text-sm leading-relaxed text-brand-grey [animation-delay:150ms]">
                 be the first to know about new drops, exclusive offers, and
                 upcoming releases. free, always.

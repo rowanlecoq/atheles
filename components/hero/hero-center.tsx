@@ -64,10 +64,6 @@ export function HeroCenter() {
         </p>
       </FadeIn>
 
-      <FadeIn delay={0} direction="none" duration={0.3}>
-        <div className="mx-auto my-5 h-px w-28 bg-brand-gold/60" />
-      </FadeIn>
-
       <FadeIn direction="up" delay={0} duration={0.3}>
         <MagneticHover className="inline-block">
           <Link
