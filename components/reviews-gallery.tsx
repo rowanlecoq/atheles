@@ -888,7 +888,7 @@ export function ReviewSideTab() {
       <button
         onClick={() => setOpen(true)}
         aria-label="open community reviews"
-        className="group flex w-full items-center justify-center gap-3 border-t border-brand-dark-gold/20 bg-transparent py-5 text-[11px] uppercase tracking-[0.22em] text-brand-gold/60 transition-colors duration-300 hover:text-brand-gold"
+        className="reviews-strip group flex w-full items-center justify-center gap-3 border-t border-brand-dark-gold/20 bg-transparent py-5 text-[11px] uppercase tracking-[0.22em] text-brand-gold/60 transition-colors duration-300 hover:text-brand-gold"
       >
         <span>community reviews</span>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0 transition-all duration-300 group-hover:fill-current" aria-hidden="true">
