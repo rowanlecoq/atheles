@@ -8,10 +8,16 @@ const LS_KEY = "atheles-bg-theme";
 function applyFromStorage() {
   try {
     const pathname = window.location.pathname;
-    // localStorage persists across browser close — primary source
+    const loggedIn = document.cookie.includes("atheles-logged-in=1");
     const stored = localStorage.getItem(LS_KEY);
     if (stored) {
       const { theme, globalTheme } = JSON.parse(stored) as { theme?: string; globalTheme?: boolean };
+      // Never show a theme to logged-out users — clear stale localStorage too
+      if (!loggedIn) {
+        localStorage.removeItem(LS_KEY);
+        document.body.removeAttribute("data-bg");
+        return;
+      }
       if (theme && theme !== "none" && (globalTheme || pathname.startsWith("/profile"))) {
         document.body.setAttribute("data-bg", theme);
       } else {
