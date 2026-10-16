@@ -68,7 +68,7 @@ export function HeroCenter() {
         <MagneticHover className="inline-block">
           <Link
             href="/search"
-            className="inline-block rounded-lg bg-brand-gold px-8 py-3 font-heading text-sm uppercase tracking-[0.18em] text-brand-dark transition-colors duration-300 hover:bg-brand-light-gold sm:px-10 sm:tracking-[0.24em]"
+            className="inline-block rounded-lg border border-brand-gold px-8 py-3 font-heading text-sm uppercase tracking-[0.18em] text-brand-gold transition-colors duration-300 hover:bg-brand-gold hover:text-brand-dark sm:px-10 sm:tracking-[0.24em]"
           >
             enter store
           </Link>
