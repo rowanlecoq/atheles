@@ -888,15 +888,13 @@ export function ReviewSideTab() {
       <button
         onClick={() => setOpen(true)}
         aria-label="open community reviews"
-        className="reviews-strip group w-full border-t border-brand-dark-gold/20 bg-transparent py-5 text-[11px] uppercase tracking-[0.22em] text-brand-gold/60 transition-colors duration-300 hover:text-brand-gold"
+        className="reviews-strip group flex w-full items-center justify-center gap-3 border-t border-brand-dark-gold/20 bg-transparent py-5 text-[11px] uppercase text-brand-gold/60 transition-colors duration-300 hover:text-brand-gold"
       >
-        <div className="mx-auto grid max-w-sm grid-cols-[1fr_auto_1fr] items-center gap-3">
-          <span className="text-right">community reviews</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5} strokeLinejoin="round" className="h-3.5 w-3.5 shrink-0 transition-all duration-300 group-hover:fill-current" aria-hidden="true">
-            <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
-          </svg>
-          <span>write yours</span>
-        </div>
+        <span className="tracking-[0.22em]">community reviews</span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.75} strokeLinejoin="round" className="h-4 w-4 shrink-0 transition-all duration-300 group-hover:fill-current" aria-hidden="true">
+          <path strokeLinecap="round" strokeLinejoin="round" d="M11.48 3.499a.562.562 0 011.04 0l2.125 5.111a.563.563 0 00.475.345l5.518.442c.499.04.701.663.321.988l-4.204 3.602a.563.563 0 00-.182.557l1.285 5.385a.562.562 0 01-.84.61l-4.725-2.885a.563.563 0 00-.586 0L6.982 20.54a.562.562 0 01-.84-.61l1.285-5.386a.562.562 0 00-.182-.557l-4.204-3.602a.563.563 0 01.321-.988l5.518-.442a.563.563 0 00.475-.345L11.48 3.5z" />
+        </svg>
+        <span className="tracking-[0.22em]">write yours</span>
       </button>
 
       {/* Modal portaled to document.body so it renders above all stacking contexts */}
