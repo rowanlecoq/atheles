@@ -890,7 +890,7 @@ export function ReviewSideTab() {
         aria-label="open community reviews"
         className="reviews-strip group flex w-full items-center justify-center gap-3 border-t border-brand-dark-gold/20 bg-transparent py-5 text-[11px] uppercase text-brand-gold/60 transition-colors duration-300 hover:text-brand-gold"
       >
-        <span className="tracking-[0.22em]">read reviews</span>
+        <span className="tracking-[0.22em]">community reviews</span>
         <span className="opacity-40">·</span>
         <span className="tracking-[0.22em]">write yours</span>
       </button>
